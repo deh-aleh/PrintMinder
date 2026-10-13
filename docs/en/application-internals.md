@@ -22,7 +22,7 @@ app/            the application (Python package)
   locales/      translations (.po) for it, es, ru, zh
   migrations/   Alembic revisions
   policy/       quotas, grants, page counting, controls, keep-alive, ordering
-  cli.py  config.py  cups_client.py  escl.py  i18n.py  main.py  mdns.py
+  cli.py  config.py  cups_client.py  envsync.py  escl.py  i18n.py  main.py  mdns.py  notices.py  updates.py
 deploy/         installation on the host without docker (systemd)
 docker/         container definitions (stack/ is the production one)
 docs/           this documentation (en/ and it/)
@@ -127,7 +127,7 @@ authoritative list is `app/config.py`. Summary:
 | `audit.py` | `reserve()` (atomic, under lock) and `finalize()` of a job; attaches the document to a `Create-Job` job. |
 | `grants.py` | Quota/group requests, approval (idempotent), direct grants, revocation, expiry of old requests. |
 | `rules.py` | Create/replace/remove limits for a user or group (shared by CLI and portal). |
-| `pages.py` | Counts pages before printing (PDF, JPEG/PNG/GIF, URF, PostScript, text) and parses page ranges. |
+| `pages.py` | Counts pages before printing (PDF, JPEG/PNG/GIF, URF, PostScript, text), parses page ranges, and turns the pages of a PDF to landscape (`landscape_pdf`). |
 | `reconcile.py` | Reconciler loop with CUPS (real pages, canceled jobs, orphan reservations). |
 | `control.py` | Gateway maintenance mode, per-printer block and mDNS hiding, the token for the mdns channel. |
 | `keepalive.py` | Periodic maintenance print: settings, scheduler, test print. |
@@ -149,7 +149,7 @@ authoritative list is `app/config.py`. Summary:
 | `audit_archive.py` | List/read/download/verify archives (`/admin/archive`). |
 | `audit_view.py` | How one audit row is displayed (clipped text, device, print specs). |
 | `me.py` | User area: consumption, keys, password, settings (theme, language, refresh), requests (`/me`). |
-| `printing.py` | Print from the browser (`/me/print`). |
+| `printing.py` | Print from the browser (`/me/print`): checks, quota, options, landscape handling, Print-Job to CUPS. |
 | `common.py` | Shared pieces: templates, session and CSRF dependencies, flash messages, redirects, helpers. |
 | `templates/*.html` | Jinja pages: `base.html` (layout, menu, theme), `macros.html`, one template per page. |
 
@@ -159,13 +159,13 @@ authoritative list is `app/config.py`. Summary:
 |---|---|
 | `app/audit/adminlog.py` | `record()`: writes an `admin_audit` row (who did what). |
 | `app/audit/archive.py` | Size estimation, crash-safe archiving to `.jsonl.gz`, verification, streaming reader, the periodic archiver. |
-| `app/backup/core.py` | Create/verify/prune/restore backups; SQLite snapshot; tar.gz with `MANIFEST.json`; retention. |
+| `app/backup/core.py` | Create/verify/prune/restore backups; SQLite snapshot; tar.gz with `MANIFEST.json`; retention; the marker file and the time limit (`bounded`) for network disks. |
 | `app/backup/crypto.py` | Recovery-key encryption (X25519 + HKDF + AES-256-GCM; private key wrapped by scrypt of the passphrase). |
 | `app/backup/service.py` | `backup_target` bookkeeping and the 60 s scheduler. |
 | `app/db/models.py` | All SQLAlchemy models. `session.py`: engine and sessions (SQLite WAL). `migrate.py`: runs Alembic from inside the app. |
 | `app/notices.py`, `app/admin/notices.py` | The bell: notices for administrators with a limit on how often the same one is reported (interval by `CUPSPL_LOG_LEVEL`), table `notice`. |
 | `app/updates.py`, `app/admin/updates.py` | Daily check for a newer release (note for administrators) and the portal button that hands an update to the `updater` container through files in `/data/update` (the gateway never touches Docker). |
-| `app/migrations/` | `env.py` and the revisions `0001`…`0012` (schema history). |
+| `app/migrations/` | `env.py` and the revisions `0001`…`0013` (schema history). |
 | `app/locales/` | `messages.pot` (template) and `<lang>/messages.po` (it, es, ru, zh). |
 
 ## 4. Scripts
@@ -177,7 +177,9 @@ authoritative list is `app/config.py`. Summary:
 | `scripts/add-printer-linux.sh` | Adds a gateway printer to a Linux computer with the print key stored in the queue address. |
 | `scripts/print-test.sh` | Sends one small text page as a user (uses a sheet of paper). |
 | `scripts/gen_dev_cert.sh` | Development-only self-signed certificate. |
+| `scripts/env-sync.sh [--check]` | Adds the options of newer versions to `.env` and `config/gateway.env` (code: `app/envsync.py`). |
 | `scripts/update.sh [VERSION\|--check]` | Safe update with the published images: backup, new version in `.env`, pull, restart, health wait, automatic return to the old version. `--from-portal` is the mode used by the `updater` container. |
+| `scripts/queue-restore.sh NAME [--reboot]` / `--list` | Brings back a deleted queue of `CUPS_QUEUES`: takes its name out of `/etc/cups/printminder-queues` in the `cups` container (the list of queues already created once); `--reboot` also restarts that container. |
 | `scripts/i18n.py` | Translation tooling: `extract`, `missing`, `check`, `add`. |
 
 ## 5. Containers and host installation
@@ -187,7 +189,7 @@ authoritative list is `app/config.py`. Summary:
 | `docker-compose.yml` | The production-style stack (`ipp-usb`, `cups`, `gateway`, `mdns`, optional `radius`). Builds from source or pulls published images. |
 | `docker-compose.test.yml` | Test environment: a real CUPS on `:6310` and FreeRADIUS on `:1812`. |
 | `docker/stack/gateway/Dockerfile` | Gateway image (also used by `mdns`). |
-| `docker/stack/cups/` | CUPS image: `cupsd.conf` (private backend policy), `entrypoint.sh` (creates the queues from `CUPS_QUEUES`), printer drivers (brlaser, gutenprint, splix, foo2zjs). It also sees `/dev/bus/usb` for printers ipp-usb can not serve. |
+| `docker/stack/cups/` | CUPS image: `cupsd.conf` (private backend policy), `entrypoint.sh` (creates the queues from `CUPS_QUEUES`, each only once, remembered in `/etc/cups/printminder-queues`), printer drivers (brlaser, gutenprint, splix, foo2zjs). It also sees `/dev/bus/usb` for printers ipp-usb can not serve. |
 | `docker/stack/ipp-usb/` | ipp-usb image, `ipp-usb.conf`, and the entrypoint that restarts it when USB devices change. |
 | `docker/cups/`, `docker/radius/` | Test CUPS image; test RADIUS users (`mario`, `anna`, `admin`). |
 | `docker/stack/updater/` | Optional `updater` image (profile `autoupdate`): waits for `/data/update/request.json`, runs `scripts/update.sh --from-portal`, writes `status.json`. Has the Docker socket. |

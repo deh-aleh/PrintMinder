@@ -52,6 +52,9 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 - Pages printed by the gateway (test, maintenance) are always in English; Russian/Chinese need an embedded font.
 - If the gateway is off, a missed maintenance interval is not made up: the page prints as soon as it restarts.
 
+- Printing from the browser, *Landscape*: PDFs with portrait pages are turned and shrunk (the text is not re-flowed as a word processor would do); plain text files cannot be turned; photos are turned by CUPS. Details in [printing.md](printing.md).
+- A queue of `CUPS_QUEUES` is created once: if you delete it, it stays deleted (`scripts/queue-restore.sh NAME --reboot` brings it back).
+
 ## 5. Backup and security
 
 - Built-in backups: SQLite only; CUPS queues not included (they are in `scripts/backup.sh`); configuration files are restored by hand;

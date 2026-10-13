@@ -4,7 +4,7 @@
 # and CUPS_VIRTUAL_QUEUE=1 adds a "virtual" queue that writes PDFs: handy to try quotas without paper.
 # Each queue is created ONCE: its name is written to /etc/cups/printminder-queues (the CUPS volume). A queue that was
 # deleted later, by hand or because its USB printer stayed away, is not brought back at the next start.
-# To bring one back: remove its name from that file (docker compose exec cups sed -i /^NAME$/d /etc/cups/printminder-queues).
+# To bring one back: scripts/queue-restore.sh NAME --reboot (it removes the name from that file and restarts this container).
 set -u
 cupsd
 

@@ -63,7 +63,11 @@ browser ───────https───────────▶     │  
 | **Operations** | Docker stack (ipp-usb + CUPS + gateway + mDNS), nothing installed on the host | ✅ |
 | | Scheduled backups per administrator (folder, hour, rotation, passphrase/recovery-key encryption), restore from CLI | ✅ |
 | | Database migrations (Alembic), health check, logs, admin CLI | ✅ |
-| | High availability, Prometheus metrics, direct remote backup targets (SSH/S3), multi-arch published images | ⬜ |
+| | Images for amd64 and arm64 on ghcr.io; update script with backup and automatic return to the old version; notice of new versions; new options added to your `.env` and `gateway.env` without changing your values | 🟡 not yet run on a real ARM machine |
+| | Update button in the portal (optional `updater` container, needs the Docker socket) | 🟡 only tested with simulations |
+| | Backups on a network disk or USB disk: marker file against an unmounted disk, time limit for a disk that stops answering | ✅ tested with an SMB share |
+| | Bell with notices for administrators; `/healthz` shows only the status unless you ask for more | ✅ |
+| | High availability, Prometheus metrics, direct remote backup targets (SSH/S3) | ⬜ |
 
 ## Limits
 

@@ -151,7 +151,7 @@ Il dispositivo deve fidarsi del certificato. Dettagli in [stampa.md](stampa.md).
 **Le stampanti USB nuove si aggiungono da sole** (entro circa un minuto): collega la stampante e compare nella pagina Stampanti. Se ha
 l'IPP-su-USB la serve `ipp-usb`; se no (molte laser vecchie) la usa direttamente il contenitore `cups`, che ha bisogno di un driver — l'immagine
 include brlaser, gutenprint, splix e foo2zjs (altri si aggiungono in `docker/stack/cups/Dockerfile`). `CUPS_QUEUES` serve solo per dare un nome
-fisso a una coda; una coda indicata lì viene creata una sola volta e, se la elimini dopo (o se il gateway toglie una stampante USB scollegata), resta eliminata. Vedi [stampanti.md](stampanti.md#2-stampanti-usb-nuove-e-scollegate).
+fisso a una coda; una coda indicata lì viene creata una sola volta e, se la elimini dopo (o se il gateway toglie una stampante USB scollegata), resta eliminata. Per rimetterla: `scripts/queue-restore.sh NOME --reboot`. Vedi [stampanti.md](stampanti.md#2-stampanti-usb-nuove-e-scollegate).
 
 `ipp-usb` ha bisogno dell'uso esclusivo della stampante. Se è installato sull'host, fermalo e mascheralo (vale anche per SANE):
 

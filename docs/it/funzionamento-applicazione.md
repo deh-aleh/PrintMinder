@@ -22,7 +22,7 @@ app/            l'applicazione (pacchetto Python)
   locales/      traduzioni (.po) per it, es, ru, zh
   migrations/   revisioni Alembic
   policy/       quote, concessioni, conteggio pagine, controlli, stampa periodica, ordinamento
-  cli.py  config.py  cups_client.py  escl.py  i18n.py  main.py  mdns.py
+  cli.py  config.py  cups_client.py  envsync.py  escl.py  i18n.py  main.py  mdns.py  notices.py  updates.py
 deploy/         installazione sull'host senza docker (systemd)
 docker/         definizione dei contenitori (stack/ è quella di produzione)
 docs/           questa documentazione (en/ e it/)
@@ -127,7 +127,7 @@ autorevole è `app/config.py`. Riassunto:
 | `audit.py` | `reserve()` (atomico, sotto lock) e `finalize()` di un job; collega il documento a un job `Create-Job`. |
 | `grants.py` | Richieste di quota/gruppo, approvazione (idempotente), concessioni dirette, revoca, scadenza delle richieste vecchie. |
 | `rules.py` | Crea/sostituisce/rimuove i limiti di un utente o gruppo (condiviso da CLI e portale). |
-| `pages.py` | Conta le pagine prima di stampare (PDF, JPEG/PNG/GIF, URF, PostScript, testo) e interpreta gli intervalli di pagine. |
+| `pages.py` | Conta le pagine prima di stampare (PDF, JPEG/PNG/GIF, URF, PostScript, testo), interpreta gli intervalli di pagine e ruota in orizzontale le pagine di un PDF (`landscape_pdf`). |
 | `reconcile.py` | Ciclo del riconciliatore con CUPS (pagine reali, job annullati, riserve orfane). |
 | `control.py` | Manutenzione del gateway, blocco per stampante e nascondimento mDNS, token del canale mdns. |
 | `keepalive.py` | Stampa periodica di manutenzione: impostazioni, scheduler, stampa di prova. |
@@ -149,7 +149,7 @@ autorevole è `app/config.py`. Riassunto:
 | `audit_archive.py` | Elenco/lettura/download/verifica degli archivi (`/admin/archive`). |
 | `audit_view.py` | Come si mostra una riga di audit (testi accorciati, dispositivo, specifiche di stampa). |
 | `me.py` | Area dell'utente: consumo, chiavi, password, impostazioni (tema, lingua, aggiornamento), richieste (`/me`). |
-| `printing.py` | Stampa dal browser (`/me/print`). |
+| `printing.py` | Stampa dal browser (`/me/print`): controlli, quota, opzioni, orientamento orizzontale, Print-Job a CUPS. |
 | `common.py` | Parti condivise: template, dipendenze di sessione e CSRF, messaggi, reindirizzamenti, funzioni di supporto. |
 | `templates/*.html` | Pagine Jinja: `base.html` (struttura, menu, tema), `macros.html`, un template per pagina. |
 
@@ -159,13 +159,13 @@ autorevole è `app/config.py`. Riassunto:
 |---|---|
 | `app/audit/adminlog.py` | `record()`: scrive una riga di `admin_audit` (chi ha fatto cosa). |
 | `app/audit/archive.py` | Stima del peso, archiviazione sicura in `.jsonl.gz`, verifica, lettura in streaming, archiviatore periodico. |
-| `app/backup/core.py` | Crea/verifica/ruota/ripristina i backup; copia SQLite; tar.gz con `MANIFEST.json`; conservazione. |
+| `app/backup/core.py` | Crea/verifica/ruota/ripristina i backup; copia SQLite; tar.gz con `MANIFEST.json`; conservazione; il file segnaposto e il limite di tempo (`bounded`) per i dischi di rete. |
 | `app/backup/crypto.py` | Cifratura con chiave di recupero (X25519 + HKDF + AES-256-GCM; chiave privata avvolta da scrypt della passphrase). |
 | `app/backup/service.py` | Gestione della tabella `backup_target` e scheduler a 60 s. |
 | `app/db/models.py` | Tutti i modelli SQLAlchemy. `session.py`: motore e sessioni (SQLite WAL). `migrate.py`: esegue Alembic dall'interno dell'app. |
 | `app/notices.py`, `app/admin/notices.py` | La campanella: avvisi per gli amministratori con un limite alla frequenza con cui lo stesso viene segnalato (intervallo da `CUPSPL_LOG_LEVEL`), tabella `notice`. |
 | `app/updates.py`, `app/admin/updates.py` | Controllo giornaliero di una release più nuova (avviso agli amministratori) e pulsante del portale che passa un aggiornamento al contenitore `updater` tramite file in `/data/update` (il gateway non tocca mai Docker). |
-| `app/migrations/` | `env.py` e le revisioni `0001`…`0012` (storia dello schema). |
+| `app/migrations/` | `env.py` e le revisioni `0001`…`0013` (storia dello schema). |
 | `app/locales/` | `messages.pot` (modello) e `<lingua>/messages.po` (it, es, ru, zh). |
 
 ## 4. Script
@@ -177,7 +177,9 @@ autorevole è `app/config.py`. Riassunto:
 | `scripts/add-printer-linux.sh` | Aggiunge una stampante del gateway a un computer Linux con la chiave di stampa nell'indirizzo della coda. |
 | `scripts/print-test.sh` | Invia una pagina di testo come utente (consuma un foglio). |
 | `scripts/gen_dev_cert.sh` | Certificato autofirmato solo per lo sviluppo. |
+| `scripts/env-sync.sh [--check]` | Aggiunge le opzioni delle versioni nuove a `.env` e `config/gateway.env` (codice: `app/envsync.py`). |
 | `scripts/update.sh [VERSIONE\|--check]` | Aggiornamento sicuro con le immagini pubblicate: backup, nuova versione in `.env`, pull, riavvio, attesa della salute, ritorno automatico alla versione precedente. `--from-portal` è la modalità usata dal contenitore `updater`. |
+| `scripts/queue-restore.sh NOME [--reboot]` / `--list` | Rimette una coda eliminata di `CUPS_QUEUES`: toglie il nome da `/etc/cups/printminder-queues` nel contenitore `cups` (l'elenco delle code già create una volta); `--reboot` riavvia anche quel contenitore. |
 | `scripts/i18n.py` | Strumenti per le traduzioni: `extract`, `missing`, `check`, `add`. |
 
 ## 5. Contenitori e installazione sull'host
@@ -187,7 +189,7 @@ autorevole è `app/config.py`. Riassunto:
 | `docker-compose.yml` | Lo stack di produzione (`ipp-usb`, `cups`, `gateway`, `mdns`, `radius` facoltativo). Costruisce dal sorgente o scarica immagini pubblicate. |
 | `docker-compose.test.yml` | Ambiente dei test: un CUPS vero su `:6310` e FreeRADIUS su `:1812`. |
 | `docker/stack/gateway/Dockerfile` | Immagine del gateway (usata anche da `mdns`). |
-| `docker/stack/cups/` | Immagine CUPS: `cupsd.conf` (policy da backend privato), `entrypoint.sh` (crea le code da `CUPS_QUEUES`), driver di stampa (brlaser, gutenprint, splix, foo2zjs). Vede anche `/dev/bus/usb` per le stampanti che ipp-usb non sa servire. |
+| `docker/stack/cups/` | Immagine CUPS: `cupsd.conf` (policy da backend privato), `entrypoint.sh` (crea le code da `CUPS_QUEUES`, ognuna una sola volta, ricordata in `/etc/cups/printminder-queues`), driver di stampa (brlaser, gutenprint, splix, foo2zjs). Vede anche `/dev/bus/usb` per le stampanti che ipp-usb non sa servire. |
 | `docker/stack/ipp-usb/` | Immagine ipp-usb, `ipp-usb.conf` e l'entrypoint che lo riavvia quando cambiano i dispositivi USB. |
 | `docker/cups/`, `docker/radius/` | Immagine CUPS dei test; utenti del RADIUS di prova (`mario`, `anna`, `admin`). |
 | `docker/stack/updater/` | Immagine facoltativa `updater` (profilo `autoupdate`): aspetta `/data/update/request.json`, esegue `scripts/update.sh --from-portal`, scrive `status.json`. Ha il socket di Docker. |

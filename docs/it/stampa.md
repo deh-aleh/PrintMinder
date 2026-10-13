@@ -14,6 +14,11 @@ senza installare nulla). Entrambi passano dalle stesse quote, audit e identità 
 - Le opzioni dipendono dalla stampante scelta: formato carta (solo quelli elencati dalla coda), orientamento, colore / bianco e nero
   (se la coda è a colori), **intervallo di pagine** (`1,5`, `2-4`, `3-`), copie e un **commento** (max 50 caratteri) mostrato sotto il
   nome del file nell'audit.
+- **Orientamento.** *Automatico* segue il file: un PDF con pagine già larghe si stampa da solo in orizzontale. *Orizzontale* su un
+  PDF con pagine verticali ruota ogni pagina di 90° e la rimpicciolisce per farla stare sullo stesso foglio (lo fa il portale, perché i
+  filtri PDF di CUPS capovolgono la pagina verticale su alcune stampanti, per esempio le Brother). Non riorganizza il testo come fa
+  LibreOffice quando cambi lo stile di pagina in orizzontale: per quello imposta l'orizzontale nel programma ed esporta di nuovo il PDF.
+  Le foto le ruota CUPS. I file di testo semplice non si possono ruotare (il portale lo dice e non stampa nulla).
 - Le pagine contate per il limite sono quelle scelte × copie; un intervallo oltre la fine del documento è rifiutato prima di riservare quota.
 - Una stampante che non risponde non viene offerta; nemmeno una bloccata. L'ordine dell'elenco è descritto in [stampanti.md](stampanti.md).
 

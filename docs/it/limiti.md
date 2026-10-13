@@ -52,6 +52,9 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 - Le pagine stampate dal gateway (prova, manutenzione) sono sempre in inglese; russo/cinese richiedono un font incorporato.
 - Se il gateway è spento, un intervallo di manutenzione perso non si recupera: la pagina parte appena riparte.
 
+- Stampa dal browser, *Orizzontale*: i PDF con pagine verticali vengono ruotati e rimpiccioliti (il testo non viene riorganizzato come farebbe un programma di videoscrittura); i file di testo semplice non si possono ruotare; le foto le ruota CUPS. Dettagli in [stampa.md](stampa.md).
+- Una coda di `CUPS_QUEUES` viene creata una sola volta: se la elimini, resta eliminata (`scripts/queue-restore.sh NOME --reboot` la rimette).
+
 ## 5. Backup e sicurezza
 
 - Backup integrati: solo SQLite; code CUPS non incluse (sono in `scripts/backup.sh`); i file di configurazione si ripristinano a mano;

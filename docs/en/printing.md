@@ -14,6 +14,11 @@ There are two ways to print: through the **gateway's IPP address** (computers an
 - Options depend on the selected printer: paper size (only those the queue lists), orientation, colour / black and white
   (if the queue is colour-capable), **page range** (`1,5`, `2-4`, `3-`), copies and a **comment** (max 50 characters) shown
   under the file name in the audit.
+- **Orientation.** *Automatic* follows the file: a PDF whose pages are already wide prints in landscape by itself. *Landscape* on a
+  PDF with portrait pages turns every such page 90° and shrinks it to the same sheet (the portal does it, because CUPS' PDF
+  filters turn a portrait page upside down on some printers, for example Brother ones). It cannot re-flow the text as LibreOffice
+  does when you change the page style to landscape: for that, set landscape in the program and export the PDF again. Photos are
+  turned by CUPS. Plain text files cannot be turned (the portal says so and prints nothing).
 - The pages counted for the pages limit are the selected pages × copies; a range beyond the end of the document is refused
   before any quota is reserved.
 - A printer that does not answer is not offered; a blocked printer is not offered either. The list order is described in

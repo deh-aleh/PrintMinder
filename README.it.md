@@ -63,7 +63,11 @@ browser ───────https───────────▶     │  
 | **Operatività** | Stack docker (ipp-usb + CUPS + gateway + mDNS), nulla installato sull'host | ✅ |
 | | Backup programmati per amministratore (cartella, ora, rotazione, cifratura con passphrase/chiave di recupero), ripristino da CLI | ✅ |
 | | Migrazioni del database (Alembic), health check, log, CLI di amministrazione | ✅ |
-| | Alta disponibilità, metriche Prometheus, destinazioni di backup remote dirette (SSH/S3), immagini multi-arch pubblicate | ⬜ |
+| | Immagini per amd64 e arm64 su ghcr.io; script di aggiornamento con backup e ritorno automatico alla versione precedente; avviso di nuove versioni; opzioni nuove aggiunte a `.env` e `gateway.env` senza cambiare i tuoi valori | 🟡 non ancora provate su una vera macchina ARM |
+| | Pulsante Aggiorna nel portale (contenitore facoltativo `updater`, usa il socket di Docker) | 🟡 provato solo con simulazioni |
+| | Backup su disco di rete o USB: file segnaposto contro un disco non montato, limite di tempo per un disco che non risponde | ✅ provato con una condivisione SMB |
+| | Campanella con gli avvisi per gli amministratori; `/healthz` mostra solo lo stato se non chiedi di più | ✅ |
+| | Alta disponibilità, metriche Prometheus, destinazioni di backup remote dirette (SSH/S3) | ⬜ |
 
 ## Limiti
 
