@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-13 15:51+0200\n"
+"POT-Creation-Date: 2026-10-14 00:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -1080,22 +1080,30 @@ msgstr "El comentario puede tener como máximo %(n)s caracteres"
 msgid "Paper size not available on this printer"
 msgstr "Tamaño de papel no disponible en esta impresora"
 
-#: app/admin/printing.py:169
+#: app/admin/printing.py:146
+msgid "Landscape is available for PDF files and images, not for text files"
+msgstr "La orientación horizontal está disponible para archivos PDF e imágenes, no para archivos de texto"
+
+#: app/admin/printing.py:152
+msgid "This PDF can not be turned to landscape (protected or damaged): choose automatic orientation"
+msgstr "Este PDF no se puede poner en horizontal (protegido o dañado): elija la orientación automática"
+
+#: app/admin/printing.py:182
 #, python-format
 msgid "%(reason)s. You can ask for more quota below."
 msgstr "%(reason)s. Puedes pedir más cuota más abajo."
 
-#: app/admin/printing.py:206
+#: app/admin/printing.py:219
 #, python-format
 msgid "Sent to %(printer)s: %(title)s"
 msgstr "Enviado a %(printer)s: %(title)s"
 
-#: app/admin/printing.py:206
+#: app/admin/printing.py:219
 #, python-format
 msgid " — %(n)s page(s)"
 msgstr " — %(n)s página(s)"
 
-#: app/admin/printing.py:208
+#: app/admin/printing.py:221
 msgid "The print server did not accept the file. Try another format (PDF works best)."
 msgstr "El servidor de impresión no aceptó el archivo. Prueba otro formato (PDF funciona mejor)."
 
@@ -1539,7 +1547,7 @@ msgstr "Versión instalada: %(v)s"
 msgid "new version %(v)s available"
 msgstr "nueva versión %(v)s disponible"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:203
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:210
 msgid "Release notes"
 msgstr "Notas de la versión"
 
@@ -1765,77 +1773,77 @@ msgstr "Sin cifrado, el archivo contiene la base de datos (usuarios, nombres de 
 msgid "Create backup"
 msgstr "Crear copia de seguridad"
 
-#: app/admin/templates/base.html:159 app/admin/templates/settings.html:2
+#: app/admin/templates/base.html:164 app/admin/templates/settings.html:2
 #: app/admin/templates/settings.html:5
 msgid "Settings"
 msgstr "Ajustes"
 
-#: app/admin/templates/base.html:167
+#: app/admin/templates/base.html:172
 msgctxt "menu"
 msgid "Audit"
 msgstr "Auditoría"
 
-#: app/admin/templates/base.html:168
+#: app/admin/templates/base.html:173
 msgctxt "menu"
 msgid "Users"
 msgstr "Usuarios"
 
-#: app/admin/templates/base.html:169
+#: app/admin/templates/base.html:174
 msgctxt "menu"
 msgid "Groups"
 msgstr "Grupos"
 
-#: app/admin/templates/base.html:170
+#: app/admin/templates/base.html:175
 msgctxt "menu"
 msgid "Requests"
 msgstr "Solicitudes"
 
-#: app/admin/templates/base.html:171
+#: app/admin/templates/base.html:176
 msgctxt "menu"
 msgid "Grants"
 msgstr "Extras"
 
-#: app/admin/templates/base.html:172
+#: app/admin/templates/base.html:177
 msgctxt "menu"
 msgid "Actions"
 msgstr "Acciones"
 
-#: app/admin/templates/base.html:173
+#: app/admin/templates/base.html:178
 msgctxt "menu"
 msgid "Printers"
 msgstr "Impresoras"
 
-#: app/admin/templates/base.html:174
+#: app/admin/templates/base.html:179
 msgctxt "menu"
 msgid "Backup"
 msgstr "Copias"
 
-#: app/admin/templates/base.html:175
+#: app/admin/templates/base.html:180
 msgctxt "menu"
 msgid "Archive"
 msgstr "Archivo"
 
-#: app/admin/templates/base.html:178
+#: app/admin/templates/base.html:183
 msgctxt "menu"
 msgid "Profile"
 msgstr "Perfil"
 
-#: app/admin/templates/base.html:179
+#: app/admin/templates/base.html:184
 msgctxt "menu"
 msgid "Print"
 msgstr "Imprimir"
 
-#: app/admin/templates/base.html:180
+#: app/admin/templates/base.html:185
 msgctxt "menu"
 msgid "Scan"
 msgstr "Escanear"
 
-#: app/admin/templates/base.html:184 app/admin/templates/notices.html:2
+#: app/admin/templates/base.html:190 app/admin/templates/notices.html:2
 #: app/admin/templates/notices.html:5
 msgid "Notices"
 msgstr "Avisos"
 
-#: app/admin/templates/base.html:188
+#: app/admin/templates/base.html:194
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -1845,52 +1853,52 @@ msgstr ""
 "\n"
 "Las impresoras desaparecen de la red (mDNS) y ningún usuario podrá imprimir ni escanear: solo los administradores."
 
-#: app/admin/templates/base.html:191
+#: app/admin/templates/base.html:197
 msgid "LEAVE MAINTENANCE"
 msgstr "SALIR DEL MANTENIMIENTO"
 
-#: app/admin/templates/base.html:191
+#: app/admin/templates/base.html:197
 msgid "PUT IN MAINTENANCE"
 msgstr "PONER EN MANTENIMIENTO"
 
-#: app/admin/templates/base.html:192
+#: app/admin/templates/base.html:198
 msgid "Turn the gateway back on"
 msgstr "Reactivar el gateway"
 
-#: app/admin/templates/base.html:192
+#: app/admin/templates/base.html:198
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "Detiene la impresión y el escaneo para todos salvo los administradores y oculta las impresoras de la red"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Log out"
 msgstr "Salir"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "GATEWAY EN MANTENIMIENTO"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "la impresión y el escaneo están detenidos para los usuarios; los administradores aún pueden usarlos"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "printing and scanning are temporarily suspended"
 msgstr "la impresión y el escaneo están suspendidos temporalmente"
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:210
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "Hay una versión nueva disponible: %(new)s (instalada: %(old)s)."
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:210
 msgid "To update, run on the server:"
 msgstr "Para actualizar, ejecute en el servidor:"
 
-#: app/admin/templates/base.html:228
+#: app/admin/templates/base.html:248
 msgid "Copied"
 msgstr "Copiado"
 
-#: app/admin/templates/base.html:228 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:248 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "Copiar"
 
@@ -3870,21 +3878,21 @@ msgstr "Impresión periódica automática: mantiene limpios los cabezales y los 
 msgid "Schedule"
 msgstr "Programación"
 
-#: app/policy/pages.py:68
+#: app/policy/pages.py:101
 #, python-format
 msgid "Invalid pages: “%(part)s”. Example: 1,5 or 2-4"
 msgstr "Páginas no válidas: «%(part)s». Ejemplo: 1,5 o 2-4"
 
-#: app/policy/pages.py:72
+#: app/policy/pages.py:105
 #, python-format
 msgid "Invalid range: “%(part)s”"
 msgstr "Intervalo no válido: «%(part)s»"
 
-#: app/policy/pages.py:75
+#: app/policy/pages.py:108
 msgid "Too many page ranges"
 msgstr "Demasiados intervalos de páginas"
 
-#: app/policy/pages.py:88
+#: app/policy/pages.py:121
 #, python-format
 msgid "The document has only %(n)s page"
 msgid_plural "The document has only %(n)s pages"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-13 15:51+0200\n"
+"POT-Creation-Date: 2026-10-14 00:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -1075,22 +1075,30 @@ msgstr "备注最多 %(n)s 个字符"
 msgid "Paper size not available on this printer"
 msgstr "此打印机不支持该纸张尺寸"
 
-#: app/admin/printing.py:169
+#: app/admin/printing.py:146
+msgid "Landscape is available for PDF files and images, not for text files"
+msgstr "横向仅适用于 PDF 文件和图片,不适用于文本文件"
+
+#: app/admin/printing.py:152
+msgid "This PDF can not be turned to landscape (protected or damaged): choose automatic orientation"
+msgstr "此 PDF 无法设为横向(受保护或已损坏):请选择自动方向"
+
+#: app/admin/printing.py:182
 #, python-format
 msgid "%(reason)s. You can ask for more quota below."
 msgstr "%(reason)s。您可以在下方申请更多配额。"
 
-#: app/admin/printing.py:206
+#: app/admin/printing.py:219
 #, python-format
 msgid "Sent to %(printer)s: %(title)s"
 msgstr "已发送到 %(printer)s：%(title)s"
 
-#: app/admin/printing.py:206
+#: app/admin/printing.py:219
 #, python-format
 msgid " — %(n)s page(s)"
 msgstr " — %(n)s 页"
 
-#: app/admin/printing.py:208
+#: app/admin/printing.py:221
 msgid "The print server did not accept the file. Try another format (PDF works best)."
 msgstr "打印服务器没有接受该文件。请尝试其他格式（PDF 效果最好）。"
 
@@ -1534,7 +1542,7 @@ msgstr "已安装版本:%(v)s"
 msgid "new version %(v)s available"
 msgstr "有新版本 %(v)s"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:203
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:210
 msgid "Release notes"
 msgstr "发行说明"
 
@@ -1760,77 +1768,77 @@ msgstr "不加密时，文件中包含数据库（用户、已打印文件的名
 msgid "Create backup"
 msgstr "创建备份"
 
-#: app/admin/templates/base.html:159 app/admin/templates/settings.html:2
+#: app/admin/templates/base.html:164 app/admin/templates/settings.html:2
 #: app/admin/templates/settings.html:5
 msgid "Settings"
 msgstr "设置"
 
-#: app/admin/templates/base.html:167
+#: app/admin/templates/base.html:172
 msgctxt "menu"
 msgid "Audit"
 msgstr "审计"
 
-#: app/admin/templates/base.html:168
+#: app/admin/templates/base.html:173
 msgctxt "menu"
 msgid "Users"
 msgstr "用户"
 
-#: app/admin/templates/base.html:169
+#: app/admin/templates/base.html:174
 msgctxt "menu"
 msgid "Groups"
 msgstr "群组"
 
-#: app/admin/templates/base.html:170
+#: app/admin/templates/base.html:175
 msgctxt "menu"
 msgid "Requests"
 msgstr "申请"
 
-#: app/admin/templates/base.html:171
+#: app/admin/templates/base.html:176
 msgctxt "menu"
 msgid "Grants"
 msgstr "额度"
 
-#: app/admin/templates/base.html:172
+#: app/admin/templates/base.html:177
 msgctxt "menu"
 msgid "Actions"
 msgstr "操作"
 
-#: app/admin/templates/base.html:173
+#: app/admin/templates/base.html:178
 msgctxt "menu"
 msgid "Printers"
 msgstr "打印机"
 
-#: app/admin/templates/base.html:174
+#: app/admin/templates/base.html:179
 msgctxt "menu"
 msgid "Backup"
 msgstr "备份"
 
-#: app/admin/templates/base.html:175
+#: app/admin/templates/base.html:180
 msgctxt "menu"
 msgid "Archive"
 msgstr "归档"
 
-#: app/admin/templates/base.html:178
+#: app/admin/templates/base.html:183
 msgctxt "menu"
 msgid "Profile"
 msgstr "资料"
 
-#: app/admin/templates/base.html:179
+#: app/admin/templates/base.html:184
 msgctxt "menu"
 msgid "Print"
 msgstr "打印"
 
-#: app/admin/templates/base.html:180
+#: app/admin/templates/base.html:185
 msgctxt "menu"
 msgid "Scan"
 msgstr "扫描"
 
-#: app/admin/templates/base.html:184 app/admin/templates/notices.html:2
+#: app/admin/templates/base.html:190 app/admin/templates/notices.html:2
 #: app/admin/templates/notices.html:5
 msgid "Notices"
 msgstr "通知"
 
-#: app/admin/templates/base.html:188
+#: app/admin/templates/base.html:194
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -1840,52 +1848,52 @@ msgstr ""
 "\n"
 "打印机将从网络（mDNS）中消失，除管理员外，所有用户都无法打印或扫描。"
 
-#: app/admin/templates/base.html:191
+#: app/admin/templates/base.html:197
 msgid "LEAVE MAINTENANCE"
 msgstr "退出维护模式"
 
-#: app/admin/templates/base.html:191
+#: app/admin/templates/base.html:197
 msgid "PUT IN MAINTENANCE"
 msgstr "进入维护模式"
 
-#: app/admin/templates/base.html:192
+#: app/admin/templates/base.html:198
 msgid "Turn the gateway back on"
 msgstr "恢复网关"
 
-#: app/admin/templates/base.html:192
+#: app/admin/templates/base.html:198
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "除管理员外，停止所有人的打印和扫描，并在网络中隐藏打印机"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Log out"
 msgstr "退出登录"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "网关维护中"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "用户的打印和扫描已停止；管理员仍可使用"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "printing and scanning are temporarily suspended"
 msgstr "打印和扫描已暂时停用"
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:210
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "有新版本可用:%(new)s(已安装:%(old)s)。"
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:210
 msgid "To update, run on the server:"
 msgstr "要更新,请在服务器上运行:"
 
-#: app/admin/templates/base.html:228
+#: app/admin/templates/base.html:248
 msgid "Copied"
 msgstr "已复制"
 
-#: app/admin/templates/base.html:228 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:248 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "复制"
 
@@ -3859,21 +3867,21 @@ msgstr "自动定期打印：保持打印头和进纸辊清洁。"
 msgid "Schedule"
 msgstr "计划"
 
-#: app/policy/pages.py:68
+#: app/policy/pages.py:101
 #, python-format
 msgid "Invalid pages: “%(part)s”. Example: 1,5 or 2-4"
 msgstr "页码无效：“%(part)s”。示例：1,5 或 2-4"
 
-#: app/policy/pages.py:72
+#: app/policy/pages.py:105
 #, python-format
 msgid "Invalid range: “%(part)s”"
 msgstr "范围无效：“%(part)s”"
 
-#: app/policy/pages.py:75
+#: app/policy/pages.py:108
 msgid "Too many page ranges"
 msgstr "页面范围过多"
 
-#: app/policy/pages.py:88
+#: app/policy/pages.py:121
 #, python-format
 msgid "The document has only %(n)s page"
 msgid_plural "The document has only %(n)s pages"

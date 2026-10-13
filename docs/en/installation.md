@@ -151,7 +151,7 @@ The device must trust the certificate. Details in [printing.md](printing.md).
 **New USB printers are added by themselves** (within about a minute): plug the printer in and it appears in the Printers page. If it has
 IPP-over-USB it is served by `ipp-usb`; if not (many older lasers), the `cups` container uses it directly and needs a driver — the image
 includes brlaser, gutenprint, splix and foo2zjs (add others in `docker/stack/cups/Dockerfile`). `CUPS_QUEUES` is only needed to give a
-fixed name to a queue. See [printers.md](printers.md#2-new-and-unplugged-usb-printers).
+fixed name to a queue; a queue named there is created once, and stays deleted if you delete it later (or if the gateway removes an unplugged USB printer). See [printers.md](printers.md#2-new-and-unplugged-usb-printers).
 
 `ipp-usb` needs exclusive use of the printer. If it is installed on the host, stop and mask it (SANE too):
 

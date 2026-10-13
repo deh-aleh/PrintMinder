@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-13 15:51+0200\n"
+"POT-Creation-Date: 2026-10-14 00:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -1085,22 +1085,30 @@ msgstr "Комментарий может содержать не более %(n
 msgid "Paper size not available on this printer"
 msgstr "Этот формат бумаги недоступен на этом принтере"
 
-#: app/admin/printing.py:169
+#: app/admin/printing.py:146
+msgid "Landscape is available for PDF files and images, not for text files"
+msgstr "Альбомная ориентация доступна для PDF-файлов и изображений, но не для текстовых файлов"
+
+#: app/admin/printing.py:152
+msgid "This PDF can not be turned to landscape (protected or damaged): choose automatic orientation"
+msgstr "Этот PDF нельзя повернуть в альбомную ориентацию (защищён или повреждён): выберите автоматическую ориентацию"
+
+#: app/admin/printing.py:182
 #, python-format
 msgid "%(reason)s. You can ask for more quota below."
 msgstr "%(reason)s. Вы можете запросить больше квоты ниже."
 
-#: app/admin/printing.py:206
+#: app/admin/printing.py:219
 #, python-format
 msgid "Sent to %(printer)s: %(title)s"
 msgstr "Отправлено на %(printer)s: %(title)s"
 
-#: app/admin/printing.py:206
+#: app/admin/printing.py:219
 #, python-format
 msgid " — %(n)s page(s)"
 msgstr " — страниц: %(n)s"
 
-#: app/admin/printing.py:208
+#: app/admin/printing.py:221
 msgid "The print server did not accept the file. Try another format (PDF works best)."
 msgstr "Сервер печати не принял файл. Попробуйте другой формат (лучше всего подходит PDF)."
 
@@ -1544,7 +1552,7 @@ msgstr "Установленная версия: %(v)s"
 msgid "new version %(v)s available"
 msgstr "доступна новая версия %(v)s"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:203
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:210
 msgid "Release notes"
 msgstr "Примечания к выпуску"
 
@@ -1770,77 +1778,77 @@ msgstr "Без шифрования файл содержит базу данн�
 msgid "Create backup"
 msgstr "Создать резервную копию"
 
-#: app/admin/templates/base.html:159 app/admin/templates/settings.html:2
+#: app/admin/templates/base.html:164 app/admin/templates/settings.html:2
 #: app/admin/templates/settings.html:5
 msgid "Settings"
 msgstr "Настройки"
 
-#: app/admin/templates/base.html:167
+#: app/admin/templates/base.html:172
 msgctxt "menu"
 msgid "Audit"
 msgstr "Аудит"
 
-#: app/admin/templates/base.html:168
+#: app/admin/templates/base.html:173
 msgctxt "menu"
 msgid "Users"
 msgstr "Пользователи"
 
-#: app/admin/templates/base.html:169
+#: app/admin/templates/base.html:174
 msgctxt "menu"
 msgid "Groups"
 msgstr "Группы"
 
-#: app/admin/templates/base.html:170
+#: app/admin/templates/base.html:175
 msgctxt "menu"
 msgid "Requests"
 msgstr "Запросы"
 
-#: app/admin/templates/base.html:171
+#: app/admin/templates/base.html:176
 msgctxt "menu"
 msgid "Grants"
 msgstr "Допквоты"
 
-#: app/admin/templates/base.html:172
+#: app/admin/templates/base.html:177
 msgctxt "menu"
 msgid "Actions"
 msgstr "Действия"
 
-#: app/admin/templates/base.html:173
+#: app/admin/templates/base.html:178
 msgctxt "menu"
 msgid "Printers"
 msgstr "Принтеры"
 
-#: app/admin/templates/base.html:174
+#: app/admin/templates/base.html:179
 msgctxt "menu"
 msgid "Backup"
 msgstr "Копии"
 
-#: app/admin/templates/base.html:175
+#: app/admin/templates/base.html:180
 msgctxt "menu"
 msgid "Archive"
 msgstr "Архив"
 
-#: app/admin/templates/base.html:178
+#: app/admin/templates/base.html:183
 msgctxt "menu"
 msgid "Profile"
 msgstr "Профиль"
 
-#: app/admin/templates/base.html:179
+#: app/admin/templates/base.html:184
 msgctxt "menu"
 msgid "Print"
 msgstr "Печать"
 
-#: app/admin/templates/base.html:180
+#: app/admin/templates/base.html:185
 msgctxt "menu"
 msgid "Scan"
 msgstr "Скан"
 
-#: app/admin/templates/base.html:184 app/admin/templates/notices.html:2
+#: app/admin/templates/base.html:190 app/admin/templates/notices.html:2
 #: app/admin/templates/notices.html:5
 msgid "Notices"
 msgstr "Уведомления"
 
-#: app/admin/templates/base.html:188
+#: app/admin/templates/base.html:194
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -1850,52 +1858,52 @@ msgstr ""
 "\n"
 "Принтеры исчезнут из сети (mDNS), и никто из пользователей не сможет печатать и сканировать — только администраторы."
 
-#: app/admin/templates/base.html:191
+#: app/admin/templates/base.html:197
 msgid "LEAVE MAINTENANCE"
 msgstr "ВЫЙТИ ИЗ РЕЖИМА ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:191
+#: app/admin/templates/base.html:197
 msgid "PUT IN MAINTENANCE"
 msgstr "ПЕРЕВЕСТИ В РЕЖИМ ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:192
+#: app/admin/templates/base.html:198
 msgid "Turn the gateway back on"
 msgstr "Снова включить шлюз"
 
-#: app/admin/templates/base.html:192
+#: app/admin/templates/base.html:198
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "Останавливает печать и сканирование для всех, кроме администраторов, и скрывает принтеры из сети"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Log out"
 msgstr "Выйти"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "ШЛЮЗ В РЕЖИМЕ ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "печать и сканирование остановлены для пользователей; администраторы по-прежнему могут ими пользоваться"
 
-#: app/admin/templates/base.html:202
+#: app/admin/templates/base.html:209
 msgid "printing and scanning are temporarily suspended"
 msgstr "печать и сканирование временно приостановлены"
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:210
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "Доступна новая версия: %(new)s (установлена: %(old)s)."
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:210
 msgid "To update, run on the server:"
 msgstr "Для обновления выполните на сервере:"
 
-#: app/admin/templates/base.html:228
+#: app/admin/templates/base.html:248
 msgid "Copied"
 msgstr "Скопировано"
 
-#: app/admin/templates/base.html:228 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:248 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "Копировать"
 
@@ -3881,21 +3889,21 @@ msgstr "Автоматическая периодическая печать: п
 msgid "Schedule"
 msgstr "Расписание"
 
-#: app/policy/pages.py:68
+#: app/policy/pages.py:101
 #, python-format
 msgid "Invalid pages: “%(part)s”. Example: 1,5 or 2-4"
 msgstr "Недопустимые страницы: «%(part)s». Пример: 1,5 или 2-4"
 
-#: app/policy/pages.py:72
+#: app/policy/pages.py:105
 #, python-format
 msgid "Invalid range: “%(part)s”"
 msgstr "Недопустимый диапазон: «%(part)s»"
 
-#: app/policy/pages.py:75
+#: app/policy/pages.py:108
 msgid "Too many page ranges"
 msgstr "Слишком много диапазонов страниц"
 
-#: app/policy/pages.py:88
+#: app/policy/pages.py:121
 #, python-format
 msgid "The document has only %(n)s page"
 msgid_plural "The document has only %(n)s pages"

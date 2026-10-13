@@ -1,23 +1,37 @@
 #!/bin/sh
 # CUPS as a private backend: unix socket only (config mounted from deploy/cupsd.conf).
-# Queues are created from CUPS_QUEUES="NAME=URI NAME2=URI2" (idempotent, retried until the printer answers)
+# Queues are created from CUPS_QUEUES="NAME=URI NAME2=URI2" (retried until the printer answers)
 # and CUPS_VIRTUAL_QUEUE=1 adds a "virtual" queue that writes PDFs: handy to try quotas without paper.
+# Each queue is created ONCE: its name is written to /etc/cups/printminder-queues (the CUPS volume). A queue that was
+# deleted later, by hand or because its USB printer stayed away, is not brought back at the next start.
+# To bring one back: remove its name from that file (docker compose exec cups sed -i /^NAME$/d /etc/cups/printminder-queues).
 set -u
 cupsd
 
 for i in $(seq 1 40); do lpstat -r >/dev/null 2>&1 && break; sleep 0.5; done
 
-if [ "${CUPS_VIRTUAL_QUEUE:-0}" = "1" ] && ! lpstat -p virtual >/dev/null 2>&1; then
-    lpadmin -p virtual -E -v cups-pdf:/ -m lsb/usr/cups-pdf/CUPS-PDF_noopt.ppd \
-        || lpadmin -p virtual -E -v cups-pdf:/ -m /usr/share/ppd/cups-pdf/CUPS-PDF_noopt.ppd
+STATE=/etc/cups/printminder-queues
+touch "$STATE"
+done_before() { grep -qx -- "$1" "$STATE"; }
+remember() { done_before "$1" || echo "$1" >> "$STATE"; }
+
+if [ "${CUPS_VIRTUAL_QUEUE:-0}" = "1" ] && ! lpstat -p virtual >/dev/null 2>&1 && ! done_before virtual; then
+    if lpadmin -p virtual -E -v cups-pdf:/ -m lsb/usr/cups-pdf/CUPS-PDF_noopt.ppd \
+        || lpadmin -p virtual -E -v cups-pdf:/ -m /usr/share/ppd/cups-pdf/CUPS-PDF_noopt.ppd; then
+        remember virtual
+    fi
 fi
 
 add_queue() {
     name="$1"; uri="$2"
-    lpstat -p "$name" >/dev/null 2>&1 && return 0
+    if lpstat -p "$name" >/dev/null 2>&1; then remember "$name"; return 0; fi
+    if done_before "$name"; then
+        echo "[entrypoint] queue $name was created before and removed since: not created again (see the top of this file)"
+        return 0
+    fi
     for i in $(seq 1 60); do   # the printer may take a while (USB enumeration, ipp-usb start)
         if lpadmin -p "$name" -E -v "$uri" -m everywhere 2>/dev/null; then
-            echo "[entrypoint] queue $name -> $uri created"; return 0
+            remember "$name"; echo "[entrypoint] queue $name -> $uri created"; return 0
         fi
         sleep 5
     done

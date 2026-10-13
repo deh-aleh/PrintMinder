@@ -222,3 +222,130 @@ async def test_print_options_reach_cups_and_page_ranges_are_checked_first(web):
     [(title, state, _, job_id, opts)] = rows(web)
     assert state == "accepted" and job_id
     assert opts["comment"] == "Contratto firmato" and title == "relazione.pdf" and opts["page_ranges"] == "1" and opts["orientation"] == "landscape" and opts["color"] == "monochrome"
+
+
+# ---------------------------------------------------------------- landscape (no CUPS needed: the request is recorded)
+
+def pdf_of(width, height, pages=2) -> bytes:
+    import io
+
+    from pypdf import PdfWriter
+    from pypdf.generic import DecodedStreamObject, NameObject
+    w = PdfWriter()
+    for _i in range(pages):
+        page = w.add_blank_page(width, height)
+        content = DecodedStreamObject()
+        content.set_data(b"0 0 50 50 re f")                    # something drawn, as in a real document
+        page[NameObject("/Contents")] = w._add_object(content)
+    b = io.BytesIO()
+    w.write(b)
+    return b.getvalue()
+
+
+@pytest.fixture
+async def recorded(portal):
+    from app.ipp import codec
+
+    seen = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        seen.append(codec.decode(req.content))
+        ok = codec.make_error_response(0, 1)
+        ok.groups.append(codec.Group(codec.TAG_JOB, [codec.Attr("job-id", [codec.Val(codec.TAG_INTEGER, 7)])]))
+        return httpx.Response(200, content=codec.encode(ok), headers={"content-type": "application/ipp"})
+
+    portal.app.state.upstream = httpx.AsyncClient(base_url="http://cups", transport=httpx.MockTransport(handler))
+    portal.app.state.queues_cache = (__import__("time").monotonic(), [{"name": "virtual", "info": "", "model": "", "device_uri": "cups-pdf:/", "virtual": True}])
+    make_user(portal.sm, "ann", password=GOOD)
+    await portal_login(portal, "ann", GOOD)
+    portal.token = await csrf_of_page(portal)
+    portal.seen = seen
+    yield portal
+    del portal.app.state.upstream
+
+
+def job_attr(msg, name):
+    from app.ipp import codec
+
+    a = next((g for g in msg.groups if g.tag == codec.TAG_JOB), None)
+    return a.get(name) if a else None
+
+
+@pytest.mark.usefixtures("english")
+async def test_landscape_turns_the_pages_of_a_pdf_itself_instead_of_asking_cups(recorded):
+    import io
+
+    from pypdf import PdfReader
+
+    from app.ipp import codec
+
+    r = await recorded.post("/me/print", data={"queue": "virtual", "copies": "1", "csrf_token": recorded.token, "orientation": "landscape", "pages": "2"},
+                            files={"file": ("a.pdf", pdf_of(595, 842), "application/pdf")})
+    assert r.status_code == 303
+    [msg] = recorded.seen
+    assert job_attr(msg, "orientation-requested") is None          # CUPS is not asked to rotate: its PDF filters get it wrong
+    assert job_attr(msg, "page-ranges") is not None                # the range still goes through
+    sent = PdfReader(io.BytesIO(msg.data))
+    assert len(sent.pages) == 2 and float(sent.pages[0].mediabox.width) == 595 and float(sent.pages[0].mediabox.height) == 842
+    assert b" cm" in sent.pages[0].get_contents().get_data()                      # a rotation matrix was put in front of the content
+    assert "landscape" in str(rows_options(recorded))                              # the audit still says what was asked
+    _ = codec
+
+
+def rows_options(web):
+    with web.sm() as s:
+        return [j.options_json for j in s.scalars(select(JobLog))]
+
+
+@pytest.mark.usefixtures("english")
+async def test_landscape_pdf_pages_already_landscape_are_left_alone_and_other_files(recorded):
+    import io
+
+    from pypdf import PdfReader
+
+    await recorded.post("/me/print", data={"queue": "virtual", "copies": "1", "csrf_token": recorded.token, "orientation": "landscape"},
+                        files={"file": ("a.pdf", pdf_of(842, 595, 1), "application/pdf")})
+    sent = PdfReader(io.BytesIO(recorded.seen[-1].data))
+    assert b" cm" not in sent.pages[0].get_contents().get_data()                  # nothing turned: the page is already wide
+    # an image keeps asking CUPS (its filter turns images correctly)
+    await recorded.post("/me/print", data={"queue": "virtual", "copies": "1", "csrf_token": recorded.token, "orientation": "landscape"},
+                        files={"file": ("p.png", PNG, "image/png")})
+    assert int(job_attr(recorded.seen[-1], "orientation-requested").first) == 4
+    # text can not be turned: refused before anything is reserved
+    n = len(recorded.seen)
+    r = await recorded.post("/me/print", data={"queue": "virtual", "copies": "1", "csrf_token": recorded.token, "orientation": "landscape"},
+                            files={"file": ("n.txt", b"hello\n", "text/plain")})
+    assert r.status_code == 303 and len(recorded.seen) == n and "not for text files" in await last_message(recorded)
+    # portrait is still passed to CUPS as before
+    await recorded.post("/me/print", data={"queue": "virtual", "copies": "1", "csrf_token": recorded.token, "orientation": "portrait"},
+                        files={"file": ("a.pdf", pdf_of(595, 842, 1), "application/pdf")})
+    assert int(job_attr(recorded.seen[-1], "orientation-requested").first) == 3
+
+
+def test_landscape_pdf_refuses_what_it_cannot_change():
+    from app.policy import pages
+    with pytest.raises(ValueError):
+        pages.landscape_pdf(b"%PDF-1.4 this is not a real document")
+
+
+def test_landscape_pdf_looks_at_the_displayed_shape_of_each_page():
+    import io
+
+    from pypdf import PdfReader, PdfWriter
+    from pypdf.generic import DecodedStreamObject, NameObject
+
+    from app.policy import pages
+
+    w = PdfWriter()
+    for width, height, rotate in ((595, 842, 0), (595, 842, 90), (842, 595, 0), (842, 595, 90)):
+        page = w.add_blank_page(width, height)
+        content = DecodedStreamObject()
+        content.set_data(b"0 0 50 50 re f")
+        page[NameObject("/Contents")] = w._add_object(content)
+        if rotate:
+            page.rotate(rotate)
+    b = io.BytesIO()
+    w.write(b)
+    out = PdfReader(io.BytesIO(pages.landscape_pdf(b.getvalue())))
+    turned = [b" cm" in p.get_contents().get_data() for p in out.pages]
+    assert turned == [True, False, False, True]      # portrait as displayed -> turned; landscape as displayed -> left alone

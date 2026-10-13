@@ -57,6 +57,38 @@ def count_pages(data: bytes, declared: str | None = None) -> int | None:
     return None
 
 
+def landscape_pdf(data: bytes) -> bytes:
+    """The PDF with every portrait page turned 90 degrees (counter-clockwise, as printers do) and shrunk to fit the same
+    sheet; pages that are already landscape stay as they are. Done here and not by asking CUPS (orientation-requested),
+    because CUPS' PDF filters turn a portrait page upside down instead of sideways on printers whose PPD declares a
+    landscape direction, such as the brlaser ones. Raises ValueError when the file can not be changed (encrypted, damaged)."""
+    from pypdf import PdfReader, PdfWriter, Transformation
+    from pypdf.errors import PyPdfError
+
+    try:
+        reader = PdfReader(io.BytesIO(data))
+        if reader.is_encrypted:
+            raise ValueError("encrypted")
+        writer = PdfWriter(clone_from=reader)             # the pages belong to the writer before they are changed
+        for page in writer.pages:
+            w, h = float(page.mediabox.width), float(page.mediabox.height)
+            quarter = (page.rotation or 0) % 180 == 90
+            shown_w, shown_h = (h, w) if quarter else (w, h)      # the shape the page has when displayed
+            if shown_h > shown_w:                                 # portrait: lay it on its side, inside the same sheet
+                page.transfer_rotation_to_content()               # from here the page is w x h with nothing hidden in /Rotate
+                w, h = float(page.mediabox.width), float(page.mediabox.height)
+                scale = min(w / h, h / w)
+                left, bottom = float(page.mediabox.left), float(page.mediabox.bottom)
+                page.add_transformation(
+                    Transformation().translate(-left, -bottom).rotate(90).scale(scale, scale)
+                    .translate(scale * h + (w - scale * h) / 2 + left, (h - scale * w) / 2 + bottom))
+        out = io.BytesIO()
+        writer.write(out)
+        return out.getvalue()
+    except (PyPdfError, OSError, KeyError, AttributeError) as exc:
+        raise ValueError(str(exc)) from exc
+
+
 def parse_ranges(text: str) -> list[tuple[int, int]]:
     """"1,5" / "2-4, 7" / "3-" -> [(lo, hi)], hi = 0 meaning "to the end". Raises ValueError with a readable message."""
     out: list[tuple[int, int]] = []

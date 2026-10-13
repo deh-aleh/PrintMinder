@@ -140,6 +140,19 @@ async def print_submit(request: Request, user: User = Depends(current_user)):
         flash(request, str(exc), "err")
         return back("/me/print")
 
+    ipp_orientation = orientation   # what is asked of CUPS; for landscape PDFs the page itself is turned instead (see landscape_pdf)
+    if orientation == "landscape" and not mime.startswith("image/"):
+        if mime != "application/pdf":
+            flash(request, _("Landscape is available for PDF files and images, not for text files"), "err")
+            return back("/me/print")
+        try:
+            data = await run_in_threadpool(pages_mod.landscape_pdf, data)
+        except ValueError:
+            log.warning("web print: could not turn the pages of %r", title)
+            flash(request, _("This PDF can not be turned to landscape (protected or damaged): choose automatic orientation"), "err")
+            return back("/me/print")
+        ipp_orientation = ""
+
     total = await run_in_threadpool(pages_mod.count_pages, data, mime)
     try:
         counted = pages_mod.pages_in_ranges(ranges, total)
@@ -177,8 +190,8 @@ async def print_submit(request: Request, user: User = Depends(current_user)):
         job_attrs.append(codec.Attr("copies", [codec.Val(codec.TAG_INTEGER, copies)]))
     if media:
         job_attrs.append(codec.Attr("media", [codec.Val(codec.TAG_KEYWORD, media)]))
-    if orientation:
-        job_attrs.append(codec.Attr("orientation-requested", [codec.Val(codec.TAG_ENUM, 3 if orientation == "portrait" else 4)]))
+    if ipp_orientation:
+        job_attrs.append(codec.Attr("orientation-requested", [codec.Val(codec.TAG_ENUM, 3 if ipp_orientation == "portrait" else 4)]))
     if color:
         job_attrs.append(codec.Attr("print-color-mode", [codec.Val(codec.TAG_KEYWORD, color)]))
     if ranges:
