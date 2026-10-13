@@ -36,6 +36,10 @@ di ogni dispositivo nuovo — entro circa un minuto dal collegamento. Due strade
    uno per quel modello la pagina Stampanti lo dice ("trovata, ma CUPS non ha un driver"). Un dispositivo servito da ipp-usb non viene
    mai preso per questa strada.
 
+   *Verificato con una Brother DCP-7055 collegata via USB:* è stata riconosciuta come stampante USB (non come ipp-usb), la coda è stata
+   creata con il driver brlaser (`drv:///brlaser.drv/br7055.ppd`) e la primissima stampa dal portale ha funzionato, senza cambiare
+   nessuna impostazione. Anche *Orizzontale* dal portale dà su di essa il risultato atteso (vedi [stampa.md](stampa.md)).
+
 Un dispositivo viene preso dal backend usb solo dopo essere rimasto non servito per due controlli di seguito (ipp-usb si riavvia per qualche secondo a ogni collegamento o scollegamento USB, e una stampante che serve lui non va presa in quel momento).
 
 La coda prende il nome dal modello, accorciato (al massimo 24 caratteri): si tolgono le parole inutili come "series", "printer", "MFP" e un

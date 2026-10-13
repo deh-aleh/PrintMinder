@@ -40,7 +40,7 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 
 ## 4. Printers and scanners
 
-- Automatic USB discovery: a printer served by `ipp-usb` is never taken through CUPS' usb backend. Printers without IPP-over-USB need a driver present in the `cups` image (brlaser, gutenprint, splix, foo2zjs are included). Whether CUPS' usb backend and `ipp-usb` coexist on the same USB bus with several printers has been tested with one device at a time only.
+- Automatic USB discovery: a printer served by `ipp-usb` is never taken through CUPS' usb backend. Printers without IPP-over-USB need a driver present in the `cups` image (brlaser, gutenprint, splix, foo2zjs are included). Whether CUPS' usb backend and `ipp-usb` coexist on the same USB bus with several printers has been tested with one device at a time only. Printers tested so far: HP Smart Tank 7300 (through ipp-usb) and Brother DCP-7055 (CUPS usb backend, brlaser).
 - USB queues unreachable for 8 h (configurable) are removed by themselves; network queues never are.
 
 - Disconnected-device detection lags by up to ~30 s; for network queues it is a TCP probe (no paper information).

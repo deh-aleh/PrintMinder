@@ -40,7 +40,7 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 
 ## 4. Stampanti e scanner
 
-- Rilevamento USB automatico: una stampante servita da `ipp-usb` non viene mai presa dal backend usb di CUPS. Le stampanti senza IPP-su-USB richiedono un driver presente nell'immagine `cups` (inclusi brlaser, gutenprint, splix, foo2zjs). La convivenza fra backend usb di CUPS e `ipp-usb` sullo stesso bus con più stampanti è provata solo con un dispositivo alla volta.
+- Rilevamento USB automatico: una stampante servita da `ipp-usb` non viene mai presa dal backend usb di CUPS. Le stampanti senza IPP-su-USB richiedono un driver presente nell'immagine `cups` (inclusi brlaser, gutenprint, splix, foo2zjs). La convivenza fra backend usb di CUPS e `ipp-usb` sullo stesso bus con più stampanti è provata solo con un dispositivo alla volta. Stampanti provate finora: HP Smart Tank 7300 (tramite ipp-usb) e Brother DCP-7055 (backend usb di CUPS, brlaser).
 - Le code USB irraggiungibili da 8 h (configurabile) vengono tolte da sole; quelle di rete mai.
 
 - Il rilevamento di un dispositivo scollegato ritarda fino a ~30 s; per le code di rete è una prova TCP (nessuna informazione sulla carta).

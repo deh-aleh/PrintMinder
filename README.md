@@ -40,7 +40,7 @@ browser ───────https───────────▶     │  
 | **Identity** | Local accounts (argon2id); RADIUS login (optional); first administrator through a one-time code | ✅ |
 | | Other providers (LDAP/AD, OIDC); two-factor authentication for administrators | ⬜ |
 | **Printing** | IPP/IPPS proxy in front of CUPS; no bypass (CUPS is not reachable); personal print keys | ✅ |
-| | Any printer CUPS supports (USB through ipp-usb, or network) | 🟡 tested with an HP Smart Tank 7300 over USB |
+| | Any printer CUPS supports (USB through ipp-usb, or network) | 🟡 tested with two printers over USB: an HP Smart Tank 7300 (through ipp-usb) and a Brother DCP-7055 (CUPS usb backend, brlaser driver: found, queue created and first print worked without any setting) |
 | | LAN announcement (DNS-SD) and printing from the browser | ✅ seen by Android with Mopria; iPhone not tested |
 | | New USB printers get their queue by themselves (ipp-usb first, CUPS usb backend + driver otherwise); unreachable USB queues are removed after a countdown, any dead queue can be deleted by hand | ✅ |
 | | Held printing with later release (pull printing) | ⬜ |

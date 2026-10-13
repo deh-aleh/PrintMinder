@@ -35,6 +35,10 @@ creates the CUPS queue of each new device — within about a minute of plugging 
    has none for the model, the Printers page says so ("found, but CUPS has no driver for it"). A device that ipp-usb serves is
    never taken this way.
 
+   *Checked with a Brother DCP-7055 connected by USB:* it was detected as a USB printer (not as ipp-usb), the queue was created
+   with the brlaser driver (`drv:///brlaser.drv/br7055.ppd`) and the very first print from the portal worked, with no setting
+   changed. *Landscape* from the portal also gives the expected result on it (see [printing.md](printing.md)).
+
 A device is taken through the usb backend only after it has stayed unserved for two passes in a row (ipp-usb restarts for a few seconds whenever a USB device is plugged or unplugged, and a printer it serves must not be grabbed in that moment).
 
 The queue is named after the model, shortened (at most 24 characters): noise such as "series", "printer", "MFP" and a bracketed part

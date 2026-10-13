@@ -40,7 +40,7 @@ browser ───────https───────────▶     │  
 | **Identità** | Account locali (argon2id); accesso RADIUS (facoltativo); primo amministratore con codice monouso | ✅ |
 | | Altri provider (LDAP/AD, OIDC); autenticazione a due fattori per gli admin | ⬜ |
 | **Stampa** | Proxy IPP/IPPS davanti a CUPS; nessun bypass (CUPS non è raggiungibile); chiavi di stampa personali | ✅ |
-| | Qualunque stampante supportata da CUPS (USB via ipp-usb, o di rete) | 🟡 provata con HP Smart Tank 7300 via USB |
+| | Qualunque stampante supportata da CUPS (USB via ipp-usb, o di rete) | 🟡 provata con due stampanti via USB: una HP Smart Tank 7300 (tramite ipp-usb) e una Brother DCP-7055 (backend usb di CUPS, driver brlaser: trovata, coda creata e prima stampa riuscita senza alcuna impostazione) |
 | | Annuncio sulla LAN (DNS-SD) e stampa da browser | ✅ visto da Android con Mopria; iPhone non provato |
 | | Le stampanti USB nuove ottengono da sole la loro coda (prima ipp-usb, altrimenti backend usb di CUPS + driver); le code USB irraggiungibili si tolgono dopo un conto alla rovescia, qualunque coda morta si elimina a mano | ✅ |
 | | Stampa trattenuta con rilascio successivo (pull printing) | ⬜ |
