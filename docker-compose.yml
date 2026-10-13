@@ -1,0 +1,138 @@
+# Production-style stack: ipp-usb + CUPS + gateway, everything in containers.
+# Nothing is installed on the host and no host CUPS is touched. Setup: scripts/docker-init.sh
+#
+# Two ways to get the images (same file):
+#   * build from this source tree:   docker compose up -d --build
+#   * download them, no source:      PRINTGW_REGISTRY=ghcr.io/<owner> PRINTGW_VERSION=1.0.0 docker compose pull
+#                                    docker compose up -d
+#     (put both variables in .env so they are not typed every time)
+# PRINTGW_VERSION: use a fixed version in production, never "latest", so an update is a decision and not a surprise.
+# Try it without a printer or a RADIUS server:
+#   CUPS_VIRTUAL_QUEUE=1 docker compose --profile radius-test up -d --build
+name: printgw
+
+services:
+  # USB <-> IPP bridge. Needs exclusive use of the printer: stop the host's ipp-usb first
+  # (sudo systemctl disable --now ipp-usb && sudo systemctl mask ipp-usb).
+  ipp-usb:
+    image: ${PRINTGW_REGISTRY:-printgw}/ipp-usb:${PRINTGW_VERSION:-dev}
+    build: ./docker/stack/ipp-usb
+    restart: unless-stopped
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+      - ipp-usb-state:/var/ipp-usb          # remembers the port given to each printer
+    device_cgroup_rules:
+      - "c 189:* rmw"                       # USB char devices, also the ones plugged in later
+    # no published ports: the printer is reachable only from this compose network
+
+  # Private backend: unix socket only, shared with the gateway through a volume.
+  cups:
+    image: ${PRINTGW_REGISTRY:-printgw}/cups:${PRINTGW_VERSION:-dev}
+    build: ./docker/stack/cups
+    restart: unless-stopped
+    environment:
+      CUPS_QUEUES: ${CUPS_QUEUES:-}
+      CUPS_VIRTUAL_QUEUE: ${CUPS_VIRTUAL_QUEUE:-0}
+    device_cgroup_rules:
+      - "c 189:* rmw"                       # USB char devices, also the ones plugged in later
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb           # printers that ipp-usb can not serve (no IPP-over-USB): CUPS' own usb backend
+      - cups-config:/etc/cups               # queues survive restarts
+      - ./docker/stack/cups/cupsd.conf:/etc/cups/cupsd.conf:ro
+      - cups-run:/run/cups
+      - cups-spool:/var/spool/cups          # job history (the gateway's reconciler reads it)
+      - cups-pdf:/var/spool/cups-pdf        # output of the optional "virtual" queue
+    healthcheck:
+      test: ["CMD-SHELL", "lpstat -r"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  gateway:
+    image: ${PRINTGW_REGISTRY:-printgw}/gateway:${PRINTGW_VERSION:-dev}
+    build:
+      context: .
+      dockerfile: docker/stack/gateway/Dockerfile
+    # runs as the host user (decided here, not when the image is built, so one published image fits every machine):
+    # the bind-mounted TLS key (mode 600) and data/audit-archive belong to that user
+    user: "${PUID:-1000}:${PGID:-1000}"
+    restart: unless-stopped
+    depends_on:
+      cups:
+        condition: service_healthy
+    env_file: config/gateway.env
+    ports:
+      - "${GATEWAY_PORT:-8631}:8631"        # the only thing exposed to the network
+    environment:
+      # shown in the portal so people know where the compressed audit files are on this machine
+      CUPSPL_AUDIT_ARCHIVE_HOST_PATH: ${AUDIT_ARCHIVE_HOST_PATH:-}
+      CUPSPL_BACKUP_HOST_PATH: ${BACKUP_HOST_PATH:-}
+    volumes:
+      - ./config/tls:/tls:ro
+      - cups-run:/run/cups
+      - gateway-data:/data                  # SQLite: users, rules, audit
+      - ./data/audit-archive:/data/audit-archive   # compressed audit, kept forever, readable on the host
+      # backups: the only place the gateway may write them. Administrators pick a sub-folder in the portal.
+      # To save on a USB disk or a network share, mount it on the host INSIDE this folder (before starting the gateway).
+      - ${BACKUP_DIR:-./data/backups}:/backups
+      # read-only: lets encrypted backups include gateway.env and the TLS key (never written into a plain backup)
+      - ./config:/config:ro
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+  # Announces the queues on the LAN (DNS-SD/Bonjour: _ipps._tcp + AirPrint subtype) so phones and computers find them.
+  # Multicast does not cross a bridge network, hence host networking; it only reads the queue list from CUPS.
+  mdns:
+    image: ${PRINTGW_REGISTRY:-printgw}/gateway:${PRINTGW_VERSION:-dev}
+    command: ["python", "-m", "app.mdns"]
+    restart: unless-stopped
+    depends_on: [gateway]
+    network_mode: host
+    env_file: config/gateway.env
+    environment:
+      CUPSPL_MDNS_PORT: ${GATEWAY_PORT:-8631}
+    volumes:
+      - cups-run:/run/cups
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+  # OPTIONAL: lets administrators press "Update" in the portal. Off by default, because it needs the Docker socket,
+  # and whoever controls that socket controls the whole machine (root). Start it with:  docker compose --profile autoupdate up -d
+  # Details and alternatives (scripts/update.sh in a terminal): docs/en/installation.md, section "Updates".
+  # PROJECT_DIR is written into .env by scripts/docker-init.sh (the full path of this folder).
+  updater:
+    image: ${PRINTGW_REGISTRY:-printgw}/updater:${PRINTGW_VERSION:-dev}
+    build: ./docker/stack/updater
+    profiles: [autoupdate]
+    restart: unless-stopped
+    working_dir: ${PROJECT_DIR:-/nonexistent}
+    environment:
+      PROJECT_DIR: ${PROJECT_DIR:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PROJECT_DIR:-/nonexistent}:${PROJECT_DIR:-/nonexistent}   # same path as on the host, so relative paths in this file still work
+      - gateway-data:/data                  # where requests and results are exchanged with the gateway (folder /data/update)
+    security_opt: ["no-new-privileges:true"]
+
+  # Only for trying the stack: users mario/mario123, anna/anna123, admin/admin123, secret testing123.
+  # Point config/gateway.env at it with CUPSPL_RADIUS_HOST=radius, CUPSPL_RADIUS_SECRET=testing123.
+  # (RADIUS is optional: with host/secret empty only local accounts exist.)
+  radius:
+    image: freeradius/freeradius-server:latest
+    profiles: [radius-test]
+    restart: unless-stopped
+    volumes:
+      - ./docker/radius/clients.conf:/etc/freeradius/clients.conf:ro
+      - ./docker/radius/authorize:/etc/freeradius/mods-config/files/authorize:ro
+
+volumes:
+  ipp-usb-state:
+  cups-config:
+  cups-run:
+  cups-spool:
+  cups-pdf:
+  gateway-data:

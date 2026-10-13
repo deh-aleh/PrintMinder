@@ -1,0 +1,72 @@
+#!/bin/sh
+# HOST-SIDE full backup / restore (also takes the CUPS queues and .env; use it to move the machine).
+# The gateway has its own scheduled backups in the portal (menu Backup): see README. Run from anywhere; works on the running stack.
+#   scripts/backup.sh backup [DEST_DIR]      writes DEST_DIR/printgw-YYYYMMDD-HHMMSS.tar.gz   (default DEST_DIR: ./backups)
+#   scripts/backup.sh restore FILE.tar.gz    puts it back (stops the gateway first, asks for confirmation)
+#
+# What is saved:
+#   gateway.db     users, groups, quotas, print keys (hashes), audit. Taken with SQLite's own backup call, so it is
+#                  consistent even while people are printing (copying the live file would not be).
+#   config/        gateway.env (SECRET_KEY, RADIUS secret), .env and the TLS certificate and key
+#   audit-archive/ the compressed audit files (data/audit-archive)
+#   cups-config    the CUPS queues (printers.conf), so queues created from the portal survive a rebuild
+# NOT saved: the images (they are downloaded again) and the spool of jobs in progress.
+# The archive holds secrets (TLS key, SECRET_KEY): keep it as private as the server itself.
+set -eu
+cd "$(dirname "$0")/.."
+cmd="${1:-}"
+project="$(docker compose config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["name"])')"
+
+case "$cmd" in
+backup)
+    dest="${2:-backups}"
+    mkdir -p "$dest"
+    work="$(mktemp -d)"
+    trap 'rm -rf "$work"' EXIT
+    # consistent copy of the database, streamed out of the running container
+    docker compose exec -T gateway python - > "$work/gateway.db" <<'PY'
+import sqlite3, sys
+src = sqlite3.connect("/data/gateway.db")
+dst = sqlite3.connect("/tmp/snapshot.db")
+src.backup(dst)
+dst.close()
+sys.stdout.buffer.write(open("/tmp/snapshot.db", "rb").read())
+PY
+    [ -s "$work/gateway.db" ] || { echo "database snapshot is empty: is the gateway running?" >&2; exit 1; }
+    mkdir -p "$work/config" "$work/audit-archive"
+    cp -a config/. "$work/config/"
+    [ -e .env ] && cp -a .env "$work/dot-env"
+    cp -a data/audit-archive/. "$work/audit-archive/" 2>/dev/null || true
+    docker run --rm -v "${project}_cups-config:/c:ro" alpine tar -C /c -cf - . > "$work/cups-config.tar"
+    out="$dest/printgw-$(date +%Y%m%d-%H%M%S).tar.gz"
+    tar -C "$work" -czf "$out" .
+    chmod 600 "$out"
+    echo "backup written: $out"
+    ;;
+restore)
+    file="${2:?usage: scripts/backup.sh restore FILE.tar.gz}"
+    echo "This REPLACES the database, the configuration and the CUPS queues of this server with the ones in $file."
+    printf "type YES to continue: "
+    read -r answer
+    [ "$answer" = "YES" ] || { echo "cancelled"; exit 1; }
+    work="$(mktemp -d)"
+    trap 'rm -rf "$work"' EXIT
+    tar -C "$work" -xzf "$file"
+    docker compose stop gateway mdns
+    mkdir -p config data/audit-archive
+    cp -a "$work/config/." config/
+    [ -e "$work/dot-env" ] && cp -a "$work/dot-env" .env
+    cp -a "$work/audit-archive/." data/audit-archive/ 2>/dev/null || true
+    owner="$(sed -n 's/^PUID=//p' .env 2>/dev/null | head -1):$(sed -n 's/^PGID=//p' .env 2>/dev/null | head -1)"
+    docker run --rm -i -v "${project}_gateway-data:/d" -v "$work:/w:ro" alpine \
+        sh -c "rm -f /d/gateway.db /d/gateway.db-wal /d/gateway.db-shm && cp /w/gateway.db /d/gateway.db && chown ${owner:-1000:1000} /d/gateway.db && chmod 600 /d/gateway.db" 
+    docker run --rm -v "${project}_cups-config:/c" -v "$work:/w:ro" alpine \
+        sh -c 'cd /c && tar -xf /w/cups-config.tar'
+    docker compose up -d
+    echo "restored. Check:  docker compose logs --tail 20 gateway"
+    ;;
+*)
+    echo "usage: $0 backup [DEST_DIR] | restore FILE.tar.gz" >&2
+    exit 2
+    ;;
+esac

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Printers") }}{% endblock %}
+{% block body %}
+<h1 style="margin:0 0 4px;font-size:18px">{{ _("Printers") }} <span class="muted" style="font-size:13px">({{ _("data read from the printers; physical ones first, in your own order") }})</span></h1>
+<p style="margin:0 0 12px">{% set ar_key = 'printers' %}{% set ar_seconds = refresh_seconds %}{% set ar_on = false %}{% include "autorefresh.html" %}</p>
+<form class="card row" method="post" action="/admin/printers/debug" style="justify-content:space-between">
+  <div><b>{{ _("Test printers") }}</b><div class="muted">{{ _('A virtual printer that writes PDFs instead of printing: it is for trying quotas, audit and blocks without paper (<span class="mono">debugprinter0</span>, <span class="mono">debugprinter1</span>…). Virtual ones can be deleted.') }}</div></div>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}"><button>{{ _("Create a test printer") }}</button>
+</form>
+<form class="card row" method="post" action="/admin/printers/discover" style="justify-content:space-between">
+  <div><b>{{ _("Find printers") }}</b><div class="muted">{{ _("USB printers are added by themselves within a minute of being plugged in: through ipp-usb when the printer supports it, otherwise with a CUPS driver.") }}
+    {% if remove_after %}{{ _("A USB printer that stops answering is removed after %(hours)s hours.", hours=remove_hours) }}{% else %}{{ _("Queues of unplugged printers are not removed by themselves.") }}{% endif %}</div>
+    {% for n in notes %}<div style="color:var(--err)">{{ n }}</div>{% endfor %}</div>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _("Look now") }}</button>
+</form>
+{% for d in devices %}{% set dev = d.device %}
+<div class="card">
+  {% set q0 = d.queues[0] %}{% set ka = keepalive.get(key(q0.name)) %}
+  <div class="cardhead">
+  <h2>{{ d.title }}{% if d.virtual %} <span class="pill">{{ _("virtual") }}</span>{% endif %}{% if dev and dev.scanner %} <span class="pill" title="{{ _('Multifunction: prints and scans (the device also answers as an eSCL scanner)') }}">MFP</span>{% endif %}{% set tr = transport(q0.device_uri) %}{% if tr %} <span class="pill" title="{{ _('Connected by USB cable through the ipp-usb bridge') if tr == 'IPP-USB' else _('Connected by USB cable, driven by CUPS with a driver') }}">{{ tr }}</span>{% endif %}</h2>
+  <div class="tools">
+    {% set at_top = loop.first or loop.previtem.virtual != d.virtual %}{% set at_bottom = loop.last or loop.nextitem.virtual != d.virtual %}
+    <form method="post" action="/admin/printers/{{ q0.name|urlencode }}/move"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="direction" value="up">
+      <button class="icon" {{ 'disabled' if at_top }} title="{{ _('Already first') if at_top else _('Move up') }}" aria-label="{{ _('Move %(printer)s up', printer=q0.name) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></form>
+    <form method="post" action="/admin/printers/{{ q0.name|urlencode }}/move"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="direction" value="down">
+      <button class="icon" {{ 'disabled' if at_bottom }} title="{{ _('Already last') if at_bottom else _('Move down') }}" aria-label="{{ _('Move %(printer)s down', printer=q0.name) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button></form>
+    <button type="button" class="icon" title="{{ _('Rename the queue') }}" aria-label="{{ _('Rename %(printer)s', printer=q0.name) }}" onclick="document.getElementById('rn-{{ loop.index }}').showModal()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg></button>
+  {% if not d.virtual %}
+    <button type="button" class="icon" title="{{ _('Periodic print: keeps the print heads and rollers in good condition') }}{% if ka and ka.enabled %} ({{ _('active') }}){% endif %}" aria-label="{{ _('Periodic print of %(printer)s', printer=q0.name) }}" onclick="document.getElementById('ka-{{ loop.index }}').showModal()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h8v6M7 17H4v-6h14v2"/><rect x="7" y="13" width="7" height="3" rx=".5"/><circle cx="17.5" cy="17.5" r="4.5" class="bg"/><path d="M17.5 15v2.7l1.8 1"/></svg>
+      {% if ka and ka.enabled %}<i class="dot" aria-hidden="true"></i>{% endif %}</button>
+    <button type="button" class="icon" title="{{ _('Test print with the printer statistics') }}" aria-label="{{ _('Test print on %(printer)s', printer=q0.name) }}" onclick="document.getElementById('tp-{{ loop.index }}').showModal()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5"/><rect x="7" y="7.5" width="10" height="12" rx="5"/><path d="M12 7.5v12M3 12h4M17 12h4M4 6l3 2.5M20 6l-3 2.5M4 19l3-2.5M20 19l-3-2.5"/></svg></button>
+  {% endif %}
+  </div>
+  </div>
+  <dialog id="rn-{{ loop.index }}">
+    <div class="dlghead">
+      <h3>{{ _("Rename the queue") }}</h3>
+      <form method="dialog" class="x"><button class="sec" aria-label="{{ _('Close') }}" title="{{ _('Close (changes nothing)') }}"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round"><path d="M5 5l14 14M19 5L5 19"/></svg></button></form>
+    </div>
+    <p class="muted">{{ _("The name of the queue is the last part of the printer address (…/printers/<b>name</b>). Letters, digits and . _ @ + - only.") }}</p>
+    <p class="pill blocked" style="display:block;border-radius:8px;padding:8px 12px">{{ _("Computers and phones where the printer was set up by hand with the old address will stop printing until they are set up again. Block, maintenance print and the places in the lists follow the queue; the audit keeps the old name for what already happened.") }}</p>
+    {% for q in d.queues %}
+    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/rename" class="row" style="margin-top:8px"
+          onsubmit="return confirm({{ _t('Rename %(printer)s? Computers and phones where it was set up by hand with the old address will stop printing until they are set up again.', printer=q.name)|tojson|forceescape }})">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <input name="new_name" value="{{ q.name }}" required maxlength="127" pattern="[A-Za-z0-9._@+\-]{1,127}" class="mono" style="flex:1;min-width:160px" aria-label="{{ _('New name of %(printer)s', printer=q.name) }}">
+      <button>{{ _("Rename") }}</button>
+    </form>
+    {% endfor %}
+  </dialog>
+  {% if ka and ka.enabled %}<div class="muted" style="margin:-4px 0 8px">{{ _("Periodic print active: %(every)s, %(mode)s", every=describe(ka.interval_hours), mode=_('in colour') if ka.color and q0.color else _('in black and white')) }}
+    {%- if next_due(ka) %} · {{ _("next %(when)s", when=next_due(ka)|localtime('%Y-%m-%d %H:%M')) }}{% endif %}
+    {%- if ka.last_status == 'error' %} · <span style="color:var(--err)">{{ _("last attempt failed: %(error)s", error=ka.last_error) }}</span>
+    {%- elif ka.last_status == 'offline' %} · <span style="color:var(--err)">{{ _("printer not reachable: I will retry as soon as it answers") }}</span>{% endif %}</div>{% endif %}
+  {% if not d.virtual %}
+  <dialog id="ka-{{ loop.index }}">
+    <div class="dlghead">
+      <h3>{{ _("Periodic print") }}</h3>
+      <form method="post" action="/admin/printers/{{ q0.name|urlencode }}/keepalive/toggle">
+        <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="on" value="{{ '0' if ka and ka.enabled else '1' }}">
+        <button class="switch{{ ' on' if ka and ka.enabled }}" role="switch" aria-checked="{{ 'true' if ka and ka.enabled else 'false' }}" aria-label="{{ _('Turn on the periodic print') }}" title="{{ _('On: click to turn off') if ka and ka.enabled else _('Off: click to turn on') }}"><i></i></button>
+      </form>
+      <form method="dialog" class="x"><button class="sec" aria-label="{{ _('Close') }}" title="{{ _('Close (changes nothing)') }}"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round"><path d="M5 5l14 14M19 5L5 19"/></svg></button></form>
+    </div>
+    <p class="muted">{{ _('A printer left idle for a long time dries its ink or sticks its rollers. With the periodic print the gateway sends <b class="mono">%(printer)s</b> a maintenance page at regular intervals. It applies to all administrators.', printer=q0.name) }}</p>
+    {% set cur = split(ka.interval_hours) if ka else (7, 'days') %}
+    <form method="post" action="/admin/printers/{{ q0.name|urlencode }}/keepalive">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <label>{{ _("Every") }}</label>
+      <div class="row" style="margin:4px 0 8px">
+        <input type="number" name="amount" min="1" max="2160" value="{{ cur[0] }}" required style="width:90px" aria-label="{{ _('Interval') }}">
+        <select name="unit" aria-label="{{ _('Unit') }}"><option value="days" {{ 'selected' if cur[1] == 'days' }}>{{ _("days") }}</option><option value="hours" {{ 'selected' if cur[1] == 'hours' }}>{{ _("hours") }}</option></select>
+      </div>
+      <div class="row" style="margin-bottom:10px">
+        {% for hrs, label in presets %}<button type="button" class="sec chip" data-amount="{{ hrs // 24 }}" data-unit="days">{{ _(label) }}</button>{% endfor %}
+      </div>
+      {% if q0.color %}
+      <label class="check"><input type="checkbox" name="color" value="1" {{ 'checked' if ka and ka.color }}> {{ _("Print in colour (uses a little of every ink: keeps the colour heads working too)") }}</label>
+      {% else %}<p class="muted">{{ _("This printer does not print in colour: the page will be black and white.") }}</p>{% endif %}
+      <p class="muted">{{ _("Between 1 hour and 90 days. “Save” records the settings without turning the program on or off: the switch at the top decides that.") }}
+        {% if ka %}{{ _("Last change: %(who)s, %(when)s.", who=ka.updated_by or '—', when=ka.updated_at|localtime('%Y-%m-%d %H:%M')) }}{% if ka.last_ok_at %} {{ _("Last page printed: %(when)s.", when=ka.last_ok_at|localtime('%Y-%m-%d %H:%M')) }}{% endif %}{% endif %}</p>
+      <div class="row" style="justify-content:flex-end"><button>{{ _("Save") }}</button></div>
+    </form>
+  </dialog>
+  <dialog id="tp-{{ loop.index }}">
+    <h3 style="margin-top:0">{{ _("Test print on %(printer)s", printer=q0.name) }}</h3>
+    <p class="muted">{{ _("Prints a page with all the statistics you see here: state, ink, counters, data from the gateway and device details.") }}{% if not d.online %} <b style="color:var(--err)">{{ _("The printer does not answer.") }}</b>{% endif %}</p>
+    <form method="post" action="/admin/printers/{{ q0.name|urlencode }}/testprint" class="row" style="justify-content:flex-end">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <button type="submit" formmethod="dialog" formnovalidate class="sec">{{ _("Cancel") }}</button>
+      <button name="mode" value="mono" {{ 'disabled' if not q0.online }}>{{ _("Print black and white") }}</button>
+      <button name="mode" value="color" {% if not q0.color %}disabled title="{{ _('This printer does not print in colour') }}"{% elif not q0.online %}disabled{% endif %}>{{ _("Print in colour") }}</button>
+    </form>
+  </dialog>
+  {% endif %}
+  {% for q in d.queues %}
+  <div class="row" style="margin-bottom:6px">
+    <b class="mono">{{ q.name }}</b>
+    {% if q.online %}<span class="pill s-{{ 'ok' if q.state == 'idle' else 'pending' if q.state == 'printing' else 'failed' }}">{{ _(q.state) }}</span>
+    {% else %}<span class="pill blocked" title="{{ _('The device does not answer on the network: cable unplugged or printer off? The queue still exists in CUPS') }}">{{ _("NOT REACHABLE") }}</span>{% endif %}
+    {% if not q.accepting %}<span class="pill s-failed">{{ _("not accepting jobs") }}</span>{% endif %}
+    <span class="muted">{{ _("%(n)s in queue", n=q.queued) }}</span>
+    {% if q.online %}{% for r in q.reasons %}<span class="pill s-pending">{{ r }}</span>{% endfor %}{% endif %}
+    {% if q.message and q.online %}<span class="muted">{{ q.message }}</span>{% endif %}
+  </div>
+  {% set c = controls.get(key(q.name)) %}
+  <div class="row" style="margin-bottom:12px">
+    {% if c and c.blocked %}<span class="pill blocked" title="{{ _('Applies to all users, also to the accounts of the administrator group') }}">{{ _("BLOCKED FOR EVERYONE · admins included") }}</span>{% endif %}
+    {% if c and c.mdns_hidden %}<span class="pill s-pending" title="{{ _('It is not announced on the network: still usable by whoever knows it') }}">{{ _("hidden from the network (mDNS)") }}</span>{% endif %}
+    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/block"
+          {% if not (c and c.blocked) %}onsubmit="return confirm({{ _t('Block %(printer)s for EVERYONE, administrators included?', printer=q.name)|tojson|forceescape }})"{% endif %}>
+      <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="on" value="{{ '0' if c and c.blocked else '1' }}">
+      <button class="{{ 'sec' if c and c.blocked else 'danger' }}" title="{{ _('If blocked nobody can print, not even the admins') }}">{{ _('Unblock use') if c and c.blocked else _('Block use') }}</button>
+    </form>
+    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/mdns">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="on" value="{{ '0' if c and c.mdns_hidden else '1' }}">
+      <button class="sec" title="{{ _('Removes (or restores) the printer from the automatic announcement on the network') }}">{{ _('Show on mDNS') if c and c.mdns_hidden else _('Hide from mDNS') }}</button>
+    </form>
+    {% if q.device_uri.startswith('cups-pdf:') %}
+    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/delete" onsubmit="return confirm({{ _t('Delete the virtual printer %(printer)s? The PDFs already produced stay where they are.', printer=q.name)|tojson|forceescape }})">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger" title="{{ _('Only virtual printers can be deleted') }}">{{ _("Delete") }}</button>
+    </form>
+    {% elif not q.online %}
+    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/delete" onsubmit="return confirm({{ _t('Delete the queue %(printer)s? The printer does not answer. Its settings (block, maintenance print) are forgotten; if it comes back it is added again as a new printer.', printer=q.name)|tojson|forceescape }})">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger" title="{{ _('The printer does not answer: remove its queue now') }}">{{ _("Delete queue") }}</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  {% if not d.online %}<div class="pill blocked" style="display:block;border-radius:8px;padding:8px 12px">{{ _("The device does not answer (cable unplugged? printer off?): ink and counters are not shown because they would be stale data.") }}
+    {% for q in d.queues %}{% if remove_after and is_usb(q.device_uri) and not q.online %}{% set since = offline_since.get(key(q.name)) %}{% if since %}{% set end = since + remove_after %}{% set secs = [((end - now).total_seconds())|int, 0]|max %}
+    <div style="margin-top:6px">{{ _("The queue %(name)s will be removed automatically in %(time)s (%(when)s) unless the printer comes back.", name=q.name, time=('<b class="countdown" data-end="%s">%d:%02d:%02d</b>'|format(end.isoformat(), secs // 3600, secs % 3600 // 60, secs % 60))|safe, when=end|localtime('%Y-%m-%d %H:%M')) }}</div>
+    {% endif %}{% endif %}{% endfor %}</div>{% endif %}
+  <div class="grid2" style="margin-top:12px">
+    {% if d.online and d.queues[0].ink %}
+    <div><h2>{{ _("Ink left") }}</h2>
+      {% for i in d.queues[0].ink %}
+      <div style="margin-bottom:8px"><div class="row" style="justify-content:space-between"><span>{{ i.name }}</span><b {% if i.low %}style="color:var(--err)"{% endif %}>{{ i.level if i.level >= 0 else '?' }}%{% if i.low %} · {{ _("almost empty") }}{% endif %}</b></div>
+        <div class="bar"><i style="width:{{ [i.level, 0]|max }}%;background:{{ i.color }}"></i></div></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if dev and dev.usage %}
+    <div><h2>{{ _("Printer counters") }}</h2>
+      <table>{% for label, v in dev.usage %}<tr><td>{{ _(label) }}</td><td style="text-align:right"><b>{{ v }}</b></td></tr>{% endfor %}</table>
+      <p class="muted" style="margin:6px 0 0">{{ _("Since the printer was born, including prints made without going through the gateway.") }}</p>
+    </div>
+    {% endif %}
+    <div><h2>{{ _("From the gateway") }}</h2>
+      <table>
+        <tr><th>{{ _("Queue") }}</th><th>{{ _("Jobs") }}</th><th>{{ _("Pages") }}</th><th>{{ _("Last") }}</th></tr>
+        {% for name, st in d.stats.items() %}<tr><td class="mono">{{ name }}</td><td>{{ st.jobs }}</td><td>{{ st.pages }}</td><td class="muted">{{ st.last|localtime('%Y-%m-%d %H:%M') if st.last else '—' }}</td></tr>{% endfor %}
+        {% if d.scan_stats %}<tr><td>{{ _("scans") }}</td><td>{{ d.scan_stats.scans }}</td><td></td><td class="muted">{{ d.scan_stats.last|localtime('%Y-%m-%d %H:%M') if d.scan_stats.last else '—' }}</td></tr>{% endif %}
+      </table>
+      <p class="muted" style="margin:6px 0 0">{{ _("Only what went through the gateway (pages counted on successful jobs).") }}</p>
+    </div>
+    {% if dev %}
+    <div><h2>{{ _("Details") }}</h2>
+      <dl class="kv">
+        {% if dev.config.serial %}<dt>{{ _("Serial number") }}</dt><dd class="mono">{{ dev.config.serial }}</dd>{% endif %}
+        {% if dev.ipp.firmware %}<dt>Firmware</dt><dd class="mono">{{ dev.ipp.firmware }}</dd>{% endif %}
+        {% if dev.config.sku %}<dt>{{ _("Model") }}</dt><dd>{{ dev.config.sku }}</dd>{% endif %}
+        {% if dev.ipp.ppm %}<dt>{{ _("Speed") }}</dt><dd>{{ _("%(n)s pages/min", n=dev.ipp.ppm) }}{% if dev.ipp.ppm_color %} ({{ _("colour %(n)s", n=dev.ipp.ppm_color) }}){% endif %}</dd>{% endif %}
+        {% if dev.ipp.media %}<dt>{{ _("Paper ready") }}</dt><dd>{{ dev.ipp.media|join(', ') }}</dd>{% endif %}
+        {% if d.queues[0].location %}<dt>{{ _("Location") }}</dt><dd>{{ d.queues[0].location }}</dd>{% endif %}
+        <dt>{{ _("Connection") }}</dt><dd class="mono">{{ d.base }}</dd>
+      </dl>
+      {% if dev.ipp.alerts %}<p class="muted">{{ _("Alerts: %(list)s", list=dev.ipp.alerts|unique|join(' · ')) }}</p>{% endif %}
+    </div>
+    {% if dev.scanner %}
+    <div><h2>{{ _("Scanner") }}</h2>
+      <dl class="kv"><dt>{{ _("State") }}</dt><dd>{{ dev.scanner.state or '?' }}</dd>
+        {% if dev.scanner.adf %}<dt>{{ _("Feeder") }}</dt><dd>{{ dev.scanner.adf }}</dd>{% endif %}
+        {% if dev.scanner.dpi %}<dt>{{ _("Resolutions") }}</dt><dd>{{ dev.scanner.dpi|join(', ') }} dpi</dd>{% endif %}
+        {% if dev.scanner.formats %}<dt>{{ _("Formats") }}</dt><dd>{{ dev.scanner.formats|join(', ') }}</dd>{% endif %}</dl>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% else %}<div class="card"><p class="muted">{{ _("CUPS does not answer or has no queues configured.") }}</p></div>{% endfor %}
+<script>
+(function () {
+  var els = document.querySelectorAll('.countdown');
+  if (!els.length) return;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function tick() {
+    els.forEach(function (el) {
+      var s = Math.max(0, Math.floor((new Date(el.dataset.end) - Date.now()) / 1000));
+      el.textContent = Math.floor(s / 3600) + ':' + pad(Math.floor(s % 3600 / 60)) + ':' + pad(s % 60);
+      if (s === 0) setTimeout(function () { location.reload(); }, 40000);
+    });
+  }
+  tick(); setInterval(tick, 1000);
+})();
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('button.chip'); if (!b) return;
+  var f = b.closest('form'); f.elements.amount.value = b.dataset.amount; f.elements.unit.value = b.dataset.unit;
+});
+</script>
+{% endblock %}

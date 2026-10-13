@@ -1,0 +1,18 @@
+# Test environment only. Host CUPS already uses :631, so test CUPS -> :6310.
+services:
+  cups:
+    build: ./docker/cups
+    ports:
+      - "127.0.0.1:6310:631"
+    volumes:
+      - cups-pdf:/var/spool/cups-pdf
+      - ./docker/run:/run/cups  # exposes cups.sock to the host (tests the unix:// upstream)
+  radius:
+    image: freeradius/freeradius-server:latest
+    ports:
+      - "127.0.0.1:1812:1812/udp"
+    volumes:
+      - ./docker/radius/clients.conf:/etc/freeradius/clients.conf:ro
+      - ./docker/radius/authorize:/etc/freeradius/mods-config/files/authorize:ro
+volumes:
+  cups-pdf:

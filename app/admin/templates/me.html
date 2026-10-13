@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ _("My profile") }}{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>{{ _("Hello, %(user)s", user=me.username) }}</h1>
+  <p class="muted">{{ _("Group: <b>%(group)s</b>", group=group.name if group else _('no group')) }} · {{ _("Sign-in") }}: {{ _('local account') if me.provider == 'local' else _('RADIUS (%(provider)s)', provider=me.provider) }}
+    · <a href="/me/settings">{{ _("settings") }}</a></p>
+  <h2>{{ _("My usage") }}</h2>
+  <table class="stack">
+    <tr><th>{{ _("What") }}</th><th>{{ _("Used") }}</th><th>{{ _("Limit") }}</th><th>{{ _("Period") }}</th><th>{{ _("Resets on") }}</th></tr>
+    {% for o in options %}
+    <tr><td data-l="{{ _('What') }}">{{ _('jobs') if o.metric == 'jobs' else _('pages') }}</td><td data-l="{{ _('Used') }}">{{ o.used }}</td>
+      <td data-l="{{ _('Limit') }}">{{ o.limit + o.extra }}{% if o.extra %} <span class="muted">({{ _("%(limit)s + %(extra)s granted", limit=o.limit, extra=o.extra) }})</span>{% endif %}</td>
+      <td data-l="{{ _('Period') }}">{{ _('weekly') if o.period == 'weekly' else _('monthly') }}</td><td data-l="{{ _('Resets on') }}">{{ o.window_end|localtime('%Y-%m-%d %H:%M') }}</td></tr>
+    {% else %}<tr><td colspan="5" class="muted">{{ _("No limit applies to you.") }}</td></tr>{% endfor %}
+  </table>
+  <div class="row" style="margin-top:12px">
+    <a class="btn" href="/me/print">{{ _("Print a file") }}</a>
+    <a class="btn sec" href="/me/scan">{{ _("Scan") }}</a>
+    {% if options %}<a class="btn sec" href="/me/request/quota">{{ _("Ask for more quota") }}</a>{% endif %}
+    {% if can_request_group %}<a class="btn sec" href="/me/request/group">{{ _("Ask to change group") }}</a>{% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <h2>{{ _("My print keys") }}</h2>
+  <p class="muted">{{ _("Instead of the domain password, on the computer or phone you use a personal <b>key</b> (user name <b>%(user)s</b>, server <b>%(server)s</b>). It only works for printing and you can revoke it whenever you want.", user=me.username, server=server) }}
+    {% if ipp_mode == 'keys' %}{{ _("The domain password is <b>not</b> accepted for printing.") }}{% endif %}</p>
+  <div class="row"><span>{{ _("Active keys: <b>%(n)s</b>", n=active_keys) }}</span><a class="btn" href="/me/keys">{{ _("Manage keys") }}</a></div>
+</div>
+
+<div class="card">
+  <h2>{{ _("How to connect a device") }}</h2>
+  <table class="stack">
+    <tr><th>{{ _("Device") }}</th><th>{{ _("What to do") }}</th></tr>
+    <tr><td><b>{{ _("Phone or tablet") }}</b></td><td>{{ _('The easiest way: <a href="/me/print">Print a file</a> (PDF, photo, text) and <a href="/me/scan">Scan</a>, without installing or configuring anything. Alternatively on Android: <b>Mopria Print Service</b>, which shows the printers and asks for the name and key.') }}</td></tr>
+    <tr><td><b>Linux</b></td><td>{{ _("Create a key above: the next page shows the ready-made command (user name and key included), to paste just once.") }}
+      {{ _('Or <span class="mono">scripts/add-printer-linux.sh</span> from the project.') }}</td></tr>
+    <tr><td><b>Windows / macOS</b></td><td>{{ _('Add a network printer with the address <span class="mono">ipps://%(server)s/printers/&lt;name&gt;</span>; when it asks for the user name and password enter <b>%(user)s</b> and the key, and choose "remember".', server=server, user=me.username) }} <span class="muted">({{ _("Not yet tried on these systems.") }})</span></td></tr>
+  </table>
+  {% if queues %}<p class="muted">{{ _("Available printers:") }} {% for q in queues %}<span class="mono">{{ q.name }}</span>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+</div>
+
+<div class="card">
+  <h2>{{ _("My requests") }}</h2>
+  <table class="stack">
+    <tr><th>{{ _("When") }}</th><th>{{ _("What") }}</th><th>{{ _("Reason") }}</th><th>{{ _("State") }}</th><th>{{ _("Answer") }}</th><th></th></tr>
+    {% for item in requests %}{% set r = item.r %}
+    <tr>
+      <td class="nowrap">{{ r.created_at|localtime('%Y-%m-%d %H:%M') }}</td><td>{{ item.what }}</td><td>{{ r.reason }}</td>
+      <td><span class="pill s-{{ r.status.value }}">{{ _(r.status.value) }}</span></td><td class="muted">{{ r.decision_note or '' }}</td>
+      <td>{% if r.status.value == 'pending' %}<form method="post" action="/me/requests/{{ r.id }}/cancel"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _("Cancel") }}</button></form>{% endif %}</td>
+    </tr>
+    {% else %}<tr><td colspan="6" class="muted">{{ _("No requests.") }}</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

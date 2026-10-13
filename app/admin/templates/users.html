@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Users") }}{% endblock %}
+{% block body %}
+{% macro lim(m) %}{% if m.limit is none %}<span class="muted">{{ _("unlimited") }}</span>{% else %}<span {% if m.tip %}title="{{ m.tip }}"{% endif %}><span class="{{ 'inherited' if m.inherited }}">{{ m.limit }}</span>{% if m.extra %} <span class="extra">+{{ m.extra }}</span>{% endif %}</span>{% endif %}{% endmacro %}
+<div class="card">
+  <h1>{{ _("Users") }}</h1>
+  <p class="muted">{{ _('Read-only values: use <b>Edit</b> to change them. <span class="inherited">Italic</span> = inherited from the group · <span class="extra">+N</span> = active grants (temporary or permanent): hover over Jobs or Pages to see which and when they expire.') }}</p>
+  <table class="stack">
+    <tr><th>{{ _("User") }}</th><th>{{ _("Group") }}</th><th>{{ _("State") }}</th><th>{{ _("Admin") }}</th><th>{{ _("Jobs") }}</th><th>{{ _("Pages") }}</th><th>{{ _("Period") }}</th><th>{{ _("Usage") }}</th><th>{{ _("Keys") }}</th><th></th></tr>
+    {% for r in rows %}{% set u = r.u %}{% set v = r.view %}
+    <tr>
+      <td data-l="{{ _('User') }}"><b>{{ u.username }}</b>{% if u.must_change_password %}<div class="muted">{{ _("must change password") }}</div>{% endif %}{% if u.provider == 'local' and not u.password_hash %}<div class="muted">{{ _("password not set") }}</div>{% endif %}
+        <div class="muted">{{ _('local') if u.provider == 'local' else u.provider }}</div></td>
+      <td data-l="{{ _('Group') }}">{{ r.group }}</td>
+      <td data-l="{{ _('State') }}">{% if u.enabled %}<span class="pill s-ok">{{ _("active") }}</span>{% else %}<span class="pill s-revoked">{{ _("disabled") }}</span>{% endif %}</td>
+      <td data-l="{{ _('Admin') }}">{{ _('yes') if u.is_admin else '—' }}</td>
+      <td data-l="{{ _('Jobs') }}">{{ lim(v.jobs) }}</td>
+      <td data-l="{{ _('Pages') }}">{{ lim(v.pages) }}</td>
+      <td data-l="{{ _('Period') }}">{{ {'weekly': _('weekly'), 'monthly': _('monthly')}.get(v.period, v.period) }}</td>
+      <td data-l="{{ _('Usage') }}" class="muted">{% for l in v.usage %}<div>{{ l }}</div>{% else %}—{% endfor %}</td>
+      <td data-l="{{ _('Keys') }}"><a href="/admin/users/{{ u.id }}/keys">{{ ngettext("%(n)s active", "%(n)s active", r.key_count) }}</a></td>
+      <td><a class="btn sec" href="/admin/users/{{ u.id }}/edit">{{ _("Edit") }}</a></td>
+    </tr>
+    {% else %}<tr><td colspan="10" class="muted">{{ _("No users.") }}</td></tr>{% endfor %}
+  </table>
+</div>
+<div class="grid2">
+  <form class="card" method="post" action="/admin/users/local">
+    <h2>{{ _("New local user") }}</h2>
+    <p class="muted">{{ _("Account managed here, without RADIUS. If you leave the password empty a temporary one is generated (you will see it only once).") }}</p>
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="row">
+      <input type="text" name="username" placeholder="{{ _('user name') }}" required>
+      <select name="group_id"><option value="0">{{ _("Default group (%(group)s)", group=default_group) }}</option>{% for g in groups if g.name != default_group %}<option value="{{ g.id }}">{{ g.name }}</option>{% endfor %}</select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input type="password" name="password" placeholder="{{ _('temporary password (min. 12)') }}" autocomplete="new-password">
+      <label><input type="checkbox" name="is_admin" value="1"> {{ _("administrator") }}</label>
+      <button>{{ _("Create") }}</button>
+    </div>
+  </form>
+  {% if radius_enabled %}
+  <form class="card" method="post" action="/admin/users">
+    <h2>{{ _("Pre-register a RADIUS user") }}</h2>
+    <p class="muted">{{ _("To assign group and limits before their first sign-in.") }}</p>
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="row">
+      <input type="text" name="username" placeholder="{{ _('RADIUS username') }}" required>
+      <select name="group_id"><option value="0">{{ _("Default group (%(group)s)", group=default_group) }}</option>{% for g in groups if g.name != default_group %}<option value="{{ g.id }}">{{ g.name }}</option>{% endfor %}</select>
+      <button>{{ _("Create") }}</button>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Edit group") if g else _("New group") }}{% endblock %}
+{% block body %}
+<form class="card" method="post" action="{{ '/admin/groups/%d' % g.id if g else '/admin/groups' }}" style="max-width:720px">
+  <h1>{{ _("Edit group %(name)s", name=g.name) if g else _("New group") }}</h1>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  {% if g and g.name in system %}<p class="muted">{{ _("System group: the name cannot be changed and the group cannot be deleted.") }}
+    {% if g.name == admin_group %}{{ _("Only administrators belong here.") }}{% endif %}</p>{% endif %}
+  <dl class="kv" style="align-items:center">
+    <dt>{{ _("Name") }}</dt><dd><input type="text" name="name" value="{{ g.name if g else '' }}" maxlength="64" required {{ 'readonly' if g and g.name in system }}></dd>
+    <dt>{{ _("Job limit") }}</dt><dd><input type="number" min="0" name="jobs_limit" value="{{ jobs }}" placeholder="{{ _('unlimited') }}"></dd>
+    <dt>{{ _("Page limit") }}</dt><dd><input type="number" min="0" name="pages_limit" value="{{ pages }}" placeholder="{{ _('unlimited') }}"></dd>
+    <dt>{{ _("Period") }}</dt><dd><select name="period">{% for p in periods %}<option value="{{ p }}" {{ 'selected' if period == p }}>{{ {'weekly': _('weekly'), 'monthly': _('monthly')}.get(p, p) }}</option>{% endfor %}</select></dd>
+    <dt>{{ _("Requestable") }}</dt><dd><label><input type="checkbox" name="requestable" value="1" {{ 'checked' if g and g.requestable }}> {{ _("users can ask to be moved to this group") }}</label></dd>
+  </dl>
+  <div class="row" style="margin-top:12px"><button>{{ _("Save") if g else _("Create group") }}</button><a class="btn sec" href="/admin/groups">{{ _("Cancel") }}</a></div>
+</form>
+{% if g %}
+<form class="card" method="post" action="/admin/groups/{{ g.id }}/delete" style="max-width:720px" onsubmit="return confirm({{ warning|tojson|forceescape }})">
+  <h2>{{ _("Delete group") }}</h2>
+  <p class="muted">{{ warning }}</p>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger" {{ 'disabled' if g.name in system }}>{{ _("Delete %(name)s", name=g.name) }}</button>
+</form>
+{% endif %}
+{% endblock %}

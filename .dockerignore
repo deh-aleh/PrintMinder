@@ -1,0 +1,30 @@
+# the project directory is also a virtualenv: keep it out of every build context
+bin/
+lib/
+lib64
+include/
+pyvenv.cfg
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+certs/
+config/
+data/
+docker/run/
+*.db
+*.db-wal
+*.db-shm
+tests/
+# the gateway image needs only pyproject.toml and app/
+deploy/
+docker/*
+# the gateway image carries the templates of .env and gateway.env (app.envsync reads them)
+!docker/env.example
+!docker/gateway.env.example
+scripts/
+docker-compose*.yml
+README.md
+requirement.txt
+alembic.ini
+.env

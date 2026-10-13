@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Notices") }}{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>{{ _("Notices") }}</h1>
+  <p class="muted">{{ _("Things the gateway noticed that administrators should know about. The same notice from the same source is reported again only after a while (now: every %(when)s), and repeats in between are counted.", when=when) }}</p>
+  {% if rows %}
+  <table class="stack">
+    <tr><th>{{ _("Last time") }}</th><th>{{ _("What happened") }}</th><th>{{ _("Times") }}</th><th></th></tr>
+    {% for r in rows %}{% set n = r.n %}
+    <tr {% if n.dismissed_at %}class="muted"{% endif %}>
+      <td data-l="{{ _('Last time') }}">{{ n.last_at|localtime }}<div class="muted">{{ _("first: %(t)s", t=n.first_at|localtime) }}</div></td>
+      <td data-l="{{ _('What happened') }}">
+        {% if n.kind == 'escl_anonymous_refused' %}
+        {{ _("A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">config/gateway.env</span> and run <span class=\"mono\">docker compose up -d</span>.", ip=n.key) }}
+        {% else %}{{ n.kind }}: {{ n.key }}{% endif %}
+      </td>
+      <td data-l="{{ _('Times') }}">{{ n.count + r.extra }}</td>
+      <td>{% if n.dismissed_at %}<span class="muted">{{ _("dismissed by %(who)s", who=n.dismissed_by or "?") }}</span>
+        {% else %}<form method="post" action="/admin/notices/{{ n.id }}/dismiss"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _("Dismiss") }}</button></form>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}<p>{{ _("No notices.") }}</p>{% endif %}
+  <div class="row" style="margin-top:12px">
+    {% if rows|selectattr('n.dismissed_at', 'none')|list %}
+    <form method="post" action="/admin/notices/dismiss-all"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _("Dismiss all") }}</button></form>
+    {% endif %}
+    <a class="btn sec" href="/admin/notices{{ '' if show_all else '?all=1' }}">{{ _("Hide dismissed") if show_all else _("Show dismissed too") }}</a>
+  </div>
+</div>
+{% endblock %}

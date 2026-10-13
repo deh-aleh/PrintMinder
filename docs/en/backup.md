@@ -1,0 +1,102 @@
+# Backup and restore
+
+[Documentation index](../README.md) · English · [Italiano](../it/backup.md)
+
+There are two independent mechanisms:
+
+| | Built-in backups (portal) | `scripts/backup.sh` (host side) |
+|---|---|---|
+| Who | each administrator, plus one *general* | the person running the server |
+| What | database (consistent copy while people print) and audit archive; with encryption also `gateway.env` and the TLS certificate | all of it **plus** CUPS queues and `.env` |
+| When | scheduled, once a day | by hand |
+| Use for | everyday protection | **moving the machine** |
+
+## 1. Built-in backups (menu *Backup*)
+
+Every administrator creates **their own** targets, with folder, hour, number of copies to keep (last N daily, weekly, monthly)
+and encryption. They edit and delete only their own; *Run now* is available to all. The *General* backup of the installation is
+shown read-only: it is set in `config/gateway.env` (`CUPSPL_BACKUP_*`).
+
+- A backup is written to `.partial`, **read back and verified**, renamed; only then are older copies removed.
+  *Run now* adds a copy without deleting any (the next scheduled run prunes).
+- If a backup failed, or the last one is older than 48 h, the page shows it in red.
+- Retention affects only files carrying the name of the same gateway and target.
+- Each file is `printgw-<instance>-t<target>-<UTC time>.tar.gz` (plus `.enc` if encrypted) with a `MANIFEST.json`
+  (sha256 and size of each part, app version, schema revision).
+- Without encryption the file **contains no secrets** (TLS key, `SECRET_KEY`, RADIUS secret).
+
+### Where
+
+Only inside `data/backups` (`BACKUP_DIR`, mounted at `/backups`); an administrator picks a sub-folder (letters, digits, space, `. _ -` and
+`/`, max 4 levels) and can not leave it (`..`, absolute paths and symlinks are refused). For a NAS or a USB disk mount it on the
+server **inside that folder before starting the gateway** (a mount done later needs a gateway restart, see below).
+
+### Saving to a network disk (NAS, SMB/CIFS, NFS) or a USB disk
+
+1. **Mount it on the server, inside `data/backups`** (the folder `BACKUP_DIR` points to). Use `/etc/fstab` so it comes back after a reboot, for example:
+
+   ```
+   # SMB/CIFS: uid/gid = the PUID/PGID of .env, so the gateway can write. Keep the password in a root-only file.
+   //nas.lan/backups  /srv/printminder/data/backups/nas  cifs  credentials=/root/.nas-cred,uid=1000,gid=1000,vers=3.0,_netdev,nofail,x-systemd.automount  0 0
+   # NFS: the exported folder must be writable by that user id (check "root squash" on the NAS)
+   nas.lan:/export/backups  /srv/printminder/data/backups/nas  nfs  _netdev,nofail,x-systemd.automount,soft,timeo=100  0 0
+   ```
+2. Mount it **before** starting the gateway. A mount made later is not seen by a container that is already running: restart it
+   (`docker compose restart gateway`).
+3. In the backup form type the sub-folder (`nas/...`) and tick **"The folder is a network disk or USB disk: write only if it is mounted"**
+   *while the disk is mounted*. The gateway puts a small file `.printminder-destination` in it and, from then on, **refuses to back up
+   when the file is not there**. Without this a disk that fails to mount leaves an empty folder on the server's own disk, and the
+   backups silently fill it (and are not outside the machine at all). For the general backup use `CUPSPL_BACKUP_REQUIRE_MARKER=true`
+   and create the file by hand once: `touch data/backups/nas/<folder>/.printminder-destination`.
+
+Behaviour of the gateway with a network disk:
+
+- A disk that does not answer: the *Backup* page loads in about 6 seconds and shows the problem; a backup fails after 20 seconds
+  with "The backup disk did not answer…". At most 4 requests wait on a dead disk at the same time; the rest of the portal is not affected.
+- With the marker option on, an unmounted disk never receives a file; the backup fails with "The marker file is missing…".
+- A disk mounted after the gateway started is not seen by default. Restart the gateway, or bind the folder with
+  `bind: {propagation: rslave}` in `docker-compose.yml` (the folder must be on a shared mount, which is the default with systemd).
+- On SMB/CIFS and some NFS setups file permissions are decided by the mount options, **not** by the gateway: the usual `chmod 600` has
+  no effect and anyone who can read the share can read the files. **Use encryption** for backups on a share.
+- Use `soft` mounts (NFS: `soft,timeo=100`; CIFS: `soft`), never `hard`, so a dead NAS does not freeze the server.
+- The backup is only "outside the machine" if the share is on another machine. A USB disk plugged into the server protects from a broken disk, not from a fire.
+
+### Encryption
+
+- **Passphrase** (recommended; **not** the account password — the gateway does not know it, it changes, and for RADIUS it is not the user's),
+- **recovery key** created on the server (`cups-policy-admin backup-key`: the passphrase never goes through the portal),
+- or **none**.
+
+How it works: a key pair is made once. The public half encrypts each file (ephemeral X25519 + HKDF + AES-256-GCM in 1 MiB blocks, last
+block flagged); the private half is kept **wrapped** by scrypt of the passphrase and copied into the file header, so
+*file + passphrase* are enough. The gateway never stores the passphrase: **without it the copies can not be opened**, not even by
+another administrator. The passphrase is never written to the audit. A new encrypted file is re-read with the key just used.
+
+## 2. Restore
+
+```sh
+docker compose stop gateway mdns
+docker compose run --rm -it --no-deps gateway cups-policy-admin backup-restore /backups/<folder>/<file>
+docker compose up -d
+```
+
+The previous database stays beside as `gateway.db.before-restore-…`; configuration files go to `/data/restored-config` (copy them
+into `./config` on a new machine). `backup-verify <file>` checks a file without restoring; `backup-run [--id N]` runs backups by hand.
+Restore is the way back after an upgrade you want to undo.
+
+## 3. Host-side full backup
+
+```sh
+scripts/backup.sh backup [DEST_DIR]        # writes DEST_DIR/printgw-YYYYMMDD-HHMMSS.tar.gz  (default ./backups)
+scripts/backup.sh restore FILE.tar.gz      # stops the gateway first and asks for confirmation
+```
+
+Includes the database (SQLite backup call), `config/` (with secrets), `.env`, the audit archive and the CUPS configuration (queues).
+Not included: images and the spool of jobs in progress. The archive holds secrets: keep it as private as the server.
+`restore` has only been tested by hand.
+
+## 4. Limits
+
+SQLite only (with another database use its own dump tool); the built-in backups do not include CUPS queues (recreate them from
+`CUPS_QUEUES`, or use `scripts/backup.sh`); configuration files are not restored automatically (the container has them read-only);
+no direct remote destination (SSH/S3): mount it on the server; the passphrase is not recoverable.

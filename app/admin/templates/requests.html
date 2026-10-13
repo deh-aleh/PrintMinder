@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Requests") }}{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>{{ _("Pending requests") }} <span class="muted">({{ pending|length }})</span></h1>
+  <table class="stack">
+    <tr><th>{{ _("When") }}</th><th>{{ _("User") }}</th><th>{{ _("Request") }}</th><th>{{ _("Reason") }}</th><th>{{ _("Decision") }}</th></tr>
+    {% for p in pending %}{% set r = p.r %}
+    <tr>
+      <td class="nowrap">{{ r.created_at|localtime('%Y-%m-%d %H:%M') }}<div class="muted">{{ _("expires on %(date)s", date=r.expires_at|localtime('%Y-%m-%d')) }}</div></td>
+      <td><b>{{ p.user }}</b></td>
+      <td>{{ p.text }}{% if r.kind.value == 'quota' %}<div class="muted">{{ _('temporary (until the end of the period)') if p.scope == 'temporary' else _('permanent') }}</div>{% endif %}</td>
+      <td>{{ r.reason }}</td>
+      <td>
+        <form method="post" action="/admin/requests/{{ r.id }}/approve" class="row">
+          <input type="hidden" name="csrf_token" value="{{ csrf }}">
+          {% if r.kind.value == 'quota' %}
+          <input type="number" name="amount" min="1" value="{{ p.amount }}" title="{{ _('amount (you can change it)') }}">
+          <select name="scope"><option value="temporary" {{ 'selected' if p.scope == 'temporary' }}>{{ _("temporary") }}</option><option value="permanent" {{ 'selected' if p.scope == 'permanent' }}>{{ _("permanent") }}</option></select>
+          {% endif %}
+          <input type="text" name="note" placeholder="{{ _('note (optional)') }}" maxlength="500">
+          <button>{{ _("Approve") }}</button>
+        </form>
+        <form method="post" action="/admin/requests/{{ r.id }}/reject" class="row" style="margin-top:6px">
+          <input type="hidden" name="csrf_token" value="{{ csrf }}">
+          <input type="text" name="note" placeholder="{{ _('reason for the refusal') }}" maxlength="500">
+          <button class="danger">{{ _("Reject") }}</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}<tr><td colspan="5" class="muted">{{ _("No pending requests.") }}</td></tr>{% endfor %}
+  </table>
+</div>
+<div class="card">
+  <h2>{{ _("Latest decisions") }}</h2>
+  <table class="stack">
+    <tr><th>{{ _("When") }}</th><th>{{ _("User") }}</th><th>{{ _("Request") }}</th><th>{{ _("State") }}</th><th>{{ _("By") }}</th><th>{{ _("Note") }}</th></tr>
+    {% for p in done %}{% set r = p.r %}
+    <tr><td class="nowrap">{{ (r.decided_at or r.created_at)|localtime('%Y-%m-%d %H:%M') }}</td><td>{{ p.user }}</td>
+      <td>{{ p.text }}{% if r.scope %} <span class="muted">({{ _(r.scope.value) }})</span>{% endif %}</td>
+      <td><span class="pill s-{{ r.status.value }}">{{ _(r.status.value) }}</span></td><td>{{ p.by or '' }}</td><td class="muted">{{ r.decision_note or '' }}</td></tr>
+    {% else %}<tr><td colspan="6" class="muted">{{ _("None yet.") }}</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+# Publishes the container images when you push a version tag, for example:  git tag v1.2.0 && git push origin v1.2.0
+# One tag gives one image per service, built for both amd64 (PC, server) and arm64 (Raspberry Pi, ARM NAS).
+# Images go to ghcr.io/<owner>/<service>:<version> (gateway, cups, ipp-usb, updater). The tag must match "version" in pyproject.toml.
+name: Release
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:      # "Run workflow" button: builds everything for both architectures but publishes nothing (a dry run)
+
+permissions:
+  contents: write     # create the GitHub release
+  packages: write     # push images to ghcr.io
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ".[dev]"
+      - run: python -m pytest -q
+      - name: Tag must match the version in pyproject.toml
+        if: github.event_name == 'push'
+        run: |
+          v="$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')"
+          test "v$v" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} != pyproject version v$v"; exit 1; }
+
+  images:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false      # one image failing must not cancel the others: all errors show up in one run
+      matrix:
+        include:
+          - {name: gateway,  context: ".",                    file: docker/stack/gateway/Dockerfile}
+          - {name: cups,     context: docker/stack/cups,      file: docker/stack/cups/Dockerfile}
+          - {name: ipp-usb,  context: docker/stack/ipp-usb,   file: docker/stack/ipp-usb/Dockerfile}
+          - {name: updater,  context: docker/stack/updater,   file: docker/stack/updater/Dockerfile}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        if: github.event_name == 'push'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        run: |
+          echo "owner=$(echo '${{ github.repository_owner }}' | tr 'A-Z' 'a-z')" >> "$GITHUB_OUTPUT"
+          echo "version=$(python3 -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name == 'push' }}
+          tags: ghcr.io/${{ steps.meta.outputs.owner }}/${{ matrix.name }}:${{ steps.meta.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+
+  release:
+    needs: images
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

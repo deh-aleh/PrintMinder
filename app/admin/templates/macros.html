@@ -1,0 +1,5 @@
+{# A block of text with a copy button in its corner (the kind code blocks have in chat UIs). The script is in base.html. #}
+{% macro copybox(text, cls='', style='') %}<div class="copybox"><div data-copy class="{{ cls or 'copytext' }}"{% if style %} style="{{ style }}"{% endif %}>{{ text }}</div>
+<button type="button" class="copy" aria-label="{{ _('Copy to clipboard') }}" title="{{ _('Copy') }}">
+<svg class="cp" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+<svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>{% endmacro %}

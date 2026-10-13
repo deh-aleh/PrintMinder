@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Grants") }}{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>{{ _("Quota grants") }}</h1>
+  <p class="muted">{{ _("Quota added on top of the limit. The print history is never modified. Temporary ones end with the period of the user's limit.") }}</p>
+  <table class="stack">
+    <tr><th>{{ _("User") }}</th><th>{{ _("What") }}</th><th>{{ _("Type") }}</th><th>{{ _("From") }}</th><th>{{ _("Until") }}</th><th>{{ _("State") }}</th><th>{{ _("By") }}</th><th></th></tr>
+    {% for x in rows %}{% set g = x.g %}
+    <tr><td><b>{{ x.user }}</b></td><td>+{{ g.amount }} {{ _(g.metric.value) }}</td><td>{{ _(g.scope.value) }}</td>
+      <td class="nowrap">{{ g.valid_from|localtime('%Y-%m-%d %H:%M') }}</td><td class="nowrap">{{ g.valid_until|localtime('%Y-%m-%d %H:%M') if g.valid_until else _('no expiry') }}</td>
+      <td><span class="pill s-{{ x.state }}">{{ _(x.state) }}</span></td><td>{{ x.by or '' }}<div class="muted">{{ g.note or '' }}</div></td>
+      <td>{% if x.state == 'active' %}<form method="post" action="/admin/grants/{{ g.id }}/revoke" onsubmit="return confirm({{ _t('Revoke this grant?')|tojson|forceescape }})"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger">{{ _("Revoke") }}</button></form>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="8" class="muted">{{ _("No grants.") }}</td></tr>{% endfor %}
+  </table>
+</div>
+<form class="card" method="post" action="/admin/grants">
+  <h2>{{ _("Grant quota without a request") }}</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <div class="row">
+    <select name="username" required>{% for n in usernames %}<option>{{ n }}</option>{% endfor %}</select>
+    <select name="metric"><option value="jobs">{{ _("jobs") }}</option><option value="pages">{{ _("pages") }}</option></select>
+    <input type="number" name="amount" min="1" placeholder="{{ _('amount') }}" required>
+    <select name="scope"><option value="temporary">{{ _("temporary (until the end of the period)") }}</option><option value="permanent">{{ _("permanent") }}</option></select>
+    <input type="text" name="note" placeholder="{{ _('note') }}" maxlength="500">
+    <button>{{ _("Grant") }}</button>
+  </div>
+</form>
+{% endblock %}

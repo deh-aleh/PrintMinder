@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Settings") }}{% endblock %}
+{% block body %}
+<div class="card" style="max-width:640px">
+  <h1>{{ _("Settings") }}</h1>
+  <dl class="kv"><dt>{{ _("User") }}</dt><dd><b>{{ me.username }}</b></dd><dt>{{ _("Sign-in") }}</dt><dd>{{ _("local account") if me.provider == 'local' else _("RADIUS (%(provider)s)", provider=me.provider) }}</dd></dl>
+</div>
+<form class="card" method="post" action="/me/settings/theme" style="max-width:640px">
+  <h2>{{ _("Appearance") }}</h2>
+  <div class="row">
+    <select name="theme" aria-label="{{ _('Theme') }}">{% for k, label in themes.items() %}<option value="{{ k }}" {{ 'selected' if me.theme == k }}>{{ _(label) }}</option>{% endfor %}</select>
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><button>{{ _("Save") }}</button>
+  </div>
+</form>
+<form class="card" method="post" action="/me/settings/language" style="max-width:640px">
+  <h2>{{ _("Language") }}</h2>
+  <div class="row">
+    <select name="language" aria-label="{{ _('Language') }}">
+      <option value="" {{ 'selected' if not me.language }}>{{ _("Automatic (as the browser)") }}</option>
+      {% for code, name in languages.items() %}<option value="{{ code }}" lang="{{ code }}" {{ 'selected' if me.language == code }}>{{ name }}</option>{% endfor %}
+    </select>
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><button>{{ _("Save") }}</button>
+  </div>
+</form>
+{% if me.is_admin %}
+<form class="card" method="post" action="/me/settings/refresh" style="max-width:640px">
+  <h2>{{ _("Audit: automatic refresh") }}</h2>
+  <p class="muted">{{ _("How many seconds between the automatic reloads of the Audit page while its switch is on (it does not reload while you type in the filters or have a popup open). With 0 the switch starts off, and uses 30 seconds when you turn it on.") }}</p>
+  <div class="row">
+    <input type="number" name="seconds" min="0" max="{{ refresh_max }}" value="{{ me.refresh_seconds }}" aria-label="{{ _('Seconds') }}" required> {{ _("seconds") }}
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><button>{{ _("Save") }}</button>
+  </div>
+</form>
+{% endif %}
+{% if me.provider == 'local' %}
+<form class="card" method="post" action="/me/password" style="max-width:640px">
+  <h2>{{ _("Change password") }}</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <div class="row"><input type="password" name="current" placeholder="{{ _('current password') }}" autocomplete="current-password" required></div>
+  <div class="row" style="margin-top:8px"><input type="password" name="new" placeholder="{{ _('new password (min. 12)') }}" autocomplete="new-password" required>
+    <input type="password" name="confirm" placeholder="{{ _('repeat the new one') }}" autocomplete="new-password" required></div>
+  <p><button>{{ _("Change password") }}</button></p>
+  <p class="muted">{{ _("Other sessions open with this account will be closed. Print keys stay valid.") }}</p>
+</form>
+{% else %}
+<div class="card" style="max-width:640px"><h2>{{ _("Password") }}</h2><p class="muted">{{ _("Your password is managed by the RADIUS server: it cannot be changed here.") }}</p></div>
+{% endif %}
+{% endblock %}

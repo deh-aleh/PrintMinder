@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cups-policy-gateway"
+version = "0.1.0"
+description = "Auth, quota and audit gateway in front of CUPS (IPP)"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{name = "Alessio Paccino"}]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "sqlalchemy>=2",
+    "alembic",
+    "pyrad",
+    "jinja2",
+    "python-multipart",
+    "pydantic-settings",
+    "itsdangerous",
+    "argon2-cffi",
+    "zeroconf",
+    "pypdf",
+    "cryptography",
+    "babel",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio"]
+
+[project.scripts]
+cups-policy-gateway = "app.__main__:main"
+cups-policy-admin = "app.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+app = ["admin/templates/*.html", "admin/static/*", "locales/*/messages.po", "auth/dictionary", "migrations/script.py.mako", "migrations/versions/*.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

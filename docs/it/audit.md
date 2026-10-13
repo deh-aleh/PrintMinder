@@ -1,0 +1,74 @@
+# Audit
+
+[Indice della documentazione](../README.md) · [English](../en/audit.md) · Italiano
+
+PrintMinder tiene **due registri in cui si aggiunge soltanto**:
+
+| Registro | Tabella | Contenuto | Pagina |
+|---|---|---|---|
+| Audit di stampe e scansioni | `job_log` | chi ha stampato o scansionato cosa | **Audit** (`/admin/jobs`) |
+| Azioni amministrative | `admin_audit` | chi ha fatto cosa nel portale | **Azioni admin** (`/admin/actions`) |
+
+Gli id non si riusano mai. **Nessuna funzione del portale cancella righe.** L'audit si conserva per sempre.
+
+## 1. Audit di stampe e scansioni
+
+Ogni riga ha: numero progressivo (N.), ora, utente, dispositivo (coda di stampa o scanner), nome file, tipo (stampa / scansione), esito,
+pagine, motivo del rifiuto e opzioni (carta, colore, fronte-retro, sorgente, copie, intervallo di pagine, commento, `via` web / IPP…).
+
+| Stato | Significato |
+|---|---|
+| `accepted` | Ha superato i controlli ed è stato consegnato a CUPS o allo scanner (in stampa, in coda o in corso). **Conta già per la quota.** |
+| `completed` | Concluso; le pagine sono quelle **reali** lette da CUPS |
+| `held` | Trattenuto in coda; conta per la quota |
+| `rejected` | Rifiutato (quota, blocco, manutenzione, non valido). Non conta. Il motivo è conservato (in inglese) |
+| `failed` | Accettato ma la stampante o lo scanner non ha potuto eseguirlo. Non conta |
+| `canceled` | Fermato prima di stampare, dall'utente, da un amministratore o dal programma di scansione. La quota si libera |
+
+La pagina si legge bene anche da telefono: 30 azioni per pagina, un interruttore **Aggiornamento automatico** nella pagina stessa (l'intervallo si
+imposta nelle *Impostazioni*, predefinito 30 s; con 0 l'interruttore parte spento e usa 30 s quando lo accendi; la scelta la ricorda il browser), righe alternate, testi lunghi accorciati con «…» e popup per il testo completo, colonne *Dispositivo* / *Azione*
+(caricatore, colore, fronte-retro), layout adattivo e menu sempre visibile. Sono disponibili filtri ed **esportazione CSV** (l'iniezione
+di formule è neutralizzata). Il pulsante *Annulla* ferma un job in coda (si usa l'identità del proprietario).
+
+Le scansioni senza credenziali (eSCL anonimo) mostrano IP e nome host di chi chiama nella colonna delle informazioni.
+
+## 2. Allineamento con CUPS
+
+Ogni 30 s il **riconciliatore** legge CUPS: un job finito diventa `completed` con le sue pagine reali; uno annullato prima di stampare
+restituisce la quota; le riserve senza job CUPS da oltre 1 ora (gateway morto a metà) vengono liberate; un job scomparso dallo storico da
+oltre un giorno è segnato come completato.
+
+## 3. Audit amministrativo
+
+Accessi degli amministratori, creazione / modifica / eliminazione di utenti e gruppi (`user.*`, `group.*`), password e chiavi
+(`password.change`, `key.*`), approvazioni e rifiuti (`request.approve/reject`), concessioni (`grant.create/revoke`), controlli delle
+stampanti (`printer.block/unblock`, `printer.mdns_hide/mdns_show`, `printer.keepalive_on/off/save`, `printer.test_print`,
+`printer.debug_create/delete`, `printer.move`, `printer.rename`, e dal sistema stesso `printer.auto_add` / `printer.auto_remove`), backup (`backup.*`), manutenzione (`maintenance.on/off`), archiviazione dell'audit (`audit.archive`).
+
+Ogni voce conserva il *nome* di chi ha agito (sopravvive all'eliminazione di quell'utente), l'azione, il bersaglio e i dettagli. La
+pagina ha filtri con suggerimenti.
+
+## 4. Archivio
+
+Quando le tabelle attive superano `CUPSPL_AUDIT_MAX_MB` (predefinito 50), l'archiviatore (controlla ogni `CUPSPL_AUDIT_CHECK_INTERVAL`,
+predefinito 1 h) sposta le **righe più vecchie** in `data/audit-archive/audit-<tabella>-<da>-<a>.jsonl.gz`. Garanzie:
+
+1. Le righe delle finestre di quota ancora in corso (mese precedente e corrente, più un margine) **non** vengono mai archiviate, quindi i limiti non cambiano.
+2. Il file si scrive come `.pending`, si scarica su disco, si **rilegge e si verifica** (sha256).
+3. Solo allora, in **una sola transazione**, l'archivio è registrato in `audit_archive` (percorso, intervallo di date e id, righe,
+   dimensione, sha256) e le righe sono tolte dalla tabella.
+4. Il file viene rinominato e reso in sola lettura. Un archivio esistente non viene mai sovrascritto.
+5. Un'interruzione in qualunque punto non perde né duplica nulla: i file `.pending` vengono riparati o ripuliti al riavvio.
+
+La pagina **Archivio audit** (`/admin/archive`) elenca gli archivi con il percorso nel contenitore e sul server
+(`AUDIT_ARCHIVE_HOST_PATH`, solo informativo), dimensione e sha256; li apre con ricerca e paginazione (in streaming), li **scarica** e ne
+**verifica l'integrità**. Non può eliminarli. La pagina Audit mostra un avviso quando esistono archivi.
+`cups-policy-admin audit-archive [--force]` lancia l'archiviatore a mano; `cups-policy-admin jobs` mostra le ultime righe.
+
+La cartella deve essere scrivibile dall'utente del contenitore; sta sull'host, fuori dai volumi docker, così si trova e si copia a mano.
+È inclusa nei backup ([backup.md](backup.md)).
+
+## 5. Privacy
+
+Il database e gli archivi **non sono cifrati** e contengono i nomi dei file stampati, che sono dati personali: proteggi `data/` e il
+volume come dati personali. Anonimizzazione ed esportazione verso syslog/SIEM non sono ancora implementate.

@@ -1,0 +1,84 @@
+import pytest
+
+from app.auth.cache import CachedAuth
+from app.auth.radius import RadiusProvider
+from app.auth.throttle import Throttle
+from tests.conftest import requires_radius
+
+
+class Stub:
+    name = "stub"
+
+    def __init__(self, users):
+        self.users, self.calls = users, 0
+
+    async def authenticate(self, u, p):
+        self.calls += 1
+        return self.users.get(u) == p
+
+
+async def test_cache_hits_and_expiry():
+    now = [0.0]
+    inner = Stub({"a": "pw"})
+    c = CachedAuth(inner, ttl=60, clock=lambda: now[0])
+    assert await c.authenticate("a", "pw") and await c.authenticate("a", "pw")
+    assert inner.calls == 1
+    now[0] = 61
+    assert await c.authenticate("a", "pw")
+    assert inner.calls == 2
+
+
+async def test_cache_never_accepts_wrong_password_or_caches_failures():
+    inner = Stub({"a": "pw"})
+    c = CachedAuth(inner, ttl=60)
+    assert await c.authenticate("a", "pw")
+    assert not await c.authenticate("a", "other")
+    assert not await c.authenticate("a", "other")
+    assert inner.calls == 3  # success cached; each failure hits the backend
+
+
+def test_throttle_blocks_and_recovers():
+    now = [0.0]
+    t = Throttle(limit=3, window=100, clock=lambda: now[0])
+    for _ in range(3):
+        t.fail("k")
+    assert t.blocked("k")
+    now[0] = 101
+    assert not t.blocked("k")
+    t.fail("k")
+    t.clear("k")
+    assert not t.blocked("k")
+
+
+@requires_radius
+async def test_radius_real_server():
+    p = RadiusProvider("127.0.0.1", 1812, "testing123", timeout=2, retries=1)
+    assert await p.authenticate("mario", "mario123")
+    assert not await p.authenticate("mario", "wrong")
+    assert not await p.authenticate("nobody", "x")
+    assert not await p.authenticate("", "")
+
+
+async def test_radius_unreachable_fails_closed():
+    p = RadiusProvider("127.0.0.1", 9, "x", timeout=1, retries=1)  # nothing listens on udp/9
+    assert not await p.authenticate("mario", "mario123")
+
+
+async def test_cache_does_not_grow_without_bound():
+    now = [0.0]
+    inner = Stub({f"u{i}": "pw" for i in range(1500)})
+    c = CachedAuth(inner, ttl=10, clock=lambda: now[0])
+    for i in range(1500):
+        now[0] += 1                       # entries expire after 10 s
+        assert await c.authenticate(f"u{i}", "pw")
+    assert len(c._ok) < 1100
+
+
+@requires_radius
+async def test_radius_reject_reason_is_logged_without_the_password(caplog):
+    import logging
+    p = RadiusProvider("127.0.0.1", 1812, "testing123", timeout=2, retries=1)
+    with caplog.at_level(logging.WARNING, logger="app.auth.radius"):
+        assert not await p.authenticate("mario", "S3cretWrong")
+    assert "RADIUS rejected user='mario'" in caplog.text
+    assert "S3cretWrong" not in caplog.text

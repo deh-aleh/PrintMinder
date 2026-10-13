@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Group change") }}{% endblock %}
+{% block body %}
+<form class="card" method="post" action="/me/request/group" style="max-width:720px">
+  <h1>{{ _("Ask to change group") }}</h1>
+  <p class="muted">{{ _("You are now in: <b>%(group)s</b>. The group sets your limits.", group=current.name if current else _('no group')) }}</p>
+  {% if not options %}
+    <p>{{ _("No group is available for this request.") }}</p>
+  {% else %}
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <h2>{{ _("New group") }}</h2>
+  <select name="group_id" required>{% for g in options %}<option value="{{ g.id }}">{{ g.name }}</option>{% endfor %}</select>
+  <h2>{{ _("Reason") }}</h2>
+  <textarea name="reason" maxlength="500" required placeholder="{{ _('Why do you need to change group?') }}"></textarea>
+  <p><button>{{ _("Send the request") }}</button> <a href="/me">{{ _("Cancel") }}</a></p>
+  {% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Edit %(user)s", user=u.username) }}{% endblock %}
+{% block body %}
+<form class="card" method="post" action="/admin/users/{{ u.id }}" style="max-width:760px">
+  <h1>{{ _("Edit %(user)s", user=u.username) }}</h1>
+  {% if protected %}<p class="muted">{{ _("%(user)s is the emergency administrator: it cannot be disabled, demoted, deleted or moved to RADIUS.", user=u.username) }}</p>{% endif %}
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <dl class="kv" style="align-items:center">
+    <dt>{{ _("Origin (sign-in)") }}</dt>
+    <dd><select name="provider" {{ 'disabled' if protected }}>{% for p in providers %}<option value="{{ p }}" {{ 'selected' if u.provider == p }}>{{ _('local (password in the gateway)') if p == 'local' else _('%(provider)s (password on the server)', provider=p) }}</option>{% endfor %}
+      {% if u.provider not in providers %}<option value="{{ u.provider }}" selected>{{ _("%(provider)s (not available)", provider=u.provider) }}</option>{% endif %}</select>
+      <div class="muted">{{ _("From RADIUS to local generates a temporary password; from local to RADIUS deletes the password stored here.") }}</div></dd>
+    <dt>{{ _("Group") }}</dt>
+    <dd><select name="group_id">
+      <option value="0">—</option>
+      {% for g in groups %}<option value="{{ g.id }}" {{ 'selected' if u.group_id == g.id }}>{{ g.name }}</option>{% endfor %}
+    </select><div class="muted">{{ _("“%(group)s” is reserved for administrators: it changes by itself with the flag below.", group=admin_group) }}</div></dd>
+    <dt>{{ _("State") }}</dt><dd><label><input type="checkbox" name="enabled" value="1" {{ 'checked' if u.enabled }}> {{ _("active") }}</label></dd>
+    <dt>{{ _("Administrator") }}</dt><dd><label><input type="checkbox" name="is_admin" value="1" {{ 'checked' if u.is_admin }}> {{ _("can use the administration panel") }}</label></dd>
+    <dt>{{ _("Job limit") }}</dt><dd><input type="number" min="0" name="jobs_limit" value="{{ jobs }}" placeholder="{{ _('inherit') }}">
+      <span class="muted">{{ _("empty = inherit from the group") }}{% if view.jobs.extra %} · {{ _('<span class="extra">+%(n)s</span> granted', n=view.jobs.extra) }}{% endif %}</span></dd>
+    <dt>{{ _("Page limit") }}</dt><dd><input type="number" min="0" name="pages_limit" value="{{ pages }}" placeholder="{{ _('inherit') }}">
+      <span class="muted">{{ _("empty = inherit from the group") }}{% if view.pages.extra %} · {{ _('<span class="extra">+%(n)s</span> granted', n=view.pages.extra) }}{% endif %}</span></dd>
+    <dt>{{ _("Period") }}</dt><dd><select name="period">{% for p in periods %}<option value="{{ p }}" {{ 'selected' if view.period == p }}>{{ {'weekly': _('weekly'), 'monthly': _('monthly')}[p] }}</option>{% endfor %}</select></dd>
+    <dt>{{ _("Usage") }}</dt><dd class="muted">{% for l in view.usage %}<div>{{ l }}</div>{% else %}{{ _("no limit") }}{% endfor %}</dd>
+  </dl>
+  <div class="row" style="margin-top:14px"><button>{{ _("Save") }}</button><a class="btn sec" href="/admin/users">{{ _("Cancel") }}</a></div>
+</form>
+<div class="card" style="max-width:760px">
+  <h2>{{ _("Other actions") }}</h2>
+  <div class="row">
+    <a class="btn sec" href="/admin/users/{{ u.id }}/keys">{{ _("Print keys") }}</a>
+    {% if u.provider == 'local' %}
+    <form method="post" action="/admin/users/{{ u.id }}/password" onsubmit="return confirm({{ _t('Generate a new temporary password for %(user)s?', user=u.username)|tojson|forceescape }})">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec" type="submit">{{ _("Reset password") }}</button></form>
+    {% endif %}
+    {% if not protected and not is_self %}<a class="btn danger" href="/admin/users/{{ u.id }}/delete">{{ _("Delete account…") }}</a>{% endif %}
+  </div>
+</div>
+{% endblock %}

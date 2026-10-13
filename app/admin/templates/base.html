@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="{{ lang() }}" data-theme="{{ me.theme if me else 'auto' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Admin{% endblock %} · PrintMinder</title>
+<link rel="icon" href="/admin/static/icon.svg?v={{ app_version }}" type="image/svg+xml">
+<link rel="icon" href="/admin/static/favicon.ico?v={{ app_version }}" sizes="48x48">
+<link rel="apple-touch-icon" href="/admin/static/apple-touch-icon.png?v={{ app_version }}">
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --fg:#1d2330; --muted:#667085; --line:#e3e6ec; --accent:#2457d6; --ok:#12805c; --err:#b42318; --warn:#9a6700; --extra:#7a3fd0; --orange:#c2570c; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#12151c; --card:#1a1f2b; --fg:#e7eaf0; --muted:#98a2b3; --line:#2b3242; --accent:#6c93f5; --ok:#4cc29a; --err:#f97066; --warn:#e3b341; --extra:#b794f4; --orange:#ffa733; } }
+  :root[data-theme="dark"] { --bg:#12151c; --card:#1a1f2b; --fg:#e7eaf0; --muted:#98a2b3; --line:#2b3242; --accent:#6c93f5; --ok:#4cc29a; --err:#f97066; --warn:#e3b341; --extra:#b794f4; --orange:#ffa733; }
+  :root { color-scheme: light dark; } :root[data-theme="light"] { color-scheme: light; } :root[data-theme="dark"] { color-scheme: dark; }
+  * { box-sizing:border-box }
+  :lang(zh) { font-family:system-ui,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Source Han Sans SC",sans-serif }  /* the browser picks the right Han glyphs from lang */
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui,sans-serif; -webkit-text-size-adjust:100% }
+  header { display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; padding:10px 16px; background:var(--card); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:100 }
+  /* brand block: logo, name and (user name) under it; the whole block opens the settings */
+  a.brand { display:flex; align-items:center; gap:10px; color:var(--fg); text-decoration:none; padding:3px 10px 3px 4px; margin-right:4px; border-radius:8px; border:1px solid transparent }
+  a.brand:hover, a.brand.on { background:var(--bg); border-color:var(--line) }
+  a.brand .bname { display:flex; flex-direction:column; line-height:1.15 }
+  a.brand .bname b { font-size:16px }
+  a.brand .bname small { color:var(--muted); font-size:12px; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .logo img { display:block } a.brand .logo img { width:34px; height:34px }
+  a.brand .gear { width:16px; height:16px; color:var(--muted) }
+  a.brand:hover .gear, a.brand.on .gear { color:var(--orange) }
+  /* two logos, one per theme: ink tile on a light page, paper tile on a dark one (same rules as the colours above) */
+  .logo img.logo-l { display:none }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo img.logo-d { display:none } :root:not([data-theme="light"]) .logo img.logo-l { display:block } }
+  :root[data-theme="dark"] .logo img.logo-d { display:none } :root[data-theme="dark"] .logo img.logo-l { display:block }
+  .hactions { display:flex; align-items:center; gap:8px } .hactions form { margin:0 }
+  .iconbtn { width:40px; height:40px; padding:0; display:inline-flex; align-items:center; justify-content:center }
+  .iconbtn svg { width:20px; height:20px }
+  a.bell { position:relative; color:var(--muted); text-decoration:none; border:1px solid var(--line); border-radius:6px }
+  a.bell:hover, a.bell.on { color:var(--orange); background:var(--bg) }
+  a.bell .belln { position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:#b42318; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center }
+  nav { display:flex; flex-wrap:wrap; gap:2px }
+  nav a { color:var(--muted); text-decoration:none; padding:6px 10px; border-radius:6px; white-space:nowrap }
+  nav a.on { background:var(--bg) }
+  /* top bar: the background stays, the text turns orange on hover and for the page you are on (the maintenance
+     button is the exception: it is red/green on purpose) */
+  nav a:hover, nav a.on, .who:hover, .who.on, header button.sec:hover { color:var(--orange) }
+  nav a:hover, .who:hover { background:var(--bg) }
+  header button.sec:hover { border-color:var(--orange) }
+  .spacer { flex:1 }
+  .who { color:var(--muted); text-decoration:none; padding:6px 10px; border-radius:6px; border:1px solid var(--line) }
+  .who.on { background:var(--bg) }
+  main { max-width:1200px; margin:0 auto; padding:16px }
+  a { color:var(--accent) }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:16px; overflow-x:auto }
+  h1 { font-size:18px; margin:0 0 12px } h2 { font-size:15px; margin:14px 0 8px } .card > h2:first-child { margin-top:0 }
+  table { border-collapse:collapse; width:100% }
+  th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); vertical-align:middle }
+  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.03em }
+  input, select, button, .btn { font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:5px 8px }
+  input[type=number] { width:90px } input[type=text], input[type=password] { min-width:140px }
+  button, .btn { cursor:pointer; background:var(--accent); color:#fff; border-color:var(--accent); text-decoration:none; display:inline-block }
+  button.sec, .btn.sec { background:transparent; color:var(--fg); border-color:var(--line) }
+  button.danger, .btn.danger { background:transparent; color:var(--err); border-color:var(--err) }
+  button.danger:hover, .btn.danger:hover { background:var(--err); color:var(--card); border-color:var(--err) }  /* colours swap on hover */
+  button:disabled { opacity:.5; cursor:not-allowed }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+  .flash { padding:8px 12px; border-radius:6px; margin-bottom:12px; border:1px solid var(--line); background:var(--card) }
+  .flash.ok { color:var(--ok) } .flash.err { color:var(--err) }
+  .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; border:1px solid var(--line) }
+  .s-accepted,.s-completed { color:var(--ok) } .s-denied,.s-failed { color:var(--err) } .s-canceled,.s-held,.s-pending { color:var(--warn) } .s-approved,.s-ok,.s-active { color:var(--ok) } .s-rejected,.s-revoked,.s-expired,.s-ended,.s-missing,.s-modified { color:var(--err) }
+  .muted { color:var(--muted) } .mono { font-family:ui-monospace,monospace; font-size:13px } .nowrap { white-space:nowrap }
+  .extra { color:var(--extra); font-weight:600 } .inherited { color:var(--muted); font-style:italic }
+  .badge { background:var(--err); color:#fff; border-radius:99px; padding:0 7px; font-size:12px }
+  .secret { font:600 17px ui-monospace,monospace; padding:12px; border:1px dashed var(--accent); border-radius:8px; word-break:break-all; user-select:all; background:var(--bg) }
+  textarea { font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:6px 8px; width:100%; min-height:70px }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px }
+  .grid2 > div { min-width:0 }  /* a long queue name must not push the next column */
+  .grid2 td.mono, .grid2 dd { overflow-wrap:anywhere }
+  /* login and first-start pages: one centred box, no menu */
+  main.authmain { max-width:none; min-height:100vh; display:grid; place-items:center; padding:24px 16px }
+  .authbox { width:100%; max-width:540px; padding:44px 46px 34px; margin:0; overflow:visible; box-shadow:0 8px 30px rgba(0,0,0,.08) }
+  .authbrand { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:26px }
+  .authbrand .logo img { width:72px; height:72px } .authbrand .authname { font-size:36px; font-weight:700; letter-spacing:-.01em }
+  .authbox h1 { font-size:18px; text-align:center; margin:0 0 14px }
+  .authbox input { width:100%; font-size:17px; min-height:54px; padding:10px 14px; margin-bottom:14px }
+  .authbox button.primary { width:100%; min-height:54px; font-size:17px; display:flex; align-items:center; justify-content:center; gap:10px }
+  .authbox button.primary svg { width:20px; height:20px }
+  .authbox .muted { text-align:center; margin:16px 0 0 }
+  .pwrow { position:relative } .pwrow input { padding-right:50px }
+  .pwtoggle { position:absolute; right:4px; top:4px; width:40px; height:40px; min-height:0; padding:0; background:transparent; border:0; color:var(--muted); display:flex; align-items:center; justify-content:center }
+  .pwtoggle:hover { color:var(--orange) } .pwtoggle svg { width:22px; height:22px }
+  .pwtoggle .off { display:none } .pwtoggle.shown .on { display:none } .pwtoggle.shown .off { display:block }
+  .bar { height:10px; border-radius:99px; background:var(--line); overflow:hidden; min-width:80px } .bar i { display:block; height:100% }
+  button.maint { background:#b42318; border-color:#b42318; color:#fff; box-shadow:0 1px 0 rgba(0,0,0,.2) }
+  button.maint.on { background:#12805c; border-color:#12805c }
+  .updbar { background:var(--card); border-bottom:1px solid var(--line); padding:8px 16px; text-align:center }
+  .maintbar { background:#b42318; color:#fff; padding:8px 16px; text-align:center; font-weight:600 }
+  .pill.blocked { color:#fff; background:#b42318; border-color:#b42318 }
+  button.dots { background:transparent; color:var(--accent); border:1px solid var(--line); padding:0 7px; min-height:0; line-height:1.3; border-radius:6px; font-weight:700 }
+  .cardhead { display:flex; justify-content:space-between; align-items:flex-start; gap:8px } .cardhead h2 { margin:0 0 8px !important }
+  .tools { display:flex; gap:6px; flex:none }
+  button.icon { position:relative; width:34px; height:34px; min-height:0; padding:0; display:flex; align-items:center; justify-content:center; background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:8px }
+  button.icon:hover { border-color:var(--accent) }
+  button.icon:disabled { opacity:.35; cursor:not-allowed; border-color:var(--line) }
+  .tools form { margin:0 }
+  button.icon svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round } button.icon svg .bg { fill:var(--card) }
+  button.icon .dot { position:absolute; top:3px; right:3px; width:8px; height:8px; border-radius:50%; background:var(--ok) }
+  .dlghead { display:flex; align-items:center; gap:10px } .dlghead h3 { margin:0; flex:1; font-size:16px } .dlghead form { margin:0 }
+  button.switch { width:42px; height:24px; min-height:0; padding:2px; border-radius:99px; background:var(--line); border:1px solid var(--line); display:flex; align-items:center }
+  button.switch i { width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .15s } button.switch.on { background:var(--ok); border-color:var(--ok) } button.switch.on i { transform:translateX(18px) }
+  .dlghead .x button { min-height:0; padding:2px 9px }
+  label.check { display:flex; gap:8px; align-items:flex-start; margin:6px 0 }
+  dialog { border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--fg); width:min(560px,92vw); padding:16px 18px }
+  dialog::backdrop { background:rgba(0,0,0,.45) }
+  dialog .kv { margin:8px 0 14px } dialog .kv dd { overflow-wrap:anywhere }
+  .wrap { overflow-wrap:anywhere; word-break:break-word }
+  .sg { position:relative; display:inline-block }
+  ul.suggest { position:absolute; left:0; right:0; top:100%; margin:2px 0 0; padding:4px 0; list-style:none; background:var(--card); border:1px solid var(--line); border-radius:6px; max-height:240px; overflow:auto; z-index:70; min-width:180px; box-shadow:0 6px 18px rgba(0,0,0,.18) }
+  ul.suggest li { padding:6px 10px; cursor:pointer } ul.suggest li.on, ul.suggest li:hover { background:var(--bg) } ul.suggest mark { background:none; color:var(--accent); font-weight:700 }
+  .copybox { position:relative } .copybox > [data-copy] { padding-right:46px; white-space:pre-wrap; overflow-wrap:anywhere }
+  .copybox > .copy { position:absolute; top:6px; right:6px; width:32px; height:32px; min-height:0; padding:0; display:flex; align-items:center; justify-content:center; background:var(--card); color:var(--muted); border:1px solid var(--line); border-radius:6px }
+  .copybox > .copy:hover { color:var(--fg) }
+  .copybox > .copy svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+  .copybox > .copy .ok { display:none } .copybox > .copy.done .ok { display:block; color:var(--ok) } .copybox > .copy.done .cp { display:none }
+  /* audit: alternate rows (a few shades off, enough to follow a line across) and bigger text */
+  table.zebra tr:nth-child(even) td { background:color-mix(in srgb, var(--fg) 5%, transparent) }
+  table.zebra td { font-size:15.5px } table.zebra td.mono { font-size:14.5px } table.zebra td .pill { font-size:13px }
+  table.roomy th, table.roomy td { padding:9px 16px } table.roomy th { font-size:13.5px }
+  button.info-lg { background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:50%; width:28px; height:28px; padding:0; min-height:0; font-size:17px; line-height:1; vertical-align:middle }
+  .states dt { font-weight:700 } .states dd { margin:0 0 8px }
+  .kv { display:grid; grid-template-columns:max-content 1fr; gap:4px 16px } .kv dt { color:var(--muted) } .kv dd { margin:0 }
+  /* tables marked .stack-md become stacked cards already below 1000px (too many columns for a tablet) */
+  @media (max-width:1000px) {
+    table.stack-md, table.stack-md tbody, table.stack-md tr, table.stack-md td { display:block; width:100% }
+    table.stack-md thead, table.stack-md tr:first-child:has(th) { display:none }
+    table.stack-md tr { border:1px solid var(--line); border-radius:8px; margin-bottom:10px; padding:4px 0 }
+    table.stack-md td { border:0; padding:4px 10px; display:flex; justify-content:space-between; gap:12px; text-align:right }
+    table.stack-md td[data-l]::before { content:attr(data-l); color:var(--muted); font-size:12px; text-transform:uppercase; flex:0 0 30%; text-align:left }
+    table.stack-md td > * { max-width:68% }
+  }
+  /* phones: bigger touch targets, 16px inputs (iOS zooms below that), tables become stacked cards when marked .stack */
+  @media (max-width:700px) {
+    body { font-size:15px } main { padding:10px } .card { padding:12px; border-radius:8px }
+    .authbox { padding:28px 20px 22px } .authbrand .logo img { width:56px; height:56px } .authbrand .authname { font-size:30px }
+    /* top row: logo and name on the left, the three icon buttons on the right; the menu below, wrapped so every entry is visible */
+    header { padding:8px 10px; gap:6px 10px } .spacer { display:none }
+    a.brand { order:1; margin-right:auto } .hactions { order:2 } nav { order:3; width:100%; flex-wrap:wrap; gap:2px }
+    nav a { padding:6px 9px }
+    input, select, button, .btn, textarea { font-size:16px; min-height:42px; padding:8px 10px }
+    .sg { display:block; width:100% }
+    button.dots { min-height:30px; padding:0 9px } .copybox > .copy { min-height:0; width:36px; height:36px; padding:0 } .iconbtn { width:42px; height:42px; min-height:42px }
+    input[type=text], input[type=password], input[type=number], select { width:100%; min-width:0 }
+    .row > * { flex:1 1 auto } .row form { flex:1 1 auto } .row button { width:100% }
+    table.stack, table.stack tbody, table.stack tr, table.stack td { display:block; width:100% }
+    table.stack thead, table.stack tr:first-child:has(th) { display:none }
+    table.stack tr { border:1px solid var(--line); border-radius:8px; margin-bottom:10px; padding:4px 0 }
+    table.stack td { border:0; padding:4px 10px; display:flex; justify-content:space-between; gap:12px }
+    table.stack td[data-l]::before { content:attr(data-l); color:var(--muted); font-size:12px; text-transform:uppercase; flex:0 0 38% }
+    table.stack td > * { max-width:60% }
+    .kv { grid-template-columns:1fr } .kv dt { margin-top:6px }
+  }
+</style>
+</head>
+<body>
+{% if me %}
+<header>
+  <a class="brand {{ 'on' if request.url.path.startswith('/me/settings') }}" href="/me/settings" title="{{ _('Settings') }}" aria-label="{{ _('Settings') }}">
+    <span class="logo"><img class="logo-d" src="/admin/static/icon-dark.svg" alt=""><img class="logo-l" src="/admin/static/icon-light.svg" alt=""></span>
+    <span class="bname"><b>PrintMinder</b><small>({{ me.username }})</small></span>
+    <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+  </a>
+  <nav>
+    {% if me.is_admin %}
+    {% set p = request.url.path %}
+    <a href="/admin/jobs" class="{{ 'on' if p.startswith('/admin/jobs') }}">{{ _p("menu", "Audit") }}</a>
+    <a href="/admin/users" class="{{ 'on' if p.startswith('/admin/users') }}">{{ _p("menu", "Users") }}</a>
+    <a href="/admin/groups" class="{{ 'on' if p.startswith('/admin/groups') }}">{{ _p("menu", "Groups") }}</a>
+    <a href="/admin/requests" class="{{ 'on' if p.startswith('/admin/requests') }}">{{ _p("menu", "Requests") }}{% if pending_requests %} <span class="badge">{{ pending_requests }}</span>{% endif %}</a>
+    <a href="/admin/grants" class="{{ 'on' if p.startswith('/admin/grants') }}">{{ _p("menu", "Grants") }}</a>
+    <a href="/admin/actions" class="{{ 'on' if p.startswith('/admin/actions') }}">{{ _p("menu", "Actions") }}</a>
+    <a href="/admin/printers" class="{{ 'on' if p.startswith('/admin/printers') }}">{{ _p("menu", "Printers") }}</a>
+    <a href="/admin/backups" class="{{ 'on' if p.startswith('/admin/backups') }}">{{ _p("menu", "Backup") }}</a>
+    <a href="/admin/archive" class="{{ 'on' if p.startswith('/admin/archive') }}">{{ _p("menu", "Archive") }}</a>
+    {% endif %}
+    {% set q = request.url.path %}
+    <a href="/me" class="{{ 'on' if q == '/me' or q.startswith('/me/request') or q.startswith('/me/keys') }}">{{ _p("menu", "Profile") }}</a>
+    <a href="/me/print" class="{{ 'on' if q.startswith('/me/print') }}">{{ _p("menu", "Print") }}</a>
+    <a href="/me/scan" class="{{ 'on' if q.startswith('/me/scan') }}">{{ _p("menu", "Scan") }}</a>
+  </nav>
+  <span class="spacer"></span>
+  <div class="hactions">
+  {% if me.is_admin %}
+  <a class="bell iconbtn {{ 'on' if request.url.path.startswith('/admin/notices') }}" href="/admin/notices" aria-label="{{ _t('Notices') }}" title="{{ _t('Notices') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg>
+    {% if notices_unseen %}<span class="belln">{{ notices_unseen if notices_unseen < 100 else '99+' }}</span>{% endif %}
+  </a>
+  <form method="post" action="/admin/maintenance" {% if not maintenance %}onsubmit="return confirm({{ _t('Put the WHOLE gateway in maintenance?\n\nThe printers disappear from the network (mDNS) and no user will be able to print or scan: only administrators.')|tojson|forceescape }})"{% endif %}>
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="next" value="{{ request.url.path }}">
+    <input type="hidden" name="on" value="{{ '0' if maintenance else '1' }}">
+    {% set mlabel = _t('LEAVE MAINTENANCE') if maintenance else _t('PUT IN MAINTENANCE') %}
+    <button class="maint iconbtn {{ 'on' if maintenance }}" aria-label="{{ mlabel }}" title="{{ mlabel }} — {{ _t('Turn the gateway back on') if maintenance else _t('Stops printing and scanning for everyone except the admins and hides the printers from the network') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.4 11.6 5.5 18.5"/><path d="M16.2 4.3A4.3 4.3 0 1 0 19.7 7.8"/></svg>
+    </button>
+  </form>
+  {% endif %}
+  <form method="post" action="/admin/logout"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <button class="sec iconbtn" aria-label="{{ _t('Log out') }}" title="{{ _t('Log out') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg></button>
+  </form>
+  </div>
+</header>
+{% endif %}
+{% if me and maintenance %}<div class="maintbar">{{ _("GATEWAY IN MAINTENANCE") }} — {{ _('printing and scanning are stopped for users; administrators can still use them') if me.is_admin else _('printing and scanning are temporarily suspended') }}</div>{% endif %}
+{% if me and me.is_admin and update_info %}<div class="updbar">{{ _("A new version is available: %(new)s (installed: %(old)s).", new=update_info.version, old=app_version) }} {% if update_info.url %}<a href="{{ update_info.url }}" rel="noopener noreferrer" target="_blank">{{ _("Release notes") }}</a> · {% endif %}{{ _("To update, run on the server:") }} <code>scripts/update.sh</code></div>{% endif %}
+<main{% block mainattr %}{% endblock %}>
+  {% for kind, msg in flashes %}<div class="flash {{ kind }}">{{ msg }}</div>{% endfor %}
+  {% block body %}{% endblock %}
+</main>
+<script>
+  // stacked tables on phones: give every cell the name of its column (the header row is hidden there)
+  document.querySelectorAll('table.stack').forEach(function (t) {
+    var first = t.querySelector('tr'), heads = first ? Array.prototype.map.call(first.querySelectorAll('th'), function (h) { return h.textContent.trim(); }) : [];
+    if (!heads.length) return;
+    t.querySelectorAll('tr').forEach(function (tr) {
+      var cells = tr.querySelectorAll('td');
+      Array.prototype.forEach.call(cells, function (td, i) {
+        if (td.colSpan === 1 && !td.hasAttribute('data-l') && heads[i]) td.setAttribute('data-l', heads[i]);
+      });
+    });
+  });
+</script>
+<script>
+  // show/hide password (_pwfield.html): the button is hidden until scripts run
+  document.querySelectorAll('.pwtoggle').forEach(function (b) {
+    b.hidden = false;
+    b.addEventListener('click', function () {
+      var input = b.parentNode.querySelector('input'), show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      b.classList.toggle('shown', show);
+      b.setAttribute('aria-pressed', show ? 'true' : 'false');
+      var label = show ? b.dataset.hide : b.dataset.show;
+      b.setAttribute('aria-label', label); b.title = label;
+    });
+  });
+</script>
+<script>
+  // copy button (macros.html): copies the text next to it, shows a check mark for a moment
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button.copy');
+    if (!b) return;
+    var el = b.parentNode.querySelector('[data-copy]'), text = (el ? el.textContent : '').trim();
+    function done() { b.classList.add('done'); b.title = {{ _t('Copied')|tojson }}; setTimeout(function () { b.classList.remove('done'); b.title = {{ _t('Copy')|tojson }}; }, 1500); }
+    function fallback() {
+      var t = document.createElement('textarea'); t.value = text; t.style.position = 'fixed'; t.style.opacity = '0';
+      (b.closest('dialog') || document.body).appendChild(t); t.select();
+      try { if (document.execCommand('copy')) done(); } catch (x) {} t.remove();
+    }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+  });
+</script>
+<script>
+  // text boxes with a data-suggest attribute (JSON list): the list opens on click and narrows as you type; free text is still allowed
+  Array.prototype.forEach.call(document.querySelectorAll('input[data-suggest]'), function (inp) {
+    var items = []; try { items = JSON.parse(inp.getAttribute('data-suggest')); } catch (x) {}
+    var wrap = document.createElement('span'); wrap.className = 'sg';
+    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    var box = document.createElement('ul'); box.className = 'suggest'; box.hidden = true; wrap.appendChild(box);
+    var sel = -1;
+    function show() {
+      var q = inp.value.trim().toLowerCase();
+      var hits = items.filter(function (t) { return t.toLowerCase().indexOf(q) >= 0; })
+                      .sort(function (a, b) { return (b.toLowerCase().indexOf(q) === 0) - (a.toLowerCase().indexOf(q) === 0); });
+      box.innerHTML = ''; sel = -1;
+      hits.forEach(function (t) {
+        var li = document.createElement('li'), i = t.toLowerCase().indexOf(q);
+        if (q && i >= 0) { li.appendChild(document.createTextNode(t.slice(0, i))); var m = document.createElement('mark'); m.textContent = t.slice(i, i + q.length); li.appendChild(m); li.appendChild(document.createTextNode(t.slice(i + q.length))); }
+        else li.textContent = t;
+        li.addEventListener('mousedown', function (e) { e.preventDefault(); inp.value = t; box.hidden = true; });
+        box.appendChild(li);
+      });
+      box.hidden = !hits.length;
+    }
+    function move(d) { var l = box.children; if (!l.length) return; if (sel >= 0) l[sel].classList.remove('on'); sel = (sel + d + l.length) % l.length; l[sel].classList.add('on'); l[sel].scrollIntoView({block: 'nearest'}); }
+    inp.addEventListener('focus', show); inp.addEventListener('click', show); inp.addEventListener('input', show);
+    inp.addEventListener('blur', function () { box.hidden = true; });
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (box.hidden) show(); move(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+      else if (e.key === 'Enter' && sel >= 0 && !box.hidden) { e.preventDefault(); inp.value = box.children[sel].textContent; box.hidden = true; }
+      else if (e.key === 'Escape') box.hidden = true;
+    });
+  });
+</script>
+<script>
+  // forms marked data-keep: when the server sends you back with an error, what you had typed is put back
+  // (never passwords or files). data-keep="always" also restores after a successful reload (the scan page).
+  (function () {
+    var K = 'formkeep:' + location.pathname, TTL = 120000, forms = document.querySelectorAll('form[data-keep]');
+    function field(f) { return Array.prototype.filter.call(f.elements, function (e) { return e.name && !/^(password|file|hidden|submit|button)$/.test(e.type) && !e.hasAttribute('data-nokeep'); }); }
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(K) || 'null');
+      sessionStorage.removeItem(K);
+      if (saved && Date.now() - saved.t < TTL) Array.prototype.forEach.call(forms, function (f, i) {
+        var data = saved.f[i]; if (!data || !(document.querySelector('.flash.err') || f.getAttribute('data-keep') === 'always')) return;
+        field(f).forEach(function (e) {
+          var v = data[e.name]; if (v === undefined) return;
+          if (e.type === 'radio') e.checked = (e.value === v);
+          else if (e.type === 'checkbox') e.checked = v.indexOf(e.value) >= 0;
+          else e.value = v;
+          if (e.type !== 'text' && e.type !== 'number' && e.type !== 'textarea') e.dispatchEvent(new Event('change', {bubbles: true}));
+        });
+      });
+    } catch (x) {}
+    document.addEventListener('submit', function (ev) {
+      var all = Array.prototype.slice.call(forms), i = all.indexOf(ev.target); if (i < 0) return;
+      try {
+        var out = {};
+        field(ev.target).forEach(function (e) {
+          if (e.type === 'radio') { if (e.checked) out[e.name] = e.value; }
+          else if (e.type === 'checkbox') { (out[e.name] = out[e.name] || []); if (e.checked) out[e.name].push(e.value); }
+          else out[e.name] = e.value;
+        });
+        var f = {}; f[i] = out; sessionStorage.setItem(K, JSON.stringify({t: Date.now(), f: f}));
+      } catch (x) {}
+    });
+  })();
+</script>
+</body>
+</html>

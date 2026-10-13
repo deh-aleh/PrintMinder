@@ -1,0 +1,6 @@
+# Optional helper that applies updates asked for in the portal. Started only with:  docker compose --profile autoupdate up -d
+# It needs the Docker socket, which is the same as root on the host: read docs/en/installation.md ("Updates") before using it.
+FROM docker:27-cli
+COPY updater.sh /updater.sh
+RUN chmod +x /updater.sh
+ENTRYPOINT ["/updater.sh"]

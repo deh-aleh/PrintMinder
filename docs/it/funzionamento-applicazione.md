@@ -1,0 +1,206 @@
+# Come è fatta l'applicazione
+
+[Indice della documentazione](../README.md) · [English](../en/application-internals.md) · Italiano
+
+Visita guidata del repository: a cosa serve ogni file sorgente, come funziona la configurazione (`.env`, `config/gateway.env`,
+`CUPSPL_*`) e cosa fanno script e file dei contenitori. Per il quadro generale leggi prima [architettura.md](architettura.md).
+
+> **Nomi.** Il prodotto si chiama **PrintMinder**. Alcuni nomi tecnici sono precedenti e restano di proposito, perché le installazioni
+> esistenti continuino a funzionare: il pacchetto Python `app`, le variabili `CUPSPL_*`, il comando `cups-policy-admin`, il progetto
+> compose `printgw`, il servizio `cups-policy-gateway`. Non sono errori.
+
+## 1. Struttura del repository
+
+```
+app/            l'applicazione (pacchetto Python)
+  admin/        il portale web: rotte + template Jinja
+  audit/        registro delle azioni amministrative e archivio dell'audit
+  auth/         account, password, chiavi di stampa, RADIUS, protezione dei login
+  backup/       motore dei backup (file, cifratura, scheduler)
+  db/           modelli, sessioni, esecuzione delle migrazioni
+  ipp/          codec IPP, reverse proxy, riscrittura degli URI
+  locales/      traduzioni (.po) per it, es, ru, zh
+  migrations/   revisioni Alembic
+  policy/       quote, concessioni, conteggio pagine, controlli, stampa periodica, ordinamento
+  cli.py  config.py  cups_client.py  escl.py  i18n.py  main.py  mdns.py
+deploy/         installazione sull'host senza docker (systemd)
+docker/         definizione dei contenitori (stack/ è quella di produzione)
+docs/           questa documentazione (en/ e it/)
+scripts/        script di supporto
+tests/          test automatici
+docker-compose.yml  docker-compose.test.yml  pyproject.toml  alembic.ini
+```
+
+## 2. Configurazione: chi legge cosa
+
+Ci sono tre file con nomi simili. È la fonte di confusione più comune.
+
+| File | Letto da | Contiene | Creato da |
+|---|---|---|---|
+| **`.env`** (cartella del progetto) | solo **docker compose**, per costruire `docker-compose.yml` | `PUID`, `PGID`, `GATEWAY_PORT`, `CUPS_QUEUES`, `CUPS_VIRTUAL_QUEUE`, `AUDIT_ARCHIVE_HOST_PATH`, `BACKUP_HOST_PATH`, `BACKUP_DIR`, `PRINTGW_REGISTRY`, `PRINTGW_VERSION` | `scripts/docker-init.sh` |
+| **`config/gateway.env`** | i contenitori **gateway** e **mdns** (`env_file`) | ogni impostazione `CUPSPL_*`, segreti compresi | `scripts/docker-init.sh` (da `docker/gateway.env.example`), permessi 600 |
+| **`deploy/env.example`** → `/etc/cups-policy-gateway/env` | l'unità systemd dell'**installazione sull'host** | le stesse impostazioni `CUPSPL_*`, per chi non usa docker | `deploy/install.sh` |
+
+L'applicazione ([`app/config.py`](../../app/config.py)) legge **solo variabili d'ambiente vere** con prefisso `CUPSPL_` (non legge un
+file `.env`: quello è di compose). Ogni impostazione ha un valore predefinito sicuro; un valore vuoto significa "non impostato".
+Dopo aver modificato `config/gateway.env` esegui `docker compose up -d` (ricrea i contenitori che lo usano).
+
+### 2.1 `.env` (variabili di docker compose)
+
+| Variabile | Predefinito | Significato |
+|---|---|---|
+| `PUID`, `PGID` | il tuo utente | Utente Unix che esegue il gateway; possiede la chiave TLS e le cartelle `data/` |
+| `GATEWAY_PORT` | `8631` | Porta pubblicata sull'host (usa `631` se nessun altro la usa) |
+| `CUPS_QUEUES` | vuoto | Code create in CUPS all'avvio: `NOME=URI NOME2=URI2` |
+| `CUPS_VIRTUAL_QUEUE` | `0` | `1` crea la coda `virtual` che scrive PDF (prova delle quote senza carta) |
+| `AUDIT_ARCHIVE_HOST_PATH`, `BACKUP_HOST_PATH` | impostati dall'init | Solo mostrati nel portale, per dire dove stanno i file sull'host |
+| `BACKUP_DIR` | `./data/backups` | Cartella dell'host montata su `/backups`: l'unico posto dove si possono scrivere i backup |
+| `PRINTGW_REGISTRY`, `PRINTGW_VERSION` | impostati da init | Scarica le immagini pubblicate invece di costruirle; la versione in uso (la cambia `scripts/update.sh`) |
+| `PROJECT_DIR` | impostato da init | Percorso completo della cartella del progetto; lo usa solo il contenitore facoltativo `updater` |
+| `COMPOSE_PROFILES` | non impostato | `autoupdate` avvia il contenitore facoltativo `updater` |
+
+Il file nasce da `docker/env.example`. `scripts/update.sh` e `scripts/env-sync.sh` (codice: `app/envsync.py`) aggiungono le opzioni delle versioni nuove in fondo a `.env` e a `config/gateway.env`, con la loro spiegazione; un valore già presente non viene mai cambiato e resta una copia del file (`.env.bak-<data>`).
+
+### 2.2 `config/gateway.env` (impostazioni `CUPSPL_*`)
+
+Il riferimento commentato è [`docker/gateway.env.example`](../../docker/gateway.env.example) (commenti in inglese semplice) e l'elenco
+autorevole è `app/config.py`. Riassunto:
+
+| Gruppo | Variabili |
+|---|---|
+| **Segreto** | `CUPSPL_SECRET_KEY` — firma i cookie di sessione e autentica gateway→mdns. Vuota = casuale a ogni avvio (sessioni perse al riavvio, canale mdns non protetto). Cambiarla fa solo uscire tutti dalle sessioni. |
+| **RADIUS** (facoltativo) | `RADIUS_HOST`, `RADIUS_PORT` (1812), `RADIUS_SECRET`, `RADIUS_TIMEOUT` (5), `AUTH_CACHE_SECONDS` (60). Host e secret vuoti = solo account locali; uno solo compilato = non parte. |
+| **Autenticazione di stampa** | `IPP_AUTH` (`keys` \| `keys+radius`), `KEY_TTL_DAYS_RADIUS` (90), `KEY_TTL_DAYS_LOCAL` (365), `AUTO_CREATE_USERS` (true), `DEFAULT_GROUP` (default), `CUPS_USER_PREFIX` (`gw:`), `ANONYMOUS_DISCOVERY` (true) |
+| **Primo avvio** | `BOOTSTRAP_ADMIN` (true), `BOOTSTRAP_ADMIN_USERNAME` (`cups_orchestrator`) |
+| **Richieste** | `MAX_OPEN_REQUESTS` (3), `REQUEST_TTL_DAYS` (14) |
+| **Audit** | `AUDIT_MAX_MB` (50), `AUDIT_ARCHIVE_DIR` (`/data/audit-archive`), `AUDIT_CHECK_INTERVAL` (3600) |
+| **Backup** (generale) | `BACKUP_ENABLED` (false), `BACKUP_DIR` (`general`), `BACKUP_HOUR` (3), `BACKUP_KEEP_DAILY/WEEKLY/MONTHLY` (7/4/12), `BACKUP_RECIPIENT` (chiave di recupero; vuota = non cifrato, senza segreti nel file), `BACKUP_ROOT` (`/backups`), `BACKUP_CONFIG_DIR` (`/config`) |
+| **Pagina Stampanti** | `PRINTERS_REFRESH_SECONDS` (15; 0 o non valido = 15; 5–3600) |
+| **Stampanti USB** | `AUTO_DISCOVER` (true), `DISCOVERY_INTERVAL` (30), `USB_BRIDGE_HOST` (`ipp-usb`), `USB_BRIDGE_PORTS` (`60000-60099`), `USB_DIRECT` (true), `OFFLINE_REMOVE_HOURS` (8; 0 = mai) |
+| **Stampa / scansione** | `WEB_UPLOAD_MB` (25), `WEB_MAX_COPIES` (20), `MAX_REQUEST_MB` (200), `RECONCILE_INTERVAL` (30), `SCAN_URL`, `SCAN_TIMEOUT` (180), `ESCL_ANONYMOUS` (false) |
+| **Rete / mDNS** | `PORTAL_URL`, `MDNS_HOSTNAME`, `MDNS_ADDRESSES`, `MDNS_PORT`, `MDNS_INTERVAL` (30), `PUBLIC_SCHEME` |
+| **Varie** | `TIMEZONE` (UTC), `LANGUAGE` (en), `LOG_LEVEL` (INFO), `NOTICE_INTERVAL` (0 = secondo il livello di log), `HEALTHZ_INFO` (vuoto = solo lo stato), `UPDATE_CHECK` (true) |
+| **Decise da immagine/compose, non impostare** | `TLS_CERTFILE`, `TLS_KEYFILE`, `DATABASE_URL`, `CUPS_URL`, `ALLOW_INSECURE_AUTH` (mai in produzione), `HOST`, `PORT` |
+
+## 3. Il pacchetto Python, file per file
+
+### 3.1 Punti d'ingresso
+
+| File | Ruolo |
+|---|---|
+| `app/__main__.py` | Il comando `cups-policy-gateway`: rifiuta di partire senza TLS o con RADIUS configurato a metà, poi avvia uvicorn. |
+| `app/main.py` | Costruisce l'app FastAPI: client HTTP verso CUPS (socket unix), database, provider di autenticazione, middleware (sessioni, lingua), router, `/healthz`, e avvia le attività di fondo. |
+| `app/cli.py` | Il comando `cups-policy-admin`: `set-admin-password`, `group-limit`, `user-limit`, `set-group`, `make-admin`, `jobs`, `audit-archive`, `backup-key`, `backup-run`, `backup-verify`, `backup-restore`. |
+| `app/config.py` | `Settings` (pydantic-settings): ogni variabile `CUPSPL_*` con valore predefinito e validazione. |
+| `app/cups_client.py` | La conversazione del gateway stesso con CUPS: elenca le code (stato, colore, carta, online/offline, flag virtuale) nell'ordine di visualizzazione. |
+| `app/mdns.py` | Processo a parte (`python -m app.mdns`): annuncia le code come `_ipps._tcp` (+ sottotipo AirPrint) e gli scanner come `_uscans._tcp`. |
+| `app/escl.py` | Scansione: proxy eSCL per i client nativi (`/eSCL/...`) e pagina di scansione del portale (`/me/scan`); scopre gli scanner a runtime. |
+| `app/i18n.py` | Motore delle traduzioni: negoziazione della lingua, `_()`, plurali, middleware. Vedi [lingue.md](lingue.md). |
+
+### 3.2 `app/ipp/` — il lato IPP
+
+| File | Ruolo |
+|---|---|
+| `codec.py` | Parser/serializzatore IPP (RFC 8010) senza perdita, collezioni annidate comprese. `decode_head` legge solo l'intestazione, così i documenti scorrono senza entrare in memoria. |
+| `gateway.py` | Il reverse proxy: controllo HTTPS, query di capacità, autenticazione, filtro operazioni, identità imposta, riserva di quota, inoltro in streaming a CUPS, registrazione dell'esito. |
+| `rewrite.py` | Riscrive gli URI interni di CUPS nelle risposte perché i client continuino a parlare col gateway; dichiara `uri-authentication-supported=basic` così Mopria invia le credenziali. |
+
+### 3.3 `app/auth/` — chi sei
+
+| File | Ruolo |
+|---|---|
+| `service.py` | Decide chi può entrare dove: `portal_login` (ogni utente abilitato; la riga decide locale o delegato) e `print_login` (una chiave di stampa; la password RADIUS solo con `keys+radius`). |
+| `users.py` | Ricerca/creazione utenti, gruppo predefinito, eliminazione (storico conservato). |
+| `groups.py` | I due gruppi di sistema `default` e `administrator`. |
+| `bootstrap.py` | Crea `cups_orchestrator` senza password e stampa il codice monouso `FIRST RUN`. |
+| `passwords.py` | Hash argon2id e regole delle password (minimo 12 caratteri, diversa dal nome utente). |
+| `keys.py` | Chiavi di stampa: creazione, hash sha256, scadenza, verifica, revoca. |
+| `radius.py` | Provider RADIUS (pyrad). `base.py`: l'interfaccia dei provider. `cache.py`: breve cache dei login riusciti. |
+| `throttle.py` | Blocco dei login (in memoria; si azzera al riavvio). |
+| `dictionary` | Dizionario degli attributi RADIUS richiesto da pyrad. |
+
+### 3.4 `app/policy/` — quote e controlli
+
+| File | Ruolo |
+|---|---|
+| `engine.py` | Finestre (settimanali/mensili nel fuso configurato, anche con l'ora legale), regole effettive, consumo, concessioni sommate ai limiti, `check_job` → `Decision` (`reason` inglese per audit/IPP, `text()` localizzato per il portale). |
+| `audit.py` | `reserve()` (atomico, sotto lock) e `finalize()` di un job; collega il documento a un job `Create-Job`. |
+| `grants.py` | Richieste di quota/gruppo, approvazione (idempotente), concessioni dirette, revoca, scadenza delle richieste vecchie. |
+| `rules.py` | Crea/sostituisce/rimuove i limiti di un utente o gruppo (condiviso da CLI e portale). |
+| `pages.py` | Conta le pagine prima di stampare (PDF, JPEG/PNG/GIF, URF, PostScript, testo) e interpreta gli intervalli di pagine. |
+| `reconcile.py` | Ciclo del riconciliatore con CUPS (pagine reali, job annullati, riserve orfane). |
+| `control.py` | Manutenzione del gateway, blocco per stampante e nascondimento mDNS, token del canale mdns. |
+| `keepalive.py` | Stampa periodica di manutenzione: impostazioni, scheduler, stampa di prova. |
+| `testpage.py` | Costruisce i PDF che il gateway stampa da sé (nessuna dipendenza). |
+| `ordering.py` | Ordine dell'elenco: prima le fisiche, poi le virtuali; ciascuna per prima volta vista. |
+| `discovery.py` | Trova le stampanti USB nuove (prima ipp-usb, poi backend usb di CUPS + driver), crea le loro code, tiene traccia delle code USB irraggiungibili e le rimuove dopo `OFFLINE_REMOVE_HOURS`. |
+
+### 3.5 `app/admin/` — il portale
+
+| File | Ruolo (prefisso URL) |
+|---|---|
+| `static/` | L'icona: `icon.svg` (scheda del browser: tessera inchiostro con un anello chiaro, leggibile su qualsiasi scheda), `icon-dark.svg` / `icon-light.svg` (tessera inchiostro per sfondi chiari, tessera carta per sfondi scuri; l'intestazione del portale ne sceglie una in base al tema), `favicon.ico`, `apple-touch-icon.png`, `icon-512.png`. Servita senza login su `/admin/static/`; `/favicon.ico` rimanda lì. |
+| `routes.py` | Login/logout, configurazione del primo avvio, elenco audit ed esportazione CSV, annullamento job (`/admin/…`). |
+| `accounts.py` | Utenti, gruppi, limiti, chiavi degli utenti, registro delle azioni admin (`/admin/users`, `/groups`, `/actions`). |
+| `requests.py` | Richieste in attesa, approvazione/rifiuto, concessioni dirette (`/admin/requests`, `/grants`). |
+| `printers.py` | Panoramica stampanti, contatori, stampanti di prova, stampa periodica e di prova (`/admin/printers`). |
+| `controls.py` | Manutenzione, blocco / nascondimento di una stampante, feed `/mdns/policy` per l'annunciatore. |
+| `backups.py` | Destinazioni dei backup (`/admin/backups`). |
+| `audit_archive.py` | Elenco/lettura/download/verifica degli archivi (`/admin/archive`). |
+| `audit_view.py` | Come si mostra una riga di audit (testi accorciati, dispositivo, specifiche di stampa). |
+| `me.py` | Area dell'utente: consumo, chiavi, password, impostazioni (tema, lingua, aggiornamento), richieste (`/me`). |
+| `printing.py` | Stampa dal browser (`/me/print`). |
+| `common.py` | Parti condivise: template, dipendenze di sessione e CSRF, messaggi, reindirizzamenti, funzioni di supporto. |
+| `templates/*.html` | Pagine Jinja: `base.html` (struttura, menu, tema), `macros.html`, un template per pagina. |
+
+### 3.6 Altri pacchetti
+
+| File | Ruolo |
+|---|---|
+| `app/audit/adminlog.py` | `record()`: scrive una riga di `admin_audit` (chi ha fatto cosa). |
+| `app/audit/archive.py` | Stima del peso, archiviazione sicura in `.jsonl.gz`, verifica, lettura in streaming, archiviatore periodico. |
+| `app/backup/core.py` | Crea/verifica/ruota/ripristina i backup; copia SQLite; tar.gz con `MANIFEST.json`; conservazione. |
+| `app/backup/crypto.py` | Cifratura con chiave di recupero (X25519 + HKDF + AES-256-GCM; chiave privata avvolta da scrypt della passphrase). |
+| `app/backup/service.py` | Gestione della tabella `backup_target` e scheduler a 60 s. |
+| `app/db/models.py` | Tutti i modelli SQLAlchemy. `session.py`: motore e sessioni (SQLite WAL). `migrate.py`: esegue Alembic dall'interno dell'app. |
+| `app/notices.py`, `app/admin/notices.py` | La campanella: avvisi per gli amministratori con un limite alla frequenza con cui lo stesso viene segnalato (intervallo da `CUPSPL_LOG_LEVEL`), tabella `notice`. |
+| `app/updates.py`, `app/admin/updates.py` | Controllo giornaliero di una release più nuova (avviso agli amministratori) e pulsante del portale che passa un aggiornamento al contenitore `updater` tramite file in `/data/update` (il gateway non tocca mai Docker). |
+| `app/migrations/` | `env.py` e le revisioni `0001`…`0012` (storia dello schema). |
+| `app/locales/` | `messages.pot` (modello) e `<lingua>/messages.po` (it, es, ru, zh). |
+
+## 4. Script
+
+| Script | Scopo |
+|---|---|
+| `scripts/docker-init.sh [nomi/IP]` | Preparazione una tantum: crea `config/gateway.env` (con un segreto generato), `.env`, le cartelle `data/` e un certificato TLS autofirmato con i nomi/IP indicati. |
+| `scripts/backup.sh backup\|restore` | Backup completo **lato host** (database, configurazione, archivio audit, code CUPS, `.env`); serve a spostare la macchina. |
+| `scripts/add-printer-linux.sh` | Aggiunge una stampante del gateway a un computer Linux con la chiave di stampa nell'indirizzo della coda. |
+| `scripts/print-test.sh` | Invia una pagina di testo come utente (consuma un foglio). |
+| `scripts/gen_dev_cert.sh` | Certificato autofirmato solo per lo sviluppo. |
+| `scripts/update.sh [VERSIONE\|--check]` | Aggiornamento sicuro con le immagini pubblicate: backup, nuova versione in `.env`, pull, riavvio, attesa della salute, ritorno automatico alla versione precedente. `--from-portal` è la modalità usata dal contenitore `updater`. |
+| `scripts/i18n.py` | Strumenti per le traduzioni: `extract`, `missing`, `check`, `add`. |
+
+## 5. Contenitori e installazione sull'host
+
+| Percorso | Scopo |
+|---|---|
+| `docker-compose.yml` | Lo stack di produzione (`ipp-usb`, `cups`, `gateway`, `mdns`, `radius` facoltativo). Costruisce dal sorgente o scarica immagini pubblicate. |
+| `docker-compose.test.yml` | Ambiente dei test: un CUPS vero su `:6310` e FreeRADIUS su `:1812`. |
+| `docker/stack/gateway/Dockerfile` | Immagine del gateway (usata anche da `mdns`). |
+| `docker/stack/cups/` | Immagine CUPS: `cupsd.conf` (policy da backend privato), `entrypoint.sh` (crea le code da `CUPS_QUEUES`), driver di stampa (brlaser, gutenprint, splix, foo2zjs). Vede anche `/dev/bus/usb` per le stampanti che ipp-usb non sa servire. |
+| `docker/stack/ipp-usb/` | Immagine ipp-usb, `ipp-usb.conf` e l'entrypoint che lo riavvia quando cambiano i dispositivi USB. |
+| `docker/cups/`, `docker/radius/` | Immagine CUPS dei test; utenti del RADIUS di prova (`mario`, `anna`, `admin`). |
+| `docker/stack/updater/` | Immagine facoltativa `updater` (profilo `autoupdate`): aspetta `/data/update/request.json`, esegue `scripts/update.sh --from-portal`, scrive `status.json`. Ha il socket di Docker. |
+| `docker/gateway.env.example`, `docker/env.example` | Modelli di `config/gateway.env` e di `.env`, con ogni opzione spiegata. L'immagine del gateway ne porta una copia in `/usr/share/printminder/` per `app/envsync.py`. |
+| `deploy/install.sh`, `setup-cups.sh`, `cups-policy-gateway.service`, `cups.socket.d/`, `env.example` | Installazione sull'host senza docker (vedi [installazione.md](installazione.md)). |
+
+## 6. Dove guardare quando…
+
+| Vuoi… | Guarda |
+|---|---|
+| cambiare come si calcola una quota | `app/policy/engine.py`, `app/policy/audit.py` |
+| consentire/vietare un'operazione IPP | `app/ipp/gateway.py` |
+| aggiungere una pagina al portale | un router in `app/admin/`, un template in `app/admin/templates/`, una voce di menu in `base.html` |
+| aggiungere un'impostazione | `app/config.py`, poi `docker/gateway.env.example` e [questa pagina](#22-configgatewayenv-impostazioni-cupspl_) |
+| cambiare il database | `app/db/models.py` **e** una nuova revisione Alembic (un test verifica che coincidano) |
+| tradurre un testo | [lingue.md](lingue.md) |

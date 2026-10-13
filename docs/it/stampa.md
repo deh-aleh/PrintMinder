@@ -1,0 +1,62 @@
+# Stampa e collegamento dei dispositivi
+
+[Indice della documentazione](../README.md) · [English](../en/printing.md) · Italiano
+
+Ci sono due modi di stampare: attraverso l'**indirizzo IPP del gateway** (computer e app) oppure dal **browser** (qualunque telefono,
+senza installare nulla). Entrambi passano dalle stesse quote, audit e identità (`gw:<utente>`).
+
+## 1. Stampare dal browser
+
+*Stampa* nel menu (`/me/print`), con la sessione aperta, senza bisogno di chiave.
+
+- File accettati: PDF, JPEG, PNG, GIF, testo semplice — riconosciuti dal loro **contenuto**, non dal nome o da ciò che dichiara il browser.
+- Dimensione massima `CUPSPL_WEB_UPLOAD_MB` (predefinito 25); copie fino a `CUPSPL_WEB_MAX_COPIES` (predefinito 20).
+- Le opzioni dipendono dalla stampante scelta: formato carta (solo quelli elencati dalla coda), orientamento, colore / bianco e nero
+  (se la coda è a colori), **intervallo di pagine** (`1,5`, `2-4`, `3-`), copie e un **commento** (max 50 caratteri) mostrato sotto il
+  nome del file nell'audit.
+- Le pagine contate per il limite sono quelle scelte × copie; un intervallo oltre la fine del documento è rifiutato prima di riservare quota.
+- Una stampante che non risponde non viene offerta; nemmeno una bloccata. L'ordine dell'elenco è descritto in [stampanti.md](stampanti.md).
+
+## 2. Stampare con l'indirizzo IPP
+
+Indirizzo: `ipps://<server>:8631/printers/<coda>`. Il client si autentica con HTTP Basic: **nome utente + chiave di stampa**
+(creata in *Profilo*; vedi [account.md](account.md)). La password di dominio non stampa.
+
+| Dispositivo | Come collegarlo | Stato |
+|---|---|---|
+| **Linux** (KDE, GNOME, CUPS) | Dopo aver creato una chiave la pagina del profilo mostra l'indirizzo `ipps://utente:chiave@server/printers/coda` e un comando `lpadmin` già pronto; in alternativa `scripts/add-printer-linux.sh <server> <coda> <utente>`. La chiave resta nell'indirizzo della coda (`/etc/cups/printers.conf`, leggibile solo da root e dal gruppo `cups`) e il computer non la chiede più. | ✅ provato |
+| **Qualunque dispositivo con browser** | `/me/print` | ✅ provato su Android |
+| **Android + Mopria Print Service** | Vede le stampanti annunciate, chiede nome e chiave per ogni stampante e li ricorda. | ✅ provato (Android 13) |
+| **Servizio di stampa di sistema di Android** | Vede le stampanti ma non sa chiedere le credenziali: davanti al 401 rinuncia. L'aggiunta manuale accetta solo un IP, quindi la chiave non si può mettere nell'indirizzo. | ❌ non utilizzabile — usa Mopria o il browser |
+| **iPhone / iPad** | L'annuncio porta il sottotipo AirPrint e `air=username,password`; non è noto se iOS invii le credenziali. | ⬜ non provato |
+| **Windows, macOS** | Aggiungi una stampante di rete con l'indirizzo IPP e inserisci nome utente + chiave; "ricorda". | ⬜ non provato |
+
+Il dispositivo deve fidarsi del certificato del server. Le stampanti annunciate da mDNS compaiono anche sui desktop Linux (Avahi) senza
+chiave: usarle non produce nulla finché la coda non viene aggiunta con la chiave nell'indirizzo.
+
+Script: `scripts/print-test.sh [coda] [utente]` invia una pagina di testo (consuma un foglio).
+
+## 3. Cosa fa il gateway con ogni operazione IPP
+
+Consentite: stampare (`Print-Job`, `Create-Job` + `Send-Document`), annullare, vedere job e stampanti, query di capacità. Vietate a
+tutti: le operazioni amministrative di CUPS, `Print-URI`, `Send-URI` (rischio SSRF). Le query di capacità (`Get-Printer-Attributes`,
+corpi piccoli) ricevono risposta **senza credenziali** perché i client le fanno prima di averne (`CUPSPL_ANONYMOUS_DISCOVERY=true`):
+non creano utenti né righe di audit e non inoltrano nulla. Il percorso completo è in
+[architettura.md](architettura.md#4-percorso-di-una-richiesta-ipp).
+
+Il gateway dichiara ai client `uri-security-supported=tls` e `uri-authentication-supported=basic` (CUPS direbbe `none`): senza,
+Mopria non invia le credenziali.
+
+## 4. Annuncio sulla rete (DNS-SD)
+
+Il servizio `mdns` annuncia ogni coda come `_ipps._tcp` con il sottotipo `_universal` (AirPrint) e i record TXT `rp`, `pdl`, `URF`,
+`Color`, `Duplex`, `TLS`, `air`, aggiornati ogni `CUPSPL_MDNS_INTERVAL` secondi. Il nome del server annunciato è `<nome>.local`
+(Android risolve per multicast solo quei nomi) e il suo indirizzo deve stare nel certificato TLS. Le stampanti bloccate-nascoste, i
+dispositivi irraggiungibili e la modalità manutenzione ritirano l'annuncio. Gli scanner sono annunciati come `_uscans._tcp`
+([scansione.md](scansione.md)).
+
+## 5. Job rifiutati, annullamento e stati
+
+Se un job è rifiutato il client riceve un errore IPP con il motivo e l'indirizzo del portale. Un utente può annullare i propri job;
+un amministratore può annullare i job in coda dall'audit ("Annulla") usando l'identità del proprietario (nessun privilegio CUPS in più).
+Gli stati e il loro significato sono spiegati nella pagina *Audit* ([audit.md](audit.md)).
