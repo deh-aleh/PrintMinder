@@ -282,3 +282,22 @@ async def test_admin_pages_refuse_plain_users_and_csrf_is_required(boss):
 
 
 import re  # noqa: E402  (used by the helpers above)
+
+
+def test_a_log_line_tells_when_there_is_no_first_run_code(portal, caplog):
+    import logging
+
+    from sqlalchemy import select
+
+    from app.auth import bootstrap
+    from app.auth.passwords import hash_password
+    from app.db.models import User
+
+    with caplog.at_level(logging.INFO, logger="app.auth.bootstrap"):
+        assert bootstrap.ensure_orchestrator(portal.sm) and "FIRST RUN" in caplog.text
+        caplog.clear()
+        with portal.sm() as s:
+            s.scalars(select(User).where(User.username == "cups_orchestrator")).one().password_hash = hash_password("a long password 123")
+            s.commit()
+        assert bootstrap.ensure_orchestrator(portal.sm) is None
+        assert "already has a password" in caplog.text and "FIRST RUN" not in caplog.text

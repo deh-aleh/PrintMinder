@@ -28,7 +28,7 @@ Increase detail with `CUPSPL_LOG_LEVEL=DEBUG` in `config/gateway.env`, then `doc
 
 | Symptom | Cause and fix |
 |---|---|
-| `FIRST RUN` is not in the log | `cups_orchestrator` already has a password. Reset: `docker compose exec -it gateway cups-policy-admin set-admin-password`. |
+| `docker compose logs gateway \| grep 'FIRST RUN'` prints nothing | Check in this order. **1.** `docker compose ps`: `gateway` must be *Up*; if it restarts or exits, read `docker compose logs gateway \| tail -40`. **2.** The line is only printed while the administrator has no password. If this folder ran before, the database (the Docker volume `printgw_gateway-data`) still has the account with its old password: the log then says *"administrator … already has a password"*; sign in at `https://<server>:8631/admin/login`, or set a new password with `docker compose exec -it gateway cups-policy-admin set-admin-password`. **3.** `CUPSPL_BOOTSTRAP_ADMIN=false` in `config/gateway.env` switches the first-run account off. For a truly empty start (this **deletes all users, quotas and audit**): `docker compose down -v`, then `docker compose up -d`. |
 | Locked after wrong passwords | 5 *different* wrong passwords in 5 minutes block the (user, IP) pair. Wait 5 minutes or restart the gateway (the lock is in memory). |
 | A RADIUS user cannot log in | RADIUS unreachable ⇒ access denied (fail closed). Check `CUPSPL_RADIUS_*`, that this machine is a RADIUS *client* with the same secret, and the log. A local account of the same name is **never** opened by RADIUS. |
 | Forced to change the password | Normal for temporary passwords created or reset by an administrator. |

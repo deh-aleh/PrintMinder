@@ -127,7 +127,7 @@ Check: `curl -sk https://<server>:8631/healthz` answers 200; `docker compose ps`
 
 `docker compose logs gateway | grep "FIRST RUN"` prints a one-time code. Open `https://<server>:8631/admin/setup`, enter
 the code and choose the password of `cups_orchestrator` (minimum 12 characters). The code is single-use and protected
-against guessing. If it does not appear, the account already has a password: reset it with `cups-policy-admin set-admin-password`.
+against guessing. If nothing appears, the account probably already has a password (this folder ran before and the Docker volume kept the database): the log then says "already has a password"; sign in, or reset it with `docker compose exec -it gateway cups-policy-admin set-admin-password`. More causes: [troubleshooting.md](troubleshooting.md).
 
 ### 3.7 First users
 
