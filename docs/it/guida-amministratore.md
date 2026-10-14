@@ -87,7 +87,16 @@ Dentro il contenitore: `docker compose exec gateway cups-policy-admin <comando>`
 
 La campanella nella barra in alto (solo amministratori) elenca ciò che il gateway ha notato e nessuno ha chiesto. Ogni avviso mostra
 l'ultima volta, la fonte e quante volte è successo; *Chiudi* lo chiude (la chiusura resta registrata in *Azioni*).
-Oggi esiste un solo tipo: una richiesta di scansione senza nome utente e password rifiutata perché `CUPSPL_ESCL_ANONYMOUS` è spento.
+I tipi di avviso:
+
+| Avviso | Cosa dice | Si chiude da solo quando |
+|---|---|---|
+| Scansione senza accesso | Una richiesta di scansione senza nome utente e password è stata rifiutata perché `CUPSPL_ESCL_ANONYMOUS` è spento | mai (chiudilo tu) |
+| Backup non eseguito / Backup fallito | Un backup non è stato salvato, con il nome vero del backup ([backup.md](backup.md)) | il backup successivo riesce |
+| Certificato scaduto | I dispositivi non si fidano più del gateway ([certificati.md](certificati.md)) | c'è un certificato valido |
+| Aggiornamento del certificato fallito | L'ultima esecuzione di `scripts/cert-sync.sh` è fallita | l'esecuzione successiva riesce |
+| Indirizzo annunciato non nel certificato | I telefoni che trovano da soli le stampanti mostreranno un errore di certificato | il certificato elenca l'indirizzo |
+| Certificato in scadenza | Solo se l'hai acceso (`CUPSPL_CERT_EXPIRY_WARN_ENABLED`) | il certificato è rinnovato |
 
 Perché un client che riprova 100 volte non riempia l'elenco, lo stesso avviso dalla stessa fonte viene scritto di nuovo solo dopo un
 intervallo; le ripetizioni nel frattempo vengono contate. L'intervallo dipende da `CUPSPL_LOG_LEVEL` e lo stesso testo viene scritto
@@ -106,6 +115,7 @@ nel log del container con lo stesso limite:
 
 - Salute: `GET /healthz` → 200 o 503, corpo `{"status":"ok"}`. Non richiede login. `CUPSPL_HEALTHZ_INFO=version,printers` aggiunge la versione e il numero di code (usb / rete / virtuali / totale); il predefinito è solo lo stato. Log: `docker compose logs gateway`.
 - Le migrazioni partono da sole all'avvio. Fai un backup prima di aggiornare un database importante.
-- Aggiornamenti: in cima al portale compare un avviso quando esiste una release più nuova. Aggiorna con `scripts/update.sh`, oppure con il pulsante *Aggiorna* nel menu *Backup* quando gira il contenitore facoltativo updater e c'è un backup programmato funzionante ([installazione.md](installazione.md#aggiornamenti)).
+- Nomi dei file nell'audit: il pulsante verde/rosso in alto a destra nella pagina *Audit* smette di salvarli, `.env` può cancellarli dopo qualche giorno e sono conservati cifrati ([protezione-dati.md](protezione-dati.md)). Non cambiare `CUPSPL_SECRET_KEY`.
+- Aggiornamenti: in cima al portale compare un avviso quando esiste una release più nuova. Aggiorna con `scripts/update.sh`, oppure con il pulsante *Aggiorna* nel menu *Backup* quando gira il contenitore facoltativo updater e c'è un backup programmato funzionante ([installazione.md](installazione.md#aggiornamenti)). L'updater controlla Docker, cioè tutto il server: tienilo spento se non ti serve.
 - Non lasciare account o stampanti di prova su un'installazione vera.
 - Proteggi `config/`, `.env`, `data/` e il volume: contengono segreti e dati personali.

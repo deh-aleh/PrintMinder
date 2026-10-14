@@ -4,7 +4,7 @@ import threading
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models import JobKind, JobLog, JobState, Resource, User
@@ -17,12 +17,8 @@ _submit_lock = threading.Lock()
 
 
 def _lock_quota(session: Session, user_id: int) -> None:
-    """Serialize quota decisions across processes, until the session commits."""
-    dialect = session.get_bind().dialect.name
-    if dialect == "sqlite":
-        session.connection().exec_driver_sql("BEGIN IMMEDIATE")  # single writer: blocks other reservers
-    elif dialect == "postgresql":
-        session.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": user_id})
+    """Serialize quota decisions across processes, until the session commits (SQLite: one writer at a time)."""
+    session.connection().exec_driver_sql("BEGIN IMMEDIATE")  # blocks other reservers
 
 
 def now_utc() -> datetime:
@@ -41,6 +37,8 @@ def reserve(
         _lock_quota(session, user.id)
         why = control.block_reason(session, user, printer)
         decision = Decision(False, why) if why else check_job(session, user, Resource(kind.value), now, tz, pages)
+        if not control.titles_enabled(session):  # the administrator turned the names off: only counts and states are kept
+            title, options = None, {k: v for k, v in (options or {}).items() if k != "document_name"}
         row = JobLog(
             ts=now, user_id=user.id, user_name=user.username, kind=kind, printer=printer, title=title,
             options_json=options or None, pages=pages if decision.allowed else None,
@@ -74,6 +72,8 @@ def attach_document(session: Session, user_id: int, cups_job_id: int, name: str 
     if row is None:
         return
     opts = dict(row.options_json or {})
+    if name and not control.titles_enabled(session):
+        name = None
     if name:
         opts["document_name"] = name
         if not row.title or row.title == "untitled":

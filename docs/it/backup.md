@@ -7,7 +7,7 @@ Esistono due meccanismi indipendenti:
 | | Backup integrati (portale) | `scripts/backup.sh` (lato host) |
 |---|---|---|
 | Chi | ogni amministratore, più uno *generale* | chi gestisce il server |
-| Cosa | database (copia coerente mentre si stampa) e archivio audit; con la cifratura anche `gateway.env` e il certificato TLS | tutto questo **più** le code CUPS e `.env` |
+| Cosa | database (copia coerente mentre si stampa) e archivio audit; con la cifratura anche `.env` (tutte le impostazioni e i segreti) e il certificato TLS | tutto questo **più** le code CUPS e `.env` |
 | Quando | programmato, una volta al giorno | a mano |
 | Serve per | la protezione di ogni giorno | **spostare la macchina** |
 
@@ -15,11 +15,11 @@ Esistono due meccanismi indipendenti:
 
 Ogni amministratore crea i **propri** backup programmati, con cartella, ora, numero di copie da tenere (ultime N giornaliere,
 settimanali, mensili) e cifratura. Modifica ed elimina solo i propri; *Esegui ora* è disponibile a tutti. Il backup *Generale*
-dell'installazione si mostra in sola lettura: si imposta in `config/gateway.env` (`CUPSPL_BACKUP_*`).
+dell'installazione si mostra in sola lettura: si imposta in `.env` (`CUPSPL_BACKUP_*`).
 
 - Un backup è scritto in `.partial`, **riletto e verificato**, rinominato; solo dopo si tolgono le copie vecchie. *Esegui ora* aggiunge
   una copia senza cancellarne (la pulizia la fa la prossima esecuzione programmata).
-- Se un backup è fallito, o l'ultimo ha più di 48 h, la pagina lo mostra in rosso.
+- Se un backup è fallito, o l'ultimo ha più di 48 h, la pagina lo mostra in rosso **e nella campanella compare un avviso** con il nome del backup (vedi «Avvisi» più sotto). L'avviso si chiude da solo al primo backup riuscito.
 - La rotazione riguarda solo i file con il nome dello stesso gateway e della stessa destinazione.
 - Ogni file è `printgw-<istanza>-t<destinazione>-<ora UTC>.tar.gz` (più `.enc` se cifrato) con un `MANIFEST.json` (sha256 e dimensione
   di ogni parte, versione dell'app, revisione dello schema).
@@ -43,11 +43,12 @@ USB montalo sul server **dentro quella cartella prima di avviare il gateway** (u
    ```
 2. Montalo **prima** di avviare il gateway. Un montaggio fatto dopo non è visto da un contenitore già in esecuzione: riavvialo
    (`docker compose restart gateway`).
-3. Nel modulo del backup scrivi la sottocartella (`nas/...`) e spunta **«La cartella è un disco di rete o USB: scrivi solo se è montato»**
-   *mentre il disco è montato*. Il gateway mette un piccolo file `.printminder-destination` e da quel momento **rifiuta il backup se il
+3. Nel modulo del backup scrivi la sottocartella (`nas/...`) e lascia spuntato **«La cartella è un disco di rete o USB: scrivi solo se è montato»**
+   (è spuntato di default per i backup nuovi) e salva *mentre il disco è montato*. Il gateway mette un piccolo file `.printminder-destination` e da quel momento **rifiuta il backup se il
    file non c'è**. Senza questo, un disco che non si monta lascia una cartella vuota sul disco del server e i backup la riempiono in silenzio
-   (e non sono affatto fuori dalla macchina). Per il backup Generale usa `CUPSPL_BACKUP_REQUIRE_MARKER=true` e crea il file a mano una
-   volta: `touch data/backups/nas/<cartella>/.printminder-destination`.
+   (e non sono affatto fuori dalla macchina). Il backup Generale (quello di `.env`) ha l'opzione spenta di default (`CUPSPL_BACKUP_REQUIRE_MARKER=false`): la sua cartella esiste sempre dentro il
+   contenitore, anche a disco non montato. Se lo fai puntare a un disco di rete, metti `true` e crea il file a mano una volta, a disco montato:
+   `touch data/backups/nas/<cartella>/.printminder-destination`.
 
 Comportamento del gateway con un disco di rete:
 
@@ -60,6 +61,15 @@ Comportamento del gateway con un disco di rete:
   `chmod 600` non ha effetto e chiunque legga la condivisione legge i file. **Usa la cifratura** per i backup su una condivisione.
 - Usa montaggi `soft` (NFS: `soft,timeo=100`; CIFS: `soft`), mai `hard`, così un NAS morto non blocca il server.
 - Il backup è «fuori dalla macchina» solo se la condivisione sta su un'altra macchina. Un disco USB attaccato al server protegge da un disco rotto, non da un incendio.
+
+### Avvisi quando il backup non riesce
+
+Se un backup non riesce, nella campanella degli amministratori compare un avviso con il **nome vero** del backup. Esempio, a disco non montato:
+
+> **Backup non eseguito: la cartella di destinazione non è raggiungibile.** L'ultimo backup di «NAS ufficio» non è stato salvato, perché il disco di rete o USB non risulta collegato. Nessun file è stato scritto. Controlla che sia acceso e montato, poi premi «Esegui ora». Ultimo backup riuscito: 2026-10-12 03:00:04.
+
+Per ogni altro errore (disco pieno, permessi, passphrase…) l'avviso dice «Backup fallito» e il motivo. Il gateway ritenta ogni ora e l'avviso si chiude da solo quando un
+backup riesce. Se vuoi aspettare meno, premi *Esegui ora* dopo aver rimontato il disco.
 
 ### Cifratura
 

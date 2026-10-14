@@ -4,7 +4,7 @@ use these functions; the folder, the encryption and the retention are decided by
 A backup is one file `printgw-<instance>-t<target>-<UTC stamp>.tar.gz` (plus `.enc` when encrypted) holding:
   MANIFEST.json   what is inside, with sha256 and size of each part, app version, schema revision
   gateway.db      a consistent snapshot of the database (SQLite's own backup call: safe while people are printing)
-  config/...      gateway.env and the TLS certificate+key, ONLY when the backup is encrypted (they are secrets)
+  config/...      .env (all the settings) and the TLS certificate+key, ONLY when the backup is encrypted (they are secrets)
 The compressed audit files are immutable and can be large, so they are not repeated in every backup: they are
 copied once into `audit-archive-<instance>/` next to the backups (encrypted the same way).
 Every file is written as *.partial, re-read and verified, and only then renamed: a crash never leaves a half
@@ -43,6 +43,10 @@ MANIFEST = "MANIFEST.json"
 
 class BackupError(RuntimeError):
     pass
+
+
+class NotMounted(BackupError):
+    """The marker file of a network or USB destination is missing: the disk is probably not mounted."""
 
 
 @dataclass
@@ -127,7 +131,7 @@ def make_marker(folder: Path) -> None:
 
 def check_marker(folder: Path) -> None:
     if not (folder / MARKER).is_file():
-        raise BackupError(_("The marker file is missing in this folder: the network disk or USB disk may not be mounted. Nothing was written."))
+        raise NotMounted(_("The marker file is missing in this folder: the network disk or USB disk may not be mounted. Nothing was written."))
 
 
 def existing_folders() -> list[str]:
@@ -193,15 +197,17 @@ def _sha256(path: Path) -> str:
 
 def _config_files() -> list[tuple[str, Path]]:
     base = Path(settings.backup_config_dir)
-    if not base.is_dir():
-        return []
     out = []
-    for p in sorted(base.rglob("*")):
-        if p.is_symlink() or not p.is_file() or p.stat().st_size > MAX_CONFIG_FILE:
-            continue
-        out.append((f"config/{p.relative_to(base).as_posix()}", p))
+    for p in sorted(base.rglob("*")) if base.is_dir() else []:
+        rel = p.relative_to(base)
+        if p.is_symlink() or not p.is_file() or p.stat().st_size > MAX_CONFIG_FILE or any(x.startswith(".cert-sync") for x in rel.parts):
+            continue                                   # (the last: the temporary folder of scripts/cert-sync.sh)
+        out.append((f"config/{rel.as_posix()}", p))
         if len(out) >= MAX_CONFIG_FILES:
             break
+    env = Path(settings.backup_env_file) if settings.backup_env_file else None
+    if env and env.is_file() and not env.is_symlink() and env.stat().st_size <= MAX_CONFIG_FILE:
+        out.append(("config/.env", env))               # all the settings, secrets included: it travels only in encrypted backups
     return out
 
 

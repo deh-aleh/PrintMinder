@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 from starlette.concurrency import run_in_threadpool
 
+from app import notices
 from app.backup import core
 from app.config import settings
 from app.db.models import BackupTarget, GatewaySetting
@@ -19,7 +20,7 @@ from app.i18n import _
 log = logging.getLogger("app.backup")
 RETRY_AFTER = timedelta(hours=1)
 STALE_AFTER = timedelta(hours=48)
-GLOBAL_NAME = "Generale (gateway.env)"
+GLOBAL_NAME = "Generale (.env)"
 _RUN = threading.Lock()  # one backup at a time: they all read the same database
 
 
@@ -39,12 +40,12 @@ def instance_id(db) -> str:
 
 
 def sync_global(db) -> None:
-    """The general backup lives in gateway.env; keep its row in step so the portal and the scheduler treat it alike."""
+    """The general backup lives in .env; keep its row in step so the portal and the scheduler treat it alike."""
     row = db.scalars(select(BackupTarget).where(BackupTarget.is_global)).first()
     if not settings.backup_enabled and row is None:
         return
     if row is None:
-        row = BackupTarget(is_global=True, owner_name="gateway.env", name=GLOBAL_NAME, folder=settings.backup_dir)
+        row = BackupTarget(is_global=True, owner_name=".env", name=GLOBAL_NAME, folder=settings.backup_dir)
         db.add(row)
     want = dict(
         enabled=settings.backup_enabled, folder=settings.backup_dir, require_marker=settings.backup_require_marker, hour=min(max(settings.backup_hour, 0), 23),
@@ -115,11 +116,16 @@ def run_target(sm, target_id: int, *, prune: bool = True) -> tuple[bool, str]:
                 message = str(exc) if isinstance(exc, (core.BackupError, OSError)) else f"{type(exc).__name__}: {exc}"
                 log.error("backup %s (%s) failed: %s", t.id, t.name, message)
                 t.last_status, t.last_error = "error", message[:1000]
+                last_ok = t.last_ok_at
                 db.commit()
+                notices.report(sm, "backup_not_mounted" if isinstance(exc, core.NotMounted) else "backup_failed", str(t.id),
+                               {"name": t.name, "error": message[:300], "last_ok": last_ok.isoformat() if last_ok else None})
                 return False, message
             t.last_status, t.last_error, t.last_ok_at = "ok", None, now
             t.last_file, t.last_size = res.path.name, res.size
             db.commit()
+            for kind in ("backup_not_mounted", "backup_failed"):
+                notices.resolve(sm, kind, str(t.id))
             log.info("backup %s (%s): %s, %d KB, %d audit file(s) copied, %d old removed", t.id, t.name, res.path.name,
                      res.size // 1024, res.mirrored, len(res.removed))
             return True, f"{res.path.name} ({res.size // 1024} KB)"

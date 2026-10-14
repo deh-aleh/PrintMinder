@@ -16,6 +16,9 @@ Ids are never reused. **No portal function deletes a row.** Audit is kept foreve
 Each row has: sequential number (N.), time, user, device (printer queue or scanner), file name, type (print / scan), outcome,
 pages, rejection reason, and options (paper, colour, duplex, source, copies, page range, comment, `via` web / IPP…).
 
+**The file name is encrypted** in the database and you can stop saving it with the green/red button at the top right of the page; with retention (`.env`) it disappears
+after a number of days you choose. The row always stays, with everything else. Details in [data-protection.md](data-protection.md).
+
 | State | Meaning |
 |---|---|
 | `accepted` | Passed the checks and was handed to CUPS or the scanner (printing, queued or in progress). **Already counts toward quota.** |
@@ -64,6 +67,8 @@ The **Audit archive** page (`/admin/archive`) lists archives with the path insid
 (`AUDIT_ARCHIVE_HOST_PATH`, informational), size and sha256; opens them with search and pagination (streaming), **downloads**
 them and **verifies integrity**. It can not delete them. The Audit page shows a banner when archives exist.
 `cups-policy-admin audit-archive [--force]` runs the archiver by hand; `cups-policy-admin jobs` shows the latest rows.
+
+File names in the archive stay **encrypted** (the portal decrypts them when it shows them and when you search); with retention on, rows past the limit are written without the name. Files already written are never modified.
 
 The folder must be writable by the container user; it lives on the host, outside docker volumes, so it can be found and
 copied by hand. It is included in the backups ([backup.md](backup.md)).

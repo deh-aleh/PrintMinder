@@ -1,4 +1,5 @@
 # Production-style stack: ipp-usb + CUPS + gateway, everything in containers.
+# You never edit this file: every setting is in .env (see docker/env.example), so an update can replace this file freely.
 # Nothing is installed on the host and no host CUPS is touched. Setup: scripts/docker-init.sh
 #
 # Two ways to get the images (same file):
@@ -60,7 +61,7 @@ services:
     depends_on:
       cups:
         condition: service_healthy
-    env_file: config/gateway.env
+    env_file: .env
     ports:
       - "${GATEWAY_PORT:-8631}:8631"        # the only thing exposed to the network
     environment:
@@ -75,8 +76,9 @@ services:
       # backups: the only place the gateway may write them. Administrators pick a sub-folder in the portal.
       # To save on a USB disk or a network share, mount it on the host INSIDE this folder (before starting the gateway).
       - ${BACKUP_DIR:-./data/backups}:/backups
-      # read-only: lets encrypted backups include gateway.env and the TLS key (never written into a plain backup)
+      # read-only: lets encrypted backups include .env and the TLS key (never written into a plain backup)
       - ./config:/config:ro
+      - ./.env:/project.env:ro
     read_only: true
     tmpfs: [/tmp]
     cap_drop: [ALL]
@@ -90,7 +92,7 @@ services:
     restart: unless-stopped
     depends_on: [gateway]
     network_mode: host
-    env_file: config/gateway.env
+    env_file: .env
     environment:
       CUPSPL_MDNS_PORT: ${GATEWAY_PORT:-8631}
     volumes:
@@ -119,7 +121,7 @@ services:
     security_opt: ["no-new-privileges:true"]
 
   # Only for trying the stack: users mario/mario123, anna/anna123, admin/admin123, secret testing123.
-  # Point config/gateway.env at it with CUPSPL_RADIUS_HOST=radius, CUPSPL_RADIUS_SECRET=testing123.
+  # Point .env at it with CUPSPL_RADIUS_HOST=radius, CUPSPL_RADIUS_SECRET=testing123.
   # (RADIUS is optional: with host/secret empty only local accounts exist.)
   radius:
     image: freeradius/freeradius-server:latest

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-14 00:41+0200\n"
+"POT-Creation-Date: 2026-10-14 14:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -121,27 +121,27 @@ msgstr "已拒绝"
 msgid "expired"
 msgstr "已过期"
 
-#: app/admin/templates/jobs.html:89 app/i18n.py:165
+#: app/admin/templates/jobs.html:95 app/i18n.py:165
 msgid "canceled"
 msgstr "已取消"
 
-#: app/admin/templates/jobs.html:85 app/i18n.py:166
+#: app/admin/templates/jobs.html:91 app/i18n.py:166
 msgid "accepted"
 msgstr "已接受"
 
-#: app/admin/templates/jobs.html:87 app/i18n.py:166
+#: app/admin/templates/jobs.html:93 app/i18n.py:166
 msgid "denied"
 msgstr "已拒绝"
 
-#: app/admin/templates/jobs.html:86 app/i18n.py:166
+#: app/admin/templates/jobs.html:92 app/i18n.py:166
 msgid "completed"
 msgstr "已完成"
 
-#: app/admin/templates/jobs.html:88 app/i18n.py:166
+#: app/admin/templates/jobs.html:94 app/i18n.py:166
 msgid "failed"
 msgstr "失败"
 
-#: app/admin/templates/jobs.html:90 app/i18n.py:166
+#: app/admin/templates/jobs.html:96 app/i18n.py:166
 msgid "held"
 msgstr "已挂起"
 
@@ -179,7 +179,7 @@ msgstr "作业"
 msgid "pages"
 msgstr "页"
 
-#: app/admin/templates/backup_edit.html:17 app/admin/templates/backups.html:88
+#: app/admin/templates/backup_edit.html:17 app/admin/templates/backups.html:89
 #: app/admin/templates/group_edit.html:13 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:14 app/admin/templates/request_quota.html:14
 #: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:19
@@ -187,7 +187,7 @@ msgstr "页"
 msgid "weekly"
 msgstr "每周"
 
-#: app/admin/templates/backup_edit.html:18 app/admin/templates/backups.html:89
+#: app/admin/templates/backup_edit.html:18 app/admin/templates/backups.html:90
 #: app/admin/templates/group_edit.html:13 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:14 app/admin/templates/request_quota.html:14
 #: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:19
@@ -472,7 +472,7 @@ msgstr "打印机默认"
 msgid "Sides"
 msgstr "单双面"
 
-#: app/admin/audit_view.py:39 app/admin/templates/jobs.html:19
+#: app/admin/audit_view.py:39 app/admin/templates/jobs.html:24
 #: app/admin/templates/scan.html:34
 msgid "File name"
 msgstr "文件名"
@@ -490,7 +490,7 @@ msgid "Format"
 msgstr "格式"
 
 #: app/admin/audit_view.py:47 app/admin/templates/backup_edit.html:15
-#: app/admin/templates/backups.html:86 app/admin/templates/print.html:51
+#: app/admin/templates/backups.html:87 app/admin/templates/print.html:51
 msgid "Copies"
 msgstr "副本"
 
@@ -590,40 +590,40 @@ msgstr "备份失败：%(message)s"
 msgid "Backup “%(name)s” deleted. The files already written in the folder stay where they are"
 msgstr "已删除备份“%(name)s”。文件夹中已写入的文件会保留在原处"
 
-#: app/admin/common.py:130
+#: app/admin/common.py:139
 #, python-format
 msgid "invalid limit %(value)s"
 msgstr "限额无效：%(value)s"
 
-#: app/admin/common.py:133
+#: app/admin/common.py:142
 #, python-format
 msgid "limit too large (max %(max)s)"
 msgstr "限额过大（最大 %(max)s）"
 
-#: app/admin/controls.py:32
+#: app/admin/controls.py:33
 msgid "Gateway in maintenance: printing and scanning stopped for users, printers hidden from the network (within ~30 s)"
 msgstr "网关已进入维护模式：用户的打印和扫描已停止，打印机将在约 30 秒内从网络中隐藏"
 
-#: app/admin/controls.py:33
+#: app/admin/controls.py:34
 msgid "Maintenance over: the gateway is operational again"
 msgstr "维护已结束：网关恢复运行"
 
-#: app/admin/controls.py:54
+#: app/admin/controls.py:55
 #, python-format
 msgid "%(name)s blocked: nobody can print on it, not even the administrators"
 msgstr "已封锁 %(name)s：任何人都无法使用它打印，包括管理员"
 
-#: app/admin/controls.py:55
+#: app/admin/controls.py:56
 #, python-format
 msgid "%(name)s unblocked: usable again"
 msgstr "已解除对 %(name)s 的封锁：可以再次使用"
 
-#: app/admin/controls.py:62
+#: app/admin/controls.py:63
 #, python-format
 msgid "%(name)s will no longer be announced on the network (mDNS) within ~30 s; it stays usable by whoever knows it"
 msgstr "%(name)s 将在约 30 秒内不再在网络（mDNS）中公布；知道它的人仍然可以使用"
 
-#: app/admin/controls.py:63
+#: app/admin/controls.py:64
 #, python-format
 msgid "%(name)s will be announced on the network (mDNS) again within ~30 s"
 msgstr "%(name)s 将在约 30 秒内重新在网络（mDNS）中公布"
@@ -650,6 +650,7 @@ msgid "move to group %(name)s"
 msgstr "转入群组 %(name)s"
 
 #: app/admin/me.py:83 app/admin/templates/keys.html:13
+#: app/admin/templates/notices.html:17 app/admin/templates/notices.html:19
 msgid "never"
 msgstr "从不"
 
@@ -957,8 +958,8 @@ msgstr "剩余墨水"
 
 #: app/admin/printers.py:473 app/admin/printers.py:479
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/grants.html:8 app/admin/templates/jobs.html:28
-#: app/admin/templates/jobs.html:50 app/admin/templates/keys.html:8
+#: app/admin/templates/grants.html:8 app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:56 app/admin/templates/keys.html:8
 #: app/admin/templates/keys.html:15 app/admin/templates/me.html:47
 #: app/admin/templates/printers.html:176 app/admin/templates/requests.html:37
 #: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:9
@@ -1119,40 +1120,48 @@ msgstr "已为 %(user)s 创建额度授予"
 msgid "Grant revoked"
 msgstr "已撤销额度授予"
 
-#: app/admin/routes.py:50
+#: app/admin/routes.py:52
 msgid "Too many failed attempts, retry later"
 msgstr "失败次数过多，请稍后再试"
 
-#: app/admin/routes.py:56
+#: app/admin/routes.py:58
 msgid "Invalid credentials"
 msgstr "凭据无效"
 
-#: app/admin/routes.py:109
+#: app/admin/routes.py:111
 msgid "Too many wrong codes, retry later"
 msgstr "错误验证码次数过多，请稍后再试"
 
-#: app/admin/routes.py:114
+#: app/admin/routes.py:116
 msgid "Wrong code. It is in the gateway log (docker compose logs gateway)"
 msgstr "验证码错误。它在网关日志中（docker compose logs gateway）"
 
-#: app/admin/routes.py:117
+#: app/admin/routes.py:119
 msgid "the two passwords differ"
 msgstr "两次输入的密码不一致"
 
-#: app/admin/routes.py:138
+#: app/admin/routes.py:140
 #, python-format
 msgid "Password set. Log in as %(name)s."
 msgstr "密码已设置。请以 %(name)s 登录。"
 
-#: app/admin/routes.py:224
+#: app/admin/routes.py:227
+msgid "From now on the names of new files are saved"
+msgstr "从现在起会保存新文件的文件名"
+
+#: app/admin/routes.py:228
+msgid "From now on the names of new files are not saved"
+msgstr "从现在起不再保存新文件的文件名"
+
+#: app/admin/routes.py:251
 msgid "That job is not waiting in a queue"
 msgstr "该作业没有在队列中等待"
 
-#: app/admin/routes.py:244
+#: app/admin/routes.py:271
 msgid "Cancel requested"
 msgstr "已请求取消"
 
-#: app/admin/routes.py:244
+#: app/admin/routes.py:271
 msgid "CUPS did not accept the cancel (already printed?)"
 msgstr "CUPS 没有接受取消请求（已经打印完了？）"
 
@@ -1203,13 +1212,13 @@ msgstr "操作人（管理员）"
 msgid "Action (e.g. user.update)"
 msgstr "操作（如 user.update）"
 
-#: app/admin/templates/actions.html:8 app/admin/templates/jobs.html:24
+#: app/admin/templates/actions.html:8 app/admin/templates/jobs.html:29
 msgid "Filter"
 msgstr "筛选"
 
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:11
-#: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:47
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:32
+#: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:38
 #: app/admin/templates/me.html:47 app/admin/templates/requests.html:7
 #: app/admin/templates/requests.html:37
 msgid "When"
@@ -1220,7 +1229,7 @@ msgid "Who"
 msgstr "操作人"
 
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:15
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:43
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:49
 msgid "Action"
 msgstr "操作"
 
@@ -1233,18 +1242,18 @@ msgid "No actions."
 msgstr "没有操作记录。"
 
 #: app/admin/templates/actions.html:20 app/admin/templates/archive_view.html:22
-#: app/admin/templates/jobs.html:76
+#: app/admin/templates/jobs.html:82
 msgid "Previous"
 msgstr "上一页"
 
 #: app/admin/templates/actions.html:21 app/admin/templates/archive_view.html:23
-#: app/admin/templates/jobs.html:77
+#: app/admin/templates/jobs.html:83
 #, python-format
 msgid "Page %(page)s / %(pages)s"
 msgstr "第 %(page)s / %(pages)s 页"
 
 #: app/admin/templates/actions.html:22 app/admin/templates/archive_view.html:24
-#: app/admin/templates/jobs.html:78
+#: app/admin/templates/jobs.html:84
 msgid "Next"
 msgstr "下一页"
 
@@ -1274,7 +1283,7 @@ msgid "Current size of the active tables:"
 msgstr "活动数据表当前大小："
 
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:52
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:58
 msgid "File"
 msgstr "文件"
 
@@ -1358,8 +1367,8 @@ msgid "%(n)s results"
 msgstr "%(n)s 条结果"
 
 #: app/admin/templates/archive_view.html:11 app/admin/templates/grants.html:8
-#: app/admin/templates/jobs.html:18 app/admin/templates/jobs.html:28
-#: app/admin/templates/jobs.html:33 app/admin/templates/login.html:8
+#: app/admin/templates/jobs.html:23 app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:39 app/admin/templates/login.html:8
 #: app/admin/templates/requests.html:7 app/admin/templates/requests.html:37
 #: app/admin/templates/settings.html:6 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:12
@@ -1377,8 +1386,8 @@ msgstr "打印机"
 msgid "Pages"
 msgstr "页数"
 
-#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:28
-#: app/admin/templates/jobs.html:62
+#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:68
 msgid "Notes"
 msgstr "备注"
 
@@ -1404,13 +1413,13 @@ msgstr "编辑备份"
 msgid "Edit backup “%(name)s”"
 msgstr "编辑备份“%(name)s”"
 
-#: app/admin/templates/backup_edit.html:8 app/admin/templates/backups.html:79
+#: app/admin/templates/backup_edit.html:8 app/admin/templates/backups.html:80
 #: app/admin/templates/group_edit.html:10
 msgid "Name"
 msgstr "名称"
 
-#: app/admin/templates/backup_edit.html:9 app/admin/templates/backups.html:46
-#: app/admin/templates/backups.html:80
+#: app/admin/templates/backup_edit.html:9 app/admin/templates/backups.html:47
+#: app/admin/templates/backups.html:81
 msgid "Folder"
 msgstr "文件夹"
 
@@ -1419,28 +1428,28 @@ msgstr "文件夹"
 msgid "inside %(root)s. Copies already written stay in the old folder."
 msgstr "位于 %(root)s 内。已写入的备份仍保留在旧文件夹中。"
 
-#: app/admin/templates/backup_edit.html:12 app/admin/templates/backups.html:83
+#: app/admin/templates/backup_edit.html:12 app/admin/templates/backups.html:84
 msgid "Safety"
 msgstr "安全"
 
-#: app/admin/templates/backup_edit.html:12 app/admin/templates/backups.html:83
+#: app/admin/templates/backup_edit.html:12 app/admin/templates/backups.html:84
 msgid "The folder is a network disk or USB disk: write only if it is mounted"
 msgstr "该文件夹是网络盘或 USB 盘:仅在已挂载时写入"
 
-#: app/admin/templates/backup_edit.html:13 app/admin/templates/backups.html:84
-msgid "Tick this only while the disk is mounted now. The gateway puts a small marker file in the folder and refuses to back up when it is not there, so an unmounted disk never fills the server disk with copies."
-msgstr "仅在磁盘当前已挂载时勾选。网关会在文件夹中放一个小标记文件,缺失时拒绝备份,这样未挂载的磁盘不会让服务器磁盘塞满备份。"
+#: app/admin/templates/backup_edit.html:13 app/admin/templates/backups.html:85
+msgid "Leave this ticked for a network disk or USB disk, and save while the disk is mounted now. The gateway puts a small marker file in the folder and refuses to back up when it is not there, so an unmounted disk never fills the server disk with copies."
+msgstr "对于网络磁盘或 USB 磁盘请保持勾选，并在磁盘已挂载时保存。网关会在文件夹中放一个小标记文件，找不到它就拒绝备份，这样磁盘未挂载时不会把服务器磁盘塞满备份。"
 
-#: app/admin/templates/backup_edit.html:14 app/admin/templates/backups.html:85
+#: app/admin/templates/backup_edit.html:14 app/admin/templates/backups.html:86
 msgid "Time"
 msgstr "时间"
 
-#: app/admin/templates/backup_edit.html:16 app/admin/templates/backups.html:87
+#: app/admin/templates/backup_edit.html:16 app/admin/templates/backups.html:88
 msgid "daily"
 msgstr "每日"
 
-#: app/admin/templates/backup_edit.html:19 app/admin/templates/backups.html:49
-#: app/admin/templates/backups.html:90
+#: app/admin/templates/backup_edit.html:19 app/admin/templates/backups.html:50
+#: app/admin/templates/backups.html:91
 msgid "Encryption"
 msgstr "加密"
 
@@ -1468,7 +1477,7 @@ msgid "Save"
 msgstr "保存"
 
 #: app/admin/templates/backup_edit.html:22
-#: app/admin/templates/group_edit.html:16 app/admin/templates/jobs.html:70
+#: app/admin/templates/group_edit.html:16 app/admin/templates/jobs.html:76
 #: app/admin/templates/me.html:52 app/admin/templates/print.html:57
 #: app/admin/templates/printers.html:93
 #: app/admin/templates/request_group.html:15
@@ -1503,8 +1512,8 @@ msgid "suspended"
 msgstr "已暂停"
 
 #: app/admin/templates/backups.html:7
-msgid "Each administrator can set up <b>their own</b> backups: destination folder, time, how many copies to keep and encryption. Each one saves the database, the audit archive and (only if encrypted) the configuration and the certificate. The <b>General</b> backup is set in the file <span class=\"mono\">gateway.env</span>."
-msgstr "每位管理员都可以设置<b>自己的</b>备份：目标文件夹、时间、保留多少份以及加密方式。每个备份都会保存数据库、审计归档，以及（仅在加密时）配置和证书。<b>通用</b>备份在文件 <span class=\"mono\">gateway.env</span> 中设置。"
+msgid "Each administrator can set up <b>their own</b> backups: destination folder, time, how many copies to keep and encryption. Each one saves the database, the audit archive and (only if encrypted) the configuration and the certificate. The <b>General</b> backup is set in the file <span class=\"mono\">.env</span>."
+msgstr "每位管理员都可以设置<b>自己的</b>备份：目标文件夹、时间、保留多少份以及加密方式。每个备份都会保存数据库、审计归档，以及（仅在加密时）配置和证书。<b>通用</b>备份在文件 <span class=\"mono\">.env</span> 中设置。"
 
 #: app/admin/templates/backups.html:8
 #, python-format
@@ -1590,8 +1599,8 @@ msgid "A backup is made first (%(name)s)."
 msgstr "会先备份(%(name)s)。"
 
 #: app/admin/templates/backups.html:31
-msgid "Updating from the portal is off: the updater container is not running. Start it with “docker compose --profile autoupdate up -d”, or update from a terminal with scripts/update.sh."
-msgstr "门户内更新已关闭:updater 容器未运行。用“docker compose --profile autoupdate up -d”启动它,或在终端运行 scripts/update.sh 更新。"
+msgid "Updating from the portal is off: the updater container is not running. It is off on purpose: whoever controls it controls Docker, which is the same as full control (root) of this server. If you accept that, start it with “docker compose --profile autoupdate up -d”; otherwise update from a terminal with scripts/update.sh."
+msgstr "门户内更新已关闭：updater 容器没有运行。这是有意关闭的：控制它的人就控制了 Docker，等同于完全控制（root）这台服务器。如果您接受这一点，请用“docker compose --profile autoupdate up -d”启动它；否则请在终端中用 scripts/update.sh 更新。"
 
 #: app/admin/templates/backups.html:32
 msgid "Updating from the portal needs a scheduled backup that is on and worked in the last 48 hours. Set one up below."
@@ -1601,170 +1610,174 @@ msgstr "门户内更新需要一个已启用、且最近 48 小时内成功运�
 msgid "An update is already waiting for the updater."
 msgstr "已有一个更新在等待 updater 处理。"
 
-#: app/admin/templates/backups.html:41
+#: app/admin/templates/backups.html:36
+msgid "The updater container is running. It controls Docker, which is the same as full control (root) of this server. If you do not need updates from the portal, stop it with “docker compose stop updater”."
+msgstr "updater 容器正在运行。它控制 Docker，等同于完全控制（root）这台服务器。如果您不需要在门户内更新，请用“docker compose stop updater”停止它。"
+
+#: app/admin/templates/backups.html:42
 msgid "mine"
 msgstr "我的"
 
-#: app/admin/templates/backups.html:45
+#: app/admin/templates/backups.html:46
 msgid "Owner"
 msgstr "所有者"
 
-#: app/admin/templates/backups.html:46
+#: app/admin/templates/backups.html:47
 msgid "only written while mounted"
 msgstr "仅在已挂载时写入"
 
-#: app/admin/templates/backups.html:47
+#: app/admin/templates/backups.html:48
 #, python-format
 msgid "every day at %(hour)s:00"
 msgstr "每天 %(hour)s:00"
 
-#: app/admin/templates/backups.html:48
+#: app/admin/templates/backups.html:49
 msgid "Copies kept"
 msgstr "保留的副本"
 
-#: app/admin/templates/backups.html:48
+#: app/admin/templates/backups.html:49
 #, python-format
 msgid "%(d)s daily · %(w)s weekly · %(m)s monthly"
 msgstr "%(d)s 个每日 · %(w)s 个每周 · %(m)s 个每月"
 
-#: app/admin/templates/backups.html:49
+#: app/admin/templates/backups.html:50
 msgid "<b>none</b> — no secrets in the file (neither the TLS key nor <span class=\"mono\">SECRET_KEY</span>); whoever can read the folder reads users and audit"
 msgstr "<b>无</b> — 文件中不含机密（既没有 TLS 密钥也没有 <span class=\"mono\">SECRET_KEY</span>）；任何能读取该文件夹的人都能读到用户和审计信息"
 
-#: app/admin/templates/backups.html:50
+#: app/admin/templates/backups.html:51
 msgid "passphrase chosen by the administrator (the gateway does not keep it)"
 msgstr "管理员选择的口令短语（网关不会保存）"
 
-#: app/admin/templates/backups.html:50
+#: app/admin/templates/backups.html:51
 msgid "recovery key (<span class=\"mono\">backup-key</span>)"
 msgstr "恢复密钥（<span class=\"mono\">backup-key</span>）"
 
-#: app/admin/templates/backups.html:51
+#: app/admin/templates/backups.html:52
 msgid "Last result"
 msgstr "最近结果"
 
-#: app/admin/templates/backups.html:52
+#: app/admin/templates/backups.html:53
 #, python-format
 msgid "succeeded on %(when)s — <span class=\"mono\">%(file)s</span> (%(size)s MB)"
 msgstr "%(when)s 成功 — <span class=\"mono\">%(file)s</span>（%(size)s MB）"
 
-#: app/admin/templates/backups.html:52
+#: app/admin/templates/backups.html:53
 msgid "never succeeded"
 msgstr "从未成功"
 
-#: app/admin/templates/backups.html:53
+#: app/admin/templates/backups.html:54
 #, python-format
 msgid "Last attempt failed (%(when)s): %(error)s"
 msgstr "最近一次尝试失败（%(when)s）：%(error)s"
 
-#: app/admin/templates/backups.html:58
+#: app/admin/templates/backups.html:59
 #, python-format
 msgid "%(count)s copies in the folder (latest %(shown)s)"
 msgstr "文件夹中共 %(count)s 个副本（最近 %(shown)s 个）"
 
-#: app/admin/templates/backups.html:62
+#: app/admin/templates/backups.html:63
 msgid "Run now"
 msgstr "立即执行"
 
-#: app/admin/templates/backups.html:64 app/admin/templates/groups.html:18
+#: app/admin/templates/backups.html:65 app/admin/templates/groups.html:18
 #: app/admin/templates/users.html:22
 msgid "Edit"
 msgstr "编辑"
 
-#: app/admin/templates/backups.html:65
+#: app/admin/templates/backups.html:66
 msgid "Suspend"
 msgstr "暂停"
 
-#: app/admin/templates/backups.html:65
+#: app/admin/templates/backups.html:66
 msgid "Activate"
 msgstr "启用"
 
-#: app/admin/templates/backups.html:66
+#: app/admin/templates/backups.html:67
 msgid "Delete this scheduled backup? The files already written stay in the folder."
 msgstr "要删除这个计划备份吗？已写入的文件会保留在文件夹中。"
 
-#: app/admin/templates/backups.html:67 app/admin/templates/groups.html:20
+#: app/admin/templates/backups.html:68 app/admin/templates/groups.html:20
 #: app/admin/templates/printers.html:124
 msgid "Delete"
 msgstr "删除"
 
-#: app/admin/templates/backups.html:68
+#: app/admin/templates/backups.html:69
 #, python-format
 msgid "belongs to %(owner)s"
 msgstr "属于 %(owner)s"
 
-#: app/admin/templates/backups.html:68
-msgid "edited in gateway.env"
-msgstr "在 gateway.env 中修改"
+#: app/admin/templates/backups.html:69
+msgid "edited in .env"
+msgstr "在 .env 中修改"
 
-#: app/admin/templates/backups.html:72
+#: app/admin/templates/backups.html:73
 msgid "No backup configured."
 msgstr "尚未配置备份。"
 
-#: app/admin/templates/backups.html:72
+#: app/admin/templates/backups.html:73
 msgid "If the disk breaks, users, keys, quotas and audit are lost. Create one below."
 msgstr "如果磁盘损坏，用户、密钥、配额和审计记录都会丢失。请在下方创建一个备份。"
 
-#: app/admin/templates/backups.html:76
+#: app/admin/templates/backups.html:77
 msgid "New backup"
 msgstr "新建备份"
 
-#: app/admin/templates/backups.html:79
+#: app/admin/templates/backups.html:80
 msgid "e.g. Office NAS"
 msgstr "例如：办公室 NAS"
 
-#: app/admin/templates/backups.html:80
+#: app/admin/templates/backups.html:81
 #, python-format
 msgid "e.g. nas/%(user)s"
 msgstr "例如：nas/%(user)s"
 
-#: app/admin/templates/backups.html:82
+#: app/admin/templates/backups.html:83
 #, python-format
 msgid "inside %(root)s; the gateway creates it if missing"
 msgstr "位于 %(root)s 内；若不存在，网关会自动创建"
 
-#: app/admin/templates/backups.html:91 app/admin/templates/backups.html:97
+#: app/admin/templates/backups.html:92 app/admin/templates/backups.html:98
 msgid "Passphrase"
 msgstr "口令短语"
 
-#: app/admin/templates/backups.html:91
+#: app/admin/templates/backups.html:92
 msgid "recommended"
 msgstr "推荐"
 
-#: app/admin/templates/backups.html:92
+#: app/admin/templates/backups.html:93
 msgid "Ready-made recovery key"
 msgstr "已有的恢复密钥"
 
-#: app/admin/templates/backups.html:93
+#: app/admin/templates/backups.html:94
 msgid "None"
 msgstr "无"
 
-#: app/admin/templates/backups.html:97
+#: app/admin/templates/backups.html:98
 #, python-format
 msgid "at least %(n)s characters"
 msgstr "至少 %(n)s 个字符"
 
-#: app/admin/templates/backups.html:98
+#: app/admin/templates/backups.html:99
 msgid "Repeat"
 msgstr "重复"
 
-#: app/admin/templates/backups.html:100
+#: app/admin/templates/backups.html:101
 msgid "<b>Do not use your account password:</b> the gateway does not know it (it only stores a hash), it changes over time, and for a RADIUS user it is not even theirs. Choose a dedicated one and keep it in a safe place (password manager). The gateway <b>does not store it</b>: it writes the backups without asking for it, but <b>without it nobody can open them</b>, not even another administrator."
 msgstr "<b>请勿使用您的账户密码：</b>网关并不知道它（只保存哈希值），它会随时间变化，对 RADIUS 用户来说甚至不归其所有。请专门设置一个口令并妥善保管（如密码管理器）。网关<b>不会保存它</b>：写入备份时不会向您询问，但<b>没有它任何人都无法打开备份</b>，包括其他管理员。"
 
-#: app/admin/templates/backups.html:103
+#: app/admin/templates/backups.html:104
 msgid "Key"
 msgstr "密钥"
 
-#: app/admin/templates/backups.html:104
+#: app/admin/templates/backups.html:105
 msgid "created on the server with <span class=\"mono\">docker compose exec -it gateway cups-policy-admin backup-key</span>: the passphrase never goes through the portal"
 msgstr "在服务器上用 <span class=\"mono\">docker compose exec -it gateway cups-policy-admin backup-key</span> 创建：口令短语不会经过门户"
 
-#: app/admin/templates/backups.html:106
+#: app/admin/templates/backups.html:107
 msgid "Without encryption the file contains the database (users, names of printed files). That is why the secrets are <b>not</b> saved: the TLS key, <span class=\"mono\">SECRET_KEY</span> and the RADIUS secret must be kept separately."
 msgstr "不加密时，文件中包含数据库（用户、已打印文件的名称）。因此<b>不会</b>保存机密：TLS 密钥、<span class=\"mono\">SECRET_KEY</span> 和 RADIUS 密钥需另行保管。"
 
-#: app/admin/templates/backups.html:107
+#: app/admin/templates/backups.html:108
 msgid "Create backup"
 msgstr "创建备份"
 
@@ -2080,157 +2093,182 @@ msgstr "较早的打印记录不再显示在此表中。"
 msgid "View, download or verify the archives →"
 msgstr "查看、下载或验证归档 →"
 
-#: app/admin/templates/jobs.html:13
+#: app/admin/templates/jobs.html:14
+msgid "Stop saving the names of the files? From now on new prints and scans will be listed without a file name. The names already saved stay. You can turn it on again at any time."
+msgstr "停止保存文件名吗？从现在起，新的打印和扫描将不带文件名显示。已保存的文件名会保留。您可以随时重新开启。"
+
+#: app/admin/templates/jobs.html:16
+msgid "Click to stop saving the names of new files"
+msgstr "点击停止保存新文件的文件名"
+
+#: app/admin/templates/jobs.html:16
+msgid "Click to start saving the names of new files again"
+msgstr "点击重新开始保存新文件的文件名"
+
+#: app/admin/templates/jobs.html:16
+msgid "File names are being saved"
+msgstr "文件名：正在保存"
+
+#: app/admin/templates/jobs.html:16
+msgid "File names are not being saved"
+msgstr "文件名：不保存"
+
+#: app/admin/templates/jobs.html:18
 msgid "Print and scan audit"
 msgstr "打印和扫描审计"
 
-#: app/admin/templates/jobs.html:15
+#: app/admin/templates/jobs.html:20
 msgid "change it in the settings"
 msgstr "在设置中修改"
 
-#: app/admin/templates/jobs.html:15
+#: app/admin/templates/jobs.html:20
 msgid "30 actions per page"
 msgstr "每页 30 条"
 
-#: app/admin/templates/jobs.html:21
+#: app/admin/templates/jobs.html:26
 msgid "All states"
 msgstr "所有状态"
 
-#: app/admin/templates/jobs.html:25
+#: app/admin/templates/jobs.html:30
 msgid "Export CSV"
 msgstr "导出 CSV"
 
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:31
+#: app/admin/templates/jobs.html:32
+#, python-format
+msgid "The search by file name looks in the latest %(n)s actions that match the other filters."
+msgstr "按文件名搜索只查看符合其他筛选条件的最近 %(n)s 条操作。"
+
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:37
 msgid "No."
 msgstr "编号"
 
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:42
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:48
 #: app/admin/templates/me.html:35
 msgid "Device"
 msgstr "设备"
 
-#: app/admin/templates/jobs.html:28
+#: app/admin/templates/jobs.html:34
 msgid "What the states mean"
 msgstr "各状态的含义"
 
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:51
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:57
 msgid "Pg."
 msgstr "页"
 
-#: app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:40
 msgid "Where the scan came from"
 msgstr "扫描来自哪里"
 
-#: app/admin/templates/jobs.html:36
+#: app/admin/templates/jobs.html:42
 #, python-format
 msgid "Scan without sign-in · no. %(id)s"
 msgstr "未登录的扫描 · 编号 %(id)s"
 
-#: app/admin/templates/jobs.html:37
+#: app/admin/templates/jobs.html:43
 #, python-format
 msgid "Whoever scanned did not sign in: they are recorded as “%(name)s”. This is all that is known about them."
 msgstr "扫描者没有登录：记录为“%(name)s”。以下就是已知的全部信息。"
 
-#: app/admin/templates/jobs.html:38
+#: app/admin/templates/jobs.html:44
 msgid "IP address"
 msgstr "IP 地址"
 
-#: app/admin/templates/jobs.html:39
+#: app/admin/templates/jobs.html:45
 msgid "Host name"
 msgstr "主机名"
 
-#: app/admin/templates/jobs.html:39
+#: app/admin/templates/jobs.html:45
 msgid "not available (no name registered in the DNS)"
 msgstr "不可用（DNS 中没有注册名称）"
 
-#: app/admin/templates/jobs.html:40 app/admin/templates/jobs.html:48
-#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:66
-#: app/admin/templates/jobs.html:92 app/admin/templates/printers.html:41
+#: app/admin/templates/jobs.html:46 app/admin/templates/jobs.html:54
+#: app/admin/templates/jobs.html:66 app/admin/templates/jobs.html:72
+#: app/admin/templates/jobs.html:98 app/admin/templates/printers.html:41
 #: app/admin/templates/printers.html:66
 msgid "Close"
 msgstr "关闭"
 
-#: app/admin/templates/jobs.html:43 app/admin/templates/scan.html:18
+#: app/admin/templates/jobs.html:49 app/admin/templates/scan.html:18
 msgid "scan"
 msgstr "扫描"
 
-#: app/admin/templates/jobs.html:43
+#: app/admin/templates/jobs.html:49
 msgid "Scanned with the automatic document feeder (ADF)"
 msgstr "使用自动进纸器（ADF）扫描"
 
-#: app/admin/templates/jobs.html:43
+#: app/admin/templates/jobs.html:49
 msgid "print"
 msgstr "打印"
 
-#: app/admin/templates/jobs.html:44
+#: app/admin/templates/jobs.html:50
 msgid "Specifications of this print"
 msgstr "此次打印的详细参数"
 
-#: app/admin/templates/jobs.html:46
+#: app/admin/templates/jobs.html:52
 #, python-format
 msgid "Print specifications · no. %(id)s"
 msgstr "打印参数 · 编号 %(id)s"
 
-#: app/admin/templates/jobs.html:54 app/admin/templates/jobs.html:55
-#: app/admin/templates/jobs.html:56
+#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:61
+#: app/admin/templates/jobs.html:62
 msgid "Show all"
 msgstr "显示全部"
 
-#: app/admin/templates/jobs.html:54 app/admin/templates/jobs.html:55
+#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:61
 msgid "Show the complete information of the file"
 msgstr "显示文件的完整信息"
 
-#: app/admin/templates/jobs.html:56
+#: app/admin/templates/jobs.html:62
 msgid "Show the complete comment"
 msgstr "显示完整备注"
 
-#: app/admin/templates/jobs.html:58
+#: app/admin/templates/jobs.html:64
 #, python-format
 msgid "File · no. %(id)s"
 msgstr "文件 · 编号 %(id)s"
 
-#: app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:68
 msgid "Show and copy the whole note"
 msgstr "显示并复制完整备注"
 
-#: app/admin/templates/jobs.html:64
+#: app/admin/templates/jobs.html:70
 #, python-format
 msgid "Note · no. %(id)s"
 msgstr "备注 · 编号 %(id)s"
 
-#: app/admin/templates/jobs.html:69
+#: app/admin/templates/jobs.html:75
 msgid "Cancel this queued job?"
 msgstr "要取消这个排队中的作业吗？"
 
-#: app/admin/templates/jobs.html:72
+#: app/admin/templates/jobs.html:78
 msgid "No jobs."
 msgstr "没有作业。"
 
-#: app/admin/templates/jobs.html:83
+#: app/admin/templates/jobs.html:89
 msgid "States of a print or scan"
 msgstr "打印或扫描的状态"
 
-#: app/admin/templates/jobs.html:85
+#: app/admin/templates/jobs.html:91
 msgid "<b>Accepted.</b> It passed the checks (identity, quota, blocks, maintenance) and was handed to CUPS or the scanner: it is printing, queued or in progress. It already counts toward the quota."
 msgstr "<b>已接受。</b>已通过检查（身份、配额、封锁、维护），并交给 CUPS 或扫描仪：正在打印、排队或进行中。已计入配额。"
 
-#: app/admin/templates/jobs.html:86
+#: app/admin/templates/jobs.html:92
 msgid "<b>Completed.</b> Print finished (CUPS confirms it) or scan delivered. The real pages replace the estimate made before printing."
 msgstr "<b>已完成。</b>打印结束（CUPS 已确认）或扫描已交付。实际页数会取代打印前的估算值。"
 
-#: app/admin/templates/jobs.html:87
+#: app/admin/templates/jobs.html:93
 msgid "<b>Denied.</b> The gateway refused it and nothing started: quota used up, printer blocked, gateway in maintenance, invalid file… The reason is in the Notes column. It does not count toward the quota."
 msgstr "<b>已拒绝。</b>网关拒绝了该请求，没有任何内容开始执行：配额用完、打印机被封锁、网关处于维护模式、文件无效等。原因见“备注”列。不计入配额。"
 
-#: app/admin/templates/jobs.html:88
+#: app/admin/templates/jobs.html:94
 msgid "<b>Failed.</b> It had been accepted but the printer or scanner could not carry it out (CUPS reported an error, the device did not answer). It does not count toward the quota."
 msgstr "<b>失败。</b>已被接受，但打印机或扫描仪未能执行（CUPS 报错，或设备没有响应）。不计入配额。"
 
-#: app/admin/templates/jobs.html:89
+#: app/admin/templates/jobs.html:95
 msgid "<b>Canceled.</b> Stopped before printing, by the user, by an administrator (“Cancel”) or by the scanning program. The quota is freed."
 msgstr "<b>已取消。</b>在打印前被用户、管理员（“取消”）或扫描程序终止。配额已释放。"
 
-#: app/admin/templates/jobs.html:90
+#: app/admin/templates/jobs.html:96
 msgid "<b>On hold.</b> CUPS is holding it (queue paused or waiting for someone to act). Until it restarts it counts toward the quota."
 msgstr "<b>挂起。</b>CUPS 暂时保留该作业（队列已暂停或在等待人工处理）。在恢复之前仍计入配额。"
 
@@ -2517,7 +2555,7 @@ msgstr "最近一次"
 msgid "What happened"
 msgstr "发生了什么"
 
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:18
+#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:32
 msgid "Times"
 msgstr "次数"
 
@@ -2528,31 +2566,71 @@ msgstr "首次:%(t)s"
 
 #: app/admin/templates/notices.html:15
 #, python-format
-msgid "A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">config/gateway.env</span> and run <span class=\"mono\">docker compose up -d</span>."
-msgstr "来自 <span class=\"mono\">%(ip)s</span> 的无用户名和密码的扫描请求已被拒绝,因为免登录扫描处于关闭状态。如果您的扫描应用无法发送凭据,请在 <span class=\"mono\">config/gateway.env</span> 中设置 <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> 并运行 <span class=\"mono\">docker compose up -d</span>。"
+msgid "A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">.env</span> and run <span class=\"mono\">docker compose up -d</span>."
+msgstr "来自 <span class=\"mono\">%(ip)s</span> 的无用户名和密码的扫描请求已被拒绝,因为免登录扫描处于关闭状态。如果您的扫描应用无法发送凭据,请在 <span class=\"mono\">.env</span> 中设置 <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> 并运行 <span class=\"mono\">docker compose up -d</span>。"
+
+#: app/admin/templates/notices.html:17
+#, python-format
+msgid "<b>Backup not done: the destination folder can not be reached.</b> The latest backup of “%(name)s” was not saved, because the network disk or USB disk does not seem to be connected. Nothing was written. Check that it is switched on and mounted, then press “Run now”. Last successful backup: %(last)s."
+msgstr "<b>备份未完成：无法访问目标文件夹。</b>“%(name)s”的最新备份没有保存，因为网络磁盘或 USB 磁盘似乎没有连接。没有写入任何文件。请检查它是否已开机并已挂载，然后点击“立即运行”。上次成功的备份：%(last)s。"
 
 #: app/admin/templates/notices.html:19
+#, python-format
+msgid "<b>Backup failed.</b> The latest backup of “%(name)s” was not saved. Reason: %(error)s. Last successful backup: %(last)s."
+msgstr "<b>备份失败。</b>“%(name)s”的最新备份没有保存。原因：%(error)s。上次成功的备份：%(last)s。"
+
+#: app/admin/templates/notices.html:21
+#, python-format
+msgid "<b>The certificate could not be updated.</b> The last run of <span class=\"mono\">scripts/cert-sync.sh</span> (%(when)s) failed: %(message)s. The certificate in use is the old one. Run the script by hand to see the error, and check the cron job."
+msgstr "<b>无法更新证书。</b><span class=\"mono\">scripts/cert-sync.sh</span> 最近一次运行（%(when)s）失败：%(message)s。当前使用的仍是旧证书。请手动运行脚本查看错误，并检查 cron 任务。"
+
+#: app/admin/templates/notices.html:23
+#, python-format
+msgid "<b>The TLS certificate has expired</b> (on %(date)s). Phones and computers refuse to connect to the gateway until a valid one is in <span class=\"mono\">config/tls</span> and the gateway has been restarted."
+msgstr "<b>TLS 证书已过期</b>（%(date)s）。在 <span class=\"mono\">config/tls</span> 中放入有效证书并重启网关之前，手机和电脑将拒绝连接网关。"
+
+#: app/admin/templates/notices.html:25
+#, python-format
+msgid "<b>The TLS certificate expires on %(date)s.</b> The last synchronisation worked, so the source has not renewed it yet: check the program that renews it (for example Nginx Proxy Manager)."
+msgstr "<b>TLS 证书将于 %(date)s 到期。</b>上次同步成功，说明来源尚未续期：请检查负责续期的程序（例如 Nginx Proxy Manager）。"
+
+#: app/admin/templates/notices.html:26
+#, python-format
+msgid "<b>The TLS certificate expires on %(date)s.</b> The last synchronisation failed: see the other notice about the certificate."
+msgstr "<b>TLS 证书将于 %(date)s 到期。</b>上次同步失败：请查看另一条关于证书的通知。"
+
+#: app/admin/templates/notices.html:27
+#, python-format
+msgid "<b>The TLS certificate expires on %(date)s.</b> Renew it and put the new files in <span class=\"mono\">config/tls</span>, then restart the gateway."
+msgstr "<b>TLS 证书将于 %(date)s 到期。</b>请续期，把新文件放进 <span class=\"mono\">config/tls</span>，然后重启网关。"
+
+#: app/admin/templates/notices.html:29
+#, python-format
+msgid "<b>The announced address is not in the TLS certificate.</b> The gateway announces itself on the network as <span class=\"mono\">%(names)s</span> at <span class=\"mono\">%(addresses)s</span>, and the certificate covers none of them: phones and computers that find the printers this way will show a certificate error. Make the certificate list the address (or give the machine a fixed address and a name that the certificate covers)."
+msgstr "<b>公告的地址不在 TLS 证书中。</b>网关在网络上以 <span class=\"mono\">%(names)s</span> 公告自己，地址为 <span class=\"mono\">%(addresses)s</span>，而证书没有涵盖其中任何一个：以这种方式找到打印机的手机和电脑会显示证书错误。请让证书包含该地址（或给机器设置固定地址和证书涵盖的名称）。"
+
+#: app/admin/templates/notices.html:33
 #, python-format
 msgid "dismissed by %(who)s"
 msgstr "由 %(who)s 忽略"
 
-#: app/admin/templates/notices.html:20
+#: app/admin/templates/notices.html:34
 msgid "Dismiss"
 msgstr "忽略"
 
-#: app/admin/templates/notices.html:24
+#: app/admin/templates/notices.html:38
 msgid "No notices."
 msgstr "没有通知。"
 
-#: app/admin/templates/notices.html:27
+#: app/admin/templates/notices.html:41
 msgid "Dismiss all"
 msgstr "全部忽略"
 
-#: app/admin/templates/notices.html:29
+#: app/admin/templates/notices.html:43
 msgid "Hide dismissed"
 msgstr "隐藏已忽略"
 
-#: app/admin/templates/notices.html:29
+#: app/admin/templates/notices.html:43
 msgid "Show dismissed too"
 msgstr "同时显示已忽略"
 
@@ -3635,39 +3713,39 @@ msgstr "密码不能与用户名相同"
 msgid "the password is too repetitive"
 msgstr "密码重复字符过多"
 
-#: app/backup/core.py:65
+#: app/backup/core.py:69
 msgid "Folder name not valid: letters, digits, space . _ - and / for sub-folders (max 4 levels)"
 msgstr "文件夹名称无效：只能使用字母、数字、空格、. _ -，子文件夹用 / 分隔（最多 4 层）"
 
-#: app/backup/core.py:68
+#: app/backup/core.py:72
 #, python-format
 msgid "Backup root %(root)s is not available: mount a folder there (see docker-compose.yml)"
 msgstr "备份根目录 %(root)s 不可用：请在该处挂载一个文件夹（参见 docker-compose.yml）"
 
-#: app/backup/core.py:72
+#: app/backup/core.py:76
 msgid "Folder is outside the backup root"
 msgstr "该文件夹在备份根目录之外"
 
-#: app/backup/core.py:79
+#: app/backup/core.py:83
 #, python-format
 msgid "Folder %(folder)s is not writable by the gateway: %(error)s"
 msgstr "网关无法写入文件夹 %(folder)s：%(error)s"
 
-#: app/backup/core.py:95
+#: app/backup/core.py:99
 msgid "The backup disk is not answering (earlier requests are still waiting). Check the network disk."
 msgstr "备份磁盘无响应(之前的请求仍在等待)。请检查网络磁盘。"
 
-#: app/backup/core.py:110
+#: app/backup/core.py:114
 #, python-format
 msgid "The backup disk did not answer in %(s)s seconds: is the network disk reachable?"
 msgstr "备份磁盘在 %(s)s 秒内没有响应:网络磁盘可以访问吗?"
 
-#: app/backup/core.py:125
+#: app/backup/core.py:129
 #, python-format
 msgid "Cannot write the marker file in the folder: %(error)s"
 msgstr "无法在文件夹中写入标记文件:%(error)s"
 
-#: app/backup/core.py:130
+#: app/backup/core.py:134
 msgid "The marker file is missing in this folder: the network disk or USB disk may not be mounted. Nothing was written."
 msgstr "此文件夹中缺少标记文件:网络盘或 USB 盘可能未挂载。未写入任何内容。"
 
@@ -3684,19 +3762,19 @@ msgstr "口令短语至少需要 %(n)s 个字符"
 msgid "recovery key is not valid (expected cpgbk1.<public>.<wrapped>)"
 msgstr "恢复密钥无效（应为 cpgbk1.<公钥>.<封装>）"
 
-#: app/backup/service.py:90
+#: app/backup/service.py:91
 msgid "Another backup is running: try again in a minute"
 msgstr "另一个备份正在运行：请一分钟后重试"
 
-#: app/backup/service.py:95
+#: app/backup/service.py:96
 msgid "Backup target not found"
 msgstr "找不到备份目标"
 
-#: app/policy/control.py:21
+#: app/policy/control.py:22
 msgid "printer disabled by the administrator (applies to everyone, administrators included)"
 msgstr "打印机已被管理员停用（对所有人生效，包括管理员）"
 
-#: app/policy/control.py:22
+#: app/policy/control.py:23
 msgid "gateway in maintenance: only administrators can print or scan"
 msgstr "网关维护中：只有管理员可以打印或扫描"
 
@@ -3867,21 +3945,21 @@ msgstr "自动定期打印：保持打印头和进纸辊清洁。"
 msgid "Schedule"
 msgstr "计划"
 
-#: app/policy/pages.py:101
+#: app/policy/pages.py:100
 #, python-format
 msgid "Invalid pages: “%(part)s”. Example: 1,5 or 2-4"
 msgstr "页码无效：“%(part)s”。示例：1,5 或 2-4"
 
-#: app/policy/pages.py:105
+#: app/policy/pages.py:104
 #, python-format
 msgid "Invalid range: “%(part)s”"
 msgstr "范围无效：“%(part)s”"
 
-#: app/policy/pages.py:108
+#: app/policy/pages.py:107
 msgid "Too many page ranges"
 msgstr "页面范围过多"
 
-#: app/policy/pages.py:121
+#: app/policy/pages.py:120
 #, python-format
 msgid "The document has only %(n)s page"
 msgid_plural "The document has only %(n)s pages"

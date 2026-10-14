@@ -28,7 +28,16 @@ def localtime(dt: datetime | None, fmt: str = "%Y-%m-%d %H:%M:%S") -> str:
     return dt.astimezone(ZoneInfo(settings.timezone)).strftime(fmt)
 
 
+def isotime(value: str | None) -> str:
+    """localtime() for a timestamp that was stored as text (ISO 8601) inside a notice."""
+    try:
+        return localtime(datetime.fromisoformat(value)) if value else ""
+    except ValueError:
+        return ""
+
+
 templates.env.filters["localtime"] = localtime
+templates.env.filters["isotime"] = isotime
 templates.env.globals.update(_=i18n.html_gettext, _p=i18n.html_pgettext, _t=i18n.plain_gettext, _js=i18n.raw_gettext, ngettext=i18n.html_ngettext, lang=i18n.current, languages=i18n.LANGUAGES)
 
 

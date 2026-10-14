@@ -7,7 +7,7 @@ There are two independent mechanisms:
 | | Built-in backups (portal) | `scripts/backup.sh` (host side) |
 |---|---|---|
 | Who | each administrator, plus one *general* | the person running the server |
-| What | database (consistent copy while people print) and audit archive; with encryption also `gateway.env` and the TLS certificate | all of it **plus** CUPS queues and `.env` |
+| What | database (consistent copy while people print) and audit archive; with encryption also `.env` (all the settings and secrets) and the TLS certificate | all of it **plus** CUPS queues and `.env` |
 | When | scheduled, once a day | by hand |
 | Use for | everyday protection | **moving the machine** |
 
@@ -15,11 +15,11 @@ There are two independent mechanisms:
 
 Every administrator creates **their own** targets, with folder, hour, number of copies to keep (last N daily, weekly, monthly)
 and encryption. They edit and delete only their own; *Run now* is available to all. The *General* backup of the installation is
-shown read-only: it is set in `config/gateway.env` (`CUPSPL_BACKUP_*`).
+shown read-only: it is set in `.env` (`CUPSPL_BACKUP_*`).
 
 - A backup is written to `.partial`, **read back and verified**, renamed; only then are older copies removed.
   *Run now* adds a copy without deleting any (the next scheduled run prunes).
-- If a backup failed, or the last one is older than 48 h, the page shows it in red.
+- If a backup failed, or the last one is older than 48 h, the page shows it in red **and a notice appears in the bell** with the name of the backup (see "Notices" below). The notice closes by itself at the first successful backup.
 - Retention affects only files carrying the name of the same gateway and target.
 - Each file is `printgw-<instance>-t<target>-<UTC time>.tar.gz` (plus `.enc` if encrypted) with a `MANIFEST.json`
   (sha256 and size of each part, app version, schema revision).
@@ -43,11 +43,12 @@ server **inside that folder before starting the gateway** (a mount done later ne
    ```
 2. Mount it **before** starting the gateway. A mount made later is not seen by a container that is already running: restart it
    (`docker compose restart gateway`).
-3. In the backup form type the sub-folder (`nas/...`) and tick **"The folder is a network disk or USB disk: write only if it is mounted"**
-   *while the disk is mounted*. The gateway puts a small file `.printminder-destination` in it and, from then on, **refuses to back up
+3. In the backup form type the sub-folder (`nas/...`) and leave **"The folder is a network disk or USB disk: write only if it is mounted"** ticked
+   (it is ticked by default for new backups), and save *while the disk is mounted*. The gateway puts a small file `.printminder-destination` in it and, from then on, **refuses to back up
    when the file is not there**. Without this a disk that fails to mount leaves an empty folder on the server's own disk, and the
-   backups silently fill it (and are not outside the machine at all). For the general backup use `CUPSPL_BACKUP_REQUIRE_MARKER=true`
-   and create the file by hand once: `touch data/backups/nas/<folder>/.printminder-destination`.
+   backups silently fill it (and are not outside the machine at all). The general backup (the one of `.env`) has the option off by default (`CUPSPL_BACKUP_REQUIRE_MARKER=false`): its folder always exists inside the
+   container, even with the disk unmounted. If you point it at a network disk, set `true` and create the file by hand once, with the disk mounted:
+   `touch data/backups/nas/<folder>/.printminder-destination`.
 
 Behaviour of the gateway with a network disk:
 
@@ -60,6 +61,15 @@ Behaviour of the gateway with a network disk:
   no effect and anyone who can read the share can read the files. **Use encryption** for backups on a share.
 - Use `soft` mounts (NFS: `soft,timeo=100`; CIFS: `soft`), never `hard`, so a dead NAS does not freeze the server.
 - The backup is only "outside the machine" if the share is on another machine. A USB disk plugged into the server protects from a broken disk, not from a fire.
+
+### Notices when a backup fails
+
+When a backup fails, a notice with the **real name** of the backup appears in the administrators' bell. Example, with the disk unmounted:
+
+> **Backup not done: the destination folder can not be reached.** The latest backup of "Office NAS" was not saved, because the network disk or USB disk does not seem to be connected. Nothing was written. Check that it is switched on and mounted, then press "Run now". Last successful backup: 2026-10-12 03:00:04.
+
+For any other error (disk full, permissions, passphrase…) the notice says "Backup failed" and the reason. The gateway retries every hour and the notice closes by itself when a
+backup succeeds. If you do not want to wait, press *Run now* after remounting the disk.
 
 ### Encryption
 

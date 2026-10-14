@@ -1,0 +1,224 @@
+# Certificati TLS: avvisi e sincronizzazione
+
+[Indice della documentazione](../README.md) · [English](../en/certificates.md) · Italiano
+
+Il gateway parla solo in modo cifrato (TLS, quello del lucchetto nel browser) e per farlo ha bisogno di un **certificato**. Questa pagina spiega
+come deve essere fatto, cosa ti dice il portale quando qualcosa non va, e come tenerlo aggiornato da solo se lo rinnova un'altra macchina
+(per esempio Nginx Proxy Manager).
+
+## 1. Cosa controlla un telefono quando si collega
+
+Il certificato è come una carta d'identità del server. Quando un telefono o un computer si collega, controlla tre cose:
+
+1. la carta è stata rilasciata da qualcuno di cui il dispositivo si fida (una **CA**, cioè un'autorità che rilascia certificati);
+2. il nome o l'indirizzo scritto sulla carta è quello a cui ci si sta collegando;
+3. la carta non è scaduta.
+
+**Esempio.** Il certificato dice «valido per `stampa.azienda.it` e `192.168.1.50`». Il telefono trova la stampante come `https://192.168.1.50:8631`:
+l'indirizzo è sulla carta, quindi va bene. Se il router un giorno assegna al server `192.168.1.77`, il telefono non trova quell'indirizzo sulla carta
+e mostra «certificato non valido». Per questo il certificato deve elencare l'indirizzo che il gateway annuncia in rete (mDNS).
+
+Se una di queste tre cose non va, il dispositivo si rifiuta di stampare o mostra un avviso di sicurezza.
+
+## 2. Gli avvisi nel portale (la campanella)
+
+Il gateway non cambia mai il certificato da solo: lo **guarda** e, se vede un problema, mette un avviso nella campanella degli amministratori.
+L'avviso sparisce da solo quando il problema è risolto.
+
+| Avviso | Quando compare | Si può spegnere? |
+|---|---|---|
+| Il certificato è scaduto | La data di scadenza è passata: i dispositivi non si collegano più | No, è sempre attivo |
+| L'ultimo aggiornamento del certificato è fallito | L'ultima esecuzione di `scripts/cert-sync.sh` è finita con un errore (il messaggio dello script è nell'avviso) | No, compare solo se usi lo script |
+| L'indirizzo annunciato non è nel certificato | Né l'IP né il nome `.local` che il gateway annuncia in rete sono nel certificato | Sì: `CUPSPL_CERT_NAME_CHECK=false` |
+| Il certificato sta per scadere | Mancano meno di N giorni alla scadenza | **È spento di default.** `CUPSPL_CERT_EXPIRY_WARN_ENABLED=true` lo accende, `CUPSPL_CERT_EXPIRY_WARN_DAYS=14` sceglie i giorni |
+
+Le impostazioni stanno in `.env` (poi `docker compose up -d`).
+
+**Perché l'avviso «sta per scadere» è spento.** Non vogliamo che qualcuno si trovi un avviso da gestire quando in realtà il rinnovo non è ancora dovuto.
+I certificati di Let's Encrypt durano 90 giorni e vengono rinnovati circa 30 giorni prima della fine: con la soglia a 14 giorni l'avviso compare solo se il
+rinnovo non è riuscito per più di due settimane, cioè se c'è davvero un problema. Con una soglia alta (per esempio 45 giorni) l'avviso comparirebbe ogni
+volta prima del rinnovo normale, quindi non metterla sopra i 30 giorni con Let's Encrypt. I certificati di una CA aziendale durano spesso un anno e si
+rinnovano a mano: lì una soglia di 30 giorni va bene.
+
+L'avviso dice anche dove cercare: se l'ultima sincronizzazione è riuscita, «la sorgente non ha ancora rinnovato, controlla Nginx Proxy Manager»; se è
+fallita, rimanda all'altro avviso.
+
+## 3. Il file della CA: cosa farne
+
+Se l'azienda ha una sua CA, l'amministratore della CA ti dà un file (di solito `.crt` o `.pem`): è il **certificato della CA**, mai la chiave privata.
+Serve per far fidare i dispositivi di tutti i certificati che quella CA rilascia, compreso quello del gateway. Va installato **una volta su ogni dispositivo**:
+
+| Dispositivo | Cosa fare |
+|---|---|
+| Android | *Impostazioni → Sicurezza → Crittografia e credenziali → Installa un certificato → Certificato CA*, scegli il file. Il browser lo accetta; **alcune app ignorano le CA aggiunte dall'utente**: se un'app si rifiuta di collegarsi, usa un certificato di una CA pubblica (per esempio Let's Encrypt). |
+| iPhone / iPad | Apri il file (da Mail o da File), *Impostazioni → Profilo scaricato → Installa*. Poi *Impostazioni → Generali → Info → Attendibilità certificati* e attiva l'interruttore della CA: senza questo secondo passaggio il certificato resta non attendibile. |
+| Windows | Doppio clic sul file → *Installa certificato* → *Computer locale* → *Colloca tutti i certificati nel seguente archivio* → *Autorità di certificazione radice attendibili*. |
+| macOS | Apri *Accesso Portachiavi*, trascina il file in *Sistema*, doppio clic sul certificato → *Attendibilità* → *Considera sempre attendibile*. |
+| Linux (Debian, Ubuntu) | Copia il file in `/usr/local/share/ca-certificates/` con estensione `.crt`, poi `sudo update-ca-certificates`. Firefox ha un archivio suo: *Impostazioni → Privacy e sicurezza → Certificati → Mostra certificati → Autorità → Importa*. |
+
+Se invece non hai una CA e usi il certificato autofirmato creato da `scripts/docker-init.sh`, il file da installare è `config/tls/fullchain.pem`, con gli stessi passaggi.
+
+Con un certificato di una CA pubblica (Let's Encrypt) non c'è nulla da installare sui dispositivi: già si fidano.
+
+## 4. Copiare il certificato a mano
+
+Metti `fullchain.pem` (il certificato, con la catena) e `privkey.pem` (la chiave) in `config/tls/`, rendi la chiave leggibile solo a te
+(`chmod 600 config/tls/privkey.pem`) e riavvia: `docker compose restart gateway`. Dettagli e un esempio con Nginx Proxy Manager in
+[installazione.md](installazione.md#34-certificato-tls).
+
+Un certificato Let's Encrypt si rinnova ogni circa 60 giorni: farlo a mano ogni volta è facile da dimenticare. Per questo c'è lo script del capitolo seguente.
+
+## 5. Tenere il certificato aggiornato da solo: `scripts/cert-sync.sh`
+
+### 5.1 Come funziona
+
+Lo lanci tu **una volta** a mano per provare, poi lo metti in `cron` (l'orologio di Linux che esegue comandi a orari fissi). Ogni volta lo script:
+
+1. scarica i due file dalla macchina che rinnova i certificati (con `rsync` su `ssh`) in una cartella temporanea privata;
+2. li controlla: il certificato non è scaduto e la chiave privata è proprio la sua;
+3. se sono uguali a quelli in uso, **si ferma** (niente da fare, niente riavvii);
+4. altrimenti mette da parte la coppia vecchia in `config/tls/previous/`, installa la nuova e riavvia il gateway;
+5. scrive com'è andata in `config/tls/sync-status.json`: se è andata male, il portale mostra l'avviso «l'ultimo aggiornamento del certificato è fallito».
+
+Se qualcosa non va nei controlli, **i file in uso non vengono toccati**: un certificato sbagliato non può rompere un server che funziona.
+
+### 5.2 Le impostazioni (in `.env`)
+
+| Impostazione | Cosa | Predefinito |
+|---|---|---|
+| `CERT_SYNC_HOST` | La macchina che ha il certificato (nome o indirizzo) | obbligatoria |
+| `CERT_SYNC_USER` | L'utente con cui ci si collega (quello di sola lettura del §5.3) | obbligatoria |
+| `CERT_SYNC_KEY` | Percorso **completo** della chiave privata ssh di questa macchina | obbligatoria |
+| `CERT_SYNC_REMOTE_DIR` | Percorso **completo**, sulla macchina remota, della cartella che contiene i due file | obbligatoria |
+| `CERT_SYNC_PORT` | Porta ssh | `22` |
+| `CERT_SYNC_CERT_FILE` | Nome del file del certificato (con la catena) | `fullchain.pem` |
+| `CERT_SYNC_KEY_FILE` | Nome del file della chiave | `privkey.pem` |
+
+Il percorso e i nomi cambiano con il programma che rinnova i certificati, ed è per questo che si possono scegliere:
+
+| Programma | `CERT_SYNC_REMOTE_DIR` (esempio) | File |
+|---|---|---|
+| Nginx Proxy Manager, certificato Let's Encrypt | `/home/tu/npm/data/letsencrypt/live/npm-3` | `fullchain.pem`, `privkey.pem` |
+| Nginx Proxy Manager, certificato personalizzato | `/home/tu/npm/data/custom_ssl/npm-3` | `fullchain.pem`, `privkey.pem` |
+| certbot | `/etc/letsencrypt/live/tuodominio.it` | `fullchain.pem`, `privkey.pem` |
+| Altro (Caddy, Traefik, acme.sh, una CA aziendale) | la cartella dove il programma salva i file | i nomi che usa lui, per esempio `cert.pem` e `key.pem` |
+
+Il numero di `npm-3` è diverso da installazione a installazione: guarda quale cartella c'è dentro `live/` sulla macchina di NPM. Per sapere dove NPM tiene i dati:
+`docker inspect NOME-DEL-CONTENITORE --format '{{ range .Mounts }}{{ .Source }} -> {{ .Destination }}{{ println }}{{ end }}'` (cerca quello che finisce in `/etc/letsencrypt`).
+
+### 5.3 Passo per passo: un utente che può solo leggere
+
+Il certificato è un segreto (la chiave privata soprattutto). Per questo lo script **non** usa l'account di un amministratore: se la sua chiave ssh venisse
+rubata, il ladro entrerebbe nella macchina di NPM con tutti i poteri. Si crea invece un utente separato che può soltanto leggere i certificati.
+
+Nell'esempio la macchina di NPM si chiama `npm.lan`, quella di PrintMinder `print.lan` (IP `192.168.1.50`), l'utente si chiama `certsync`.
+
+**Passo 1 — su `npm.lan`: crea l'utente** (senza password: ci si entra solo con la chiave).
+
+```sh
+sudo adduser --disabled-password --gecos "" certsync
+sudo apt install rsync acl          # se mancano: rsync serve a copiare, acl per i permessi del passo 4
+```
+
+**Passo 2 — su `print.lan`: crea la chiave ssh** (con il tuo utente, quello che lancerà il cron).
+Servono `rsync` e `ssh` anche su questa macchina (`sudo apt install rsync openssh-client` se mancano).
+
+```sh
+ssh-keygen -t ed25519 -N "" -C "printminder cert-sync" -f ~/.ssh/printminder_certsync
+cat ~/.ssh/printminder_certsync.pub          # una riga che inizia con ssh-ed25519: la useremo al passo 3
+```
+
+La chiave privata (`printminder_certsync`, senza `.pub`) non deve uscire da questa macchina. Il percorso completo (per esempio `/home/tu/.ssh/printminder_certsync`)
+andrà in `CERT_SYNC_KEY`.
+
+**Passo 3 — su `npm.lan`: autorizza la chiave, con dei limiti.** Sostituisci `192.168.1.50` con l'IP di `print.lan` e la parte `ssh-ed25519 AAAA…` con la riga stampata al passo 2.
+
+```sh
+sudo -u certsync mkdir -p -m 700 /home/certsync/.ssh
+echo 'restrict,from="192.168.1.50" ssh-ed25519 AAAA… printminder cert-sync' | sudo -u certsync tee -a /home/certsync/.ssh/authorized_keys
+sudo chmod 600 /home/certsync/.ssh/authorized_keys
+```
+
+Le due parole davanti alla chiave sono i limiti: `from="192.168.1.50"` fa funzionare la chiave **solo** da `print.lan`; `restrict` toglie tutto il resto
+(niente inoltro di porte, niente terminale interattivo, niente agente ssh).
+
+**Passo 4 — su `npm.lan`: dai all'utente il permesso di leggere i certificati, e nient'altro.** Con le ACL (permessi per un utente preciso) si concede la sola lettura di una cartella.
+Esempio per NPM, con i dati in `/home/tu/npm/data`:
+
+```sh
+# l'utente deve poter "attraversare" le cartelle sopra (x) e leggere (r) quelle dei certificati
+sudo setfacl -m u:certsync:x /home/tu /home/tu/npm /home/tu/npm/data
+sudo setfacl -R -m u:certsync:rX /home/tu/npm/data/letsencrypt
+sudo setfacl -R -d -m u:certsync:rX /home/tu/npm/data/letsencrypt    # vale anche per i file creati ai prossimi rinnovi
+```
+
+Per certbot: `sudo setfacl -R -m u:certsync:rX /etc/letsencrypt` (e la stessa riga con `-d`).
+
+Se il tuo disco non supporta le ACL (`setfacl` risponde «Operation not supported»), l'alternativa è creare un gruppo che può leggere la cartella e aggiungere `certsync` a quel gruppo.
+
+Controlla che funzioni e che sia davvero di sola lettura:
+
+```sh
+sudo -u certsync head -1 /home/tu/npm/data/letsencrypt/live/npm-3/fullchain.pem     # deve stampare -----BEGIN CERTIFICATE-----
+sudo -u certsync touch /home/tu/npm/data/letsencrypt/live/npm-3/prova               # deve rispondere: Permission denied
+```
+
+**Passo 5 — su `print.lan`: scrivi le impostazioni in `.env`.**
+
+```sh
+CERT_SYNC_HOST=npm.lan
+CERT_SYNC_USER=certsync
+CERT_SYNC_KEY=/home/tu/.ssh/printminder_certsync
+CERT_SYNC_REMOTE_DIR=/home/tu/npm/data/letsencrypt/live/npm-3
+```
+
+**Passo 6 — su `print.lan`: prova.** Prima senza cambiare nulla:
+
+```sh
+scripts/cert-sync.sh --dry-run
+```
+
+La prima volta ssh ricorda l'impronta di `npm.lan` (nel file `config/ssh/known_hosts`) e dalle volte successive la controlla: se un giorno quell'impronta cambia, lo script
+si rifiuta di collegarsi (è il segnale che qualcuno si sta spacciando per `npm.lan`). Se tutto va bene scrive «a new certificate is available» oppure «already up to date».
+Poi la prova vera: `scripts/cert-sync.sh`. Apri il portale: nessun avviso sul certificato, e se il certificato era cambiato il gateway si è riavviato.
+
+**Passo 7 — su `print.lan`: mettilo in cron.** Con il tuo utente (deve poter usare `docker`):
+
+```sh
+crontab -e
+```
+
+e aggiungi una riga (cambia il percorso della cartella di PrintMinder):
+
+```
+17 4 * * *  cd /home/tu/printminder && scripts/cert-sync.sh >> data/cert-sync.log 2>&1
+```
+
+Si legge così: ogni giorno (`* * *`) alle 4 e 17 (`17 4`), vai nella cartella ed esegui lo script, scrivendo cosa dice in `data/cert-sync.log`. Una volta al giorno basta:
+se il certificato non è cambiato non succede nulla e nulla si riavvia.
+
+### 5.4 Se qualcosa va storto
+
+Il messaggio compare nel portale (campanella) e in `data/cert-sync.log`. Per vederlo subito: `scripts/cert-sync.sh --dry-run`.
+
+| Messaggio | Cosa significa e cosa fare |
+|---|---|
+| `set CERT_SYNC_HOST, CERT_SYNC_USER, CERT_SYNC_KEY and CERT_SYNC_REMOTE_DIR in .env` | Manca una delle quattro impostazioni obbligatorie. |
+| `the ssh key … does not exist or can not be read by this user` | Il percorso in `CERT_SYNC_KEY` è sbagliato o il file appartiene a un altro utente. Deve essere il percorso completo. |
+| `could not download … Permission denied (publickey)` | La chiave pubblica non è in `authorized_keys` dell'utente remoto, o l'`from=` non corrisponde all'IP di questa macchina. Rifai il passo 3. |
+| `could not download … REMOTE HOST IDENTIFICATION HAS CHANGED` | L'impronta della macchina remota è cambiata (reinstallata, o qualcuno si finge lei). Se sai perché, cancella la sua riga da `config/ssh/known_hosts`. |
+| `could not download … No such file or directory` | `CERT_SYNC_REMOTE_DIR` o i nomi dei file sono sbagliati (il numero `npm-3`, per esempio). |
+| `could not download … Permission denied` (senza `publickey`) | L'utente remoto non ha il permesso di leggere: rifai il passo 4. |
+| `the certificate on … is already expired: it was not installed` | La sorgente ha ancora un certificato scaduto: il problema è lì, controlla perché non rinnova. |
+| `the private key … does not belong to the certificate …: nothing was installed` | Il file della chiave e quello del certificato non sono la stessa coppia (nomi sbagliati, o rinnovo a metà). I file in uso non sono stati toccati. |
+| `the new certificate is installed but the gateway did not restart` | Il certificato nuovo è al suo posto, ma `docker compose restart gateway` è fallito: lancialo a mano e guarda `docker compose logs gateway`. Se il cron non può usare docker, aggiungi il suo utente al gruppo `docker`. |
+
+Per tornare alla coppia precedente: copia i due file di `config/tls/previous/` in `config/tls/` e `docker compose restart gateway`.
+
+### 5.5 Cosa lo script non fa
+
+- Non **rinnova** il certificato: lo copia da chi lo rinnova. Se il rinnovo fallisce alla sorgente, qui arriva sempre il vecchio; per accorgersene accendi l'avviso «sta per scadere» (§2).
+- Non cambia i nomi nel certificato: se manca l'indirizzo che il gateway annuncia, l'avviso lo dice, ma il certificato va riemesso dalla sorgente.
+- Non tocca la CA dei dispositivi (§3).
+- Non usa `rrsync` per restringere ulteriormente la chiave: `rrsync` rifiuta di seguire i collegamenti simbolici, e sia Nginx Proxy Manager sia certbot tengono in `live/` dei collegamenti verso `archive/`.
+  I limiti qui sono quelli del passo 3 (`restrict`, `from=`) e del passo 4 (sola lettura solo sui certificati).

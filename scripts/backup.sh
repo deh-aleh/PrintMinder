@@ -2,12 +2,14 @@
 # HOST-SIDE full backup / restore (also takes the CUPS queues and .env; use it to move the machine).
 # The gateway has its own scheduled backups in the portal (menu Backup): see README. Run from anywhere; works on the running stack.
 #   scripts/backup.sh backup [DEST_DIR]      writes DEST_DIR/printgw-YYYYMMDD-HHMMSS.tar.gz   (default DEST_DIR: ./backups)
-#   scripts/backup.sh restore FILE.tar.gz    puts it back (stops the gateway first, asks for confirmation)
+#   scripts/backup.sh restore FILE.tar.gz [--yes]   puts it back (stops the gateway first, asks for confirmation; --yes = already asked,
+#                                            used by scripts/update.sh)
 #
 # What is saved:
 #   gateway.db     users, groups, quotas, print keys (hashes), audit. Taken with SQLite's own backup call, so it is
 #                  consistent even while people are printing (copying the live file would not be).
-#   config/        gateway.env (SECRET_KEY, RADIUS secret), .env and the TLS certificate and key
+#   config/        the TLS certificate and key (and the old gateway.env of older backups)
+#   dot-env        .env (all the settings: SECRET_KEY, RADIUS secret...)
 #   audit-archive/ the compressed audit files (data/audit-archive)
 #   cups-config    the CUPS queues (printers.conf), so queues created from the portal survive a rebuild
 # NOT saved: the images (they are downloaded again) and the spool of jobs in progress.
@@ -44,11 +46,13 @@ PY
     echo "backup written: $out"
     ;;
 restore)
-    file="${2:?usage: scripts/backup.sh restore FILE.tar.gz}"
-    echo "This REPLACES the database, the configuration and the CUPS queues of this server with the ones in $file."
-    printf "type YES to continue: "
-    read -r answer
-    [ "$answer" = "YES" ] || { echo "cancelled"; exit 1; }
+    file="${2:?usage: scripts/backup.sh restore FILE.tar.gz [--yes]}"
+    if [ "${3:-}" != "--yes" ]; then
+        echo "This REPLACES the database, the configuration and the CUPS queues of this server with the ones in $file."
+        printf "type YES to continue: "
+        read -r answer
+        [ "$answer" = "YES" ] || { echo "cancelled"; exit 1; }
+    fi
     work="$(mktemp -d)"
     trap 'rm -rf "$work"' EXIT
     tar -C "$work" -xzf "$file"
@@ -66,7 +70,7 @@ restore)
     echo "restored. Check:  docker compose logs --tail 20 gateway"
     ;;
 *)
-    echo "usage: $0 backup [DEST_DIR] | restore FILE.tar.gz" >&2
+    echo "usage: $0 backup [DEST_DIR] | restore FILE.tar.gz [--yes]" >&2
     exit 2
     ;;
 esac

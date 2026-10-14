@@ -27,6 +27,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import String, cast, delete, func, select
 from starlette.concurrency import run_in_threadpool
 
+from app import crypto_fields, titles
 from app.audit.adminlog import record
 from app.config import settings
 from app.db.models import AdminAudit, AuditArchive, JobLog, User
@@ -77,10 +78,18 @@ def _jsonable(v):
 
 def _row_dict(table: str, obj, usernames: dict[int, str]) -> dict:
     if table == "job_log":
+        title, options = obj.title, obj.options_json
+        cut = titles.cutoff_for_archive()
+        if cut is not None and _aware(obj.ts) < cut:  # past the retention: the name does not go into the file
+            title, options = None, {k: v for k, v in (options or {}).items() if k != "document_name"} or None
+        else:  # the file keeps the names encrypted, like the database (the portal decrypts them when it shows them)
+            title = crypto_fields.seal(title)
+            if options and isinstance(options.get("document_name"), str):
+                options = {**options, "document_name": crypto_fields.seal(options["document_name"])}
         return {
             "id": obj.id, "ts": _jsonable(obj.ts), "user_id": obj.user_id, "user": usernames.get(obj.user_id) or obj.user_name,
-            "kind": _jsonable(obj.kind), "printer": obj.printer, "cups_job_id": obj.cups_job_id, "title": obj.title,
-            "pages": obj.pages, "state": _jsonable(obj.state), "reason": obj.denied_reason, "options": obj.options_json,
+            "kind": _jsonable(obj.kind), "printer": obj.printer, "cups_job_id": obj.cups_job_id, "title": title,
+            "pages": obj.pages, "state": _jsonable(obj.state), "reason": obj.denied_reason, "options": options,
         }
     return {
         "id": obj.id, "ts": _jsonable(obj.ts), "actor_id": obj.actor_id, "actor": obj.actor_name,
@@ -204,11 +213,21 @@ def archive_status(a: AuditArchive, verify: bool = False) -> str:
     return "ok" if verify else "present"
 
 
+def _unsealed(row: dict) -> dict:
+    """A line of an archive file with the encrypted file names opened (the file itself keeps them encrypted)."""
+    if crypto_fields.is_sealed(row.get("title")):
+        row["title"] = crypto_fields.unseal(row["title"])
+    opts = row.get("options")
+    if isinstance(opts, dict) and crypto_fields.is_sealed(opts.get("document_name")):
+        opts["document_name"] = crypto_fields.unseal(opts["document_name"])
+    return row
+
+
 def iter_archive(path: Path) -> Iterator[dict]:
     with gzip.open(path, "rt", encoding="utf-8") as f:
         for line in f:
             if line.strip():
-                yield json.loads(line)
+                yield _unsealed(json.loads(line))
 
 
 def read_page(path: Path, page: int, per_page: int, query: str = "") -> tuple[list[dict], int]:
@@ -217,10 +236,14 @@ def read_page(path: Path, page: int, per_page: int, query: str = "") -> tuple[li
     start, end, total, out = (page - 1) * per_page, page * per_page, 0, []
     with gzip.open(path, "rt", encoding="utf-8") as f:
         for line in f:
+            row = None
+            if crypto_fields.PREFIX in line:  # search in the names as people read them, not as they are stored
+                row = _unsealed(json.loads(line))
+                line = json.dumps(row, ensure_ascii=False)
             if q and q not in line.lower():
                 continue
             if start <= total < end:
-                out.append(json.loads(line))
+                out.append(row or json.loads(line))
             total += 1
     return out, total
 

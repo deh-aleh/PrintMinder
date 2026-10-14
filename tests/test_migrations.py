@@ -1,4 +1,5 @@
 import threading
+from pathlib import Path
 
 import pytest
 
@@ -118,3 +119,26 @@ def test_audit_ids_are_never_reused(tmp_path):
         s.add(JobLog(kind=JobKind.print, state=JobState.completed))
         s.commit()
         assert s.query(JobLog).one().id == 4
+
+
+# ------------------------------------------------------------------------------------------------ expand / contract
+
+# A new version must not break the previous one when something goes wrong and the update is rolled back: the old code
+# still runs against the NEW schema. So a migration only ADDS (tables, columns with a default or that may be empty).
+# Removing or renaming something is done in two releases: the first stops using it, the second drops it. Migrations up to
+# BASELINE are already released; later ones must not use the operations below. A migration that really has to may
+# be listed in CONTRACTS with a reason - and the update notes must say that going back needs a backup.
+BASELINE = "0013"
+CONTRACTS: dict[str, str] = {}
+FORBIDDEN = ("drop_column", "drop_table", "drop_constraint", "alter_column", "rename_table", "execute(")
+
+
+def test_new_migrations_only_expand_the_schema():
+    versions = Path(__file__).resolve().parent.parent / "app" / "migrations" / "versions"
+    bad = []
+    for f in sorted(versions.glob("[0-9]*.py")):
+        if f.name[:4] <= BASELINE or f.name[:4] in CONTRACTS:
+            continue
+        upgrade = f.read_text().split("def upgrade", 1)[1].split("def downgrade", 1)[0]
+        bad += [f"{f.name}: {op}" for op in FORBIDDEN if op in upgrade]
+    assert not bad, "a migration after the released ones removes or changes something (see the note above): " + ", ".join(bad)

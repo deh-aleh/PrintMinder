@@ -7,8 +7,6 @@ WORKDIR /src
 COPY pyproject.toml LICENSE NOTICE ./
 COPY app ./app
 RUN pip install --no-cache-dir . && cd / && rm -rf /src
-# the templates of .env and gateway.env: app.envsync reads them to add new options to an existing install
-COPY docker/env.example docker/gateway.env.example /usr/share/printminder/
 USER gateway
 ENV CUPSPL_HOST=0.0.0.0 CUPSPL_PORT=8631 \
     CUPSPL_CUPS_URL=unix:///run/cups/cups.sock \

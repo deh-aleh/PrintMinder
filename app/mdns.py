@@ -7,6 +7,7 @@ Services are `_ipps._tcp` (+ the `_universal` subtype AirPrint looks for). The T
 """
 
 import asyncio
+import json
 import logging
 import re
 import socket
@@ -83,14 +84,17 @@ def scanner_txt(info: dict, portal: str) -> dict[str, str]:
     return txt
 
 
-async def fetch_policy(port: int) -> dict | None:
+async def fetch_policy(port: int, announce: dict | None = None) -> dict | None:
     """Which printers the administrators want hidden / whether the gateway is in maintenance, asked to the gateway
     itself (this container has no database). None = could not ask: the caller keeps what it knew."""
     from app.policy.control import mdns_token
 
     try:
         async with httpx.AsyncClient(verify=False, timeout=8.0) as c:
-            r = await c.get(f"https://127.0.0.1:{port}/mdns/policy", headers={"X-Mdns-Token": mdns_token()})
+            headers = {"X-Mdns-Token": mdns_token()}
+            if announce:  # what is announced, so the gateway can warn when the TLS certificate does not cover it
+                headers["X-Mdns-Announce"] = json.dumps(announce)
+            r = await c.get(f"https://127.0.0.1:{port}/mdns/policy", headers=headers)
         if r.status_code != 200:
             return None
         data = r.json()
@@ -157,12 +161,13 @@ async def main() -> None:
     zcs = [AsyncZeroconf(ip_version=IPVersion.V4Only, interfaces=addresses) for _ in (SERVICE, UNIVERSAL)]
     published: dict[str, list[ServiceInfo]] = {}
     policy: dict | None = None
+    announce = {"names": [host, f"{host.split('.')[0]}.local"], "addresses": addresses}
     log.info("announcing as %s at %s:%s", host, addresses, port)
     try:
         while True:
             _App.state.queues_cache = None
             queues = await list_queues(_App, probe=False)  # the gateway tells which devices are unreachable
-            policy = await fetch_policy(port) or policy  # gateway unreachable: keep the last known policy
+            policy = await fetch_policy(port, announce) or policy  # gateway unreachable: keep the last known policy
             wanted = build_services(apply_policy(queues, policy), host, addresses, port, portal)
             # one service per scanner the gateway knows (none in maintenance); without a policy, the default one as before
             for sc in ([] if policy and policy["maintenance"] else (policy["scanners"] if policy else [{"root": "eSCL"}])):

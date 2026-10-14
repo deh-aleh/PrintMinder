@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint, false
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from app.crypto_fields import SealedOptions, SealedText
+
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
@@ -128,11 +130,11 @@ class JobLog(Base):
     kind: Mapped[JobKind] = mapped_column(Enum(JobKind), default=JobKind.print)
     printer: Mapped[str | None] = mapped_column(String(128))
     cups_job_id: Mapped[int | None]
-    title: Mapped[str | None] = mapped_column(String(512))
+    title: Mapped[str | None] = mapped_column(SealedText(512))  # a file name: encrypted in the database (app/crypto_fields.py)
     pages: Mapped[int | None]
     state: Mapped[JobState] = mapped_column(Enum(JobState))
     denied_reason: Mapped[str | None] = mapped_column(String(256))
-    options_json: Mapped[dict | None] = mapped_column(JSON)
+    options_json: Mapped[dict | None] = mapped_column(SealedOptions())  # "document_name" inside is encrypted
 
     user: Mapped[User | None] = relationship()
 
@@ -320,7 +322,7 @@ class AuditArchive(Base):
 
 class BackupTarget(Base):
     """A scheduled backup: where it goes (a folder under the backup root), when, how many to keep, how it is encrypted.
-    Each administrator owns their own; the row with `is_global` mirrors the settings of gateway.env."""
+    Each administrator owns their own; the row with `is_global` mirrors the settings of .env."""
 
     __tablename__ = "backup_target"
 

@@ -42,8 +42,7 @@ The pages limit is **hard** only for documents the gateway can count. It is **so
 
 ### Atomic reservation
 
-Checking the limit and recording the job happen under a lock (thread + `BEGIN IMMEDIATE` on SQLite; advisory lock on
-PostgreSQL), so many simultaneous jobs can not exceed the limit. Active grants are added to the limit **inside** the same check.
+Checking the limit and recording the job happen under a lock (thread + `BEGIN IMMEDIATE` on SQLite), so many simultaneous jobs can not exceed the limit. Active grants are added to the limit **inside** the same check.
 
 ## 2. Requests from users
 

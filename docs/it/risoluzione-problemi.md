@@ -11,7 +11,7 @@ docker compose logs --tail=100 cups ipp-usb mdns
 curl -sk https://<server>:8631/healthz             # 200 = gateway e database ok, 503 = no
 ```
 
-Per più dettaglio metti `CUPSPL_LOG_LEVEL=DEBUG` in `config/gateway.env` e poi `docker compose up -d`.
+Per più dettaglio metti `CUPSPL_LOG_LEVEL=DEBUG` in `.env` e poi `docker compose up -d`.
 
 ## 1. Il gateway non parte
 
@@ -28,7 +28,7 @@ Per più dettaglio metti `CUPSPL_LOG_LEVEL=DEBUG` in `config/gateway.env` e poi 
 
 | Sintomo | Causa e rimedio |
 |---|---|
-| `docker compose logs gateway \| grep 'FIRST RUN'` non stampa nulla | Controlla in quest'ordine. **1.** `docker compose ps`: `gateway` deve essere *Up*; se si riavvia o si ferma, leggi `docker compose logs gateway \| tail -40`. **2.** La riga compare solo finché l'amministratore non ha una password. Se questa cartella è già stata usata, il database (il volume Docker `printgw_gateway-data`) ha ancora l'account con la vecchia password: il log dice allora *"administrator … already has a password"*; accedi su `https://<server>:8631/admin/login`, oppure imposta una password nuova con `docker compose exec -it gateway cups-policy-admin set-admin-password`. **3.** `CUPSPL_BOOTSTRAP_ADMIN=false` in `config/gateway.env` spegne l'account del primo avvio. Per ripartire davvero da zero (questo **cancella utenti, quote e audit**): `docker compose down -v`, poi `docker compose up -d`. |
+| `docker compose logs gateway \| grep 'FIRST RUN'` non stampa nulla | Controlla in quest'ordine. **1.** `docker compose ps`: `gateway` deve essere *Up*; se si riavvia o si ferma, leggi `docker compose logs gateway \| tail -40`. **2.** La riga compare solo finché l'amministratore non ha una password. Se questa cartella è già stata usata, il database (il volume Docker `printgw_gateway-data`) ha ancora l'account con la vecchia password: il log dice allora *"administrator … already has a password"*; accedi su `https://<server>:8631/admin/login`, oppure imposta una password nuova con `docker compose exec -it gateway cups-policy-admin set-admin-password`. **3.** `CUPSPL_BOOTSTRAP_ADMIN=false` in `.env` spegne l'account del primo avvio. Per ripartire davvero da zero (questo **cancella utenti, quote e audit**): `docker compose down -v`, poi `docker compose up -d`. |
 | Bloccato dopo password sbagliate | 5 password *diverse* sbagliate in 5 minuti bloccano la coppia (utente, IP). Attendi 5 minuti o riavvia il gateway (il blocco è in memoria). |
 | Un utente RADIUS non entra | RADIUS irraggiungibile ⇒ accesso negato (fail closed). Controlla `CUPSPL_RADIUS_*`, che questa macchina sia un *client* RADIUS con lo stesso secret, e il log. Un account locale con lo stesso nome **non** viene mai aperto dal RADIUS. |
 | Obbligo di cambiare password | Normale per le password temporanee create o reimpostate da un amministratore. |
@@ -94,15 +94,23 @@ Per più dettaglio metti `CUPSPL_LOG_LEVEL=DEBUG` in `config/gateway.env` e poi 
 | I caratteri cinesi sono quadratini | Sul computer *del browser* manca un font CJK. |
 | Le pagine di prova o di manutenzione stampate sono in inglese | È voluto: russo e cinese richiederebbero un font PDF incorporato ([lingue.md](lingue.md)). |
 
-## 7b. Aggiornamenti
+## 7b. Aggiornamenti e certificati
 
 | Sintomo | Causa e rimedio |
 |---|---|
-| `scripts/env-sync.sh` scrive `No module named app.envsync` | Lo script è partito dentro un'immagine del gateway costruita prima che questa cartella ricevesse il codice nuovo (l'immagine non contiene `app/envsync.py`). Gli script recenti usano il Python della cartella se c'è `python3`; se lo vedi ancora, esegui `docker compose build gateway` (o `scripts/update.sh` per le immagini pubblicate) e riprova. |
-| Dopo `git pull` le opzioni nuove non sono in `.env` o `gateway.env` | Un pull cambia la cartella, non i tuoi due file. Esegui `scripts/env-sync.sh` (prima con `--check` per vedere cosa verrebbe aggiunto). |
-| `scripts/update.sh` dice `PRINTGW_REGISTRY is empty` | Le immagini si costruiscono da questa cartella: aggiorna con `git pull && docker compose up -d --build`, poi `scripts/env-sync.sh`. |
+| `scripts/update.sh` dice `PRINTGW_REGISTRY is empty` | Le immagini si costruiscono da questa cartella: aggiorna con `git pull && docker compose up -d --build`. |
+| `scripts/update.sh` dice «This folder is a git clone» | Con una cartella clonata con git l'aggiornamento è `git pull && docker compose up -d --build`: lo script rifiuta di sostituire file che git gestisce. |
+| `the package does not match its sha256 sum` | Il file scaricato non è quello pubblicato (download interrotto, o una rete che lo modifica). Non è stato cambiato nulla: riprova; se persiste, scaricalo dal browser dalla pagina delle release. |
+| `NOT healthy after the update: going back` | La versione nuova non è diventata sana in due minuti. Lo script ha rimesso i file e la versione di prima. Guarda `docker compose logs --tail 50 gateway` per capire perché. |
+| Dopo l'aggiornamento non parte né la versione nuova né la vecchia | La nuova ha già cambiato il database. `update.sh` ti propone di ripristinare il backup preso all'inizio (`YES`); a mano: `scripts/backup.sh restore data/backups/pre-update/<file>`. |
+| Il pulsante *Aggiorna* ha detto «rolled back» | Dal portale la nuova versione non è partita e c'è di nuovo la vecchia. Il ripristino del backup, se serve, lo fai tu: menu *Backup* o `scripts/backup.sh restore`. |
+| Una variabile nuova della versione non è in `.env` | Normale: l'aggiornamento non tocca `.env` e la variabile usa il suo valore predefinito. Per cambiarla copia la riga da `docker/env.example`. |
+| Avviso «Backup non eseguito» nella campanella | Il disco di rete o USB dei backup non è montato (o il backup è fallito per un altro motivo, scritto nell'avviso). Rimonta, poi *Esegui ora* ([backup.md](backup.md)). |
+| Avviso sul certificato nella campanella | Vedi [certificati.md](certificati.md): ogni avviso dice cosa è successo e cosa fare. |
+| `scripts/cert-sync.sh` scrive un errore | La tabella dei messaggi è in [certificati.md](certificati.md#54-se-qualcosa-va-storto). |
+| I nomi dei file nell'audit sono `[encrypted]` | `CUPSPL_SECRET_KEY` è stata cambiata dopo averli salvati. Rimetti la chiave di prima in `.env` e `docker compose up -d` ([protezione-dati.md](protezione-dati.md)). |
 
 ## 8. Ancora bloccato
 
 Prima di chiedere aiuto raccogli `docker compose logs gateway`, `docker compose ps`, l'esito di `/healthz`, la versione del gateway
-(`PRINTGW_VERSION` o il commit) e ciò che mostrava la pagina. Non incollare mai `config/gateway.env`, `.env` o la chiave TLS.
+(`PRINTGW_VERSION` o il commit) e ciò che mostrava la pagina. Non incollare mai `.env` o la chiave TLS.

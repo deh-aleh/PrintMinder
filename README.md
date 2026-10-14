@@ -52,6 +52,7 @@ browser ───────https───────────▶     │  
 | | Native eSCL clients that can authenticate (field test) | ⬜ |
 | **Audit** | Print/scan audit with real pages; separate log of administrative actions | ✅ |
 | | Unlimited retention with verified compressed archives; CSV export, filters, archive viewer and download | ✅ |
+| | File names encrypted in the database; button to stop saving them; optional erasing after some days | ✅ |
 | | syslog/SIEM export; anonymisation | ⬜ |
 | **Portal** | Admin portal (audit, users, groups, requests, grants, actions, printers, backups, archive) and user area (consumption, keys, requests, print, scan) | ✅ |
 | | Settings: password, theme, language, refresh; phone-friendly layout; copy buttons | ✅ |
@@ -63,9 +64,10 @@ browser ───────https───────────▶     │  
 | **Operations** | Docker stack (ipp-usb + CUPS + gateway + mDNS), nothing installed on the host | ✅ |
 | | Scheduled backups per administrator (folder, hour, rotation, passphrase/recovery-key encryption), restore from CLI | ✅ |
 | | Database migrations (Alembic), health check, logs, admin CLI | ✅ |
-| | Images for amd64 and arm64 on ghcr.io; update script with backup and automatic return to the old version; notice of new versions; new options added to your `.env` and `gateway.env` without changing your values | 🟡 not yet run on a real ARM machine |
+| | Images for amd64 and arm64 on ghcr.io; update script that downloads a checked release package, makes a backup first and goes back by itself (and offers to restore the backup) if the new version does not start; notice of new versions; one `.env` file that an update never touches | 🟡 not yet run on a real ARM machine |
 | | Update button in the portal (optional `updater` container, needs the Docker socket) | 🟡 only tested with simulations |
-| | Backups on a network disk or USB disk: marker file against an unmounted disk, time limit for a disk that stops answering | ✅ tested with an SMB share |
+| | Backups on a network disk or USB disk: marker file against an unmounted disk (on by default), a notice in the bell when a backup fails, time limit for a disk that stops answering | ✅ tested with an SMB share |
+| | TLS certificate: notices (expired, announced address missing, optional expiry warning) and `scripts/cert-sync.sh` to copy a renewed certificate from Nginx Proxy Manager or certbot | 🟡 script tested with simulations, not yet with a real Nginx Proxy Manager |
 | | Bell with notices for administrators; `/healthz` shows only the status unless you ask for more | ✅ |
 | | High availability, Prometheus metrics, direct remote backup targets (SSH/S3) | ⬜ |
 
@@ -82,22 +84,25 @@ The full list, with workarounds, is in [docs/en/limitations.md](docs/en/limitati
   architecture; going back to an older version after a migration needs a backup.
 - **TLS is mandatory**: install the self-signed certificate on clients or use your CA's.
 - Printer disconnection is detected within ~30 s (network queues: a TCP check, not paper).
-- The database is **not encrypted** and holds printed file names: protect it as personal data.
+- Printed **file names are encrypted** in the database (key from `CUPSPL_SECRET_KEY`: do not change it); the rest of the database is not. For everything else encrypt the disk: [data-protection.md](docs/en/data-protection.md).
 - Spanish, Russian and Chinese translations are not reviewed by native speakers; pages printed by the gateway stay English.
 
 ## Install (Docker, recommended)
 
-Requirements: a **Linux** server, Docker Engine with Compose, `openssl`, `python3`, a USB or network printer, and a TCP port
+Requirements: a **Linux** server, Docker Engine with Compose, `openssl`, `curl`, `tar`, `python3`, a USB or network printer, and a TCP port
 reachable by clients (default 8631). Nothing is installed on the host.
 
 ```sh
-git clone <repository-url> printminder && cd printminder
+# 0. download the release package (newest version: https://github.com/deh-aleh/PrintMinder/releases)
+VERSION=1.0.0
+curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/printminder-$VERSION.tar.gz
+tar xzf printminder-$VERSION.tar.gz && cd printminder-$VERSION      # (the guide also shows how to check the download)
 
 # 1. names / IPs clients will use to reach the server (they go into the TLS certificate)
-scripts/docker-init.sh print.lan 192.168.1.50      # creates config/gateway.env, .env, config/tls/, data/
+scripts/docker-init.sh print.lan 192.168.1.50      # creates .env (all the settings), config/tls/, data/
 
 # 2. settings: RADIUS is optional (leave host and secret empty for local accounts only)
-$EDITOR config/gateway.env
+$EDITOR .env
 
 # 3. printers, in .env — USB (stop the host's ipp-usb first: sudo systemctl disable --now ipp-usb && sudo systemctl mask ipp-usb)
 #       CUPS_QUEUES=HP7305=ipp://ipp-usb:60000/ipp/print
@@ -115,7 +120,7 @@ docker compose logs gateway | grep "FIRST RUN"
 Then: create users and groups in the portal (`https://<server>:8631/admin`); every user creates a **print key** in *Profile*
 and uses it as the password when a computer or phone asks for credentials (printer address `ipps://<server>:8631/printers/<queue>`);
 phones with nothing installed can use *Print* in the portal. Check the install with `curl -sk https://<server>:8631/healthz`.
-To use a CA-signed certificate put `fullchain.pem` and `privkey.pem` in `config/tls/` and `docker compose restart gateway`.
+To use a CA-signed certificate put `fullchain.pem` and `privkey.pem` in `config/tls/` and `docker compose restart gateway` (to keep a renewed one up to date by itself: [certificates.md](docs/en/certificates.md)).
 Update with `scripts/update.sh` (backup first, automatic return if the new version does not start; images for amd64 and arm64).
 Try it with no printer or RADIUS: see the guide. The alternative host install (systemd, modifies `/etc/cups`) is also in the guide.
 
@@ -128,7 +133,7 @@ Full guide: [docs/en/installation.md](docs/en/installation.md).
 | **Installation** (docker and host, USB/network printers, TLS, updates) | [installation.md](docs/en/installation.md) |
 | **Troubleshooting** | [troubleshooting.md](docs/en/troubleshooting.md) |
 | Architecture and technologies | [architecture.md](docs/en/architecture.md) |
-| How the application is built (each source file, `.env`, `gateway.env`, scripts) | [application-internals.md](docs/en/application-internals.md) |
+| How the application is built (each source file, `.env`, scripts) | [application-internals.md](docs/en/application-internals.md) |
 | User guide · Administrator guide (incl. CLI) | [user-guide.md](docs/en/user-guide.md) · [admin-guide.md](docs/en/admin-guide.md) |
 | Accounts, groups, print keys | [accounts.md](docs/en/accounts.md) |
 | Quotas, requests, grants | [quotas.md](docs/en/quotas.md) |
@@ -137,6 +142,8 @@ Full guide: [docs/en/installation.md](docs/en/installation.md).
 | Scanning | [scanning.md](docs/en/scanning.md) |
 | Audit and archive | [audit.md](docs/en/audit.md) |
 | Backup and restore | [backup.md](docs/en/backup.md) |
+| TLS certificates: notices, CA file, automatic synchronisation | [certificates.md](docs/en/certificates.md) |
+| Data protection: file names, encryption, retention | [data-protection.md](docs/en/data-protection.md) |
 | Languages and translating | [languages.md](docs/en/languages.md) |
 | Known limitations | [limitations.md](docs/en/limitations.md) |
 

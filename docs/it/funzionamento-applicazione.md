@@ -2,7 +2,7 @@
 
 [Indice della documentazione](../README.md) · [English](../en/application-internals.md) · Italiano
 
-Visita guidata del repository: a cosa serve ogni file sorgente, come funziona la configurazione (`.env`, `config/gateway.env`,
+Visita guidata del repository: a cosa serve ogni file sorgente, come funziona la configurazione (`.env`,
 `CUPSPL_*`) e cosa fanno script e file dei contenitori. Per il quadro generale leggi prima [architettura.md](architettura.md).
 
 > **Nomi.** Il prodotto si chiama **PrintMinder**. Alcuni nomi tecnici sono precedenti e restano di proposito, perché le installazioni
@@ -22,7 +22,7 @@ app/            l'applicazione (pacchetto Python)
   locales/      traduzioni (.po) per it, es, ru, zh
   migrations/   revisioni Alembic
   policy/       quote, concessioni, conteggio pagine, controlli, stampa periodica, ordinamento
-  cli.py  config.py  cups_client.py  envsync.py  escl.py  i18n.py  main.py  mdns.py  notices.py  updates.py
+  certwatch.py  cli.py  config.py  crypto_fields.py  cups_client.py  escl.py  i18n.py  main.py  mdns.py  notices.py  titles.py  updates.py
 deploy/         installazione sull'host senza docker (systemd)
 docker/         definizione dei contenitori (stack/ è quella di produzione)
 docs/           questa documentazione (en/ e it/)
@@ -33,19 +33,18 @@ docker-compose.yml  docker-compose.test.yml  pyproject.toml  alembic.ini
 
 ## 2. Configurazione: chi legge cosa
 
-Ci sono tre file con nomi simili. È la fonte di confusione più comune.
+Con docker c'è **un solo file** di impostazioni, `.env`. (Per l'installazione sull'host senza docker ce n'è uno simile, descritto sotto.)
 
 | File | Letto da | Contiene | Creato da |
 |---|---|---|---|
-| **`.env`** (cartella del progetto) | solo **docker compose**, per costruire `docker-compose.yml` | `PUID`, `PGID`, `GATEWAY_PORT`, `CUPS_QUEUES`, `CUPS_VIRTUAL_QUEUE`, `AUDIT_ARCHIVE_HOST_PATH`, `BACKUP_HOST_PATH`, `BACKUP_DIR`, `PRINTGW_REGISTRY`, `PRINTGW_VERSION` | `scripts/docker-init.sh` |
-| **`config/gateway.env`** | i contenitori **gateway** e **mdns** (`env_file`) | ogni impostazione `CUPSPL_*`, segreti compresi | `scripts/docker-init.sh` (da `docker/gateway.env.example`), permessi 600 |
+| **`.env`** (cartella del progetto) | **docker compose** (per costruire `docker-compose.yml`) **e** i contenitori **gateway** e **mdns** (`env_file: .env`) | parte A: `PUID`, `PGID`, `GATEWAY_PORT`, `CUPS_QUEUES`, `CUPS_VIRTUAL_QUEUE`, `AUDIT_ARCHIVE_HOST_PATH`, `BACKUP_HOST_PATH`, `BACKUP_DIR`, `PRINTGW_REGISTRY`, `PRINTGW_VERSION`. Parte B: ogni impostazione `CUPSPL_*`, segreti compresi. Più le opzioni `CERT_SYNC_*` di `scripts/cert-sync.sh` | `scripts/docker-init.sh` (da `docker/env.example`), permessi 600 |
 | **`deploy/env.example`** → `/etc/cups-policy-gateway/env` | l'unità systemd dell'**installazione sull'host** | le stesse impostazioni `CUPSPL_*`, per chi non usa docker | `deploy/install.sh` |
 
 L'applicazione ([`app/config.py`](../../app/config.py)) legge **solo variabili d'ambiente vere** con prefisso `CUPSPL_` (non legge un
 file `.env`: quello è di compose). Ogni impostazione ha un valore predefinito sicuro; un valore vuoto significa "non impostato".
-Dopo aver modificato `config/gateway.env` esegui `docker compose up -d` (ricrea i contenitori che lo usano).
+Dopo aver modificato `.env` esegui `docker compose up -d` (ricrea i contenitori che lo usano). **`docker-compose.yml` non si modifica mai**: tutto ciò che l'utente può cambiare sta in `.env`, così un aggiornamento può sostituire il compose senza cancellare le scelte di nessuno. Le variabili in più passate ai contenitori (come `PUID`) sono ignorate dall'applicazione.
 
-### 2.1 `.env` (variabili di docker compose)
+### 2.1 Parte A di `.env` (variabili di docker compose)
 
 | Variabile | Predefinito | Significato |
 |---|---|---|
@@ -59,11 +58,11 @@ Dopo aver modificato `config/gateway.env` esegui `docker compose up -d` (ricrea 
 | `PROJECT_DIR` | impostato da init | Percorso completo della cartella del progetto; lo usa solo il contenitore facoltativo `updater` |
 | `COMPOSE_PROFILES` | non impostato | `autoupdate` avvia il contenitore facoltativo `updater` |
 
-Il file nasce da `docker/env.example`. `scripts/update.sh` e `scripts/env-sync.sh` (codice: `app/envsync.py`) aggiungono le opzioni delle versioni nuove in fondo a `.env` e a `config/gateway.env`, con la loro spiegazione; un valore già presente non viene mai cambiato e resta una copia del file (`.env.bak-<data>`).
+Il file nasce da `docker/env.example` (lo fa `scripts/docker-init.sh`, in shell puro: sostituisce versione, utente, cartella e genera il segreto). Un aggiornamento **non tocca mai `.env`**: le opzioni nuove funzionano con il loro valore predefinito (quello di `app/config.py`) anche se mancano, e `docker/env.example` (sostituito a ogni aggiornamento) le elenca con la spiegazione. Un test verifica che ogni valore attivo di `docker/env.example` sia uguale al predefinito di `app/config.py`.
 
-### 2.2 `config/gateway.env` (impostazioni `CUPSPL_*`)
+### 2.2 Parte B di `.env` (impostazioni `CUPSPL_*`)
 
-Il riferimento commentato è [`docker/gateway.env.example`](../../docker/gateway.env.example) (commenti in inglese semplice) e l'elenco
+Il riferimento commentato è la parte B di [`docker/env.example`](../../docker/env.example) (commenti in inglese semplice) e l'elenco
 autorevole è `app/config.py`. Riassunto:
 
 | Gruppo | Variabili |
@@ -172,13 +171,14 @@ autorevole è `app/config.py`. Riassunto:
 
 | Script | Scopo |
 |---|---|
-| `scripts/docker-init.sh [nomi/IP]` | Preparazione una tantum: crea `config/gateway.env` (con un segreto generato), `.env`, le cartelle `data/` e un certificato TLS autofirmato con i nomi/IP indicati. |
+| `scripts/docker-init.sh [nomi/IP]` | Preparazione una tantum, in shell puro (servono `sed` e `openssl`): crea `.env` da `docker/env.example` (con versione, utente e un segreto generato), le cartelle `data/` e un certificato TLS autofirmato con i nomi/IP indicati. |
 | `scripts/backup.sh backup\|restore` | Backup completo **lato host** (database, configurazione, archivio audit, code CUPS, `.env`); serve a spostare la macchina. |
 | `scripts/add-printer-linux.sh` | Aggiunge una stampante del gateway a un computer Linux con la chiave di stampa nell'indirizzo della coda. |
 | `scripts/print-test.sh` | Invia una pagina di testo come utente (consuma un foglio). |
 | `scripts/gen_dev_cert.sh` | Certificato autofirmato solo per lo sviluppo. |
-| `scripts/env-sync.sh [--check]` | Aggiunge le opzioni delle versioni nuove a `.env` e `config/gateway.env` (codice: `app/envsync.py`). |
-| `scripts/update.sh [VERSIONE\|--check]` | Aggiornamento sicuro con le immagini pubblicate: backup, nuova versione in `.env`, pull, riavvio, attesa della salute, ritorno automatico alla versione precedente. `--from-portal` è la modalità usata dal contenitore `updater`. |
+| `scripts/cert-sync.sh [--dry-run]` | Da cron: copia il certificato TLS dalla macchina che lo rinnova (`rsync` su `ssh`), lo controlla, lo installa in `config/tls/` e riavvia il gateway se è cambiato. Scrive `config/tls/sync-status.json`, che il portale legge (`app/certwatch.py`). Vedi [certificati.md](certificati.md). |
+| `scripts/make-release-package.sh VERSIONE CARTELLA` | Costruisce il pacchetto della release (`printminder-<versione>.tar.gz` + `SHA256SUMS`): compose, script, `docker/env.example`, documentazione. Lo usa il workflow di rilascio; non contiene mai `.env`, `config/`, `data/`. |
+| `scripts/update.sh [VERSIONE\|--check]` | Aggiornamento sicuro con le immagini pubblicate: backup, scarica e verifica (sha256) il pacchetto della release, sostituisce compose e script (mai `.env`, `config/`, `data/`), nuova versione in `.env`, pull, riavvio, attesa della salute, ritorno automatico ai file e alla versione precedenti e, se serve, offerta di ripristinare il backup. Si rifiuta in una cartella con `.git`. `--from-portal` è la modalità usata dal contenitore `updater`. |
 | `scripts/queue-restore.sh NOME [--reboot]` / `--list` | Rimette una coda eliminata di `CUPS_QUEUES`: toglie il nome da `/etc/cups/printminder-queues` nel contenitore `cups` (l'elenco delle code già create una volta); `--reboot` riavvia anche quel contenitore. |
 | `scripts/i18n.py` | Strumenti per le traduzioni: `extract`, `missing`, `check`, `add`. |
 
@@ -193,7 +193,7 @@ autorevole è `app/config.py`. Riassunto:
 | `docker/stack/ipp-usb/` | Immagine ipp-usb, `ipp-usb.conf` e l'entrypoint che lo riavvia quando cambiano i dispositivi USB. |
 | `docker/cups/`, `docker/radius/` | Immagine CUPS dei test; utenti del RADIUS di prova (`mario`, `anna`, `admin`). |
 | `docker/stack/updater/` | Immagine facoltativa `updater` (profilo `autoupdate`): aspetta `/data/update/request.json`, esegue `scripts/update.sh --from-portal`, scrive `status.json`. Ha il socket di Docker. |
-| `docker/gateway.env.example`, `docker/env.example` | Modelli di `config/gateway.env` e di `.env`, con ogni opzione spiegata. L'immagine del gateway ne porta una copia in `/usr/share/printminder/` per `app/envsync.py`. |
+| `docker/env.example` | Il modello di `.env`, con ogni opzione spiegata (parte A per compose, parte B per il programma). Fa parte del pacchetto della release. |
 | `deploy/install.sh`, `setup-cups.sh`, `cups-policy-gateway.service`, `cups.socket.d/`, `env.example` | Installazione sull'host senza docker (vedi [installazione.md](installazione.md)). |
 
 ## 6. Dove guardare quando…
@@ -203,6 +203,6 @@ autorevole è `app/config.py`. Riassunto:
 | cambiare come si calcola una quota | `app/policy/engine.py`, `app/policy/audit.py` |
 | consentire/vietare un'operazione IPP | `app/ipp/gateway.py` |
 | aggiungere una pagina al portale | un router in `app/admin/`, un template in `app/admin/templates/`, una voce di menu in `base.html` |
-| aggiungere un'impostazione | `app/config.py`, poi `docker/gateway.env.example` e [questa pagina](#22-configgatewayenv-impostazioni-cupspl_) |
+| aggiungere un'impostazione | `app/config.py`, poi `docker/env.example` (parte B, con la spiegazione e lo stesso valore predefinito: un test lo controlla) e [questa pagina](#22-parte-b-di-env-impostazioni-cupspl_) |
 | cambiare il database | `app/db/models.py` **e** una nuova revisione Alembic (un test verifica che coincidano) |
 | tradurre un testo | [lingue.md](lingue.md) |

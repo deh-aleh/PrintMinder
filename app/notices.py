@@ -84,6 +84,20 @@ def report(sm, kind: str, key: str, detail: dict | None = None, now: float | Non
     return True
 
 
+def resolve(sm, kind: str, key: str) -> int:
+    """Close the open notices of this source because the problem is gone (dismissed by "system"). Returns how many."""
+    key = key[:128]
+    with sm() as db:
+        rows = list(db.scalars(select(Notice).where(Notice.kind == kind, Notice.key == key, Notice.dismissed_at.is_(None))))
+        for row in rows:
+            row.dismissed_at, row.dismissed_by = datetime.now(timezone.utc), "system"
+        db.commit()
+    if rows:
+        with _lock:
+            _state.pop((kind, key), None)  # if it happens again it is a new problem and is reported at once
+    return len(rows)
+
+
 def pending(kind: str, key: str) -> int:
     """Repeats counted in memory and not yet written (shown beside the stored count)."""
     with _lock:

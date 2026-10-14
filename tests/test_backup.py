@@ -126,6 +126,21 @@ async def test_plain_backup_has_no_secrets_and_encrypted_has_them(portal, dirs):
         core.verify(enc.path, "not the passphrase!!")
 
 
+async def test_the_env_file_travels_in_encrypted_backups_only(portal, dirs, tmp_path, monkeypatch):
+    env = tmp_path / "project.env"
+    env.write_text("CUPSPL_SECRET_KEY=from-env\n")
+    monkeypatch.setattr(settings, "backup_env_file", str(env))
+    (dirs.parent / "cfg" / ".cert-sync.abc123").mkdir()
+    (dirs.parent / "cfg" / ".cert-sync.abc123" / "privkey.pem").write_text("TEMPORARY")
+    f = core.resolve_folder("t")
+    plain = core.create_backup(portal.sm, f, "printgw-aaaaaaaa-t1", recipient=None, target_name="p", instance="aaaaaaaa")
+    assert set(core.verify(plain.path)["files"]) == {"gateway.db"}
+    enc = core.create_backup(portal.sm, f, "printgw-aaaaaaaa-t2", recipient=crypto.make_recipient(PASS), target_name="e",
+                             instance="aaaaaaaa", now=datetime.now(timezone.utc) + timedelta(seconds=1))
+    files = set(core.verify(enc.path, PASS)["files"])
+    assert "config/.env" in files and not any(".cert-sync" in x for x in files)   # the script's temporary folder is skipped
+
+
 async def test_a_damaged_backup_is_detected(portal, dirs):
     f = core.resolve_folder("t")
     res = core.create_backup(portal.sm, f, "printgw-aaaaaaaa-t1", recipient=None, target_name="p", instance="aaaaaaaa")
@@ -254,6 +269,41 @@ async def test_a_failing_backup_is_visible_not_silent(portal, dirs):
         assert service.health(t, datetime.now(timezone.utc)) == "error"
 
 
+@pytest.mark.usefixtures("english")
+async def test_unmounted_destination_raises_a_notice_with_the_real_name_and_it_closes_when_fixed(portal, dirs):
+    from app.db.models import Notice
+
+    make_user(portal.sm, "ada", password=GOOD, admin=True)
+    (dirs / "nas").mkdir()
+    with portal.sm() as s:
+        t = BackupTarget(owner_name="ada", name="NAS ufficio", folder="nas", mode="none", require_marker=True)
+        s.add(t)
+        s.commit()
+        tid = t.id
+    ok, _msg = service.run_target(portal.sm, tid)       # the share is not mounted: no marker file
+    assert not ok
+    with portal.sm() as s:
+        n = s.query(Notice).filter(Notice.kind == "backup_not_mounted", Notice.key == str(tid)).one()
+        assert n.dismissed_at is None and n.detail_json["name"] == "NAS ufficio"
+    await portal_login(portal, "ada", GOOD)
+    page = (await portal.get("/admin/notices")).text
+    assert "NAS ufficio" in page and "can not be reached" in page
+
+    core.make_marker(dirs / "nas")                        # mounted again
+    ok, _msg = service.run_target(portal.sm, tid)
+    assert ok
+    with portal.sm() as s:
+        assert s.query(Notice).filter(Notice.kind == "backup_not_mounted", Notice.dismissed_at.is_(None)).count() == 0
+        assert s.query(Notice).filter(Notice.kind == "backup_not_mounted").one().dismissed_by == "system"
+
+
+async def test_a_new_backup_is_created_with_the_marker_ticked(portal, dirs):
+    make_user(portal.sm, "ada", password=GOOD, admin=True)
+    await portal_login(portal, "ada", GOOD)
+    page = (await portal.get("/admin/backups")).text
+    assert 'name="require_marker" value="1" checked' in page
+
+
 # ------------------------------------------------------------------------------------------------ schedule
 
 def test_schedule_runs_once_a_day_after_the_hour(monkeypatch):
@@ -303,7 +353,7 @@ async def test_general_backup_follows_gateway_env(portal, dirs, monkeypatch):
     make_user(portal.sm, "ada", password=GOOD, admin=True)
     await portal_login(portal, "ada", GOOD)
     text = (await portal.get("/admin/backups")).text
-    assert "si modifica in gateway.env" in text
+    assert "si modifica in .env" in text
     assert (await portal.get(f"/admin/backups/{g.id}/edit")).status_code == 403
 
 

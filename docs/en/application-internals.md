@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md) · English · [Italiano](../it/funzionamento-applicazione.md)
 
-A guided tour of the repository: what every source file is for, how configuration works (`.env`, `config/gateway.env`,
+A guided tour of the repository: what every source file is for, how configuration works (`.env`,
 `CUPSPL_*`), and what the scripts and container files do. For the big picture read [architecture.md](architecture.md) first.
 
 > **Naming.** The product is called **PrintMinder**. Some technical names predate it and are kept on purpose so that
@@ -22,7 +22,7 @@ app/            the application (Python package)
   locales/      translations (.po) for it, es, ru, zh
   migrations/   Alembic revisions
   policy/       quotas, grants, page counting, controls, keep-alive, ordering
-  cli.py  config.py  cups_client.py  envsync.py  escl.py  i18n.py  main.py  mdns.py  notices.py  updates.py
+  certwatch.py  cli.py  config.py  crypto_fields.py  cups_client.py  escl.py  i18n.py  main.py  mdns.py  notices.py  titles.py  updates.py
 deploy/         installation on the host without docker (systemd)
 docker/         container definitions (stack/ is the production one)
 docs/           this documentation (en/ and it/)
@@ -33,19 +33,18 @@ docker-compose.yml  docker-compose.test.yml  pyproject.toml  alembic.ini
 
 ## 2. Configuration: who reads what
 
-There are three different files with similar names. This is the most common source of confusion.
+With docker there is **one single** settings file, `.env`. (For the host install without docker there is a similar one, described below.)
 
 | File | Read by | Contains | Created by |
 |---|---|---|---|
-| **`.env`** (project folder) | **docker compose** only, to build `docker-compose.yml` | `PUID`, `PGID`, `GATEWAY_PORT`, `CUPS_QUEUES`, `CUPS_VIRTUAL_QUEUE`, `AUDIT_ARCHIVE_HOST_PATH`, `BACKUP_HOST_PATH`, `BACKUP_DIR`, `PRINTGW_REGISTRY`, `PRINTGW_VERSION` | `scripts/docker-init.sh` |
-| **`config/gateway.env`** | the **gateway** and **mdns** containers (`env_file`) | every `CUPSPL_*` setting, including secrets | `scripts/docker-init.sh` (from `docker/gateway.env.example`), mode 600 |
+| **`.env`** (project folder) | **docker compose** (to build `docker-compose.yml`) **and** the **gateway** and **mdns** containers (`env_file: .env`) | part A: `PUID`, `PGID`, `GATEWAY_PORT`, `CUPS_QUEUES`, `CUPS_VIRTUAL_QUEUE`, `AUDIT_ARCHIVE_HOST_PATH`, `BACKUP_HOST_PATH`, `BACKUP_DIR`, `PRINTGW_REGISTRY`, `PRINTGW_VERSION`. Part B: every `CUPSPL_*` setting, including secrets. Plus the `CERT_SYNC_*` options of `scripts/cert-sync.sh` | `scripts/docker-init.sh` (from `docker/env.example`), mode 600 |
 | **`deploy/env.example`** → `/etc/cups-policy-gateway/env` | systemd unit of the **host install** | same `CUPSPL_*` settings, for installs without docker | `deploy/install.sh` |
 
 The application itself ([`app/config.py`](../../app/config.py)) reads **only real environment variables** with the prefix
 `CUPSPL_` (it does not read a `.env` file: that one belongs to compose). Every setting has a safe default; an empty value
-means "not set". After editing `config/gateway.env` run `docker compose up -d` (recreates the containers that use it).
+means "not set". After editing `.env` run `docker compose up -d` (recreates the containers that use it). **`docker-compose.yml` is never edited**: everything the user may change is in `.env`, so an update can replace the compose file without erasing anyone's choices. The extra variables passed to the containers (like `PUID`) are ignored by the application.
 
-### 2.1 `.env` (docker compose variables)
+### 2.1 Part A of `.env` (docker compose variables)
 
 | Variable | Default | Meaning |
 |---|---|---|
@@ -59,11 +58,11 @@ means "not set". After editing `config/gateway.env` run `docker compose up -d` (
 | `PROJECT_DIR` | set by init | Full path of the project folder; only the optional `updater` container uses it |
 | `COMPOSE_PROFILES` | unset | `autoupdate` starts the optional `updater` container |
 
-The file is made from `docker/env.example`. `scripts/update.sh` and `scripts/env-sync.sh` (code: `app/envsync.py`) add the options of newer versions at the end of `.env` and `config/gateway.env`, with their explanation; a value that exists is never changed, and a copy of the file is kept (`.env.bak-<date>`).
+The file is made from `docker/env.example` (by `scripts/docker-init.sh`, in plain shell: it fills in version, user, folder and generates the secret). An update **never touches `.env`**: new options work with their default value (the one in `app/config.py`) even when missing, and `docker/env.example` (replaced by every update) lists them with their explanation. A test checks that every active value of `docker/env.example` equals the default in `app/config.py`.
 
-### 2.2 `config/gateway.env` (`CUPSPL_*` settings)
+### 2.2 Part B of `.env` (`CUPSPL_*` settings)
 
-The commented reference is [`docker/gateway.env.example`](../../docker/gateway.env.example) (plain English comments) and the
+The commented reference is part B of [`docker/env.example`](../../docker/env.example) (plain English comments) and the
 authoritative list is `app/config.py`. Summary:
 
 | Group | Variables |
@@ -172,13 +171,14 @@ authoritative list is `app/config.py`. Summary:
 
 | Script | Purpose |
 |---|---|
-| `scripts/docker-init.sh [names/IPs]` | One-time setup: creates `config/gateway.env` (with a generated secret), `.env`, `data/` folders and a self-signed TLS certificate whose SAN lists the names/IPs given. |
+| `scripts/docker-init.sh [names/IPs]` | One-time setup, in plain shell (needs `sed` and `openssl`): creates `.env` from `docker/env.example` (with version, user and a generated secret), the `data/` folders and a self-signed TLS certificate whose SAN lists the names/IPs given. |
 | `scripts/backup.sh backup\|restore` | Full **host-side** backup (database, config, audit archive, CUPS queues, `.env`); used to move the machine. |
 | `scripts/add-printer-linux.sh` | Adds a gateway printer to a Linux computer with the print key stored in the queue address. |
 | `scripts/print-test.sh` | Sends one small text page as a user (uses a sheet of paper). |
 | `scripts/gen_dev_cert.sh` | Development-only self-signed certificate. |
-| `scripts/env-sync.sh [--check]` | Adds the options of newer versions to `.env` and `config/gateway.env` (code: `app/envsync.py`). |
-| `scripts/update.sh [VERSION\|--check]` | Safe update with the published images: backup, new version in `.env`, pull, restart, health wait, automatic return to the old version. `--from-portal` is the mode used by the `updater` container. |
+| `scripts/cert-sync.sh [--dry-run]` | From cron: copies the TLS certificate from the machine that renews it (`rsync` over `ssh`), checks it, installs it in `config/tls/` and restarts the gateway if it changed. Writes `config/tls/sync-status.json`, which the portal reads (`app/certwatch.py`). See [certificates.md](certificates.md). |
+| `scripts/make-release-package.sh VERSION FOLDER` | Builds the release package (`printminder-<version>.tar.gz` + `SHA256SUMS`): compose, scripts, `docker/env.example`, documentation. Used by the release workflow; it never holds `.env`, `config/`, `data/`. |
+| `scripts/update.sh [VERSION\|--check]` | Safe update with the published images: backup, downloads and checks (sha256) the release package, replaces the compose file and the scripts (never `.env`, `config/`, `data/`), new version in `.env`, pull, restart, waits for health, automatic return to the previous files and version and, if needed, an offer to restore the backup. It refuses to run in a folder with `.git`. `--from-portal` is the mode used by the `updater` container. |
 | `scripts/queue-restore.sh NAME [--reboot]` / `--list` | Brings back a deleted queue of `CUPS_QUEUES`: takes its name out of `/etc/cups/printminder-queues` in the `cups` container (the list of queues already created once); `--reboot` also restarts that container. |
 | `scripts/i18n.py` | Translation tooling: `extract`, `missing`, `check`, `add`. |
 
@@ -193,7 +193,7 @@ authoritative list is `app/config.py`. Summary:
 | `docker/stack/ipp-usb/` | ipp-usb image, `ipp-usb.conf`, and the entrypoint that restarts it when USB devices change. |
 | `docker/cups/`, `docker/radius/` | Test CUPS image; test RADIUS users (`mario`, `anna`, `admin`). |
 | `docker/stack/updater/` | Optional `updater` image (profile `autoupdate`): waits for `/data/update/request.json`, runs `scripts/update.sh --from-portal`, writes `status.json`. Has the Docker socket. |
-| `docker/gateway.env.example`, `docker/env.example` | Templates of `config/gateway.env` and `.env`, with every option explained. The gateway image carries a copy in `/usr/share/printminder/` for `app/envsync.py`. |
+| `docker/env.example` | The template of `.env`, with every option explained (part A for compose, part B for the program). It is part of the release package. |
 | `deploy/install.sh`, `setup-cups.sh`, `cups-policy-gateway.service`, `cups.socket.d/`, `env.example` | Installation on the host without docker (see [installation.md](installation.md)). |
 
 ## 6. Where to look when…
@@ -203,6 +203,6 @@ authoritative list is `app/config.py`. Summary:
 | change how a quota is computed | `app/policy/engine.py`, `app/policy/audit.py` |
 | allow/forbid an IPP operation | `app/ipp/gateway.py` |
 | add a portal page | a router in `app/admin/`, a template in `app/admin/templates/`, a menu entry in `base.html` |
-| add a setting | `app/config.py`, then `docker/gateway.env.example` and [this page](#22-configgatewayenv-cupspl_-settings) |
+| add a setting | `app/config.py`, then `docker/env.example` (part B, with its explanation and the same default value: a test checks it) and [this page](#22-part-b-of-env-cupspl_-settings) |
 | change the database | `app/db/models.py` **and** a new Alembic revision (a test checks they match) |
 | translate a text | [languages.md](languages.md) |

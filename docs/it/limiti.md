@@ -10,15 +10,24 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 - Serve un **host Linux** per le stampanti USB e per mDNS (il passaggio USB e la rete `host` non esistono su Docker Desktop per
   Windows/macOS: lì funzionano solo le stampanti di rete e non si annuncia nulla).
 - Un gateway per stampante USB (`ipp-usb` la vuole in esclusiva). Il suo contenitore vede tutti i dispositivi USB dell'host (necessario per il collegamento a caldo).
-- Un gateway per database SQLite; nessuna alta disponibilità.
+- Il database è SQLite (un file): un solo gateway, nessuna alta disponibilità, nessun database esterno.
 - Le immagini pubblicate esistono solo per amd64 e arm64 (niente ARM a 32 bit).
-- `scripts/update.sh` aggiorna le immagini e aggiunge le opzioni nuove a `.env` e `config/gateway.env`; le modifiche a `docker-compose.yml` e agli script arrivano con `git pull`.
-- Il pulsante *Aggiorna* del portale richiede il contenitore facoltativo `updater`, che tiene il socket di Docker (root sull'host): è spento di default. Aggiorna solo dentro la stessa versione maggiore.
-- Backup su una condivisione di rete: i permessi li decide il montaggio (usa la cifratura) e una condivisione smontata è rilevata solo se è spuntata l'opzione «scrivi solo se montato».
-- Tornare a una versione precedente dopo una migrazione del database richiede il ripristino di un backup.
-- Le migrazioni sono provate solo su SQLite; con PostgreSQL vanno verificate (i tipi enum condivisi fra tabelle richiedono attenzione).
-- Il database non è cifrato e contiene i nomi dei file stampati: proteggilo come dato personale.
-- Certificati: i dispositivi devono fidarsi della CA aziendale; l'annuncio usa l'IP, quindi il certificato deve elencarlo.
+- `scripts/update.sh` scarica il pacchetto della release e sostituisce `docker-compose.yml` e gli script, mai `.env`, `config/` e `data/`. Non funziona in una cartella
+  clonata con git (lì si usa `git pull`). Le opzioni nuove di una versione non vengono scritte nel tuo `.env`: funzionano con il valore predefinito; per vederle
+  confronta `.env` con `docker/env.example`.
+- Il pulsante *Aggiorna* del portale richiede il contenitore facoltativo `updater`, che tiene il socket di Docker (root sull'host): è spento di default e il portale lo
+  ricorda. Aggiorna solo dentro la stessa versione maggiore e, se la nuova versione non parte, rimette quella vecchia ma non ripristina il backup da solo.
+- Backup su una condivisione di rete: i permessi dei file li decide il montaggio (usa la cifratura). Una condivisione smontata non riceve backup: l'opzione
+  «scrivi solo se montato» è attiva di default per i backup creati dal portale e il portale avvisa quando un backup salta. Il backup *Generale* di `.env` ha l'opzione spenta
+  di default (va attivata e preparata a mano, vedi [backup.md](backup.md)).
+- Tornare a una versione precedente dopo una migrazione del database richiede il ripristino di un backup: `scripts/update.sh` lo propone da solo quando la versione
+  vecchia non parte. Le migrazioni nuove devono solo aggiungere (la versione vecchia continua a poter leggere il database), ma non è una garanzia per ogni caso.
+- I **nomi dei file stampati sono cifrati** nel database e nell'archivio audit (chiave derivata da `CUPSPL_SECRET_KEY`: se la cambi non si leggono più). Il resto del
+  database non è cifrato (nomi utente, gruppi, nomi delle stampanti, registro admin): per proteggere tutto cifra il disco, vedi [protezione-dati.md](protezione-dati.md).
+  Anche CUPS tiene i nomi dei suoi ultimi job (fino a 2.000) nel proprio volume: il pulsante e la retention dei nomi non li toccano.
+- Certificati: i dispositivi devono fidarsi della CA aziendale; l'annuncio usa l'IP, quindi il certificato deve elencarlo (il portale avvisa se non è così).
+  `scripts/cert-sync.sh` **copia** il certificato da chi lo rinnova ma non lo rinnova: per accorgersi di un rinnovo fallito serve l'avviso di scadenza, spento di default.
+  Dettagli in [certificati.md](certificati.md).
 
 ## 2. Quota
 
@@ -60,7 +69,7 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 - Backup integrati: solo SQLite; code CUPS non incluse (sono in `scripts/backup.sh`); i file di configurazione si ripristinano a mano;
   nessuna destinazione remota diretta; la passphrase non è recuperabile. `scripts/backup.sh restore` è provato solo a mano.
 - Il blocco dei login è in memoria e si azzera al riavvio.
-- L'audit e il database non sono cifrati.
+- L'audit e il database non sono cifrati, salvo i nomi dei file (vedi §1 e [protezione-dati.md](protezione-dati.md)).
 
 ## 6. Lingue
 

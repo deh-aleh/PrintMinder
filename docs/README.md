@@ -18,6 +18,8 @@ La documentazione è scritta in due lingue con la stessa struttura. L'inglese è
 | Scanning | [scanning.md](en/scanning.md) | [scansione.md](it/scansione.md) |
 | Audit | [audit.md](en/audit.md) | [audit.md](it/audit.md) |
 | Backup and restore | [backup.md](en/backup.md) | [backup.md](it/backup.md) |
+| TLS certificates: notices, CA file, automatic synchronisation | [certificates.md](en/certificates.md) | [certificati.md](it/certificati.md) |
+| Data protection: file names, encryption, retention | [data-protection.md](en/data-protection.md) | [protezione-dati.md](it/protezione-dati.md) |
 | Languages (i18n) | [languages.md](en/languages.md) | [lingue.md](it/lingue.md) |
 | Known limitations | [limitations.md](en/limitations.md) | [limiti.md](it/limiti.md) |
 

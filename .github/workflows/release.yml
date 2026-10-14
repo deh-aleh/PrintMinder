@@ -1,6 +1,7 @@
 # Publishes the container images when you push a version tag, for example:  git tag v1.2.0 && git push origin v1.2.0
 # One tag gives one image per service, built for both amd64 (PC, server) and arm64 (Raspberry Pi, ARM NAS).
 # Images go to ghcr.io/<owner>/<service>:<version> (gateway, cups, ipp-usb, updater). The tag must match "version" in pyproject.toml.
+# The release also gets printminder-<version>.tar.gz (+ SHA256SUMS): docker-compose.yml, scripts/, docker/env.example and the docs.
 name: Release
 on:
   push:
@@ -69,6 +70,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # the package that scripts/update.sh downloads and that new installs unpack: compose file, scripts, docs, env template
+      - name: Build the release package
+        run: sh scripts/make-release-package.sh "${GITHUB_REF_NAME#v}" dist
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          files: |
+            dist/printminder-*.tar.gz
+            dist/SHA256SUMS

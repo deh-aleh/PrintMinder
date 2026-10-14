@@ -42,8 +42,7 @@ Il limite pagine Ã¨ **rigido** solo per i documenti che il gateway sa contare. Ã
 
 ### Riserva atomica
 
-Il controllo del limite e la registrazione del job avvengono sotto lock (thread + `BEGIN IMMEDIATE` su SQLite; advisory lock su
-PostgreSQL), quindi molti job simultanei non possono superare il limite. Le concessioni attive si sommano al limite **dentro** lo stesso controllo.
+Il controllo del limite e la registrazione del job avvengono sotto lock (thread + `BEGIN IMMEDIATE` su SQLite), quindi molti job simultanei non possono superare il limite. Le concessioni attive si sommano al limite **dentro** lo stesso controllo.
 
 ## 2. Richieste degli utenti
 

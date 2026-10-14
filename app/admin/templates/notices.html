@@ -12,7 +12,21 @@
       <td data-l="{{ _('Last time') }}">{{ n.last_at|localtime }}<div class="muted">{{ _("first: %(t)s", t=n.first_at|localtime) }}</div></td>
       <td data-l="{{ _('What happened') }}">
         {% if n.kind == 'escl_anonymous_refused' %}
-        {{ _("A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">config/gateway.env</span> and run <span class=\"mono\">docker compose up -d</span>.", ip=n.key) }}
+        {{ _("A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">.env</span> and run <span class=\"mono\">docker compose up -d</span>.", ip=n.key) }}
+        {% elif n.kind == 'backup_not_mounted' %}{% set d = n.detail_json or {} %}
+        {{ _("<b>Backup not done: the destination folder can not be reached.</b> The latest backup of “%(name)s” was not saved, because the network disk or USB disk does not seem to be connected. Nothing was written. Check that it is switched on and mounted, then press “Run now”. Last successful backup: %(last)s.", name=d.get("name", n.key), last=(d.get("last_ok")|isotime) or _("never")) }}
+        {% elif n.kind == 'backup_failed' %}{% set d = n.detail_json or {} %}
+        {{ _("<b>Backup failed.</b> The latest backup of “%(name)s” was not saved. Reason: %(error)s. Last successful backup: %(last)s.", name=d.get("name", n.key), error=d.get("error", "?"), last=(d.get("last_ok")|isotime) or _("never")) }}
+        {% elif n.kind == 'cert_sync_failed' %}{% set d = n.detail_json or {} %}
+        {{ _("<b>The certificate could not be updated.</b> The last run of <span class=\"mono\">scripts/cert-sync.sh</span> (%(when)s) failed: %(message)s. The certificate in use is the old one. Run the script by hand to see the error, and check the cron job.", when=(d.get("when")|isotime) or "?", message=d.get("message") or "?") }}
+        {% elif n.kind == 'cert_expired' %}{% set d = n.detail_json or {} %}
+        {{ _("<b>The TLS certificate has expired</b> (on %(date)s). Phones and computers refuse to connect to the gateway until a valid one is in <span class=\"mono\">config/tls</span> and the gateway has been restarted.", date=(d.get("not_after") or "")[:10]) }}
+        {% elif n.kind == 'cert_expiring' %}{% set d = n.detail_json or {} %}
+        {% if d.sync == 'ok' %}{{ _("<b>The TLS certificate expires on %(date)s.</b> The last synchronisation worked, so the source has not renewed it yet: check the program that renews it (for example Nginx Proxy Manager).", date=(d.not_after or "")[:10]) }}
+        {% elif d.sync == 'failed' %}{{ _("<b>The TLS certificate expires on %(date)s.</b> The last synchronisation failed: see the other notice about the certificate.", date=(d.not_after or "")[:10]) }}
+        {% else %}{{ _("<b>The TLS certificate expires on %(date)s.</b> Renew it and put the new files in <span class=\"mono\">config/tls</span>, then restart the gateway.", date=(d.not_after or "")[:10]) }}{% endif %}
+        {% elif n.kind == 'cert_name_missing' %}{% set d = n.detail_json or {} %}
+        {{ _("<b>The announced address is not in the TLS certificate.</b> The gateway announces itself on the network as <span class=\"mono\">%(names)s</span> at <span class=\"mono\">%(addresses)s</span>, and the certificate covers none of them: phones and computers that find the printers this way will show a certificate error. Make the certificate list the address (or give the machine a fixed address and a name that the certificate covers).", names=(d.get("names") or [])|join(", "), addresses=(d.get("addresses") or [])|join(", ")) }}
         {% else %}{{ n.kind }}: {{ n.key }}{% endif %}
       </td>
       <td data-l="{{ _('Times') }}">{{ n.count + r.extra }}</td>

@@ -55,7 +55,7 @@ def _backup_offline(args) -> int:
     try:
         if args.cmd == "backup-key":
             print(crypto.make_recipient(_passphrase(confirm=True)))
-            print("\nPut it in config/gateway.env as CUPSPL_BACKUP_RECIPIENT=<the line above> or paste it in the portal "
+            print("\nPut it in .env as CUPSPL_BACKUP_RECIPIENT=<the line above> or paste it in the portal "
                   "(Backup > New backup > ready-made recovery key). Keep the passphrase: without it the backups cannot be opened.", file=sys.stderr)
             return 0
         path = Path(args.file)
@@ -78,7 +78,7 @@ def _backup_offline(args) -> int:
                          audit_dir=Path(settings.audit_archive_dir))
         print(f"database restored ({r['manifest']['created']}); {r['audit_files']} audit file(s) brought back")
         if r["config"]:
-            print(f"configuration files are in {args.config_out}: copy gateway.env and tls/ into ./config on the host "
+            print(f"configuration files are in {args.config_out}: copy .env into the project folder and tls/ into ./config on the host "
                   "if this is a new machine, then start the gateway")
         return 0
     except (core.BackupError, crypto.CryptoError) as exc:
@@ -171,7 +171,7 @@ def main(argv=None) -> int:
             service.sync_global(s)
             ids = [args.id] if args.id else [t.id for t in s.scalars(_select(BackupTarget)) if t.enabled]
             if not ids:
-                print("no enabled backup: set one up in the portal (Backup) or in gateway.env")
+                print("no enabled backup: set one up in the portal (Backup) or in .env")
             failed = 0
             for tid in ids:
                 ok, msg = service.run_target(SessionLocal, tid)

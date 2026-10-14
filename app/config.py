@@ -68,6 +68,15 @@ class Settings(BaseSettings):
     audit_archive_dir: str = "/data/audit-archive"
     audit_archive_host_path: str = ""  # shown in the portal only, so people know where the files are on the host
     audit_check_interval: float = 3600.0
+    # warnings about the TLS certificate (the one in CUPSPL_TLS_CERTFILE). "Already expired" and "the announced address is
+    # not in it" are always reported; "expires soon" only when asked for, so nobody gets a notice while the renewal is
+    # simply not due yet.
+    cert_expiry_warn_enabled: bool = False
+    cert_expiry_warn_days: int = 14
+    cert_name_check: bool = True
+    # forget the names of printed files after some days (the rows, pages and states stay: quotas need them). Off by default.
+    job_title_retention_enabled: bool = False
+    job_title_retention_days: int = 90
 
     # eSCL scanner behind the gateway (ipp-usb serves it next to IPP); empty = scanning disabled
     scan_url: str = ""
@@ -103,10 +112,11 @@ class Settings(BaseSettings):
     mdns_interval: float = 30.0  # seconds between looks at the CUPS queue list
 
     # backups: administrators pick a sub-folder of backup_root (the only place the gateway may write backups);
-    # the "general" backup below is the one set in gateway.env, the administrators' own are made in the portal
+    # the "general" backup below is the one set in .env, the administrators' own are made in the portal
     backup_root: str = "/backups"
     backup_host_path: str = ""  # shown in the portal only: where backup_root is on the host
-    backup_config_dir: str = "/config"  # read-only copy of config/ (gateway.env, TLS); saved only in encrypted backups
+    backup_config_dir: str = "/config"  # read-only copy of config/ (TLS); saved only in encrypted backups
+    backup_env_file: str = "/project.env"  # read-only copy of .env (settings, secrets); saved only in encrypted backups
     backup_enabled: bool = False
     backup_dir: str = "general"
     backup_hour: int = 3

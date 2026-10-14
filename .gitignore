@@ -31,3 +31,8 @@ tests/_out/
 # notes for whoever maintains the project (releases, development): local only
 /MAINTAINER-NOTES.md
 /.env.bak-*
+
+# update.sh working folders
+/.update-new/
+/.update-prev/
+*.pm-tmp

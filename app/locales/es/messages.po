@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-14 00:41+0200\n"
+"POT-Creation-Date: 2026-10-14 14:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -121,27 +121,27 @@ msgstr "rechazada"
 msgid "expired"
 msgstr "caducada"
 
-#: app/admin/templates/jobs.html:89 app/i18n.py:165
+#: app/admin/templates/jobs.html:95 app/i18n.py:165
 msgid "canceled"
 msgstr "cancelado"
 
-#: app/admin/templates/jobs.html:85 app/i18n.py:166
+#: app/admin/templates/jobs.html:91 app/i18n.py:166
 msgid "accepted"
 msgstr "aceptado"
 
-#: app/admin/templates/jobs.html:87 app/i18n.py:166
+#: app/admin/templates/jobs.html:93 app/i18n.py:166
 msgid "denied"
 msgstr "denegado"
 
-#: app/admin/templates/jobs.html:86 app/i18n.py:166
+#: app/admin/templates/jobs.html:92 app/i18n.py:166
 msgid "completed"
 msgstr "completado"
 
-#: app/admin/templates/jobs.html:88 app/i18n.py:166
+#: app/admin/templates/jobs.html:94 app/i18n.py:166
 msgid "failed"
 msgstr "fallido"
 
-#: app/admin/templates/jobs.html:90 app/i18n.py:166
+#: app/admin/templates/jobs.html:96 app/i18n.py:166
 msgid "held"
 msgstr "en espera"
 
@@ -179,7 +179,7 @@ msgstr "trabajos"
 msgid "pages"
 msgstr "páginas"
 
-#: app/admin/templates/backup_edit.html:17 app/admin/templates/backups.html:88
+#: app/admin/templates/backup_edit.html:17 app/admin/templates/backups.html:89
 #: app/admin/templates/group_edit.html:13 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:14 app/admin/templates/request_quota.html:14
 #: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:19
@@ -187,7 +187,7 @@ msgstr "páginas"
 msgid "weekly"
 msgstr "semanal"
 
-#: app/admin/templates/backup_edit.html:18 app/admin/templates/backups.html:89
+#: app/admin/templates/backup_edit.html:18 app/admin/templates/backups.html:90
 #: app/admin/templates/group_edit.html:13 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:14 app/admin/templates/request_quota.html:14
 #: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:19
@@ -473,7 +473,7 @@ msgstr "predeterminado de la impresora"
 msgid "Sides"
 msgstr "Caras"
 
-#: app/admin/audit_view.py:39 app/admin/templates/jobs.html:19
+#: app/admin/audit_view.py:39 app/admin/templates/jobs.html:24
 #: app/admin/templates/scan.html:34
 msgid "File name"
 msgstr "Nombre del archivo"
@@ -491,7 +491,7 @@ msgid "Format"
 msgstr "Formato"
 
 #: app/admin/audit_view.py:47 app/admin/templates/backup_edit.html:15
-#: app/admin/templates/backups.html:86 app/admin/templates/print.html:51
+#: app/admin/templates/backups.html:87 app/admin/templates/print.html:51
 msgid "Copies"
 msgstr "Copias"
 
@@ -591,40 +591,40 @@ msgstr "La copia de seguridad ha FALLADO: %(message)s"
 msgid "Backup “%(name)s” deleted. The files already written in the folder stay where they are"
 msgstr "Copia de seguridad «%(name)s» eliminada. Los archivos ya escritos en la carpeta se quedan donde están"
 
-#: app/admin/common.py:130
+#: app/admin/common.py:139
 #, python-format
 msgid "invalid limit %(value)s"
 msgstr "límite no válido %(value)s"
 
-#: app/admin/common.py:133
+#: app/admin/common.py:142
 #, python-format
 msgid "limit too large (max %(max)s)"
 msgstr "límite demasiado grande (máx. %(max)s)"
 
-#: app/admin/controls.py:32
+#: app/admin/controls.py:33
 msgid "Gateway in maintenance: printing and scanning stopped for users, printers hidden from the network (within ~30 s)"
 msgstr "Gateway en mantenimiento: impresión y escaneo detenidos para los usuarios, impresoras ocultas de la red (en ~30 s)"
 
-#: app/admin/controls.py:33
+#: app/admin/controls.py:34
 msgid "Maintenance over: the gateway is operational again"
 msgstr "Mantenimiento terminado: el gateway vuelve a estar operativo"
 
-#: app/admin/controls.py:54
+#: app/admin/controls.py:55
 #, python-format
 msgid "%(name)s blocked: nobody can print on it, not even the administrators"
 msgstr "%(name)s bloqueada: nadie puede imprimir en ella, ni siquiera los administradores"
 
-#: app/admin/controls.py:55
+#: app/admin/controls.py:56
 #, python-format
 msgid "%(name)s unblocked: usable again"
 msgstr "%(name)s desbloqueada: vuelve a poder usarse"
 
-#: app/admin/controls.py:62
+#: app/admin/controls.py:63
 #, python-format
 msgid "%(name)s will no longer be announced on the network (mDNS) within ~30 s; it stays usable by whoever knows it"
 msgstr "%(name)s dejará de anunciarse en la red (mDNS) en ~30 s; sigue siendo utilizable por quien la conoce"
 
-#: app/admin/controls.py:63
+#: app/admin/controls.py:64
 #, python-format
 msgid "%(name)s will be announced on the network (mDNS) again within ~30 s"
 msgstr "%(name)s volverá a anunciarse en la red (mDNS) en ~30 s"
@@ -651,6 +651,7 @@ msgid "move to group %(name)s"
 msgstr "pasar al grupo %(name)s"
 
 #: app/admin/me.py:83 app/admin/templates/keys.html:13
+#: app/admin/templates/notices.html:17 app/admin/templates/notices.html:19
 msgid "never"
 msgstr "nunca"
 
@@ -962,8 +963,8 @@ msgstr "Tinta restante"
 
 #: app/admin/printers.py:473 app/admin/printers.py:479
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/grants.html:8 app/admin/templates/jobs.html:28
-#: app/admin/templates/jobs.html:50 app/admin/templates/keys.html:8
+#: app/admin/templates/grants.html:8 app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:56 app/admin/templates/keys.html:8
 #: app/admin/templates/keys.html:15 app/admin/templates/me.html:47
 #: app/admin/templates/printers.html:176 app/admin/templates/requests.html:37
 #: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:9
@@ -1124,40 +1125,48 @@ msgstr "Concesión creada para %(user)s"
 msgid "Grant revoked"
 msgstr "Concesión revocada"
 
-#: app/admin/routes.py:50
+#: app/admin/routes.py:52
 msgid "Too many failed attempts, retry later"
 msgstr "Demasiados intentos fallidos, vuelve a intentarlo más tarde"
 
-#: app/admin/routes.py:56
+#: app/admin/routes.py:58
 msgid "Invalid credentials"
 msgstr "Credenciales no válidas"
 
-#: app/admin/routes.py:109
+#: app/admin/routes.py:111
 msgid "Too many wrong codes, retry later"
 msgstr "Demasiados códigos erróneos, vuelve a intentarlo más tarde"
 
-#: app/admin/routes.py:114
+#: app/admin/routes.py:116
 msgid "Wrong code. It is in the gateway log (docker compose logs gateway)"
 msgstr "Código incorrecto. Está en el registro del gateway (docker compose logs gateway)"
 
-#: app/admin/routes.py:117
+#: app/admin/routes.py:119
 msgid "the two passwords differ"
 msgstr "las dos contraseñas son distintas"
 
-#: app/admin/routes.py:138
+#: app/admin/routes.py:140
 #, python-format
 msgid "Password set. Log in as %(name)s."
 msgstr "Contraseña establecida. Inicia sesión como %(name)s."
 
-#: app/admin/routes.py:224
+#: app/admin/routes.py:227
+msgid "From now on the names of new files are saved"
+msgstr "A partir de ahora se guardan los nombres de los archivos nuevos"
+
+#: app/admin/routes.py:228
+msgid "From now on the names of new files are not saved"
+msgstr "A partir de ahora no se guardan los nombres de los archivos nuevos"
+
+#: app/admin/routes.py:251
 msgid "That job is not waiting in a queue"
 msgstr "Ese trabajo no está esperando en una cola"
 
-#: app/admin/routes.py:244
+#: app/admin/routes.py:271
 msgid "Cancel requested"
 msgstr "Cancelación solicitada"
 
-#: app/admin/routes.py:244
+#: app/admin/routes.py:271
 msgid "CUPS did not accept the cancel (already printed?)"
 msgstr "CUPS no aceptó la cancelación (¿ya impreso?)"
 
@@ -1208,13 +1217,13 @@ msgstr "Quién (administrador)"
 msgid "Action (e.g. user.update)"
 msgstr "Acción (p. ej. user.update)"
 
-#: app/admin/templates/actions.html:8 app/admin/templates/jobs.html:24
+#: app/admin/templates/actions.html:8 app/admin/templates/jobs.html:29
 msgid "Filter"
 msgstr "Filtrar"
 
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:11
-#: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:47
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:32
+#: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:38
 #: app/admin/templates/me.html:47 app/admin/templates/requests.html:7
 #: app/admin/templates/requests.html:37
 msgid "When"
@@ -1225,7 +1234,7 @@ msgid "Who"
 msgstr "Quién"
 
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:15
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:43
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:49
 msgid "Action"
 msgstr "Acción"
 
@@ -1238,18 +1247,18 @@ msgid "No actions."
 msgstr "Ninguna acción."
 
 #: app/admin/templates/actions.html:20 app/admin/templates/archive_view.html:22
-#: app/admin/templates/jobs.html:76
+#: app/admin/templates/jobs.html:82
 msgid "Previous"
 msgstr "Anterior"
 
 #: app/admin/templates/actions.html:21 app/admin/templates/archive_view.html:23
-#: app/admin/templates/jobs.html:77
+#: app/admin/templates/jobs.html:83
 #, python-format
 msgid "Page %(page)s / %(pages)s"
 msgstr "Página %(page)s / %(pages)s"
 
 #: app/admin/templates/actions.html:22 app/admin/templates/archive_view.html:24
-#: app/admin/templates/jobs.html:78
+#: app/admin/templates/jobs.html:84
 msgid "Next"
 msgstr "Siguiente"
 
@@ -1279,7 +1288,7 @@ msgid "Current size of the active tables:"
 msgstr "Tamaño actual de las tablas activas:"
 
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:52
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:58
 msgid "File"
 msgstr "Archivo"
 
@@ -1363,8 +1372,8 @@ msgid "%(n)s results"
 msgstr "%(n)s resultados"
 
 #: app/admin/templates/archive_view.html:11 app/admin/templates/grants.html:8
-#: app/admin/templates/jobs.html:18 app/admin/templates/jobs.html:28
-#: app/admin/templates/jobs.html:33 app/admin/templates/login.html:8
+#: app/admin/templates/jobs.html:23 app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:39 app/admin/templates/login.html:8
 #: app/admin/templates/requests.html:7 app/admin/templates/requests.html:37
 #: app/admin/templates/settings.html:6 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:12
@@ -1382,8 +1391,8 @@ msgstr "Impresora"
 msgid "Pages"
 msgstr "Páginas"
 
-#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:28
-#: app/admin/templates/jobs.html:62
+#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:68
 msgid "Notes"
 msgstr "Notas"
 
@@ -1409,13 +1418,13 @@ msgstr "Editar copia de seguridad"
 msgid "Edit backup “%(name)s”"
 msgstr "Editar copia de seguridad «%(name)s»"
 
-#: app/admin/templates/backup_edit.html:8 app/admin/templates/backups.html:79
+#: app/admin/templates/backup_edit.html:8 app/admin/templates/backups.html:80
 #: app/admin/templates/group_edit.html:10
 msgid "Name"
 msgstr "Nombre"
 
-#: app/admin/templates/backup_edit.html:9 app/admin/templates/backups.html:46
-#: app/admin/templates/backups.html:80
+#: app/admin/templates/backup_edit.html:9 app/admin/templates/backups.html:47
+#: app/admin/templates/backups.html:81
 msgid "Folder"
 msgstr "Carpeta"
 
@@ -1424,28 +1433,28 @@ msgstr "Carpeta"
 msgid "inside %(root)s. Copies already written stay in the old folder."
 msgstr "dentro de %(root)s. Las copias ya escritas se quedan en la carpeta antigua."
 
-#: app/admin/templates/backup_edit.html:12 app/admin/templates/backups.html:83
+#: app/admin/templates/backup_edit.html:12 app/admin/templates/backups.html:84
 msgid "Safety"
 msgstr "Seguridad"
 
-#: app/admin/templates/backup_edit.html:12 app/admin/templates/backups.html:83
+#: app/admin/templates/backup_edit.html:12 app/admin/templates/backups.html:84
 msgid "The folder is a network disk or USB disk: write only if it is mounted"
 msgstr "La carpeta es un disco de red o USB: escribir solo si está montado"
 
-#: app/admin/templates/backup_edit.html:13 app/admin/templates/backups.html:84
-msgid "Tick this only while the disk is mounted now. The gateway puts a small marker file in the folder and refuses to back up when it is not there, so an unmounted disk never fills the server disk with copies."
-msgstr "Márquelo solo mientras el disco esté montado ahora. La pasarela pone un pequeño archivo marcador en la carpeta y se niega a hacer la copia si falta, así un disco sin montar nunca llena el disco del servidor de copias."
+#: app/admin/templates/backup_edit.html:13 app/admin/templates/backups.html:85
+msgid "Leave this ticked for a network disk or USB disk, and save while the disk is mounted now. The gateway puts a small marker file in the folder and refuses to back up when it is not there, so an unmounted disk never fills the server disk with copies."
+msgstr "Déjalo marcado para un disco de red o USB, y guarda mientras el disco está montado. El gateway pone un pequeño archivo marcador en la carpeta y se niega a hacer la copia si no está, así un disco desmontado nunca llena el disco del servidor de copias."
 
-#: app/admin/templates/backup_edit.html:14 app/admin/templates/backups.html:85
+#: app/admin/templates/backup_edit.html:14 app/admin/templates/backups.html:86
 msgid "Time"
 msgstr "Hora"
 
-#: app/admin/templates/backup_edit.html:16 app/admin/templates/backups.html:87
+#: app/admin/templates/backup_edit.html:16 app/admin/templates/backups.html:88
 msgid "daily"
 msgstr "diarias"
 
-#: app/admin/templates/backup_edit.html:19 app/admin/templates/backups.html:49
-#: app/admin/templates/backups.html:90
+#: app/admin/templates/backup_edit.html:19 app/admin/templates/backups.html:50
+#: app/admin/templates/backups.html:91
 msgid "Encryption"
 msgstr "Cifrado"
 
@@ -1473,7 +1482,7 @@ msgid "Save"
 msgstr "Guardar"
 
 #: app/admin/templates/backup_edit.html:22
-#: app/admin/templates/group_edit.html:16 app/admin/templates/jobs.html:70
+#: app/admin/templates/group_edit.html:16 app/admin/templates/jobs.html:76
 #: app/admin/templates/me.html:52 app/admin/templates/print.html:57
 #: app/admin/templates/printers.html:93
 #: app/admin/templates/request_group.html:15
@@ -1508,8 +1517,8 @@ msgid "suspended"
 msgstr "suspendida"
 
 #: app/admin/templates/backups.html:7
-msgid "Each administrator can set up <b>their own</b> backups: destination folder, time, how many copies to keep and encryption. Each one saves the database, the audit archive and (only if encrypted) the configuration and the certificate. The <b>General</b> backup is set in the file <span class=\"mono\">gateway.env</span>."
-msgstr "Cada administrador puede configurar <b>sus propias</b> copias de seguridad: carpeta de destino, hora, cuántas copias conservar y cifrado. Cada una guarda la base de datos, el archivo de auditoría y (solo si está cifrada) la configuración y el certificado. La copia <b>General</b> se configura en el archivo <span class=\"mono\">gateway.env</span>."
+msgid "Each administrator can set up <b>their own</b> backups: destination folder, time, how many copies to keep and encryption. Each one saves the database, the audit archive and (only if encrypted) the configuration and the certificate. The <b>General</b> backup is set in the file <span class=\"mono\">.env</span>."
+msgstr "Cada administrador puede configurar <b>sus propias</b> copias de seguridad: carpeta de destino, hora, cuántas copias conservar y cifrado. Cada una guarda la base de datos, el archivo de auditoría y (solo si está cifrada) la configuración y el certificado. La copia <b>General</b> se configura en el archivo <span class=\"mono\">.env</span>."
 
 #: app/admin/templates/backups.html:8
 #, python-format
@@ -1595,8 +1604,8 @@ msgid "A backup is made first (%(name)s)."
 msgstr "Primero se hace una copia (%(name)s)."
 
 #: app/admin/templates/backups.html:31
-msgid "Updating from the portal is off: the updater container is not running. Start it with “docker compose --profile autoupdate up -d”, or update from a terminal with scripts/update.sh."
-msgstr "La actualización desde el portal está desactivada: el contenedor updater no está en marcha. Inícielo con «docker compose --profile autoupdate up -d» o actualice desde un terminal con scripts/update.sh."
+msgid "Updating from the portal is off: the updater container is not running. It is off on purpose: whoever controls it controls Docker, which is the same as full control (root) of this server. If you accept that, start it with “docker compose --profile autoupdate up -d”; otherwise update from a terminal with scripts/update.sh."
+msgstr "Actualizar desde el portal está desactivado: el contenedor updater no está en marcha. Está apagado a propósito: quien lo controla controla Docker, que equivale al control total (root) de este servidor. Si lo aceptas, inícialo con «docker compose --profile autoupdate up -d»; si no, actualiza desde un terminal con scripts/update.sh."
 
 #: app/admin/templates/backups.html:32
 msgid "Updating from the portal needs a scheduled backup that is on and worked in the last 48 hours. Set one up below."
@@ -1606,170 +1615,174 @@ msgstr "Actualizar desde el portal requiere una copia programada activa y correc
 msgid "An update is already waiting for the updater."
 msgstr "Ya hay una actualización esperando al actualizador."
 
-#: app/admin/templates/backups.html:41
+#: app/admin/templates/backups.html:36
+msgid "The updater container is running. It controls Docker, which is the same as full control (root) of this server. If you do not need updates from the portal, stop it with “docker compose stop updater”."
+msgstr "El contenedor updater está en marcha. Controla Docker, lo que equivale al control total (root) de este servidor. Si no necesitas actualizar desde el portal, detenlo con «docker compose stop updater»."
+
+#: app/admin/templates/backups.html:42
 msgid "mine"
 msgstr "mía"
 
-#: app/admin/templates/backups.html:45
+#: app/admin/templates/backups.html:46
 msgid "Owner"
 msgstr "Propietario"
 
-#: app/admin/templates/backups.html:46
+#: app/admin/templates/backups.html:47
 msgid "only written while mounted"
 msgstr "se escribe solo si está montado"
 
-#: app/admin/templates/backups.html:47
+#: app/admin/templates/backups.html:48
 #, python-format
 msgid "every day at %(hour)s:00"
 msgstr "cada día a las %(hour)s:00"
 
-#: app/admin/templates/backups.html:48
+#: app/admin/templates/backups.html:49
 msgid "Copies kept"
 msgstr "Copias conservadas"
 
-#: app/admin/templates/backups.html:48
+#: app/admin/templates/backups.html:49
 #, python-format
 msgid "%(d)s daily · %(w)s weekly · %(m)s monthly"
 msgstr "%(d)s diarias · %(w)s semanales · %(m)s mensuales"
 
-#: app/admin/templates/backups.html:49
+#: app/admin/templates/backups.html:50
 msgid "<b>none</b> — no secrets in the file (neither the TLS key nor <span class=\"mono\">SECRET_KEY</span>); whoever can read the folder reads users and audit"
 msgstr "<b>ninguno</b> — sin secretos en el archivo (ni la clave TLS ni <span class=\"mono\">SECRET_KEY</span>); quien pueda leer la carpeta lee usuarios y auditoría"
 
-#: app/admin/templates/backups.html:50
+#: app/admin/templates/backups.html:51
 msgid "passphrase chosen by the administrator (the gateway does not keep it)"
 msgstr "frase de contraseña elegida por el administrador (el gateway no la conserva)"
 
-#: app/admin/templates/backups.html:50
+#: app/admin/templates/backups.html:51
 msgid "recovery key (<span class=\"mono\">backup-key</span>)"
 msgstr "clave de recuperación (<span class=\"mono\">backup-key</span>)"
 
-#: app/admin/templates/backups.html:51
+#: app/admin/templates/backups.html:52
 msgid "Last result"
 msgstr "Último resultado"
 
-#: app/admin/templates/backups.html:52
+#: app/admin/templates/backups.html:53
 #, python-format
 msgid "succeeded on %(when)s — <span class=\"mono\">%(file)s</span> (%(size)s MB)"
 msgstr "correcto el %(when)s — <span class=\"mono\">%(file)s</span> (%(size)s MB)"
 
-#: app/admin/templates/backups.html:52
+#: app/admin/templates/backups.html:53
 msgid "never succeeded"
 msgstr "nunca correcto"
 
-#: app/admin/templates/backups.html:53
+#: app/admin/templates/backups.html:54
 #, python-format
 msgid "Last attempt failed (%(when)s): %(error)s"
 msgstr "El último intento falló (%(when)s): %(error)s"
 
-#: app/admin/templates/backups.html:58
+#: app/admin/templates/backups.html:59
 #, python-format
 msgid "%(count)s copies in the folder (latest %(shown)s)"
 msgstr "%(count)s copias en la carpeta (últimas %(shown)s)"
 
-#: app/admin/templates/backups.html:62
+#: app/admin/templates/backups.html:63
 msgid "Run now"
 msgstr "Ejecutar ahora"
 
-#: app/admin/templates/backups.html:64 app/admin/templates/groups.html:18
+#: app/admin/templates/backups.html:65 app/admin/templates/groups.html:18
 #: app/admin/templates/users.html:22
 msgid "Edit"
 msgstr "Editar"
 
-#: app/admin/templates/backups.html:65
+#: app/admin/templates/backups.html:66
 msgid "Suspend"
 msgstr "Suspender"
 
-#: app/admin/templates/backups.html:65
+#: app/admin/templates/backups.html:66
 msgid "Activate"
 msgstr "Activar"
 
-#: app/admin/templates/backups.html:66
+#: app/admin/templates/backups.html:67
 msgid "Delete this scheduled backup? The files already written stay in the folder."
 msgstr "¿Eliminar esta copia de seguridad programada? Los archivos ya escritos se quedan en la carpeta."
 
-#: app/admin/templates/backups.html:67 app/admin/templates/groups.html:20
+#: app/admin/templates/backups.html:68 app/admin/templates/groups.html:20
 #: app/admin/templates/printers.html:124
 msgid "Delete"
 msgstr "Eliminar"
 
-#: app/admin/templates/backups.html:68
+#: app/admin/templates/backups.html:69
 #, python-format
 msgid "belongs to %(owner)s"
 msgstr "pertenece a %(owner)s"
 
-#: app/admin/templates/backups.html:68
-msgid "edited in gateway.env"
-msgstr "se modifica en gateway.env"
+#: app/admin/templates/backups.html:69
+msgid "edited in .env"
+msgstr "se modifica en .env"
 
-#: app/admin/templates/backups.html:72
+#: app/admin/templates/backups.html:73
 msgid "No backup configured."
 msgstr "Ninguna copia de seguridad configurada."
 
-#: app/admin/templates/backups.html:72
+#: app/admin/templates/backups.html:73
 msgid "If the disk breaks, users, keys, quotas and audit are lost. Create one below."
 msgstr "Si el disco se estropea, se pierden usuarios, claves, cuotas y auditoría. Crea una abajo."
 
-#: app/admin/templates/backups.html:76
+#: app/admin/templates/backups.html:77
 msgid "New backup"
 msgstr "Nueva copia de seguridad"
 
-#: app/admin/templates/backups.html:79
+#: app/admin/templates/backups.html:80
 msgid "e.g. Office NAS"
 msgstr "p. ej. NAS de la oficina"
 
-#: app/admin/templates/backups.html:80
+#: app/admin/templates/backups.html:81
 #, python-format
 msgid "e.g. nas/%(user)s"
 msgstr "p. ej. nas/%(user)s"
 
-#: app/admin/templates/backups.html:82
+#: app/admin/templates/backups.html:83
 #, python-format
 msgid "inside %(root)s; the gateway creates it if missing"
 msgstr "dentro de %(root)s; el gateway la crea si falta"
 
-#: app/admin/templates/backups.html:91 app/admin/templates/backups.html:97
+#: app/admin/templates/backups.html:92 app/admin/templates/backups.html:98
 msgid "Passphrase"
 msgstr "Frase de contraseña"
 
-#: app/admin/templates/backups.html:91
+#: app/admin/templates/backups.html:92
 msgid "recommended"
 msgstr "recomendado"
 
-#: app/admin/templates/backups.html:92
+#: app/admin/templates/backups.html:93
 msgid "Ready-made recovery key"
 msgstr "Clave de recuperación ya preparada"
 
-#: app/admin/templates/backups.html:93
+#: app/admin/templates/backups.html:94
 msgid "None"
 msgstr "Ninguno"
 
-#: app/admin/templates/backups.html:97
+#: app/admin/templates/backups.html:98
 #, python-format
 msgid "at least %(n)s characters"
 msgstr "al menos %(n)s caracteres"
 
-#: app/admin/templates/backups.html:98
+#: app/admin/templates/backups.html:99
 msgid "Repeat"
 msgstr "Repetir"
 
-#: app/admin/templates/backups.html:100
+#: app/admin/templates/backups.html:101
 msgid "<b>Do not use your account password:</b> the gateway does not know it (it only stores a hash), it changes over time, and for a RADIUS user it is not even theirs. Choose a dedicated one and keep it in a safe place (password manager). The gateway <b>does not store it</b>: it writes the backups without asking for it, but <b>without it nobody can open them</b>, not even another administrator."
 msgstr "<b>No uses la contraseña de tu cuenta:</b> el gateway no la conoce (solo guarda un hash), cambia con el tiempo y, para un usuario RADIUS, ni siquiera es suya. Elige una expresamente y guárdala en un lugar seguro (gestor de contraseñas). El gateway <b>no la guarda</b>: escribe las copias sin pedírtela, pero <b>sin ella nadie puede abrirlas</b>, ni siquiera otro administrador."
 
-#: app/admin/templates/backups.html:103
+#: app/admin/templates/backups.html:104
 msgid "Key"
 msgstr "Clave"
 
-#: app/admin/templates/backups.html:104
+#: app/admin/templates/backups.html:105
 msgid "created on the server with <span class=\"mono\">docker compose exec -it gateway cups-policy-admin backup-key</span>: the passphrase never goes through the portal"
 msgstr "creada en el servidor con <span class=\"mono\">docker compose exec -it gateway cups-policy-admin backup-key</span>: la frase de contraseña nunca pasa por el portal"
 
-#: app/admin/templates/backups.html:106
+#: app/admin/templates/backups.html:107
 msgid "Without encryption the file contains the database (users, names of printed files). That is why the secrets are <b>not</b> saved: the TLS key, <span class=\"mono\">SECRET_KEY</span> and the RADIUS secret must be kept separately."
 msgstr "Sin cifrado, el archivo contiene la base de datos (usuarios, nombres de los archivos impresos). Por eso <b>no</b> se guardan los secretos: la clave TLS, <span class=\"mono\">SECRET_KEY</span> y el secreto RADIUS deben conservarse aparte."
 
-#: app/admin/templates/backups.html:107
+#: app/admin/templates/backups.html:108
 msgid "Create backup"
 msgstr "Crear copia de seguridad"
 
@@ -2086,157 +2099,182 @@ msgstr "las impresiones más antiguas ya no aparecen en esta tabla."
 msgid "View, download or verify the archives →"
 msgstr "Ver, descargar o verificar los archivos →"
 
-#: app/admin/templates/jobs.html:13
+#: app/admin/templates/jobs.html:14
+msgid "Stop saving the names of the files? From now on new prints and scans will be listed without a file name. The names already saved stay. You can turn it on again at any time."
+msgstr "¿Dejar de guardar los nombres de los archivos? A partir de ahora las nuevas impresiones y escaneos aparecerán sin nombre de archivo. Los nombres ya guardados se conservan. Puedes volver a activarlo cuando quieras."
+
+#: app/admin/templates/jobs.html:16
+msgid "Click to stop saving the names of new files"
+msgstr "Haz clic para dejar de guardar los nombres de los archivos nuevos"
+
+#: app/admin/templates/jobs.html:16
+msgid "Click to start saving the names of new files again"
+msgstr "Haz clic para volver a guardar los nombres de los archivos nuevos"
+
+#: app/admin/templates/jobs.html:16
+msgid "File names are being saved"
+msgstr "Nombres de archivo: se guardan"
+
+#: app/admin/templates/jobs.html:16
+msgid "File names are not being saved"
+msgstr "Nombres de archivo: no se guardan"
+
+#: app/admin/templates/jobs.html:18
 msgid "Print and scan audit"
 msgstr "Auditoría de impresiones y escaneos"
 
-#: app/admin/templates/jobs.html:15
+#: app/admin/templates/jobs.html:20
 msgid "change it in the settings"
 msgstr "cámbialo en los ajustes"
 
-#: app/admin/templates/jobs.html:15
+#: app/admin/templates/jobs.html:20
 msgid "30 actions per page"
 msgstr "30 acciones por página"
 
-#: app/admin/templates/jobs.html:21
+#: app/admin/templates/jobs.html:26
 msgid "All states"
 msgstr "Todos los estados"
 
-#: app/admin/templates/jobs.html:25
+#: app/admin/templates/jobs.html:30
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:31
+#: app/admin/templates/jobs.html:32
+#, python-format
+msgid "The search by file name looks in the latest %(n)s actions that match the other filters."
+msgstr "La búsqueda por nombre de archivo mira en las últimas %(n)s acciones que cumplen los demás filtros."
+
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:37
 msgid "No."
 msgstr "N.º"
 
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:42
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:48
 #: app/admin/templates/me.html:35
 msgid "Device"
 msgstr "Dispositivo"
 
-#: app/admin/templates/jobs.html:28
+#: app/admin/templates/jobs.html:34
 msgid "What the states mean"
 msgstr "Qué significan los estados"
 
-#: app/admin/templates/jobs.html:28 app/admin/templates/jobs.html:51
+#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:57
 msgid "Pg."
 msgstr "Pág."
 
-#: app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:40
 msgid "Where the scan came from"
 msgstr "De dónde partió el escaneo"
 
-#: app/admin/templates/jobs.html:36
+#: app/admin/templates/jobs.html:42
 #, python-format
 msgid "Scan without sign-in · no. %(id)s"
 msgstr "Escaneo sin inicio de sesión · n.º %(id)s"
 
-#: app/admin/templates/jobs.html:37
+#: app/admin/templates/jobs.html:43
 #, python-format
 msgid "Whoever scanned did not sign in: they are recorded as “%(name)s”. This is all that is known about them."
 msgstr "Quien escaneó no inició sesión: consta como «%(name)s». Esto es todo lo que se sabe de esa persona."
 
-#: app/admin/templates/jobs.html:38
+#: app/admin/templates/jobs.html:44
 msgid "IP address"
 msgstr "Dirección IP"
 
-#: app/admin/templates/jobs.html:39
+#: app/admin/templates/jobs.html:45
 msgid "Host name"
 msgstr "Nombre de host"
 
-#: app/admin/templates/jobs.html:39
+#: app/admin/templates/jobs.html:45
 msgid "not available (no name registered in the DNS)"
 msgstr "no disponible (ningún nombre registrado en el DNS)"
 
-#: app/admin/templates/jobs.html:40 app/admin/templates/jobs.html:48
-#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:66
-#: app/admin/templates/jobs.html:92 app/admin/templates/printers.html:41
+#: app/admin/templates/jobs.html:46 app/admin/templates/jobs.html:54
+#: app/admin/templates/jobs.html:66 app/admin/templates/jobs.html:72
+#: app/admin/templates/jobs.html:98 app/admin/templates/printers.html:41
 #: app/admin/templates/printers.html:66
 msgid "Close"
 msgstr "Cerrar"
 
-#: app/admin/templates/jobs.html:43 app/admin/templates/scan.html:18
+#: app/admin/templates/jobs.html:49 app/admin/templates/scan.html:18
 msgid "scan"
 msgstr "escaneo"
 
-#: app/admin/templates/jobs.html:43
+#: app/admin/templates/jobs.html:49
 msgid "Scanned with the automatic document feeder (ADF)"
 msgstr "Escaneado con el alimentador automático de documentos (ADF)"
 
-#: app/admin/templates/jobs.html:43
+#: app/admin/templates/jobs.html:49
 msgid "print"
 msgstr "impresión"
 
-#: app/admin/templates/jobs.html:44
+#: app/admin/templates/jobs.html:50
 msgid "Specifications of this print"
 msgstr "Especificaciones de esta impresión"
 
-#: app/admin/templates/jobs.html:46
+#: app/admin/templates/jobs.html:52
 #, python-format
 msgid "Print specifications · no. %(id)s"
 msgstr "Especificaciones de impresión · n.º %(id)s"
 
-#: app/admin/templates/jobs.html:54 app/admin/templates/jobs.html:55
-#: app/admin/templates/jobs.html:56
+#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:61
+#: app/admin/templates/jobs.html:62
 msgid "Show all"
 msgstr "Mostrar todo"
 
-#: app/admin/templates/jobs.html:54 app/admin/templates/jobs.html:55
+#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:61
 msgid "Show the complete information of the file"
 msgstr "Mostrar la información completa del archivo"
 
-#: app/admin/templates/jobs.html:56
+#: app/admin/templates/jobs.html:62
 msgid "Show the complete comment"
 msgstr "Mostrar el comentario completo"
 
-#: app/admin/templates/jobs.html:58
+#: app/admin/templates/jobs.html:64
 #, python-format
 msgid "File · no. %(id)s"
 msgstr "Archivo · n.º %(id)s"
 
-#: app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:68
 msgid "Show and copy the whole note"
 msgstr "Mostrar y copiar toda la nota"
 
-#: app/admin/templates/jobs.html:64
+#: app/admin/templates/jobs.html:70
 #, python-format
 msgid "Note · no. %(id)s"
 msgstr "Nota · n.º %(id)s"
 
-#: app/admin/templates/jobs.html:69
+#: app/admin/templates/jobs.html:75
 msgid "Cancel this queued job?"
 msgstr "¿Cancelar este trabajo en cola?"
 
-#: app/admin/templates/jobs.html:72
+#: app/admin/templates/jobs.html:78
 msgid "No jobs."
 msgstr "Ningún trabajo."
 
-#: app/admin/templates/jobs.html:83
+#: app/admin/templates/jobs.html:89
 msgid "States of a print or scan"
 msgstr "Estados de una impresión o escaneo"
 
-#: app/admin/templates/jobs.html:85
+#: app/admin/templates/jobs.html:91
 msgid "<b>Accepted.</b> It passed the checks (identity, quota, blocks, maintenance) and was handed to CUPS or the scanner: it is printing, queued or in progress. It already counts toward the quota."
 msgstr "<b>Aceptado.</b> Superó las comprobaciones (identidad, cuota, bloqueos, mantenimiento) y se pasó a CUPS o al escáner: se está imprimiendo, está en cola o en curso. Ya cuenta en la cuota."
 
-#: app/admin/templates/jobs.html:86
+#: app/admin/templates/jobs.html:92
 msgid "<b>Completed.</b> Print finished (CUPS confirms it) or scan delivered. The real pages replace the estimate made before printing."
 msgstr "<b>Completado.</b> Impresión terminada (CUPS lo confirma) o escaneo entregado. Las páginas reales sustituyen la estimación hecha antes de imprimir."
 
-#: app/admin/templates/jobs.html:87
+#: app/admin/templates/jobs.html:93
 msgid "<b>Denied.</b> The gateway refused it and nothing started: quota used up, printer blocked, gateway in maintenance, invalid file… The reason is in the Notes column. It does not count toward the quota."
 msgstr "<b>Denegado.</b> El gateway lo rechazó y no se inició nada: cuota agotada, impresora bloqueada, gateway en mantenimiento, archivo no válido… El motivo está en la columna Notas. No cuenta en la cuota."
 
-#: app/admin/templates/jobs.html:88
+#: app/admin/templates/jobs.html:94
 msgid "<b>Failed.</b> It had been accepted but the printer or scanner could not carry it out (CUPS reported an error, the device did not answer). It does not count toward the quota."
 msgstr "<b>Fallido.</b> Se había aceptado pero la impresora o el escáner no pudieron ejecutarlo (CUPS dio un error, el dispositivo no respondía). No cuenta en la cuota."
 
-#: app/admin/templates/jobs.html:89
+#: app/admin/templates/jobs.html:95
 msgid "<b>Canceled.</b> Stopped before printing, by the user, by an administrator (“Cancel”) or by the scanning program. The quota is freed."
 msgstr "<b>Cancelado.</b> Detenido antes de imprimir, por el usuario, por un administrador («Cancelar») o por el programa de escaneo. La cuota se libera."
 
-#: app/admin/templates/jobs.html:90
+#: app/admin/templates/jobs.html:96
 msgid "<b>On hold.</b> CUPS is holding it (queue paused or waiting for someone to act). Until it restarts it counts toward the quota."
 msgstr "<b>En espera.</b> CUPS lo mantiene detenido (cola en pausa o a la espera de una intervención). Mientras no se reanude cuenta en la cuota."
 
@@ -2523,7 +2561,7 @@ msgstr "Última vez"
 msgid "What happened"
 msgstr "Qué ha pasado"
 
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:18
+#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:32
 msgid "Times"
 msgstr "Veces"
 
@@ -2534,31 +2572,71 @@ msgstr "primera: %(t)s"
 
 #: app/admin/templates/notices.html:15
 #, python-format
-msgid "A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">config/gateway.env</span> and run <span class=\"mono\">docker compose up -d</span>."
-msgstr "Se rechazó una petición de escaneo sin usuario ni contraseña desde <span class=\"mono\">%(ip)s</span>, porque los escaneos sin inicio de sesión están desactivados. Si su aplicación de escaneo no puede enviar credenciales, ponga <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> en <span class=\"mono\">config/gateway.env</span> y ejecute <span class=\"mono\">docker compose up -d</span>."
+msgid "A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">.env</span> and run <span class=\"mono\">docker compose up -d</span>."
+msgstr "Se rechazó una petición de escaneo sin usuario ni contraseña desde <span class=\"mono\">%(ip)s</span>, porque los escaneos sin inicio de sesión están desactivados. Si su aplicación de escaneo no puede enviar credenciales, ponga <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> en <span class=\"mono\">.env</span> y ejecute <span class=\"mono\">docker compose up -d</span>."
+
+#: app/admin/templates/notices.html:17
+#, python-format
+msgid "<b>Backup not done: the destination folder can not be reached.</b> The latest backup of “%(name)s” was not saved, because the network disk or USB disk does not seem to be connected. Nothing was written. Check that it is switched on and mounted, then press “Run now”. Last successful backup: %(last)s."
+msgstr "<b>Copia de seguridad no realizada: no se puede acceder a la carpeta de destino.</b> La última copia de «%(name)s» no se guardó, porque el disco de red o USB no parece estar conectado. No se escribió nada. Comprueba que esté encendido y montado, y pulsa «Ejecutar ahora». Última copia correcta: %(last)s."
 
 #: app/admin/templates/notices.html:19
+#, python-format
+msgid "<b>Backup failed.</b> The latest backup of “%(name)s” was not saved. Reason: %(error)s. Last successful backup: %(last)s."
+msgstr "<b>La copia de seguridad falló.</b> La última copia de «%(name)s» no se guardó. Motivo: %(error)s. Última copia correcta: %(last)s."
+
+#: app/admin/templates/notices.html:21
+#, python-format
+msgid "<b>The certificate could not be updated.</b> The last run of <span class=\"mono\">scripts/cert-sync.sh</span> (%(when)s) failed: %(message)s. The certificate in use is the old one. Run the script by hand to see the error, and check the cron job."
+msgstr "<b>No se pudo actualizar el certificado.</b> La última ejecución de <span class=\"mono\">scripts/cert-sync.sh</span> (%(when)s) falló: %(message)s. El certificado en uso es el antiguo. Ejecuta el script a mano para ver el error y revisa la tarea cron."
+
+#: app/admin/templates/notices.html:23
+#, python-format
+msgid "<b>The TLS certificate has expired</b> (on %(date)s). Phones and computers refuse to connect to the gateway until a valid one is in <span class=\"mono\">config/tls</span> and the gateway has been restarted."
+msgstr "<b>El certificado TLS ha caducado</b> (el %(date)s). Los teléfonos y ordenadores se niegan a conectarse al gateway hasta que haya un certificado válido en <span class=\"mono\">config/tls</span> y se reinicie el gateway."
+
+#: app/admin/templates/notices.html:25
+#, python-format
+msgid "<b>The TLS certificate expires on %(date)s.</b> The last synchronisation worked, so the source has not renewed it yet: check the program that renews it (for example Nginx Proxy Manager)."
+msgstr "<b>El certificado TLS caduca el %(date)s.</b> La última sincronización funcionó, así que la fuente aún no lo ha renovado: revisa el programa que lo renueva (por ejemplo Nginx Proxy Manager)."
+
+#: app/admin/templates/notices.html:26
+#, python-format
+msgid "<b>The TLS certificate expires on %(date)s.</b> The last synchronisation failed: see the other notice about the certificate."
+msgstr "<b>El certificado TLS caduca el %(date)s.</b> La última sincronización falló: mira el otro aviso sobre el certificado."
+
+#: app/admin/templates/notices.html:27
+#, python-format
+msgid "<b>The TLS certificate expires on %(date)s.</b> Renew it and put the new files in <span class=\"mono\">config/tls</span>, then restart the gateway."
+msgstr "<b>El certificado TLS caduca el %(date)s.</b> Renuévalo, pon los archivos nuevos en <span class=\"mono\">config/tls</span> y reinicia el gateway."
+
+#: app/admin/templates/notices.html:29
+#, python-format
+msgid "<b>The announced address is not in the TLS certificate.</b> The gateway announces itself on the network as <span class=\"mono\">%(names)s</span> at <span class=\"mono\">%(addresses)s</span>, and the certificate covers none of them: phones and computers that find the printers this way will show a certificate error. Make the certificate list the address (or give the machine a fixed address and a name that the certificate covers)."
+msgstr "<b>La dirección anunciada no está en el certificado TLS.</b> El gateway se anuncia en la red como <span class=\"mono\">%(names)s</span> en <span class=\"mono\">%(addresses)s</span>, y el certificado no cubre ninguno: los teléfonos y ordenadores que encuentren las impresoras así mostrarán un error de certificado. Haz que el certificado incluya la dirección (o dale a la máquina una dirección fija y un nombre que el certificado cubra)."
+
+#: app/admin/templates/notices.html:33
 #, python-format
 msgid "dismissed by %(who)s"
 msgstr "descartado por %(who)s"
 
-#: app/admin/templates/notices.html:20
+#: app/admin/templates/notices.html:34
 msgid "Dismiss"
 msgstr "Descartar"
 
-#: app/admin/templates/notices.html:24
+#: app/admin/templates/notices.html:38
 msgid "No notices."
 msgstr "Sin avisos."
 
-#: app/admin/templates/notices.html:27
+#: app/admin/templates/notices.html:41
 msgid "Dismiss all"
 msgstr "Descartar todos"
 
-#: app/admin/templates/notices.html:29
+#: app/admin/templates/notices.html:43
 msgid "Hide dismissed"
 msgstr "Ocultar descartados"
 
-#: app/admin/templates/notices.html:29
+#: app/admin/templates/notices.html:43
 msgid "Show dismissed too"
 msgstr "Mostrar también los descartados"
 
@@ -3644,39 +3722,39 @@ msgstr "la contraseña no debe ser el nombre de usuario"
 msgid "the password is too repetitive"
 msgstr "la contraseña es demasiado repetitiva"
 
-#: app/backup/core.py:65
+#: app/backup/core.py:69
 msgid "Folder name not valid: letters, digits, space . _ - and / for sub-folders (max 4 levels)"
 msgstr "Nombre de carpeta no válido: letras, dígitos, espacio . _ - y / para subcarpetas (máx. 4 niveles)"
 
-#: app/backup/core.py:68
+#: app/backup/core.py:72
 #, python-format
 msgid "Backup root %(root)s is not available: mount a folder there (see docker-compose.yml)"
 msgstr "La raíz de copias de seguridad %(root)s no está disponible: monta allí una carpeta (véase docker-compose.yml)"
 
-#: app/backup/core.py:72
+#: app/backup/core.py:76
 msgid "Folder is outside the backup root"
 msgstr "La carpeta está fuera de la raíz de copias de seguridad"
 
-#: app/backup/core.py:79
+#: app/backup/core.py:83
 #, python-format
 msgid "Folder %(folder)s is not writable by the gateway: %(error)s"
 msgstr "El gateway no puede escribir en la carpeta %(folder)s: %(error)s"
 
-#: app/backup/core.py:95
+#: app/backup/core.py:99
 msgid "The backup disk is not answering (earlier requests are still waiting). Check the network disk."
 msgstr "El disco de copias no responde (hay peticiones anteriores esperando). Compruebe el disco de red."
 
-#: app/backup/core.py:110
+#: app/backup/core.py:114
 #, python-format
 msgid "The backup disk did not answer in %(s)s seconds: is the network disk reachable?"
 msgstr "El disco de copias no respondió en %(s)s segundos: ¿se puede alcanzar el disco de red?"
 
-#: app/backup/core.py:125
+#: app/backup/core.py:129
 #, python-format
 msgid "Cannot write the marker file in the folder: %(error)s"
 msgstr "No se puede escribir el archivo marcador en la carpeta: %(error)s"
 
-#: app/backup/core.py:130
+#: app/backup/core.py:134
 msgid "The marker file is missing in this folder: the network disk or USB disk may not be mounted. Nothing was written."
 msgstr "Falta el archivo marcador en esta carpeta: el disco de red o USB puede no estar montado. No se escribió nada."
 
@@ -3693,19 +3771,19 @@ msgstr "La frase de contraseña necesita al menos %(n)s caracteres"
 msgid "recovery key is not valid (expected cpgbk1.<public>.<wrapped>)"
 msgstr "la clave de recuperación no es válida (se esperaba cpgbk1.<pública>.<envuelta>)"
 
-#: app/backup/service.py:90
+#: app/backup/service.py:91
 msgid "Another backup is running: try again in a minute"
 msgstr "Hay otra copia de seguridad en curso: inténtalo de nuevo en un minuto"
 
-#: app/backup/service.py:95
+#: app/backup/service.py:96
 msgid "Backup target not found"
 msgstr "Destino de la copia de seguridad no encontrado"
 
-#: app/policy/control.py:21
+#: app/policy/control.py:22
 msgid "printer disabled by the administrator (applies to everyone, administrators included)"
 msgstr "impresora desactivada por el administrador (vale para todos, administradores incluidos)"
 
-#: app/policy/control.py:22
+#: app/policy/control.py:23
 msgid "gateway in maintenance: only administrators can print or scan"
 msgstr "gateway en mantenimiento: solo los administradores pueden imprimir o escanear"
 
@@ -3878,21 +3956,21 @@ msgstr "Impresión periódica automática: mantiene limpios los cabezales y los 
 msgid "Schedule"
 msgstr "Programación"
 
-#: app/policy/pages.py:101
+#: app/policy/pages.py:100
 #, python-format
 msgid "Invalid pages: “%(part)s”. Example: 1,5 or 2-4"
 msgstr "Páginas no válidas: «%(part)s». Ejemplo: 1,5 o 2-4"
 
-#: app/policy/pages.py:105
+#: app/policy/pages.py:104
 #, python-format
 msgid "Invalid range: “%(part)s”"
 msgstr "Intervalo no válido: «%(part)s»"
 
-#: app/policy/pages.py:108
+#: app/policy/pages.py:107
 msgid "Too many page ranges"
 msgstr "Demasiados intervalos de páginas"
 
-#: app/policy/pages.py:121
+#: app/policy/pages.py:120
 #, python-format
 msgid "The document has only %(n)s page"
 msgid_plural "The document has only %(n)s pages"

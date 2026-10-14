@@ -10,15 +10,24 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 - A **Linux host** is required for USB printers and for mDNS (USB passthrough and the `host` network do not exist on Docker
   Desktop for Windows/macOS: there only network printers work and nothing is announced).
 - One gateway per USB printer (`ipp-usb` needs exclusive use). Its container can see every USB device of the host (needed for hot-plug).
-- One gateway per SQLite database; no high availability.
+- The database is SQLite (one file): one gateway, no high availability, no external database.
 - Published images exist for amd64 and arm64 only (no 32-bit ARM).
-- `scripts/update.sh` updates the images and adds new options to `.env` and `config/gateway.env`; changes to `docker-compose.yml` and the scripts arrive with `git pull`.
-- The *Update* button of the portal needs the optional `updater` container, which holds the Docker socket (root on the host): it is off by default. It only updates inside the same major version.
-- Backups on a network share: permissions are decided by the mount (use encryption), and an unmounted share is detected only if the "write only if mounted" option is ticked.
-- Going back to an older version after a database migration requires restoring a backup.
-- Migrations are tested on SQLite only; PostgreSQL needs verification (enum types shared between tables).
-- The database is not encrypted and holds printed file names: protect it as personal data.
-- Certificates: devices must trust the company CA; the announcement uses the IP, so the certificate must list it.
+- `scripts/update.sh` downloads the release package and replaces `docker-compose.yml` and the scripts, never `.env`, `config/` or `data/`. It does not work in a folder
+  cloned with git (there you use `git pull`). The new options of a version are not written into your `.env`: they work with their default value; to see them,
+  compare `.env` with `docker/env.example`.
+- The *Update* button of the portal needs the optional `updater` container, which holds the Docker socket (root on the host): it is off by default and the portal says so. It only
+  updates inside the same major version and, if the new version does not start, it puts the old one back but does not restore the backup by itself.
+- Backups on a network share: file permissions are decided by the mount (use encryption). An unmounted share receives no backup: the option
+  "write only if mounted" is on by default for backups made in the portal, and the portal gives a notice when a backup is skipped. The *General* backup of `.env` has the option off
+  by default (it must be turned on and prepared by hand, see [backup.md](backup.md)).
+- Going back to an older version after a database migration requires restoring a backup: `scripts/update.sh` offers it by itself when the old version does not start.
+  New migrations may only add (the old version can still read the database), but that is not a guarantee in every case.
+- The **names of printed files are encrypted** in the database and in the audit archive (key derived from `CUPSPL_SECRET_KEY`: if you change it they can no longer be read). The rest of the
+  database is not encrypted (user names, groups, printer names, admin log): to protect everything, encrypt the disk, see [data-protection.md](data-protection.md).
+  CUPS also keeps the names of its latest jobs (up to 2,000) in its own volume: the button and the retention of names do not touch them.
+- Certificates: devices must trust the company CA; the announcement uses the IP, so the certificate must list it (the portal gives a notice if it does not).
+  `scripts/cert-sync.sh` **copies** the certificate from whoever renews it but does not renew it: to notice a failed renewal you need the expiry notice, which is off by default.
+  Details in [certificates.md](certificates.md).
 
 ## 2. Quota
 
@@ -60,7 +69,7 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 - Built-in backups: SQLite only; CUPS queues not included (they are in `scripts/backup.sh`); configuration files are restored by hand;
   no direct remote destinations; the passphrase can not be recovered. `scripts/backup.sh restore` is tested by hand only.
 - The login lock-out is in memory and resets at restart.
-- The audit and the database are not encrypted.
+- The audit and the database are not encrypted, except the file names (see §1 and [data-protection.md](data-protection.md)).
 
 ## 6. Languages
 

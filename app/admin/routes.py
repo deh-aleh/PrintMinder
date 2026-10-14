@@ -10,11 +10,12 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from app.i18n import _
 from app.admin.common import (
-    back, client_ip, current_admin, current_user, flash, localtime, render, session_stamp, verify_csrf,
+    back, client_ip, current_admin, current_user, flash, get_db, localtime, render, session_stamp, verify_csrf,
 )
 from app.admin.audit_view import audit_row
 from app.audit.adminlog import record
@@ -23,6 +24,7 @@ from app.auth.passwords import hash_password, validate_new_password
 from app.auth.throttle import IP_FAILS, USER_FAILS, register_failure
 from app.config import settings
 from app.db.models import AuditArchive, JobLog, JobState, User
+from app.policy import control
 from app.escl import scanner_device
 from app.ipp import codec
 
@@ -149,9 +151,15 @@ def _job_query(user: str, state: str, q: str):
         stmt = stmt.where(who.contains(user.strip().lower(), autoescape=True))
     if state in {s.value for s in JobState}:
         stmt = stmt.where(JobLog.state == JobState(state))
-    if q.strip():
-        stmt = stmt.where(JobLog.title.contains(q.strip(), autoescape=True))
     return stmt
+
+
+TITLE_SCAN = 5000  # the file names are encrypted in the database: searching them means opening rows, so only the latest ones
+
+
+def _name_matches(j: JobLog, q: str) -> bool:
+    q = q.strip().lower()
+    return q in (j.title or "").lower() or q in str((j.options_json or {}).get("document_name") or "").lower()
 
 
 @router.get("/jobs", response_class=HTMLResponse)
@@ -163,17 +171,21 @@ async def jobs(request: Request, user: str = "", state: str = "", q: str = "", p
     def load():
         with request.app.state.sessionmaker() as db:
             stmt = _job_query(user, state, q)
-            total = db.scalar(select(func.count()).select_from(stmt.subquery()))
-            rows = db.execute(stmt.order_by(JobLog.id.desc()).limit(JOBS_PAGE).offset((page - 1) * JOBS_PAGE)).all()
+            if q.strip():  # by file name: open the latest rows and keep the ones that match
+                found = [r for r in db.execute(stmt.order_by(JobLog.id.desc()).limit(TITLE_SCAN)) if _name_matches(r[0], q)]
+                total, rows = len(found), found[(page - 1) * JOBS_PAGE:page * JOBS_PAGE]
+            else:
+                total = db.scalar(select(func.count()).select_from(stmt.subquery()))
+                rows = db.execute(stmt.order_by(JobLog.id.desc()).limit(JOBS_PAGE).offset((page - 1) * JOBS_PAGE)).all()
             archives = db.execute(select(func.count(AuditArchive.id), func.min(AuditArchive.first_ts),
                                          func.max(AuditArchive.last_ts)).where(AuditArchive.source_table == "job_log")).one()
-            return total, rows, tuple(archives)
+            return total, rows, tuple(archives), control.titles_enabled(db)
 
-    total, rows, archives = await run_in_threadpool(load)
+    total, rows, archives, titles_on = await run_in_threadpool(load)
     return render(request, "jobs.html", admin, rows=[audit_row(j, name, scanner) for j, name in rows], total=total,
                   page=page, pages=max(1, -(-total // JOBS_PAGE)), f={"user": user, "state": state, "q": q},
                   states=[s.value for s in JobState], archives=archives if archives[0] else None,
-                  refresh=admin.refresh_seconds)
+                  refresh=admin.refresh_seconds, titles_on=titles_on, title_scan=TITLE_SCAN)
 
 
 def _csv_safe(v) -> str:
@@ -187,7 +199,8 @@ async def jobs_csv(request: Request, user: str = "", state: str = "", q: str = "
 
     def load():
         with request.app.state.sessionmaker() as db:
-            return [audit_row(j, name, scanner) for j, name in db.execute(_job_query(user, state, q).order_by(JobLog.id.desc()))]
+            return [audit_row(j, name, scanner) for j, name in db.execute(_job_query(user, state, q).order_by(JobLog.id.desc()))
+                    if not q.strip() or _name_matches(j, q)]
 
     out = io.StringIO()
     w = csv.writer(out)
@@ -200,6 +213,20 @@ async def jobs_csv(request: Request, user: str = "", state: str = "", q: str = "
                     "adf" if r["adf"] else "", specs[0] if specs else "", specs[1] if specs else ""])
     return Response(out.getvalue(), media_type="text/csv",
                     headers={"Content-Disposition": 'attachment; filename="print-audit.csv"'})
+
+
+@router.post("/jobs/titles", dependencies=[Depends(verify_csrf)])
+def job_titles(request: Request, on: str = Form("1"), admin: User = Depends(current_admin),
+               db: Session = Depends(get_db)):
+    """Start or stop saving the names of the files of new prints and scans (the names already saved stay)."""
+    flag = on == "1"
+    control.set_titles(db, flag)
+    record(db, admin, "jobtitles.on" if flag else "jobtitles.off", "gateway", None)
+    db.commit()
+    log.warning("admin %s %s saving the file names of new jobs", admin.username, "STARTED" if flag else "STOPPED")
+    flash(request, _("From now on the names of new files are saved") if flag
+          else _("From now on the names of new files are not saved"), "ok" if flag else "err")
+    return back("/admin/jobs")
 
 
 # ------------------------------------------------------------------ admin: cancel a queued job

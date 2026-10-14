@@ -52,6 +52,7 @@ browser ───────https───────────▶     │  
 | | Client eSCL nativi che sanno autenticarsi (prova sul campo) | ⬜ |
 | **Audit** | Audit di stampe e scansioni con pagine reali; registro separato delle azioni amministrative | ✅ |
 | | Conservazione illimitata con archivi compressi verificati; esportazione CSV, filtri, consultazione e download degli archivi | ✅ |
+| | Nomi dei file cifrati nel database; pulsante per smettere di salvarli; cancellazione facoltativa dopo qualche giorno | ✅ |
 | | Esportazione verso syslog/SIEM; anonimizzazione | ⬜ |
 | **Portale** | Portale admin (audit, utenti, gruppi, richieste, concessioni, azioni, stampanti, backup, archivio) e area utente (consumo, chiavi, richieste, stampa, scansione) | ✅ |
 | | Impostazioni: password, tema, lingua, aggiornamento; interfaccia adatta al telefono; pulsanti «copia» | ✅ |
@@ -63,9 +64,10 @@ browser ───────https───────────▶     │  
 | **Operatività** | Stack docker (ipp-usb + CUPS + gateway + mDNS), nulla installato sull'host | ✅ |
 | | Backup programmati per amministratore (cartella, ora, rotazione, cifratura con passphrase/chiave di recupero), ripristino da CLI | ✅ |
 | | Migrazioni del database (Alembic), health check, log, CLI di amministrazione | ✅ |
-| | Immagini per amd64 e arm64 su ghcr.io; script di aggiornamento con backup e ritorno automatico alla versione precedente; avviso di nuove versioni; opzioni nuove aggiunte a `.env` e `gateway.env` senza cambiare i tuoi valori | 🟡 non ancora provate su una vera macchina ARM |
+| | Immagini per amd64 e arm64 su ghcr.io; script di aggiornamento che scarica un pacchetto di release controllato, fa prima un backup e torna indietro da solo (proponendo il ripristino del backup) se la nuova versione non parte; avviso di nuove versioni; un solo file `.env` che un aggiornamento non tocca mai | 🟡 non ancora provate su una vera macchina ARM |
 | | Pulsante Aggiorna nel portale (contenitore facoltativo `updater`, usa il socket di Docker) | 🟡 provato solo con simulazioni |
-| | Backup su disco di rete o USB: file segnaposto contro un disco non montato, limite di tempo per un disco che non risponde | ✅ provato con una condivisione SMB |
+| | Backup su disco di rete o USB: file segnaposto contro un disco non montato (attivo di default), avviso nella campanella quando un backup fallisce, limite di tempo per un disco che non risponde | ✅ provato con una condivisione SMB |
+| | Certificato TLS: avvisi (scaduto, indirizzo annunciato mancante, avviso di scadenza facoltativo) e `scripts/cert-sync.sh` per copiare un certificato rinnovato da Nginx Proxy Manager o certbot | 🟡 script provato con simulazioni, non ancora con un vero Nginx Proxy Manager |
 | | Campanella con gli avvisi per gli amministratori; `/healthz` mostra solo lo stato se non chiedi di più | ✅ |
 | | Alta disponibilità, metriche Prometheus, destinazioni di backup remote dirette (SSH/S3) | ⬜ |
 
@@ -82,22 +84,25 @@ L'elenco completo, con le soluzioni, è in [docs/it/limiti.md](docs/it/limiti.md
   l'architettura della macchina che le compila; tornare a una versione precedente dopo una migrazione richiede un backup.
 - **TLS obbligatorio**: installa il certificato autofirmato sui client o usa quello della tua CA.
 - Una stampante scollegata si rileva entro ~30 s (code di rete: prova TCP, non la carta).
-- Il database **non è cifrato** e contiene i nomi dei file stampati: proteggilo come dato personale.
+- I **nomi dei file stampati sono cifrati** nel database (chiave da `CUPSPL_SECRET_KEY`: non cambiarla); il resto del database no. Per tutto il resto cifra il disco: [protezione-dati.md](docs/it/protezione-dati.md).
 - Le traduzioni in spagnolo, russo e cinese non sono riviste da madrelingua; le pagine stampate dal gateway restano in inglese.
 
 ## Installazione (Docker, consigliata)
 
-Requisiti: un server **Linux**, Docker Engine con Compose, `openssl`, `python3`, una stampante USB o di rete e una porta TCP
+Requisiti: un server **Linux**, Docker Engine con Compose, `openssl`, `curl`, `tar`, `python3`, una stampante USB o di rete e una porta TCP
 raggiungibile dai client (predefinita 8631). Sull'host non si installa nulla.
 
 ```sh
-git clone <url-del-repository> printminder && cd printminder
+# 0. scarica il pacchetto della release (ultima versione: https://github.com/deh-aleh/PrintMinder/releases)
+VERSION=1.0.0
+curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/printminder-$VERSION.tar.gz
+tar xzf printminder-$VERSION.tar.gz && cd printminder-$VERSION      # (nella guida c'è anche come controllare il download)
 
 # 1. nomi / IP con cui i client raggiungeranno il server (finiscono nel certificato TLS)
-scripts/docker-init.sh print.lan 192.168.1.50      # crea config/gateway.env, .env, config/tls/, data/
+scripts/docker-init.sh print.lan 192.168.1.50      # crea .env (tutte le impostazioni), config/tls/, data/
 
 # 2. impostazioni: RADIUS è facoltativo (host e secret vuoti = solo account locali)
-$EDITOR config/gateway.env
+$EDITOR .env
 
 # 3. stampanti, in .env — USB (prima ferma ipp-usb sull'host: sudo systemctl disable --now ipp-usb && sudo systemctl mask ipp-usb)
 #       CUPS_QUEUES=HP7305=ipp://ipp-usb:60000/ipp/print
@@ -116,7 +121,7 @@ Poi: crea utenti e gruppi nel portale (`https://<server>:8631/admin`); ogni uten
 la usa come password quando un computer o un telefono chiede le credenziali (indirizzo della stampante
 `ipps://<server>:8631/printers/<coda>`); i telefoni senza nulla di installato possono usare *Stampa* nel portale. Verifica l'installazione
 con `curl -sk https://<server>:8631/healthz`. Per usare un certificato firmato da una CA metti `fullchain.pem` e `privkey.pem` in
-`config/tls/` ed esegui `docker compose restart gateway`. Aggiorna con `scripts/update.sh` (prima fa un backup, torna indietro da solo se la nuova versione non parte; immagini per amd64 e arm64). Per provare senza stampante né RADIUS vedi la guida. Nella guida c'è anche
+`config/tls/` ed esegui `docker compose restart gateway` (per tenerne aggiornato uno rinnovato altrove: [certificati.md](docs/it/certificati.md)). Aggiorna con `scripts/update.sh` (prima fa un backup, torna indietro da solo se la nuova versione non parte; immagini per amd64 e arm64). Per provare senza stampante né RADIUS vedi la guida. Nella guida c'è anche
 l'alternativa con installazione sull'host (systemd, modifica `/etc/cups`).
 
 Guida completa: [docs/it/installazione.md](docs/it/installazione.md).
@@ -128,7 +133,7 @@ Guida completa: [docs/it/installazione.md](docs/it/installazione.md).
 | **Installazione** (docker e host, stampanti USB/rete, TLS, aggiornamenti) | [installazione.md](docs/it/installazione.md) |
 | **Risoluzione dei problemi** | [risoluzione-problemi.md](docs/it/risoluzione-problemi.md) |
 | Architettura e tecnologie | [architettura.md](docs/it/architettura.md) |
-| Come è fatta l'applicazione (ogni file sorgente, `.env`, `gateway.env`, script) | [funzionamento-applicazione.md](docs/it/funzionamento-applicazione.md) |
+| Come è fatta l'applicazione (ogni file sorgente, `.env`, script) | [funzionamento-applicazione.md](docs/it/funzionamento-applicazione.md) |
 | Guida utente · Guida amministratore (CLI compresa) | [guida-utente.md](docs/it/guida-utente.md) · [guida-amministratore.md](docs/it/guida-amministratore.md) |
 | Account, gruppi, chiavi di stampa | [account.md](docs/it/account.md) |
 | Quote, richieste, concessioni | [quote.md](docs/it/quote.md) |
@@ -137,6 +142,8 @@ Guida completa: [docs/it/installazione.md](docs/it/installazione.md).
 | Scansione | [scansione.md](docs/it/scansione.md) |
 | Audit e archivio | [audit.md](docs/it/audit.md) |
 | Backup e ripristino | [backup.md](docs/it/backup.md) |
+| Certificati TLS: avvisi, file della CA, sincronizzazione automatica | [certificati.md](docs/it/certificati.md) |
+| Protezione dei dati: nomi dei file, cifratura, retention | [protezione-dati.md](docs/it/protezione-dati.md) |
 | Lingue e traduzioni | [lingue.md](docs/it/lingue.md) |
 | Limiti noti | [limiti.md](docs/it/limiti.md) |
 

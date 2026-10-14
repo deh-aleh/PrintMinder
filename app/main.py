@@ -30,6 +30,8 @@ from app.auth.radius import RadiusProvider
 from app.auth.groups import ensure_system_groups
 from app.backup.core import app_version
 from app.backup.service import run_scheduler as run_backups
+from app.certwatch import run_checker as run_cert_check
+from app.titles import run_titles
 from app.updates import run_checker as run_update_check
 from app.auth.throttle import Throttle
 from app.config import settings
@@ -75,6 +77,8 @@ async def lifespan(app: FastAPI):
              asyncio.create_task(run_backups(app)),
              asyncio.create_task(run_keepalive(app)),
              asyncio.create_task(run_update_check(app)),
+             asyncio.create_task(run_titles(app)),
+             asyncio.create_task(run_cert_check(app)),
              asyncio.create_task(discovery.run_scheduler(app))]
     yield
     for t in tasks:

@@ -1,5 +1,5 @@
 """Backups in the portal: every administrator can set up their own destination, encryption and retention; the
-general backup of gateway.env is shown beside them (read-only: it is changed in the file)."""
+general backup of .env is shown beside them (read-only: it is changed in the file)."""
 
 import logging
 from datetime import datetime, timezone
@@ -127,7 +127,7 @@ def create(request: Request, name: str = Form(""), folder: str = Form(""), hour:
 def edit_form(request: Request, tid: int, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     t = _get(db, tid)
     if not _can_edit(t, admin):
-        raise HTTPException(403, "this backup belongs to another administrator (or to gateway.env)")
+        raise HTTPException(403, "this backup belongs to another administrator (or to .env)")
     return render(request, "backup_edit.html", admin, t=t, root=settings.backup_root, folders=_folders())
 
 

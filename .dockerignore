@@ -19,9 +19,6 @@ tests/
 # the gateway image needs only pyproject.toml and app/
 deploy/
 docker/*
-# the gateway image carries the templates of .env and gateway.env (app.envsync reads them)
-!docker/env.example
-!docker/gateway.env.example
 scripts/
 docker-compose*.yml
 README.md

@@ -85,7 +85,16 @@ Inside the container: `docker compose exec gateway cups-policy-admin <command>` 
 
 The bell in the top bar (administrators only) lists what the gateway noticed and nobody asked about. Each notice shows the
 last time, the source, and how many times it happened; *Dismiss* closes it (the dismissal is recorded in *Actions*).
-Today there is one kind: a scan request without user name and password that was refused because `CUPSPL_ESCL_ANONYMOUS` is off.
+The kinds of notice:
+
+| Notice | What it says | Closes by itself when |
+|---|---|---|
+| Scan without login | A scan request without user name and password was refused because `CUPSPL_ESCL_ANONYMOUS` is off | never (dismiss it) |
+| Backup not done / Backup failed | A backup could not be saved, with the real name of the backup ([backup.md](backup.md)) | the next backup works |
+| Certificate expired | Devices no longer trust the gateway ([certificates.md](certificates.md)) | a valid certificate is in place |
+| Certificate update failed | The last run of `scripts/cert-sync.sh` failed | the next run works |
+| Announced address not in the certificate | Phones that find the printers by themselves will show a certificate error | the certificate lists the address |
+| Certificate about to expire | Only if you turned it on (`CUPSPL_CERT_EXPIRY_WARN_ENABLED`) | the certificate is renewed |
 
 To keep one client that retries 100 times from filling the list, the same notice from the same source is written again only
 after an interval; the repeats in between are counted. The interval depends on `CUPSPL_LOG_LEVEL`, and the same text is
@@ -104,6 +113,7 @@ written to the container log with the same limit:
 
 - Health: `GET /healthz` → 200 or 503, body `{"status":"ok"}`. It needs no login. `CUPSPL_HEALTHZ_INFO=version,printers` adds the version and the number of queues (usb / network / virtual / total); the default is the status only. Logs: `docker compose logs gateway`.
 - Migrations run automatically at start. Back up before updating an important database.
-- Updates: a note appears at the top of the portal when a newer release exists. Update with `scripts/update.sh`, or with the *Update* button in the menu *Backup* when the optional updater container runs and a scheduled backup works ([installation.md](installation.md#updates)).
+- File names in the audit: the green/red button at the top right of the *Audit* page stops saving them, `.env` can erase them after some days, and they are stored encrypted ([data-protection.md](data-protection.md)). Do not change `CUPSPL_SECRET_KEY`.
+- Updates: a note appears at the top of the portal when a newer release exists. Update with `scripts/update.sh`, or with the *Update* button in the menu *Backup* when the optional updater container runs and a scheduled backup works ([installation.md](installation.md#updates)). The updater controls Docker, which is full control of the server: keep it off if you do not need it.
 - Do not leave test accounts or test printers on a real installation.
 - Protect `config/`, `.env`, `data/` and the volume: they hold secrets and personal data.

@@ -16,6 +16,9 @@ Gli id non si riusano mai. **Nessuna funzione del portale cancella righe.** L'au
 Ogni riga ha: numero progressivo (N.), ora, utente, dispositivo (coda di stampa o scanner), nome file, tipo (stampa / scansione), esito,
 pagine, motivo del rifiuto e opzioni (carta, colore, fronte-retro, sorgente, copie, intervallo di pagine, commento, `via` web / IPP…).
 
+**Il nome del file è cifrato** nel database e si può smettere di salvarlo con il pulsante verde/rosso in alto a destra della pagina; con la retention (`.env`) sparisce
+dopo un numero di giorni a scelta. La riga resta sempre, con tutto il resto. Dettagli in [protezione-dati.md](protezione-dati.md).
+
 | Stato | Significato |
 |---|---|
 | `accepted` | Ha superato i controlli ed è stato consegnato a CUPS o allo scanner (in stampa, in coda o in corso). **Conta già per la quota.** |
@@ -64,6 +67,8 @@ La pagina **Archivio audit** (`/admin/archive`) elenca gli archivi con il percor
 (`AUDIT_ARCHIVE_HOST_PATH`, solo informativo), dimensione e sha256; li apre con ricerca e paginazione (in streaming), li **scarica** e ne
 **verifica l'integrità**. Non può eliminarli. La pagina Audit mostra un avviso quando esistono archivi.
 `cups-policy-admin audit-archive [--force]` lancia l'archiviatore a mano; `cups-policy-admin jobs` mostra le ultime righe.
+
+I nomi dei file nell'archivio restano **cifrati** (il portale li decifra quando li mostra e quando cerchi); con la retention accesa, le righe oltre il limite vengono scritte senza il nome. I file già scritti non si modificano.
 
 La cartella deve essere scrivibile dall'utente del contenitore; sta sull'host, fuori dai volumi docker, così si trova e si copia a mano.
 È inclusa nei backup ([backup.md](backup.md)).

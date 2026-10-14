@@ -1,18 +1,30 @@
 #!/bin/sh
 # One-time setup for the docker stack. Writes only inside this project directory:
-#   config/gateway.env   settings of the program + a generated session secret (edit RADIUS_HOST / RADIUS_SECRET)
+#   .env                 ALL the settings (version, host user id, port, printers, login, quotas...), made from
+#                        docker/env.example with a generated session secret (mode 600: it holds secrets)
 #   config/tls/          self-signed certificate (skipped if you put your own fullchain.pem/privkey.pem there)
-#   .env                 compose variables (version, host user id, published port, printer queues)
-# Both come from templates with every option explained; scripts/env-sync.sh adds the options of later versions to them.
+#   data/                audit archive and backups
+# An existing .env is never touched. Needs only a POSIX shell, sed and openssl (no Python).
 # usage: scripts/docker-init.sh [NAME-OR-IP ...]   names/IPs clients will use to reach this server
 set -eu
 cd "$(dirname "$0")/.."
 mkdir -p config/tls data/audit-archive data/backups
 
-# .env and config/gateway.env are made from the templates docker/env.example and docker/gateway.env.example
-# (a secret is generated for the session key; existing files are never touched here)
-python3 -m app.envsync --init --root . --project-dir "$(pwd)"
-echo "set CUPSPL_RADIUS_HOST and CUPSPL_RADIUS_SECRET in config/gateway.env if you use RADIUS (optional)"
+if [ ! -e .env ]; then
+    [ -f docker/env.example ] || { echo "docker/env.example not found: run this from the PrintMinder folder" >&2; exit 1; }
+    # the version: the file VERSION of the release package, or pyproject.toml in a git clone
+    version="$(cat VERSION 2>/dev/null || sed -n 's/^version *= *"\([0-9][0-9.]*\)".*/\1/p' pyproject.toml 2>/dev/null | head -1)"
+    [ -n "$version" ] || { echo "can not tell which version this is (no VERSION file, no pyproject.toml)" >&2; exit 1; }
+    secret="$(openssl rand -base64 48 | tr -d '\n=' | tr '+/' '-_')"
+    here="$(pwd)"
+    umask 077
+    # '|' is not in any of the values (paths of this folder could hold '/' or '&': escape the replacement)
+    esc() { printf '%s' "$1" | sed 's/[\\&|]/\\&/g'; }
+    sed -e "s|__VERSION__|$(esc "$version")|g" -e "s|__PUID__|$(id -u)|g" -e "s|__PGID__|$(id -g)|g" \
+        -e "s|__PROJECT_DIR__|$(esc "$here")|g" -e "s|__GENERATED__|$secret|g" docker/env.example > .env
+    chmod 600 .env
+    echo "created .env (version $version). Set the time zone and, if you use RADIUS, CUPSPL_RADIUS_HOST / CUPSPL_RADIUS_SECRET in it."
+fi
 
 if [ ! -e config/tls/privkey.pem ]; then
     san="DNS:localhost,IP:127.0.0.1"
@@ -30,5 +42,5 @@ if [ ! -e config/tls/privkey.pem ]; then
     echo "created self-signed certificate for: $san"
     echo "(replace config/tls/fullchain.pem + privkey.pem with your CA-signed pair when you have it)"
 fi
-echo "next: edit config/gateway.env (RADIUS is optional), then: docker compose up -d"
+echo "next: edit .env (RADIUS is optional), then: docker compose up -d"
 echo "then read the one-time code:  docker compose logs gateway | grep 'FIRST RUN'   and open https://<server>:8631/admin/setup"

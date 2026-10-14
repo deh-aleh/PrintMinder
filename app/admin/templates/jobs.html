@@ -10,6 +10,11 @@
 </div>
 {% endif %}
 <div class="card">
+  <style>.tdot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:7px; background:var(--ok) } .tdot.off { background:var(--err) }</style>
+  <form method="post" action="/admin/jobs/titles" style="float:right;margin:0"{% if titles_on %} onsubmit="return confirm({{ _t('Stop saving the names of the files? From now on new prints and scans will be listed without a file name. The names already saved stay. You can turn it on again at any time.')|tojson|forceescape }})"{% endif %}>
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="on" value="{{ '0' if titles_on else '1' }}">
+    <button class="sec" title="{{ _('Click to stop saving the names of new files') if titles_on else _('Click to start saving the names of new files again') }}"><span class="tdot{{ '' if titles_on else ' off' }}"></span>{{ _("File names are being saved") if titles_on else _("File names are not being saved") }}</button>
+  </form>
   <h1>{{ _("Print and scan audit") }} <span class="muted">({{ total }})</span></h1>
   <p class="muted" style="margin:-6px 0 12px">
     {% set ar_key = 'audit' %}{% set ar_seconds = refresh or 30 %}{% set ar_on = refresh > 0 %}{% include "autorefresh.html" %} · <a href="/me/settings">{{ _("change it in the settings") }}</a> · {{ _("30 actions per page") }}
@@ -24,6 +29,7 @@
     <button>{{ _("Filter") }}</button>
     <a href="/admin/jobs.csv?user={{ f.user|urlencode }}&state={{ f.state|urlencode }}&q={{ f.q|urlencode }}"><button type="button" class="sec">{{ _("Export CSV") }}</button></a>
   </form>
+  {% if f.q %}<p class="muted" style="margin:-4px 0 10px">{{ _("The search by file name looks in the latest %(n)s actions that match the other filters.", n=title_scan) }}</p>{% endif %}
   <table class="stack-md zebra">
     <tr><th>{{ _("No.") }}</th><th>{{ _("When") }}</th><th>{{ _("User") }}</th><th>{{ _("Device") }}</th><th>{{ _("Action") }}</th><th>{{ _("State") }} <button type="button" class="info-lg" title="{{ _('What the states mean') }}" aria-label="{{ _('What the states mean') }}" onclick="document.getElementById('states-help').showModal()">ⓘ</button></th><th>{{ _("Pg.") }}</th><th>{{ _("File") }}</th><th>{{ _("Notes") }}</th><th></th></tr>
     {% for r in rows %}{% set j = r.j %}

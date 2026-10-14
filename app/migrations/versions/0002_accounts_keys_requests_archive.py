@@ -121,16 +121,12 @@ def upgrade() -> None:
         batch_op.add_column(sa.Column('requestable', sa.Boolean(), nullable=False, server_default=sa.false()))
 
     # ids of the audit tables must never be reused (they identify rows across archive files)
-    if bind.dialect.name == "sqlite":
-        with op.batch_alter_table("job_log", recreate="always", table_kwargs={"sqlite_autoincrement": True}):
-            pass
+    with op.batch_alter_table("job_log", recreate="always", table_kwargs={"sqlite_autoincrement": True}):
+        pass
     # the old unnamed UNIQUE(provider, username) goes away: the name alone must be unique now
-    if bind.dialect.name == "sqlite":
-        with op.batch_alter_table("user", naming_convention=_USER_UQ, recreate="always",
-                                  table_kwargs={"sqlite_autoincrement": True}) as batch_op:
-            batch_op.drop_constraint("uq_user_provider_username", type_="unique")
-    else:
-        op.drop_constraint("user_provider_username_key", "user", type_="unique")
+    with op.batch_alter_table("user", naming_convention=_USER_UQ, recreate="always",
+                              table_kwargs={"sqlite_autoincrement": True}) as batch_op:
+        batch_op.drop_constraint("uq_user_provider_username", type_="unique")
     with op.batch_alter_table('user', schema=None) as batch_op:
         batch_op.add_column(sa.Column('password_hash', sa.String(length=255), nullable=True))
         batch_op.add_column(sa.Column('must_change_password', sa.Boolean(), nullable=False, server_default=sa.false()))

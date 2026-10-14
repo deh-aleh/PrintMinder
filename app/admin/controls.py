@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from app.admin.common import back, current_admin, flash, get_db, safe_next, verify_csrf
+from app import certwatch
 from app.audit.adminlog import record
 from app.cups_client import list_queues
 from app.db.models import User
@@ -76,6 +77,9 @@ async def mdns_policy(request: Request):
             return control.mdns_policy(db)
 
     policy = await run_in_threadpool(load)
+    announce = certwatch.parse_announce(request.headers.get("x-mdns-announce", ""))
+    if announce:
+        request.app.state.mdns_announce = announce
     policy["offline"] = sorted(q["name"].lower() for q in await list_queues(request.app) if not q.get("online", True))
     policy["scanners"] = [{"id": s.id, "name": s.name, "root": s.root} for s in (await scanners(request.app)).values()]
     return JSONResponse(policy, headers={"Cache-Control": "no-store"})

@@ -18,6 +18,7 @@ from app.db.models import GatewaySetting, PrinterControl, User
 from app.i18n import N_
 
 MAINTENANCE = "maintenance"
+STORE_TITLES = "store_job_titles"   # "0" = the audit does not keep the names of new files
 BLOCKED_REASON = N_("printer disabled by the administrator (applies to everyone, administrators included)")
 MAINTENANCE_REASON = N_("gateway in maintenance: only administrators can print or scan")
 
@@ -35,6 +36,20 @@ def set_maintenance(db: Session, on: bool) -> None:
     row = db.get(GatewaySetting, MAINTENANCE)
     if row is None:
         db.add(GatewaySetting(key=MAINTENANCE, value="1" if on else "0"))
+    else:
+        row.value = "1" if on else "0"
+
+
+def titles_enabled(db: Session) -> bool:
+    """Whether the names of the printed files are written to the audit (on unless an administrator turned it off)."""
+    row = db.get(GatewaySetting, STORE_TITLES)
+    return not (row and row.value == "0")
+
+
+def set_titles(db: Session, on: bool) -> None:
+    row = db.get(GatewaySetting, STORE_TITLES)
+    if row is None:
+        db.add(GatewaySetting(key=STORE_TITLES, value="1" if on else "0"))
     else:
         row.value = "1" if on else "0"
 

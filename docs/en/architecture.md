@@ -49,7 +49,7 @@ Deliberate differences from a "classic" design:
 |---|---|---|
 | Language | **Python 3.12+** | Easy to debug, many libraries; the IPP codec is isolated and replaceable |
 | Web / proxy | **FastAPI + uvicorn**, **httpx** (async, also over a unix socket) | Streams documents without loading them in memory |
-| Database | **SQLAlchemy 2** + **SQLite** (WAL), **Alembic** migrations | Zero configuration; PostgreSQL is prepared (lock ready, migrations not yet tested) |
+| Database | **SQLAlchemy 2** + **SQLite** (WAL), **Alembic** migrations | Zero configuration; a single file, no server to manage |
 | Local passwords | **argon2id** (`argon2-cffi`) | Human-chosen secrets: slow hash |
 | Print keys | 192 random bits, **sha256** | High entropy: a fast hash is enough and does not slow down each IPP request |
 | RADIUS | **pyrad** (PAP + Message-Authenticator) | The office already has a RADIUS server |
@@ -75,7 +75,7 @@ Deliberate differences from a "classic" design:
 | `radius` | Test RADIUS, only with `--profile radius-test` | internal |
 
 Data: a docker volume for the database (`/data`), a host folder `data/audit-archive` for compressed audit files, a host
-folder `data/backups` for backups, `config/` (read-only) for `gateway.env` and the TLS certificate.
+folder `data/backups` for backups, `config/` (read-only) for the TLS certificate, and `.env` (read-only, for encrypted backups).
 
 ## 4. Path of an IPP request
 
@@ -112,7 +112,9 @@ All started by the gateway's lifespan ([`app/main.py`](../../app/main.py)):
 | Backup scheduler | 60 s | Runs the backup targets that are due |
 | Keep-alive scheduler | 60 s | Prints maintenance pages and notes the first time each queue is seen |
 | Printer discovery | `CUPSPL_DISCOVERY_INTERVAL` (30 s) | Creates queues for new USB printers (ipp-usb first, CUPS usb backend second) and removes USB queues unreachable for `CUPSPL_OFFLINE_REMOVE_HOURS` |
-| mDNS announcer | `CUPSPL_MDNS_INTERVAL` (30 s) | Separate container: re-reads the queue list |
+| mDNS announcer | `CUPSPL_MDNS_INTERVAL` (30 s) | Separate container: re-reads the queue list and tells the gateway which address it announces |
+| File names ([`app/titles.py`](../../app/titles.py)) | at start, then 1 day | Encrypts names written before the key existed; with retention on, erases names older than `CUPSPL_JOB_TITLE_RETENTION_DAYS` |
+| Certificate check ([`app/certwatch.py`](../../app/certwatch.py)) | 6 h | Reads the TLS certificate and `config/tls/sync-status.json`, and opens or closes the certificate notices |
 
 ## 6. Data model
 
@@ -146,8 +148,7 @@ Tables (Alembic applies migrations at start; a test fails if a model changes wit
   check that reserves the quota. `job_log` is never edited to give someone more room.
 - **Audit is append-only and kept forever.** Nothing in the portal deletes rows or archives; only the archiver moves rows,
   and only after the compressed copy has been read back and verified.
-- **Atomic reservation.** The limit check and the insert happen under a lock (thread + `BEGIN IMMEDIATE` on SQLite,
-  advisory lock on PostgreSQL), so concurrent jobs cannot overshoot the limit.
+- **Atomic reservation.** The limit check and the insert happen under a lock (thread + `BEGIN IMMEDIATE` on SQLite), so concurrent jobs cannot overshoot the limit.
 - **Nothing is assumed about the hardware.** Printers, colour support, ink, counters, scanners and paper sizes are read
   from the devices at run time. Vendor counters come from HP's web service when present; other brands show only IPP data.
 - **Fail closed.** RADIUS unreachable ⇒ access denied; no TLS ⇒ the gateway refuses to start; half-configured RADIUS ⇒ refuses to start.

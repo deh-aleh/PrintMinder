@@ -16,7 +16,7 @@ Problems? See [troubleshooting.md](troubleshooting.md).
 | | |
 |---|---|
 | Server | **Linux** machine (a mini-PC or a Raspberry Pi is ideal). USB passthrough and the `host` network used by mDNS exist only on Linux; on Docker Desktop (Windows, macOS) the gateway starts but only **network** printers work and phones will not discover them. |
-| Software | Docker Engine with the Compose plugin (`docker compose version`), `openssl` and `python3` (used by the init script), `git` or the source archive |
+| Software | Docker Engine with the Compose plugin (`docker compose version`), `openssl`, `curl` and `tar` (used by the scripts), `python3` (used by `scripts/backup.sh`). `git` is not needed: the install starts from the release package. |
 | Printer | USB (through `ipp-usb`) or on the network (IPP). Anything CUPS can drive. |
 | Network | One TCP port reachable by clients (default **8631**; `631` if no other CUPS uses it). Clients must trust the certificate (see §3.4) |
 | Architecture | **amd64** (PC, server) and **arm64** (Raspberry Pi 4/5, ARM NAS). The published images contain both and Docker picks the right one. 32-bit ARM (armv7) is not supported |
@@ -25,13 +25,18 @@ Problems? See [troubleshooting.md](troubleshooting.md).
 ## 2. Quick path (Docker)
 
 ```sh
-git clone <repository-url> printminder && cd printminder
+# 0. download the package. Write the newest version in VERSION: you find it at https://github.com/deh-aleh/PrintMinder/releases
+VERSION=1.0.0
+curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/printminder-$VERSION.tar.gz
+curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS            # must answer "OK": the file is the one that was published
+tar xzf printminder-$VERSION.tar.gz && cd printminder-$VERSION
 
 # 1. names / IPs by which clients will reach the server (they go into the TLS certificate)
 scripts/docker-init.sh print.lan 192.168.1.50
 
 # 2. settings (RADIUS is optional: leave host and secret empty to use local accounts only)
-$EDITOR config/gateway.env
+$EDITOR .env
 
 # 3. printers: see §5 (USB) and §6 (network); then start
 docker compose up -d
@@ -52,14 +57,15 @@ The administrator account is `cups_orchestrator`. From a shell you can do the sa
 
 | Created | What |
 |---|---|
-| `config/gateway.env` | all `CUPSPL_*` settings, with a freshly generated `CUPSPL_SECRET_KEY`; mode 600 (it holds secrets) |
-| `.env` | compose variables, each one explained in the file: `PRINTGW_REGISTRY`/`PRINTGW_VERSION` (which published images run), `PUID`/`PGID` (your user), `PROJECT_DIR`, `GATEWAY_PORT`, `CUPS_QUEUES`, `CUPS_VIRTUAL_QUEUE`, host paths |
+| `.env` | **all** the settings in one file. Part A is for compose: `PRINTGW_REGISTRY`/`PRINTGW_VERSION` (which published images run), `PUID`/`PGID` (your user), `PROJECT_DIR`, `GATEWAY_PORT`, `CUPS_QUEUES`, `CUPS_VIRTUAL_QUEUE`, host paths. Part B holds the settings of the program, `CUPSPL_*`, with a freshly generated `CUPSPL_SECRET_KEY`. Mode 600 (it holds secrets) |
 | `config/tls/` | a self-signed certificate (825 days) whose alternative names are the names/IPs you passed |
 | `data/audit-archive/`, `data/backups/` | host folders for compressed audit and backups |
 
 Re-running it never overwrites existing files. Never share `config/` or `.env`: they contain secrets.
 
-### 3.2 Configure `config/gateway.env`
+**Never edit `docker-compose.yml`**: everything you may change is in `.env`. That way an update can replace the compose file without erasing your choices.
+
+### 3.2 The settings of the program (part B of `.env`)
 
 Defaults are sensible; the settings you will most often touch:
 
@@ -77,9 +83,9 @@ Defaults are sensible; the settings you will most often touch:
 
 The file is fully commented. After any change: `docker compose up -d`.
 
-### 3.3 Compose variables (`.env`)
+### 3.3 The compose variables (part A of `.env`)
 
-Edit `.env` for the printer queues (`CUPS_QUEUES`), the published port (`GATEWAY_PORT=631` to replace port 631), the
+Also in `.env`, edit the printer queues (`CUPS_QUEUES`), the published port (`GATEWAY_PORT=631` to replace port 631), the
 user (`PUID`/`PGID`) and, for downloaded images, `PRINTGW_REGISTRY` + `PRINTGW_VERSION` (pin a fixed version in
 production, never `latest`).
 
@@ -91,7 +97,7 @@ TLS is **mandatory**: the gateway refuses to start without it.
 - put your CA-signed `fullchain.pem` and `privkey.pem` in `config/tls/` (the key must be readable by the `PUID` user) and
   run `docker compose restart gateway`.
 
-The certificate must list the names/IPs clients use, including the IP announced by mDNS.
+The certificate must list the names/IPs clients use, including the IP announced by mDNS. If it does not, the portal says so with a notice (the bell): see [certificates.md](certificates.md).
 
 **You already have a valid certificate (for example one issued by Nginx Proxy Manager on another machine).** The simplest way is to let the
 gateway use that same certificate itself, with no proxy in between:
@@ -100,9 +106,10 @@ gateway use that same certificate itself, with no proxy in between:
 2. Copy the pair from the machine that holds it (NPM: `data/letsencrypt/live/npm-<n>/fullchain.pem` and `privkey.pem`; custom certificates:
    `data/custom_ssl/npm-<n>/`) to `config/tls/fullchain.pem` and `config/tls/privkey.pem`, make the key readable by the `PUID` user
    (`chmod 600`), and run `docker compose restart gateway`.
-3. Set `CUPSPL_PORTAL_URL=https://print.example.com:8631` in `config/gateway.env`, and use `ipps://print.example.com:8631/printers/<queue>`.
-4. Let's Encrypt certificates are renewed about every 60 days: copy the two files again after each renewal (a `scp` or `rsync` from cron) and
-   restart the gateway.
+3. Set `CUPSPL_PORTAL_URL=https://print.example.com:8631` in `.env`, and use `ipps://print.example.com:8631/printers/<queue>`.
+4. Let's Encrypt certificates are renewed about every 60 days. To avoid copying them by hand each time, run `scripts/cert-sync.sh` from cron: it copies the
+   two files, checks them and restarts the gateway only if they changed. It is explained step by step, including how to create a user that can
+   only read, in [certificates.md](certificates.md).
 
 Devices that find printers through mDNS are given the `<name>.local` name or the IP, which a certificate for `print.example.com` does not
 cover: use the real name by hand on those devices, or stop the `mdns` service if you do not need discovery.
@@ -110,7 +117,7 @@ cover: use the real name by hand on those devices, or stop the `mdns` service if
 *Behind a reverse proxy instead* (the proxy keeps the certificate and forwards to `https://<server>:8631`; not tested by the project): the
 proxy host must forward to scheme `https`, allow large bodies and not buffer them (`client_max_body_size 250m; proxy_request_buffering off;
 proxy_read_timeout 600s;`), and the gateway sees every client as the proxy's address (login lock-out per address, audit IPs) unless
-`FORWARDED_ALLOW_IPS=<proxy address>` is set in `config/gateway.env` so uvicorn trusts `X-Forwarded-For`. Printer addresses given back to clients
+`FORWARDED_ALLOW_IPS=<proxy address>` is set in `.env` so uvicorn trusts `X-Forwarded-For`. Printer addresses given back to clients
 carry the `Host` the proxy forwards, without `:443`, so devices must keep the address they were set up with.
 
 ### 3.5 Start
@@ -179,7 +186,7 @@ otherwise list them in `CUPSPL_SCAN_URL`.
 ## 7. Try it without a printer or RADIUS
 
 ```sh
-# .env:  CUPS_VIRTUAL_QUEUE=1        config/gateway.env:  CUPSPL_RADIUS_HOST=radius  CUPSPL_RADIUS_SECRET=testing123
+# in .env:  CUPS_VIRTUAL_QUEUE=1   CUPSPL_RADIUS_HOST=radius   CUPSPL_RADIUS_SECRET=testing123
 docker compose --profile radius-test up -d --build
 ```
 
@@ -199,33 +206,38 @@ Printers page. Never leave test accounts on a real installation.
 
 The images are published for each release (`ghcr.io/deh-aleh/{gateway,cups,ipp-usb,updater}:<version>`, amd64 + arm64) and
 `.env` holds the version that runs (`PRINTGW_VERSION`). A version is only changed **on purpose**: nothing updates by itself.
-Database migrations run at start. Going back to an older version after a migration needs a restore of the backup.
+Database migrations run at start.
+
+Each release also has a **package** (`printminder-<version>.tar.gz` with its `SHA256SUMS`) holding `docker-compose.yml`, the scripts,
+`docker/env.example` and the documentation. It never holds `.env`, `config/` or `data/`: an update cannot touch them.
 
 | How | When |
 |---|---|
-| `scripts/update.sh` | **Normal way.** Makes a full backup (`data/backups/pre-update/`), writes the new version in `.env`, downloads the images, restarts, waits until the gateway is healthy and, if it is not, puts the old version back. `scripts/update.sh 1.2.0` picks a version; `--check` only tells if a newer one exists. A change of major version (1.x → 2.x) asks for confirmation: read the release notes first. |
-| Button *Update* in the portal | Optional. Menu *Backup*, box *Update*. Needs the `updater` container (below) **and** a scheduled backup that is on and succeeded in the last 48 h: a fresh backup is made, then the update starts. If there is no working scheduled backup the button stays off and says why. Only updates inside the same major version. |
-| `git pull && docker compose up -d --build` | Only if you build the images yourself (`PRINTGW_REGISTRY` empty in `.env`). |
+| `scripts/update.sh` | **Normal way.** Makes a full backup (`data/backups/pre-update/`), downloads the package of the new version and checks its sha256 sum, replaces `docker-compose.yml` and the scripts (the old ones stay in `.update-prev/`), writes the new version in `.env`, downloads the images, restarts and waits until the gateway is healthy. If it is not, it puts the previous files and version back; if even the previous version does not start (the new one already changed the database), it offers to restore the backup it has just made. `scripts/update.sh 1.2.0` picks a version; `--check` only tells if a newer one exists. A change of major version (1.x → 2.x) asks for confirmation: read the release notes first. |
+| Button *Update* in the portal | Optional. Menu *Backup*, box *Update*. Needs the `updater` container (below) **and** a scheduled backup that is on and succeeded in the last 48 h: a fresh backup is made, then the update starts. If there is no working scheduled backup the button stays off and says why. Only updates inside the same major version. If the new version does not start it puts the old one back, but restoring the backup, if needed, is up to you: from the *Backup* menu or with `scripts/backup.sh restore`. |
+| `git pull && docker compose up -d --build` | Only in a folder cloned with git (development) and for images you build yourself (`PRINTGW_REGISTRY` empty in `.env`). `scripts/update.sh` refuses to run in a folder with `.git`, so it does not fight with git. |
+
+**Example.** You are on 1.0.0 and 1.1.0 comes out, changing `docker-compose.yml` (a new volume). You run `scripts/update.sh`: the new compose file
+arrives together with the new images, so you never end up with 1.1.0 images and a 1.0.0 compose file. Your `.env` stays as it was.
 
 **Notice of a new version.** Once a day the gateway asks GitHub for the newest release and shows a note to administrators.
 Only that one request goes out and it sends nothing about your server. Switch it off with `CUPSPL_UPDATE_CHECK=false`.
 
 **The optional `updater` container** applies updates asked for in the portal. It is **off by default** because it needs the
-Docker socket (`/var/run/docker.sock`), and whoever controls that socket controls the whole machine (root). It only reads a version
-number `x.y.z` written by the gateway; images always come from the registry in your `.env`. Turn it on with:
+Docker socket (`/var/run/docker.sock`), and whoever controls that socket controls the whole machine (root): if someone found a flaw in
+the portal and used it, they could command Docker and take the server. It only reads a version number `x.y.z` written by the gateway;
+images always come from the registry in your `.env`. Turn it on with:
 
 ```sh
 echo "COMPOSE_PROFILES=autoupdate" >> .env      # one line in .env (or add --profile autoupdate every time)
 docker compose up -d
 ```
 
-If you do not want that risk, keep it off and use `scripts/update.sh`.
+If you do not want that risk, keep it off and use `scripts/update.sh`. To turn it off again: remove the line from `.env` and run `docker compose stop updater`.
 
-**New options in your files.** When a version brings new settings, `scripts/update.sh` adds them at the end of `.env` and
-`config/gateway.env`, each with its explanation and its default value, so the behaviour stays the same until you change them. Values
-you set are never touched; a copy is kept next to the file (`.env.bak-<date>`). `scripts/env-sync.sh --check` lists what would be added,
-`scripts/env-sync.sh` adds it: run it after a `git pull` (it reads the templates of this folder; `update.sh` reads those of the new image). It needs `python3` or, without it, an up-to-date gateway image.
-The folder itself (`docker-compose.yml`, scripts) is changed by `git pull`, not by `update.sh`: the release notes say when that is needed.
+**New options in later versions.** An update never modifies your `.env`. A new option works at once with its default value even if it is not
+in your `.env`. To see which options exist, open `docker/env.example` (every update replaces it): each option has its explanation. To change one,
+copy its line into your `.env` and run `docker compose up -d`.
 
 **Pin the version.** Never use `latest`: leave `PRINTGW_VERSION` at a number, so an update is a decision.
 

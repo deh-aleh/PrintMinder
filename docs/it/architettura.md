@@ -48,7 +48,7 @@ Differenze consapevoli rispetto a uno schema "classico":
 |---|---|---|
 | Linguaggio | **Python 3.12+** | Facile da debuggare, molte librerie; il codec IPP è isolato e sostituibile |
 | Web / proxy | **FastAPI + uvicorn**, **httpx** (asincrono, anche su socket unix) | Inoltra i documenti in streaming, senza caricarli in memoria |
-| Database | **SQLAlchemy 2** + **SQLite** (WAL), migrazioni **Alembic** | Zero configurazione; PostgreSQL è predisposto (lock pronto, migrazioni non ancora provate) |
+| Database | **SQLAlchemy 2** + **SQLite** (WAL), migrazioni **Alembic** | Zero configurazione; un file solo, nessun server da gestire |
 | Password locali | **argon2id** (`argon2-cffi`) | Segreti scelti da persone: hash lento |
 | Chiavi di stampa | 192 bit casuali, **sha256** | Alta entropia: un hash veloce basta e non appesantisce ogni richiesta IPP |
 | RADIUS | **pyrad** (PAP + Message-Authenticator) | Il server RADIUS esiste già in ufficio |
@@ -74,7 +74,7 @@ Differenze consapevoli rispetto a uno schema "classico":
 | `radius` | RADIUS di prova, solo con `--profile radius-test` | interna |
 
 Dati: un volume docker per il database (`/data`), la cartella `data/audit-archive` sull'host per l'audit compresso, la cartella
-`data/backups` sull'host per i backup, `config/` (in sola lettura) per `gateway.env` e il certificato TLS.
+`data/backups` sull'host per i backup, `config/` (in sola lettura) per il certificato TLS, e `.env` (in sola lettura, per i backup cifrati).
 
 ## 4. Percorso di una richiesta IPP
 
@@ -110,7 +110,9 @@ Tutte avviate dal ciclo di vita del gateway ([`app/main.py`](../../app/main.py))
 | Scheduler dei backup | 60 s | Esegue i backup in scadenza |
 | Scheduler della stampa periodica | 60 s | Stampa le pagine di manutenzione e annota la prima volta che ogni coda è stata vista |
 | Scoperta delle stampanti | `CUPSPL_DISCOVERY_INTERVAL` (30 s) | Crea le code delle stampanti USB nuove (prima ipp-usb, poi backend usb di CUPS) e toglie le code USB irraggiungibili da `CUPSPL_OFFLINE_REMOVE_HOURS` |
-| Annunciatore mDNS | `CUPSPL_MDNS_INTERVAL` (30 s) | Contenitore a parte: rilegge l'elenco delle code |
+| Annunciatore mDNS | `CUPSPL_MDNS_INTERVAL` (30 s) | Contenitore a parte: rilegge l'elenco delle code e dice al gateway quale indirizzo annuncia |
+| Nomi dei file ([`app/titles.py`](../../app/titles.py)) | all'avvio, poi 1 giorno | Cifra i nomi scritti prima che ci fosse la chiave; con la retention accesa cancella i nomi più vecchi di `CUPSPL_JOB_TITLE_RETENTION_DAYS` |
+| Controllo del certificato ([`app/certwatch.py`](../../app/certwatch.py)) | 6 h | Legge il certificato TLS e `config/tls/sync-status.json`, e apre o chiude gli avvisi sul certificato |
 
 ## 6. Modello dei dati
 
@@ -144,8 +146,7 @@ Tabelle (Alembic applica le migrazioni all'avvio; un test fallisce se un modello
   stesso controllo sotto lock che riserva la quota. `job_log` non viene mai modificato per dare più spazio a qualcuno.
 - **L'audit si aggiunge soltanto e si conserva per sempre.** Nessuna funzione del portale cancella righe o archivi; solo l'archiviatore
   sposta le righe, e solo dopo aver riletto e verificato la copia compressa.
-- **Riserva atomica.** Il controllo del limite e l'inserimento avvengono sotto lock (thread + `BEGIN IMMEDIATE` su SQLite, advisory
-  lock su PostgreSQL): job simultanei non possono superare il limite.
+- **Riserva atomica.** Il controllo del limite e l'inserimento avvengono sotto lock (thread + `BEGIN IMMEDIATE` su SQLite): job simultanei non possono superare il limite.
 - **Nessuna ipotesi sull'hardware.** Stampanti, colore, inchiostro, contatori, scanner e formati carta si leggono dai dispositivi a
   runtime. I contatori del costruttore vengono dal servizio web HP quando c'è; le altre marche mostrano solo i dati IPP.
 - **Fail closed.** RADIUS irraggiungibile ⇒ accesso negato; niente TLS ⇒ il gateway non parte; RADIUS configurato a metà ⇒ non parte.
