@@ -19,6 +19,7 @@ from zeroconf.asyncio import AsyncZeroconf
 
 from app.config import settings
 from app.cups_client import list_queues
+from app.logsetup import setup_logging
 from app.main import make_upstream
 
 log = logging.getLogger("app.mdns")
@@ -141,7 +142,7 @@ def build_services(queues: list[dict], host: str, addresses: list[str], port: in
 
 
 async def main() -> None:
-    logging.basicConfig(level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    setup_logging(settings.log_level, settings.timezone)
     portal = settings.portal_url.rstrip("/")
     host = settings.mdns_hostname or (urlparse(portal).hostname if portal else "") or socket.gethostname()
     port = settings.mdns_port or settings.port

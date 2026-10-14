@@ -17,7 +17,7 @@ credentials if the installation uses RADIUS. A temporary password must be change
 - **Print keys**: create a key for each device (give it a label). It is shown **once**: copy it at once (copy button). Use it
   as the password when the computer or phone asks for credentials; the user name is yours. A key only prints and scans — it
   never opens the portal and your domain password is never needed on a device. Revoke a key (or all of them) in *My keys* if a device is lost.
-  Keys expire (RADIUS users: renew by signing in to the portal again).
+  When you create one you choose how long it lasts (from 1 month to 2 years, or one print only); RADIUS users have a shorter maximum and renew by signing in to the portal again. The bell at the top tells you when an administrator revokes, switches off or extends one of your keys.
 - **Requests**: ask for more quota (temporary or permanent) or for a change of group, with a reason. The administrator
   approves, edits or rejects. You can have up to 3 open requests, and cancel them.
 

@@ -37,7 +37,7 @@ The list is read-only: a user's own limit or the inherited one (italics), active
 - Create **local**: a temporary password is shown once; the user changes it at first login.
 - Create **RADIUS**: choose the group; the person signs in with their office password.
 - **Reset password** (local): new temporary password, shown once.
-- **Revoke keys**: blocks printing from every device of that user at once; the key list per user is at `/admin/users/<id>/keys`.
+- **Keys**: the list per user is at `/admin/users/<id>/keys`. For each key you can **switch it off** (its expiry keeps running; switch it on again later), **extend it** or **revoke it**; "Revoke all" stops every device of the user. The user gets a notice for each action (not for their own). Revoked and expired keys disappear after `CUPSPL_KEY_HISTORY_DAYS` days (14).
 - **Admin flag**: promotion moves the user to the `administrator` group, demotion to `default`.
 - Protected: you can not disable, demote or delete yourself, the emergency account or the last administrator.
 

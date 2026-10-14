@@ -32,7 +32,7 @@ Per più dettaglio metti `CUPSPL_LOG_LEVEL=DEBUG` in `.env` e poi `docker compos
 | Bloccato dopo password sbagliate | 5 password *diverse* sbagliate in 5 minuti bloccano la coppia (utente, IP). Attendi 5 minuti o riavvia il gateway (il blocco è in memoria). |
 | Un utente RADIUS non entra | RADIUS irraggiungibile ⇒ accesso negato (fail closed). Controlla `CUPSPL_RADIUS_*`, che questa macchina sia un *client* RADIUS con lo stesso secret, e il log. Un account locale con lo stesso nome **non** viene mai aperto dal RADIUS. |
 | Obbligo di cambiare password | Normale per le password temporanee create o reimpostate da un amministratore. |
-| Un utente disabilitato stampa ancora | Gli utenti locali sono bloccati subito. Per gli utenti RADIUS le chiavi di stampa smettono alla scadenza (`CUPSPL_KEY_TTL_DAYS_RADIUS`): revoca le loro chiavi nel portale per fermarli subito. |
+| Un utente disabilitato stampa ancora | Gli utenti locali sono bloccati subito. Per gli utenti RADIUS le chiavi di stampa smettono alla scadenza (durata massima `CUPSPL_KEY_TTL_DAYS_RADIUS`): revoca le loro chiavi nel portale per fermarli subito. |
 
 ## 3. Stampa
 
@@ -63,7 +63,8 @@ Per più dettaglio metti `CUPSPL_LOG_LEVEL=DEBUG` in `.env` e poi `docker compos
 | Le stampanti non compaiono sul telefono | `mdns` deve girare con la rete host sulla stessa LAN; `docker compose logs mdns`. Imposta `CUPSPL_MDNS_ADDRESSES` se la macchina ha più schede di rete e `CUPSPL_MDNS_HOSTNAME` con un nome presente nel certificato. Docker Desktop non può farlo. Una stampante nascosta, irraggiungibile, o la modalità manutenzione, tolgono anche l'annuncio. |
 | Android: il servizio di sistema vede la stampante ma fallisce | Non sa autenticarsi. Installa **Mopria Print Service** o stampa dal portale. |
 | Il desktop Linux mostra le stampanti ma non stampa | Le stampanti annunciate non hanno la chiave finché non aggiungi la coda con la chiave nell'indirizzo (pagina del profilo o `scripts/add-printer-linux.sh`). |
-| Windows / macOS / iPhone | Non provati dal progetto. Prova `ipps://<server>:8631/printers/<coda>`, nome utente + chiave di stampa, e segnala cosa succede. |
+| Windows: «Operazione non riuscita» o «sto connettendo» troppo a lungo quando aggiungi la stampante (procedura completa in [stampa.md](stampa.md#windows-11)) | Windows chiede al gateway se il lavoro andrebbe bene (`Validate-Job`) prima di avere una password, e la finestra «Aggiungi dispositivo» non sa chiederla. Il gateway risponde a questa domanda senza password, mentre la stampa vera chiede sempre il login. Aspetta 3-4 minuti; se non si collega: Pannello di controllo → Account utente → Gestione credenziali → Gestione credenziali Windows → Aggiungi credenziali Windows; come indirizzo scrivi lo stesso nome o IP della stampante, come utente il tuo nome e come password la **chiave di stampa** (non la password dell'account). |
+| macOS / iPhone | Non provati dal progetto. Prova `ipps://<server>:8631/printers/<coda>`, nome utente + chiave di stampa, e segnala cosa succede. |
 
 ## 5. Scansione
 

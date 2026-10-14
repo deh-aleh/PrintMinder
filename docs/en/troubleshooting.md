@@ -32,7 +32,7 @@ Increase detail with `CUPSPL_LOG_LEVEL=DEBUG` in `.env`, then `docker compose up
 | Locked after wrong passwords | 5 *different* wrong passwords in 5 minutes block the (user, IP) pair. Wait 5 minutes or restart the gateway (the lock is in memory). |
 | A RADIUS user cannot log in | RADIUS unreachable ⇒ access denied (fail closed). Check `CUPSPL_RADIUS_*`, that this machine is a RADIUS *client* with the same secret, and the log. A local account of the same name is **never** opened by RADIUS. |
 | Forced to change the password | Normal for temporary passwords created or reset by an administrator. |
-| A user was disabled but still prints | Local users are blocked at once. For RADIUS users, print keys stop at expiry (`CUPSPL_KEY_TTL_DAYS_RADIUS`) — revoke their keys in the portal for an immediate stop. |
+| A user was disabled but still prints | Local users are blocked at once. For RADIUS users, print keys stop at expiry (longest life `CUPSPL_KEY_TTL_DAYS_RADIUS`) — revoke their keys in the portal for an immediate stop. |
 
 ## 3. Printing
 
@@ -63,7 +63,8 @@ Increase detail with `CUPSPL_LOG_LEVEL=DEBUG` in `.env`, then `docker compose up
 | The printers do not appear on the phone | `mdns` must run with host networking on the same LAN; `docker compose logs mdns`. Set `CUPSPL_MDNS_ADDRESSES` if the machine has several network cards, and `CUPSPL_MDNS_HOSTNAME` to a name that is in the certificate. Docker Desktop cannot do this. A printer that is blocked-hidden or unreachable, or maintenance mode, also removes the announcement. |
 | Android: the system print service sees the printer but fails | It cannot authenticate. Install **Mopria Print Service**, or print from the portal. |
 | Linux desktop shows the printers but nothing prints | Announced printers have no key until you add the queue with the key in its address (profile page or `scripts/add-printer-linux.sh`). |
-| Windows / macOS / iPhone | Not tested by the project. Try `ipps://<server>:8631/printers/<queue>`, user name + print key, and report what happens. |
+| Windows: "Operation failed" or "connecting" for too long when adding the printer (full steps in [printing.md](printing.md#windows-11)) | Windows asks the gateway whether the job would be accepted (`Validate-Job`) before it has a password, and the "Add device" window can not ask for one. The gateway answers that question without a password, while the real print always asks for the login. Wait 3-4 minutes; if it does not connect: Control Panel → User Accounts → Credential Manager → Windows Credentials → Add a Windows credential; address = the same name or IP as the printer, user name = yours, password = the **print key** (not the account password). |
+| macOS / iPhone | Not tested by the project. Try `ipps://<server>:8631/printers/<queue>`, user name + print key, and report what happens. |
 
 ## 5. Scanning
 

@@ -69,7 +69,7 @@ authoritative list is `app/config.py`. Summary:
 |---|---|
 | **Secret** | `CUPSPL_SECRET_KEY` — signs session cookies and authenticates gateway→mdns. Unset = random at each start (sessions lost on restart, mdns channel unprotected). Changing it only logs everybody out. |
 | **RADIUS** (optional) | `RADIUS_HOST`, `RADIUS_PORT` (1812), `RADIUS_SECRET`, `RADIUS_TIMEOUT` (5), `AUTH_CACHE_SECONDS` (60). Both host and secret empty = local accounts only; only one filled = refuses to start. |
-| **Print authentication** | `IPP_AUTH` (`keys` \| `keys+radius`), `KEY_TTL_DAYS_RADIUS` (90), `KEY_TTL_DAYS_LOCAL` (365), `AUTO_CREATE_USERS` (true), `DEFAULT_GROUP` (default), `CUPS_USER_PREFIX` (`gw:`), `ANONYMOUS_DISCOVERY` (true) |
+| **Print authentication** | `IPP_AUTH` (`keys` \| `keys+radius`), `KEY_TTL_DAYS_RADIUS` (90, longest), `KEY_TTL_DAYS_LOCAL` (730, longest), `KEY_ONCE_HOURS` (24), `KEY_ONCE_GRACE_SECONDS` (120), `KEY_HISTORY_DAYS` (14), `KEY_EXPIRY_WARN_ENABLED` (false), `KEY_EXPIRY_WARN_DAYS` (7), `AUTO_CREATE_USERS` (true), `DEFAULT_GROUP` (default), `CUPS_USER_PREFIX` (`gw:`), `ANONYMOUS_DISCOVERY` (true) |
 | **First run** | `BOOTSTRAP_ADMIN` (true), `BOOTSTRAP_ADMIN_USERNAME` (`cups_orchestrator`) |
 | **Requests** | `MAX_OPEN_REQUESTS` (3), `REQUEST_TTL_DAYS` (14) |
 | **Audit** | `AUDIT_MAX_MB` (50), `AUDIT_ARCHIVE_DIR` (`/data/audit-archive`), `AUDIT_CHECK_INTERVAL` (3600) |
@@ -113,7 +113,7 @@ authoritative list is `app/config.py`. Summary:
 | `groups.py` | The two system groups `default` and `administrator`. |
 | `bootstrap.py` | Creates `cups_orchestrator` without a password and prints the one-time `FIRST RUN` code. |
 | `passwords.py` | argon2id hashing and the password rules (min. 12 characters, not equal to the user name). |
-| `keys.py` | Print keys: creation, sha256 hash, expiry, verification, revocation. |
+| `keys.py` | Print keys: creation with a chosen or single-use life, sha256 hash, states, verification, switching off, extending, tidying. |
 | `radius.py` | RADIUS provider (pyrad). `base.py`: the provider interface. `cache.py`: short cache of successful logins. |
 | `throttle.py` | Login lock-out (in memory; resets on restart). |
 | `dictionary` | RADIUS attribute dictionary needed by pyrad. |

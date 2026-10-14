@@ -43,8 +43,9 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 
 - **Android's system print service can not authenticate**: use Mopria Print Service, or print from the browser.
 - Android keeps credentials per printer and per session; the gateway can only revoke the key.
-- iPhone/iPad, Windows and macOS have **not been tested**; whether the file name arrives in `job-name` from them is not verified.
+- iPhone/iPad and macOS have **not been tested**; printing works from Windows 11, but whether the file name arrives in `job-name` is not verified.
 - Print keys of Linux/CUPS clients end up saved on the client (revocable and useless elsewhere).
+- A single-use key is spent when its print is accepted: if CUPS or the printer then fail, the key is still spent and another one is made. After the print it still works for 2 minutes, only to ask for the status.
 - Announced printers appear on Linux desktops (Avahi) without a key; they do nothing until the queue is added with the key.
 
 ## 4. Printers and scanners

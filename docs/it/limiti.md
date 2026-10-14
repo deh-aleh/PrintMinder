@@ -43,8 +43,9 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 
 - **Il servizio di stampa di sistema di Android non sa autenticarsi**: usa Mopria Print Service oppure stampa dal browser.
 - Android conserva le credenziali per stampante e per sessione; il gateway può solo revocare la chiave.
-- iPhone/iPad, Windows e macOS **non sono stati provati**; non è verificato se da lì il nome del file arrivi in `job-name`.
+- iPhone/iPad e macOS **non sono stati provati**; da Windows 11 si stampa ma non è verificato se il nome del file arrivi in `job-name`.
 - Le chiavi di stampa dei client Linux/CUPS finiscono comunque salvate sul client (revocabili e inutili altrove).
+- Una chiave monouso si consuma quando la stampa viene accettata: se poi CUPS o la stampante falliscono, la chiave è comunque spesa e se ne crea un'altra. Dopo la stampa vale ancora 2 minuti, solo per chiedere lo stato.
 - Le stampanti annunciate compaiono anche ai desktop Linux (Avahi) senza chiave; non fanno nulla finché la coda non è aggiunta con la chiave.
 
 ## 4. Stampanti e scanner

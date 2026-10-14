@@ -16,7 +16,7 @@ from app.auth import keys
 from app.auth.passwords import verify_password
 from app.auth.users import find_user, resolve_user
 from app.config import settings
-from app.db.models import User
+from app.db.models import PrintKey, User
 
 log = logging.getLogger(__name__)
 LOCAL = "local"
@@ -63,33 +63,44 @@ def _create_delegated(app, provider_name: str, name: str) -> User | None:
         return user if user is not None and user.provider != LOCAL and user.enabled else None
 
 
-def _check_key(app, name: str, key: str, ip: str | None) -> User | None:
+def _check_key(app, name: str, key: str, ip: str | None, for_jobs_status: bool = False) -> tuple[User, PrintKey] | None:
     with app.state.sessionmaker() as db:
         user = find_user(db, name)
         if user is None or not user.enabled:
             return None
-        return user if keys.verify_key(db, user, key, ip) is not None else None
+        row = keys.verify_key(db, user, key, ip, read_only=for_jobs_status)
+        return (user, row) if row is not None else None
 
 
-async def print_login(app, username: str, secret: str, ip: str | None = None) -> User | None:
-    """IPP Basic credentials -> User, or None."""
+async def print_login_with_key(app, username: str, secret: str, ip: str | None = None) -> tuple[User | None, PrintKey | None]:
+    """IPP Basic credentials -> (User, the print key that was used or None when the RADIUS password was), or (None, None).
+    A single-use key that has just printed is accepted here; the caller lets it do read-only operations only."""
     name = normalize(username)
     if not name or not secret:
-        return None
-    user = await run_in_threadpool(_check_key, app, name, secret, ip)
-    if user is not None:
-        return user
+        return None, None
+    found = await run_in_threadpool(_check_key, app, name, secret, ip, True)
+    if found is not None:
+        return found
     if settings.ipp_auth != "keys+radius":
-        return None
+        return None, None
     provider = _radius(app)
     existing = await run_in_threadpool(_lookup, app, name)
     if provider is None or (existing is not None and existing.provider == LOCAL):
-        return None
+        return None, None
     if not await provider.authenticate(username, secret):
-        return None
+        return None, None
     if existing is not None:
-        return existing if existing.enabled else None
-    return await run_in_threadpool(_create_delegated, app, provider.name, name) if settings.auto_create_users else None
+        return (existing if existing.enabled else None), None
+    user = await run_in_threadpool(_create_delegated, app, provider.name, name) if settings.auto_create_users else None
+    return user, None
+
+
+async def print_login(app, username: str, secret: str, ip: str | None = None) -> User | None:
+    """IPP Basic credentials -> User, or None (a single-use key that has already printed does not count)."""
+    user, key = await print_login_with_key(app, username, secret, ip)
+    if key is not None and key.used_at is not None:
+        return None
+    return user
 
 
 def utcnow() -> datetime:

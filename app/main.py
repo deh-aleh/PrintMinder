@@ -20,6 +20,7 @@ from app.admin.notices import router as notices_router
 from app.admin.updates import router as update_router
 from app.admin.controls import router as controls_router
 from app.admin.me import router as me_router
+from app.admin.me_notices import router as me_notices_router
 from app.admin.printing import router as print_router
 from app.admin.requests import router as requests_router
 from app.admin.routes import router as admin_router
@@ -31,6 +32,7 @@ from app.auth.groups import ensure_system_groups
 from app.backup.core import app_version
 from app.backup.service import run_scheduler as run_backups
 from app.certwatch import run_checker as run_cert_check
+from app.keywatch import run_keys
 from app.titles import run_titles
 from app.updates import run_checker as run_update_check
 from app.auth.throttle import Throttle
@@ -78,6 +80,7 @@ async def lifespan(app: FastAPI):
              asyncio.create_task(run_keepalive(app)),
              asyncio.create_task(run_update_check(app)),
              asyncio.create_task(run_titles(app)),
+             asyncio.create_task(run_keys(app)),
              asyncio.create_task(run_cert_check(app)),
              asyncio.create_task(discovery.run_scheduler(app))]
     yield
@@ -166,6 +169,7 @@ app.include_router(backups_router)
 app.include_router(update_router)
 app.include_router(notices_router)
 app.include_router(controls_router)
+app.include_router(me_notices_router)
 app.include_router(me_router)
 app.include_router(scan_me_router)
 app.include_router(escl_router)

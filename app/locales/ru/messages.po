@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-14 14:35+0200\n"
+"POT-Creation-Date: 2026-10-14 20:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -117,7 +117,7 @@ msgstr "одобрено"
 msgid "rejected"
 msgstr "отклонено"
 
-#: app/admin/templates/keys.html:15 app/i18n.py:165
+#: app/admin/templates/keys.html:17 app/i18n.py:165
 msgid "expired"
 msgstr "истекло"
 
@@ -145,13 +145,13 @@ msgstr "ошибка"
 msgid "held"
 msgstr "ожидает"
 
-#: app/admin/templates/keys.html:15 app/admin/templates/printers.html:30
+#: app/admin/templates/keys.html:19 app/admin/templates/printers.html:30
 #: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:15
 #: app/i18n.py:167
 msgid "active"
 msgstr "активен"
 
-#: app/admin/templates/keys.html:15 app/i18n.py:167
+#: app/admin/templates/keys.html:16 app/i18n.py:167
 msgid "revoked"
 msgstr "отозван"
 
@@ -163,7 +163,7 @@ msgstr "завершено"
 msgid "temporary"
 msgstr "временная"
 
-#: app/admin/accounts.py:69 app/admin/me.py:44
+#: app/admin/accounts.py:70 app/admin/me.py:44
 #: app/admin/templates/grants.html:24 app/admin/templates/requests.html:12
 #: app/admin/templates/requests.html:19 app/i18n.py:167
 msgid "permanent"
@@ -211,154 +211,177 @@ msgstr "отсутствует"
 msgid "modified"
 msgstr "изменён"
 
-#: app/admin/accounts.py:36
+#: app/admin/accounts.py:37
 #, python-format
 msgid "%(used)s/%(limit)s %(metric)s (%(period)s)"
 msgstr "%(used)s/%(limit)s: %(metric)s (%(period)s)"
 
-#: app/admin/accounts.py:48
+#: app/admin/accounts.py:49
 msgid "You cannot disable or demote yourself"
 msgstr "Нельзя отключить или понизить самого себя"
 
-#: app/admin/accounts.py:50
+#: app/admin/accounts.py:51
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be disabled or demoted"
 msgstr "%(user)s — аварийный администратор: его нельзя отключить или понизить"
 
-#: app/admin/accounts.py:52 app/admin/accounts.py:273
+#: app/admin/accounts.py:53 app/admin/accounts.py:280
 msgid "That is the last administrator"
 msgstr "Это последний администратор"
 
-#: app/admin/accounts.py:68
+#: app/admin/accounts.py:69
 msgid "limit inherited from the group"
 msgstr "лимит унаследован от группы"
 
-#: app/admin/accounts.py:69
+#: app/admin/accounts.py:70
 #, python-format
 msgid "temporary, expires on %(date)s"
 msgstr "временная, истекает %(date)s"
 
-#: app/admin/accounts.py:132 app/admin/accounts.py:165
-#: app/admin/accounts.py:198
+#: app/admin/accounts.py:134 app/admin/accounts.py:167
+#: app/admin/accounts.py:200
 msgid "Unknown group"
 msgstr "Неизвестная группа"
 
-#: app/admin/accounts.py:133
+#: app/admin/accounts.py:135
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: tick the administrator box instead"
 msgstr "Группа «%(group)s» только для администраторов: вместо этого поставьте отметку «администратор»"
 
-#: app/admin/accounts.py:134
+#: app/admin/accounts.py:136
 msgid "Invalid username (letters, digits, dot, dash, underscore; max 63)"
 msgstr "Недопустимое имя пользователя (буквы, цифры, точка, дефис, подчёркивание; не более 63)"
 
-#: app/admin/accounts.py:135 app/admin/accounts.py:171
+#: app/admin/accounts.py:137 app/admin/accounts.py:173
 #, python-format
 msgid "User %(name)s already exists"
 msgstr "Пользователь %(name)s уже существует"
 
-#: app/admin/accounts.py:151 app/admin/accounts.py:179
+#: app/admin/accounts.py:153 app/admin/accounts.py:181
 #, python-format
 msgid "User %(name)s created"
 msgstr "Пользователь %(name)s создан"
 
-#: app/admin/accounts.py:151 app/admin/accounts.py:247
-#: app/admin/accounts.py:312
+#: app/admin/accounts.py:153 app/admin/accounts.py:254
+#: app/admin/accounts.py:319
 msgid "Temporary password"
 msgstr "Временный пароль"
 
-#: app/admin/accounts.py:152
+#: app/admin/accounts.py:154
 msgid "Give it to the user over a safe channel. They must choose their own at first login."
 msgstr "Передайте его пользователю по безопасному каналу. При первом входе он должен будет задать свой пароль."
 
-#: app/admin/accounts.py:163
+#: app/admin/accounts.py:165
 msgid "RADIUS is not configured: create a local user instead"
 msgstr "RADIUS не настроен: создайте вместо этого локального пользователя"
 
-#: app/admin/accounts.py:167
+#: app/admin/accounts.py:169
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: make them administrator from their page"
 msgstr "Группа «%(group)s» только для администраторов: сделайте пользователя администратором на его странице"
 
-#: app/admin/accounts.py:169
+#: app/admin/accounts.py:171
 msgid "Invalid username"
 msgstr "Недопустимое имя пользователя"
 
-#: app/admin/accounts.py:202
+#: app/admin/accounts.py:204
 msgid "Unknown or unavailable login method"
 msgstr "Неизвестный или недоступный способ входа"
 
-#: app/admin/accounts.py:210
+#: app/admin/accounts.py:212
 #, python-format
 msgid "%(user)s is the emergency administrator: it must stay a local account"
 msgstr "%(user)s — аварийный администратор: он должен оставаться локальной учётной записью"
 
-#: app/admin/accounts.py:221
+#: app/admin/accounts.py:228
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators"
 msgstr "Группа «%(group)s» только для администраторов"
 
-#: app/admin/accounts.py:224
+#: app/admin/accounts.py:231
 #, python-format
 msgid "Administrators stay in \"%(group)s\": remove the admin right first"
 msgstr "Администраторы остаются в «%(group)s»: сначала снимите права администратора"
 
-#: app/admin/accounts.py:246
+#: app/admin/accounts.py:253
 #, python-format
 msgid "%(user)s is now a local account"
 msgstr "%(user)s теперь локальная учётная запись"
 
-#: app/admin/accounts.py:248
+#: app/admin/accounts.py:255
 msgid "The user must choose their own at the next login. Their print keys keep working."
 msgstr "При следующем входе пользователь должен будет задать свой пароль. Его ключи печати продолжают работать."
 
-#: app/admin/accounts.py:250 app/admin/accounts.py:460
+#: app/admin/accounts.py:257 app/admin/accounts.py:531
 #, python-format
 msgid "Saved %(name)s"
 msgstr "Сохранено: %(name)s"
 
-#: app/admin/accounts.py:269
+#: app/admin/accounts.py:276
 msgid "You cannot delete yourself"
 msgstr "Нельзя удалить самого себя"
 
-#: app/admin/accounts.py:271
+#: app/admin/accounts.py:278
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be deleted"
 msgstr "%(user)s — аварийный администратор: его нельзя удалить"
 
-#: app/admin/accounts.py:285
+#: app/admin/accounts.py:292
 msgid "The name you typed does not match: nothing was deleted"
 msgstr "Введённое имя не совпадает: ничего не удалено"
 
-#: app/admin/accounts.py:293
+#: app/admin/accounts.py:300
 #, python-format
 msgid "Account %(name)s deleted (%(n)s print record(s) kept in the audit)"
 msgstr "Учётная запись %(name)s удалена (записей печати, сохранённых в аудите: %(n)s)"
 
-#: app/admin/accounts.py:304
+#: app/admin/accounts.py:311
 msgid "That account signs in through RADIUS: its password is managed there"
 msgstr "Эта учётная запись входит через RADIUS: её пароль управляется там"
 
-#: app/admin/accounts.py:311
+#: app/admin/accounts.py:318
 #, python-format
 msgid "New password for %(user)s"
 msgstr "Новый пароль для %(user)s"
 
-#: app/admin/accounts.py:313
+#: app/admin/accounts.py:320
 msgid "The user must choose a new one at the next login. Their print keys keep working."
 msgstr "При следующем входе пользователь должен будет задать новый пароль. Его ключи печати продолжают работать."
 
-#: app/admin/accounts.py:326
+#: app/admin/accounts.py:335
 #, python-format
 msgid "%(n)s key(s) of %(user)s revoked"
 msgstr "Отозвано ключей пользователя %(user)s: %(n)s"
 
-#: app/admin/accounts.py:350 app/admin/me.py:121
+#: app/admin/accounts.py:360 app/admin/me.py:126
 #, python-format
 msgid "Key %(label)s revoked"
 msgstr "Ключ %(label)s отозван"
 
-#: app/admin/accounts.py:358
+#: app/admin/accounts.py:387
+#, python-format
+msgid "Key %(label)s switched off: its expiry date keeps running"
+msgstr "Ключ %(label)s отключён: срок его действия продолжает идти"
+
+#: app/admin/accounts.py:399
+#, python-format
+msgid "Key %(label)s switched on"
+msgstr "Ключ %(label)s снова включён"
+
+#: app/admin/accounts.py:411 app/auth/keys.py:182
+msgid "choose one of the validity periods in the list"
+msgstr "выберите один из сроков действия из списка"
+
+#: app/admin/accounts.py:419
+#, python-format
+msgid "Key %(label)s now expires on %(date)s"
+msgstr "Ключ %(label)s теперь действует до %(date)s"
+
+#: app/admin/accounts.py:421
+msgid "This key can not be extended"
+msgstr "Срок этого ключа нельзя продлить"
+
+#: app/admin/accounts.py:429
 #, python-format
 msgid "The group “%(name)s” has %(n)s user: it will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgid_plural "The group “%(name)s” has %(n)s users: they will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
@@ -366,41 +389,41 @@ msgstr[0] "В группе «%(name)s» %(n)s пользователь: он б�
 msgstr[1] "В группе «%(name)s» %(n)s пользователя: они будут переведены в группу по умолчанию «%(group)s» (с лимитами этой группы). Удалить группу?"
 msgstr[2] "В группе «%(name)s» %(n)s пользователей: они будут переведены в группу по умолчанию «%(group)s» (с лимитами этой группы). Удалить группу?"
 
-#: app/admin/accounts.py:361
+#: app/admin/accounts.py:432
 #, python-format
 msgid "Delete the group “%(name)s”? It has no users."
 msgstr "Удалить группу «%(name)s»? В ней нет пользователей."
 
-#: app/admin/accounts.py:409 app/admin/accounts.py:446
+#: app/admin/accounts.py:480 app/admin/accounts.py:517
 msgid "Invalid group name"
 msgstr "Недопустимое имя группы"
 
-#: app/admin/accounts.py:411 app/admin/accounts.py:449
+#: app/admin/accounts.py:482 app/admin/accounts.py:520
 #, python-format
 msgid "Group %(name)s already exists"
 msgstr "Группа %(name)s уже существует"
 
-#: app/admin/accounts.py:422
+#: app/admin/accounts.py:493
 #, python-format
 msgid "Group %(name)s created"
 msgstr "Группа %(name)s создана"
 
-#: app/admin/accounts.py:443
+#: app/admin/accounts.py:514
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be renamed"
 msgstr "«%(name)s» — системная группа: её нельзя переименовать"
 
-#: app/admin/accounts.py:471
+#: app/admin/accounts.py:542
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be deleted"
 msgstr "«%(name)s» — системная группа: её нельзя удалить"
 
-#: app/admin/accounts.py:485
+#: app/admin/accounts.py:556
 #, python-format
 msgid "Group %(name)s deleted"
 msgstr "Группа %(name)s удалена"
 
-#: app/admin/accounts.py:485
+#: app/admin/accounts.py:556
 #, python-format
 msgid "; %(n)s user(s) moved to %(group)s"
 msgstr "; пользователей переведено в %(group)s: %(n)s"
@@ -592,12 +615,12 @@ msgstr "Резервное копирование НЕ удалось: %(message
 msgid "Backup “%(name)s” deleted. The files already written in the folder stay where they are"
 msgstr "Резервная копия «%(name)s» удалена. Уже записанные в папке файлы остаются на месте"
 
-#: app/admin/common.py:139
+#: app/admin/common.py:151
 #, python-format
 msgid "invalid limit %(value)s"
 msgstr "недопустимый лимит %(value)s"
 
-#: app/admin/common.py:142
+#: app/admin/common.py:154
 #, python-format
 msgid "limit too large (max %(max)s)"
 msgstr "лимит слишком велик (макс. %(max)s)"
@@ -669,64 +692,74 @@ msgstr "Ключ печати"
 msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It expires on %(date)s and works only for printing. If you lose it or lose the device, revoke it here and create another."
 msgstr "Показывается только сейчас. Используйте её как ПАРОЛЬ, когда компьютер или телефон запросит вход в принтер; имя пользователя — %(user)s. Срок действия истекает %(date)s, ключ работает только для печати. Если вы потеряете его или устройство, отзовите ключ здесь и создайте другой."
 
-#: app/admin/me.py:111
+#: app/admin/me.py:98
+#, python-format
+msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It works for ONE print only, and only until %(date)s if nobody uses it. Create another one for the next print."
+msgstr "Показывается только сейчас. Используйте его как ПАРОЛЬ, когда компьютер или телефон попросит войти в принтер; имя пользователя — %(user)s. Он действует для ОДНОЙ печати и, если им никто не воспользуется, только до %(date)s. Для следующей печати создайте другой."
+
+#: app/admin/me.py:116
 #, python-format
 msgid "%(n)s key(s) revoked"
 msgstr "Отозвано ключей: %(n)s"
 
-#: app/admin/me.py:134
+#: app/admin/me.py:139
 msgid "Your password is managed by RADIUS, not here"
 msgstr "Ваш пароль управляется RADIUS, а не здесь"
 
-#: app/admin/me.py:153
+#: app/admin/me.py:158
 msgid "Theme saved"
 msgstr "Тема сохранена"
 
-#: app/admin/me.py:167
+#: app/admin/me.py:172
 msgid "Language saved"
 msgstr "Язык сохранён"
 
-#: app/admin/me.py:180
+#: app/admin/me.py:185
 #, python-format
 msgid "Enter 0 (off) or a number of seconds between %(min)s and %(max)s"
 msgstr "Введите 0 (выключено) или число секунд от %(min)s до %(max)s"
 
-#: app/admin/me.py:184
+#: app/admin/me.py:189
 msgid "Automatic refresh off"
 msgstr "Автообновление выключено"
 
-#: app/admin/me.py:185 app/admin/templates/autorefresh.html:5
+#: app/admin/me.py:190 app/admin/templates/autorefresh.html:5
 #, python-format
 msgid "Automatic refresh every %(n)s seconds"
 msgstr "Автообновление каждые %(n)s с"
 
-#: app/admin/me.py:197
+#: app/admin/me.py:202
 msgid "Too many attempts, retry later"
 msgstr "Слишком много попыток, повторите позже"
 
-#: app/admin/me.py:201
+#: app/admin/me.py:206
 msgid "The current password is wrong"
 msgstr "Текущий пароль неверен"
 
-#: app/admin/me.py:203
+#: app/admin/me.py:208
 msgid "the two new passwords differ"
 msgstr "два новых пароля не совпадают"
 
-#: app/admin/me.py:204
+#: app/admin/me.py:209
 msgid "the new password must differ from the current one"
 msgstr "новый пароль должен отличаться от текущего"
 
-#: app/admin/me.py:216
+#: app/admin/me.py:221
 msgid "Password changed"
 msgstr "Пароль изменён"
 
-#: app/admin/me.py:238 app/admin/me.py:258
+#: app/admin/me.py:243 app/admin/me.py:263
 msgid "Request sent: an administrator will answer it"
 msgstr "Запрос отправлен: администратор ответит на него"
 
-#: app/admin/me.py:269
+#: app/admin/me.py:274
 msgid "Request canceled"
 msgstr "Запрос отменён"
+
+#: app/admin/me_notices.py:45 app/admin/notices.py:59
+#, python-format
+msgid "%(n)s notices dismissed"
+msgstr "Закрыто уведомлений: %(n)s"
 
 #: app/admin/notices.py:21
 #, python-format
@@ -751,11 +784,6 @@ msgid_plural "%(n)s days"
 msgstr[0] "%(n)s день"
 msgstr[1] "%(n)s дня"
 msgstr[2] "%(n)s дней"
-
-#: app/admin/notices.py:59
-#, python-format
-msgid "%(n)s notices dismissed"
-msgstr "Закрыто уведомлений: %(n)s"
 
 #: app/admin/printers.py:40
 msgid "idle"
@@ -1229,7 +1257,8 @@ msgstr "Фильтр"
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:11
 #: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
 #: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:38
-#: app/admin/templates/me.html:47 app/admin/templates/requests.html:7
+#: app/admin/templates/me.html:47 app/admin/templates/me_notices.html:9
+#: app/admin/templates/me_notices.html:12 app/admin/templates/requests.html:7
 #: app/admin/templates/requests.html:37
 msgid "When"
 msgstr "Когда"
@@ -1561,7 +1590,7 @@ msgstr "Установленная версия: %(v)s"
 msgid "new version %(v)s available"
 msgstr "доступна новая версия %(v)s"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:210
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:216
 msgid "Release notes"
 msgstr "Примечания к выпуску"
 
@@ -1856,12 +1885,13 @@ msgctxt "menu"
 msgid "Scan"
 msgstr "Скан"
 
-#: app/admin/templates/base.html:190 app/admin/templates/notices.html:2
-#: app/admin/templates/notices.html:5
+#: app/admin/templates/base.html:190 app/admin/templates/base.html:196
+#: app/admin/templates/me_notices.html:2 app/admin/templates/me_notices.html:5
+#: app/admin/templates/notices.html:2 app/admin/templates/notices.html:5
 msgid "Notices"
 msgstr "Уведомления"
 
-#: app/admin/templates/base.html:194
+#: app/admin/templates/base.html:200
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -1871,52 +1901,52 @@ msgstr ""
 "\n"
 "Принтеры исчезнут из сети (mDNS), и никто из пользователей не сможет печатать и сканировать — только администраторы."
 
-#: app/admin/templates/base.html:197
+#: app/admin/templates/base.html:203
 msgid "LEAVE MAINTENANCE"
 msgstr "ВЫЙТИ ИЗ РЕЖИМА ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:197
+#: app/admin/templates/base.html:203
 msgid "PUT IN MAINTENANCE"
 msgstr "ПЕРЕВЕСТИ В РЕЖИМ ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Turn the gateway back on"
 msgstr "Снова включить шлюз"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "Останавливает печать и сканирование для всех, кроме администраторов, и скрывает принтеры из сети"
 
-#: app/admin/templates/base.html:204
+#: app/admin/templates/base.html:210
 msgid "Log out"
 msgstr "Выйти"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "ШЛЮЗ В РЕЖИМЕ ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "печать и сканирование остановлены для пользователей; администраторы по-прежнему могут ими пользоваться"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "printing and scanning are temporarily suspended"
 msgstr "печать и сканирование временно приостановлены"
 
-#: app/admin/templates/base.html:210
+#: app/admin/templates/base.html:216
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "Доступна новая версия: %(new)s (установлена: %(old)s)."
 
-#: app/admin/templates/base.html:210
+#: app/admin/templates/base.html:216
 msgid "To update, run on the server:"
 msgstr "Для обновления выполните на сервере:"
 
-#: app/admin/templates/base.html:248
+#: app/admin/templates/base.html:254
 msgid "Copied"
 msgstr "Скопировано"
 
-#: app/admin/templates/base.html:248 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:254 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "Копировать"
 
@@ -1962,7 +1992,7 @@ msgstr "без срока"
 msgid "Revoke this grant?"
 msgstr "Отозвать эту квоту?"
 
-#: app/admin/templates/grants.html:13 app/admin/templates/keys.html:16
+#: app/admin/templates/grants.html:13 app/admin/templates/keys.html:33
 msgid "Revoke"
 msgstr "Отозвать"
 
@@ -2300,8 +2330,8 @@ msgid "Each device has its own key: if you lose one, revoke only that key. User 
 msgstr "У каждого устройства свой ключ: если потеряете устройство, отзовите только его ключ. Имя пользователя <b>%(user)s</b>, сервер <b>%(server)s</b>."
 
 #: app/admin/templates/keys.html:6
-msgid "Revoke a single key or all of them: the device that uses it immediately gets \"not authorized\"."
-msgstr "Отзовите один ключ или все сразу: устройство, которое его использует, сразу получит «не авторизовано»."
+msgid "Switch a key off, extend it or revoke it: the device that uses it gets \"not authorized\" at once. A switched-off key keeps ageing: its expiry date does not move."
+msgstr "Отключите, продлите или отзовите ключ: устройство, которое им пользуется, сразу получит «не авторизовано». Отключённый ключ продолжает стареть: срок его действия не сдвигается."
 
 #: app/admin/templates/keys.html:8 app/admin/templates/keys.html:11
 msgid "Label"
@@ -2327,46 +2357,79 @@ msgstr "Последнее использование"
 msgid "never used"
 msgstr "не использовался"
 
-#: app/admin/templates/keys.html:16
+#: app/admin/templates/keys.html:18
+msgid "switched off"
+msgstr "отключён"
+
+#: app/admin/templates/keys.html:20
+msgid "single use"
+msgstr "одноразовый"
+
+#: app/admin/templates/keys.html:21
+#, python-format
+msgid "leaves the list on %(date)s"
+msgstr "исчезнет из списка %(date)s"
+
+#: app/admin/templates/keys.html:25
+msgid "Switch off"
+msgstr "Отключить"
+
+#: app/admin/templates/keys.html:26
+msgid "Switch on"
+msgstr "Включить"
+
+#: app/admin/templates/keys.html:30
+msgid "New validity"
+msgstr "Новый срок действия"
+
+#: app/admin/templates/keys.html:31
+msgid "Extend"
+msgstr "Продлить"
+
+#: app/admin/templates/keys.html:33
 #, python-format
 msgid "Revoke the key “%(label)s”?"
 msgstr "Отозвать ключ «%(label)s»?"
 
-#: app/admin/templates/keys.html:18
+#: app/admin/templates/keys.html:36
 msgid "No keys."
 msgstr "Ключей нет."
 
-#: app/admin/templates/keys.html:23
+#: app/admin/templates/keys.html:41
 #, python-format
 msgid "Revoke ALL the keys of %(user)s?"
 msgstr "Отозвать ВСЕ ключи пользователя %(user)s?"
 
-#: app/admin/templates/keys.html:23
+#: app/admin/templates/keys.html:41
 msgid "Revoke ALL your keys?"
 msgstr "Отозвать ВСЕ ваши ключи?"
 
-#: app/admin/templates/keys.html:24
+#: app/admin/templates/keys.html:42
 #, python-format
 msgid "Revoke all active keys (%(n)s)"
 msgstr "Отозвать все активные ключи (%(n)s)"
 
-#: app/admin/templates/keys.html:30
+#: app/admin/templates/keys.html:48
 msgid "New key"
 msgstr "Новый ключ"
 
-#: app/admin/templates/keys.html:32
+#: app/admin/templates/keys.html:50
 msgid "For which device? (e.g. laptop)"
 msgstr "Для какого устройства? (напр. ноутбук)"
 
-#: app/admin/templates/keys.html:32
+#: app/admin/templates/keys.html:51
+msgid "Valid for"
+msgstr "Действует"
+
+#: app/admin/templates/keys.html:52
 msgid "Create a key"
 msgstr "Создать ключ"
 
-#: app/admin/templates/keys.html:33
+#: app/admin/templates/keys.html:53
 msgid "The key is shown only once, together with the ready-made address to paste when adding the printer."
 msgstr "Ключ показывается только один раз вместе с готовым адресом, который нужно вставить при добавлении принтера."
 
-#: app/admin/templates/keys.html:36
+#: app/admin/templates/keys.html:56
 msgid "Back to the user"
 msgstr "Вернуться к пользователю"
 
@@ -2554,6 +2617,69 @@ msgstr "Ответ"
 msgid "No requests."
 msgstr "Запросов нет."
 
+#: app/admin/templates/me_notices.html:6
+msgid "What the administrators did that concerns you, for example with your print keys."
+msgstr "Что сделали администраторы, что касается вас, например с вашими ключами печати."
+
+#: app/admin/templates/me_notices.html:9 app/admin/templates/me_notices.html:13
+#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:13
+msgid "What happened"
+msgstr "Что произошло"
+
+#: app/admin/templates/me_notices.html:15
+#, python-format
+msgid "An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it."
+msgstr "Администратор отозвал ваш ключ печати «%(label)s» (начинается с %(prefix)s). Он больше не работает: при необходимости создайте другой в своём профиле."
+
+#: app/admin/templates/me_notices.html:17
+#, python-format
+msgid "An administrator revoked %(n)s of your print keys. They no longer work: create new ones in your profile if you need them."
+msgstr "Администратор отозвал ключей печати: %(n)s. Они больше не работают: при необходимости создайте новые в своём профиле."
+
+#: app/admin/templates/me_notices.html:19
+#, python-format
+msgid "An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change."
+msgstr "Администратор отключил ваш ключ печати «%(label)s» (начинается с %(prefix)s). Сейчас он не работает, а срок его действия не меняется."
+
+#: app/admin/templates/me_notices.html:21
+#, python-format
+msgid "An administrator switched your print key “%(label)s” (starts with %(prefix)s) back on. It works again."
+msgstr "Администратор снова включил ваш ключ печати «%(label)s» (начинается с %(prefix)s). Он снова работает."
+
+#: app/admin/templates/me_notices.html:23
+#, python-format
+msgid "An administrator extended your print key “%(label)s” (starts with %(prefix)s). It now expires on %(date)s."
+msgstr "Администратор продлил ваш ключ печати «%(label)s» (начинается с %(prefix)s). Теперь он действует до %(date)s."
+
+#: app/admin/templates/me_notices.html:25
+#, python-format
+msgid "Your print key “%(label)s” (starts with %(prefix)s) expires on %(date)s. Create a new one before then and set it up on your devices."
+msgstr "Ваш ключ печати «%(label)s» (начинается с %(prefix)s) истекает %(date)s. Создайте новый до этой даты и настройте его на своих устройствах."
+
+#: app/admin/templates/me_notices.html:28
+msgid "dismissed"
+msgstr "скрыто"
+
+#: app/admin/templates/me_notices.html:29 app/admin/templates/notices.html:34
+msgid "Dismiss"
+msgstr "Закрыть"
+
+#: app/admin/templates/me_notices.html:33 app/admin/templates/notices.html:38
+msgid "No notices."
+msgstr "Уведомлений нет."
+
+#: app/admin/templates/me_notices.html:36 app/admin/templates/notices.html:41
+msgid "Dismiss all"
+msgstr "Закрыть все"
+
+#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+msgid "Hide dismissed"
+msgstr "Скрыть закрытые"
+
+#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+msgid "Show dismissed too"
+msgstr "Показать и закрытые"
+
 #: app/admin/templates/notices.html:6
 #, python-format
 msgid "Things the gateway noticed that administrators should know about. The same notice from the same source is reported again only after a while (now: every %(when)s), and repeats in between are counted."
@@ -2562,10 +2688,6 @@ msgstr "О чём шлюз узнал и что стоит знать админ
 #: app/admin/templates/notices.html:9 app/admin/templates/notices.html:12
 msgid "Last time"
 msgstr "Последний раз"
-
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:13
-msgid "What happened"
-msgstr "Что произошло"
 
 #: app/admin/templates/notices.html:9 app/admin/templates/notices.html:32
 msgid "Times"
@@ -2626,48 +2748,28 @@ msgstr "<b>Объявляемого адреса нет в TLS-сертифик�
 msgid "dismissed by %(who)s"
 msgstr "закрыл(а): %(who)s"
 
-#: app/admin/templates/notices.html:34
-msgid "Dismiss"
-msgstr "Закрыть"
-
-#: app/admin/templates/notices.html:38
-msgid "No notices."
-msgstr "Уведомлений нет."
-
-#: app/admin/templates/notices.html:41
-msgid "Dismiss all"
-msgstr "Закрыть все"
-
-#: app/admin/templates/notices.html:43
-msgid "Hide dismissed"
-msgstr "Скрыть закрытые"
-
-#: app/admin/templates/notices.html:43
-msgid "Show dismissed too"
-msgstr "Показать и закрытые"
-
-#: app/admin/templates/password.html:2 app/admin/templates/password.html:5
+#: app/admin/templates/password.html:2 app/admin/templates/password.html:7
 #: app/admin/templates/settings.html:37 app/admin/templates/settings.html:42
 msgid "Change password"
 msgstr "Сменить пароль"
 
-#: app/admin/templates/password.html:6
+#: app/admin/templates/password.html:9
 msgid "Your current password is temporary: choose your own to continue."
 msgstr "Текущий пароль временный: чтобы продолжить, задайте свой."
 
-#: app/admin/templates/password.html:8
+#: app/admin/templates/password.html:11
 msgid "Current password"
 msgstr "Текущий пароль"
 
-#: app/admin/templates/password.html:9 app/admin/templates/setup.html:12
+#: app/admin/templates/password.html:12 app/admin/templates/setup.html:12
 msgid "New password (min. 12 characters)"
 msgstr "Новый пароль (не менее 12 символов)"
 
-#: app/admin/templates/password.html:10
+#: app/admin/templates/password.html:13
 msgid "Repeat the new password"
 msgstr "Повторите новый пароль"
 
-#: app/admin/templates/password.html:11
+#: app/admin/templates/password.html:14
 msgid "Change"
 msgstr "Сменить"
 
@@ -3703,15 +3805,49 @@ msgstr "Чтобы назначить группу и лимиты до перв
 msgid "RADIUS username"
 msgstr "имя пользователя RADIUS"
 
-#: app/auth/keys.py:33
+#: app/auth/keys.py:40
 #, python-format
 msgid "the label must be 1-%(n)s characters"
 msgstr "название должно содержать от 1 до %(n)s символов"
 
-#: app/auth/keys.py:36
+#: app/auth/keys.py:44
 #, python-format
 msgid "at most %(n)s active keys per user: revoke some first"
 msgstr "не более %(n)s активных ключей на пользователя: сначала отзовите какие-нибудь"
+
+#: app/auth/keys.py:161
+msgid "1 month"
+msgstr "1 месяц"
+
+#: app/auth/keys.py:161
+msgid "3 months"
+msgstr "3 месяца"
+
+#: app/auth/keys.py:161
+msgid "6 months"
+msgstr "6 месяцев"
+
+#: app/auth/keys.py:161
+msgid "1 year"
+msgstr "1 год"
+
+#: app/auth/keys.py:161
+msgid "1 year and 6 months"
+msgstr "1 год и 6 месяцев"
+
+#: app/auth/keys.py:162
+msgid "2 years"
+msgstr "2 года"
+
+#: app/auth/keys.py:162
+#, python-format
+msgid "%(n)s days"
+msgstr "%(n)s дн."
+
+#: app/auth/keys.py:168
+#, python-format
+msgid "one print only (void after %(h)s hours if unused)"
+msgstr "одна печать (если не использован, перестаёт действовать через %(h)s ч)"
 
 #: app/auth/passwords.py:31
 #, python-format

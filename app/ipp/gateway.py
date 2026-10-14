@@ -11,13 +11,13 @@ import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
 from starlette.concurrency import run_in_threadpool
 
-from app.auth import service
+from app.auth import keys, service
 from app.auth.throttle import IP_FAILS, USER_FAILS, register_failure
 from app.config import settings
 from app.ipp import codec
 from app.ipp.rewrite import advertise_auth, rewrite_uris
 from app.policy import audit, control
-from app.db.models import Metric, Resource
+from app.db.models import Metric, PrintKey, Resource
 from app.policy import pages as pages_mod
 from app.policy.engine import Decision, check_job, effective_rules
 
@@ -33,8 +33,12 @@ REALM = 'Basic realm="Print gateway", charset="UTF-8"'
 # Server-side fetch of a URL (SSRF): not even gateway admins may use these.
 NEVER_OPS = {0x0003, 0x0007}  # Print-URI, Send-URI
 # Answered without credentials (see ipp_proxy): read-only, no document, nothing is audited.
-ANON_OPS = {codec.GET_PRINTER_ATTRIBUTES}
+# Validate-Job is a "would this job be accepted?" question that carries no document: Windows asks it while adding a
+# printer, before it has any password, and its "Add device" window can not ask for one. The quota is not consulted for
+# an anonymous caller; the real job (Print-Job, Create-Job) still needs a login and is counted as always.
+ANON_OPS = {codec.GET_PRINTER_ATTRIBUTES, codec.VALIDATE_JOB}
 ANON_MAX_BODY = 64 << 10  # a capability query is a few hundred bytes
+STATUS_OPS = {codec.GET_PRINTER_ATTRIBUTES, codec.GET_JOBS, 0x0008, 0x0009}  # a single-use key that has printed may still do these
 SUBMIT_OPS = {codec.PRINT_JOB, codec.CREATE_JOB}  # each counts as one job against the quota
 USER_OPS = {
     codec.PRINT_JOB, codec.VALIDATE_JOB, codec.CREATE_JOB, codec.SEND_DOCUMENT,
@@ -137,6 +141,7 @@ async def ipp_proxy(path: str, request: Request) -> Response:
     creds = _parse_basic(request.headers.get("authorization"))
     anonymous = creds is None
     user = None
+    key = None
     if anonymous:
         # Capability queries are answered without credentials: IPP Everywhere clients (CUPS, KDE, Windows,
         # macOS) ask what the printer can do before they ever send a password. Only small, fully declared
@@ -158,7 +163,7 @@ async def ipp_proxy(path: str, request: Request) -> Response:
         ukey, ikey = f"u:{username.strip().lower()}|{ip}", f"ip:{ip}"
         if throttle.blocked(ukey, USER_FAILS) or throttle.blocked(ikey, IP_FAILS):
             return Response("too many failed attempts", status_code=429, headers={"Retry-After": "60"})
-        user = await service.print_login(request.app, username, password, ip)
+        user, key = await service.print_login_with_key(request.app, username, password, ip)
         if user is None:
             register_failure(throttle, ukey, ikey, password)
             log.warning("auth failed user=%r ip=%s", username, ip)
@@ -166,6 +171,9 @@ async def ipp_proxy(path: str, request: Request) -> Response:
         throttle.clear(ukey)
         identity = user.username
         msg, head_rest, rest = await read_head(request)
+        if key is not None and key.used_at is not None and msg.code not in STATUS_OPS:
+            log.info("single-use key %s of %s already used: op=0x%04x refused", key.key_prefix, identity, msg.code)
+            return _unauthorized("this single-use key has already been used")
         if msg.code in NEVER_OPS or (msg.code not in USER_OPS and not user.is_admin):
             log.warning("op 0x%04x denied for user=%s", msg.code, identity)
             return _ipp_error(msg, codec.STATUS_FORBIDDEN, "operation not permitted")
@@ -202,7 +210,7 @@ async def ipp_proxy(path: str, request: Request) -> Response:
         if not decision.allowed:
             log.info("job denied user=%s printer=%s reason=%s", identity, printer, decision.reason)
             return _ipp_error(msg, codec.STATUS_NOT_POSSIBLE, _with_portal_hint(request, decision.reason))
-    elif msg.code == codec.VALIDATE_JOB:
+    elif msg.code == codec.VALIDATE_JOB and user is not None:
         decision = await run_in_threadpool(_peek, sm, user, tz, printer)
         if not decision.allowed:
             return _ipp_error(msg, codec.STATUS_NOT_POSSIBLE, _with_portal_hint(request, decision.reason))
@@ -210,6 +218,14 @@ async def ipp_proxy(path: str, request: Request) -> Response:
         why = await run_in_threadpool(_blocked, sm, user, printer)
         if why:
             return _ipp_error(msg, codec.STATUS_NOT_POSSIBLE, why)
+
+    if key is not None and key.single_use and msg.code in (codec.PRINT_JOB, codec.SEND_DOCUMENT):
+        # the print was accepted: the key is spent. Two requests racing with the same key: one passes, the other is refused.
+        if not await run_in_threadpool(_consume_key, sm, key.id):
+            if log_id is not None:
+                await run_in_threadpool(_finalize, sm, log_id, False, None, "single-use key already used")
+            return _unauthorized("this single-use key has already been used")
+        log.info("single-use key %s of %s used", key.key_prefix, identity)
 
     upstream: httpx.AsyncClient = request.app.state.upstream
     try:
@@ -362,6 +378,12 @@ def _peek(sm, user, tz, printer=None):
     with sm() as session:
         why = control.block_reason(session, user, printer)
         return Decision(False, why) if why else check_job(session, user, Resource.print, audit.now_utc(), tz)
+
+
+def _consume_key(sm, key_id):
+    with sm() as session:
+        row = session.get(PrintKey, key_id)
+        return row is not None and keys.consume(session, row)
 
 
 def _blocked(sm, user, printer):

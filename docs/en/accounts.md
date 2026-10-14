@@ -52,10 +52,25 @@ domain password: they use a **personal print key**.
 - Created by the user in *Profile → Create a key* (label per device). Shown **once**; stored only as a sha256 hash of
   192 random bits.
 - Valid **only for printing and scanning** (the IPP and eSCL endpoints); it never opens the portal.
-- Has an expiry: default 90 days for RADIUS users, 365 for local ones. A RADIUS user renews by logging in again in the
-  portal — so someone who leaves the company stops printing at the expiry. The administrator can revoke keys at any time.
+- **The user chooses how long it lasts** with a menu in the creation form: 1 month, 3 months, 6 months, **1 year (suggested)**, 1 year and
+  6 months, 2 years, or **one print only**. The longest depends on the kind of account: `CUPSPL_KEY_TTL_DAYS_RADIUS` (90 days) for RADIUS users and
+  `CUPSPL_KEY_TTL_DAYS_LOCAL` (730 days) for local ones; the menu shows only the durations that fit. A RADIUS user therefore gets 30 or 90
+  days and has to log in to the portal again for another — so someone who leaves the company stops printing at the expiry.
+- **Single-use key**: valid for one print. If nobody uses it, it stops working after `CUPSPL_KEY_ONCE_HOURS` hours (24). As soon as its print is
+  accepted the key disappears from the list; for `CUPSPL_KEY_ONCE_GRACE_SECONDS` seconds (120) it can still be used to ask how the job is
+  going, not to print another. A print refused by the quota does not spend it; a print that was accepted and then failed does (create another).
+- Updating from 0.2.0: keys already made stay as they are. If your `.env` still has `CUPSPL_KEY_TTL_DAYS_LOCAL=365`, that value is now the
+  longest local users can pick (it used to be the fixed life).
 - Last use (time and IP) is recorded at most once a minute.
 - Revoke one key, or all of them, in *My keys* (`/me/keys`) or, for an administrator, in `/admin/users/<id>/keys`.
+- For each key an administrator can **switch it off** (it does not work, but its expiry keeps running; it can be switched on again), **extend it**
+  (new expiry = now + the chosen duration, within the account's maximum) or **revoke it**. Every action goes to the audit (`key.disable`,
+  `key.enable`, `key.extend`, `key.revoke`) and **the user finds it in their notices** (the bell, `/me/notices`), with a fixed text and without the
+  administrator's name. When an administrator acts on their own key there is no notice.
+- **Revoked** and **expired** keys disappear from the list `CUPSPL_KEY_HISTORY_DAYS` days later (14; 0 = they stay for ever). While they are there,
+  the list says when they will go.
+- Optional, off by default: `CUPSPL_KEY_EXPIRY_WARN_ENABLED=true` warns the user in the bell `CUPSPL_KEY_EXPIRY_WARN_DAYS` days (7) before the
+  expiry, once per key.
 
 `CUPSPL_IPP_AUTH=keys` (default) accepts only keys for printing. `keys+radius` also accepts the RADIUS password for RADIUS
 users during a transition (never for local accounts): it encourages saving the domain password on clients, so use it only

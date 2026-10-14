@@ -76,6 +76,20 @@ async def test_capability_query_works_without_login_and_leaves_no_trace(client):
     assert rows(client) == []
 
 
+async def test_windows_validate_job_is_answered_without_login_but_the_job_itself_is_not(client, monkeypatch):
+    """Windows asks Validate-Job while adding the printer, before any password; its "Add device" window can not ask for one."""
+    uri = "ipp://gw.test:8631/printers/virtual"
+    val = c.make_request(c.VALIDATE_JOB, 1, printer_uri=uri, document_format="application/pdf")
+    r = await client.post("/printers/virtual", content=c.encode(val), headers={"Content-Type": "application/ipp"})
+    assert r.status_code == 200 and c.decode(r.content).code < 0x0100
+    assert rows(client) == []                                                        # nothing audited, no quota used
+    for op in (c.PRINT_JOB, 0x0005):                                                 # Print-Job, Create-Job: login needed
+        req = c.make_request(op, 1, printer_uri=uri, document_format="application/pdf")
+        assert (await client.post("/printers/virtual", content=c.encode(req), headers={"Content-Type": "application/ipp"})).status_code == 401
+    monkeypatch.setattr(settings, "anonymous_discovery", False)
+    assert (await client.post("/printers/virtual", content=c.encode(val), headers={"Content-Type": "application/ipp"})).status_code == 401
+
+
 async def test_anonymous_cannot_use_it_to_push_data_or_other_operations(client, monkeypatch):
     # other read-only operations still need a login
     for op in (c.GET_JOBS, 0x4002, 0x0009):

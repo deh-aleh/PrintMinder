@@ -79,7 +79,7 @@ The full list, with workarounds, is in [docs/en/limitations.md](docs/en/limitati
   crosses the limit *is printed* and its real pages then block the following ones. With `Create-Job` + `Send-Document` the count
   arrives after the job was accepted. A `Create-Job` without a document frees its quota only when CUPS cancels it (default 3 h).
 - **Linux host required** for USB printers and mDNS announcement (Docker Desktop on Windows/macOS: network printers only, no discovery).
-- **Android's system print service cannot authenticate**: use Mopria Print Service or print from the browser. iPhone, Windows and macOS are untested.
+- **Android's system print service cannot authenticate**: use Mopria Print Service or print from the browser. Windows 11 is partly tested ([printing.md](docs/en/printing.md#windows-11)); iPhone and macOS are untested.
 - **One gateway per USB printer** and **one per SQLite database** (no high availability). Images are built for the building machine's
   architecture; going back to an older version after a migration needs a backup.
 - **TLS is mandatory**: install the self-signed certificate on clients or use your CA's.

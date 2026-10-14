@@ -4,10 +4,11 @@ import sys
 import uvicorn
 
 from app.config import settings
+from app.logsetup import setup_logging
 
 
 def main() -> int:
-    logging.basicConfig(level=settings.log_level.upper(), format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    setup_logging(settings.log_level, settings.timezone)
     for noisy in ("httpx", "alembic"):
         logging.getLogger(noisy).setLevel(logging.WARNING)  # one INFO line per CUPS call drowns the real events
     if not (settings.tls_certfile and settings.tls_keyfile) and not settings.allow_insecure_auth:

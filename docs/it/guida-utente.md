@@ -16,7 +16,7 @@ l'installazione usa RADIUS. Una password temporanea va cambiata al primo accesso
 - **Chiavi di stampa**: crea una chiave per ogni dispositivo (dagli un'etichetta). Si mostra **una volta**: copiala subito (pulsante
   copia). Usala come password quando il computer o il telefono chiede le credenziali; il nome utente è il tuo. Una chiave serve solo a
   stampare e scansionare — non apre mai il portale e la tua password di dominio non serve mai su un dispositivo. Revoca una chiave (o
-  tutte) in *Le mie chiavi* se perdi un dispositivo. Le chiavi scadono (utenti RADIUS: si rinnovano rifacendo il login nel portale).
+  tutte) in *Le mie chiavi* se perdi un dispositivo. Quando la crei scegli per quanto tempo vale (da 1 mese a 2 anni, o una sola stampa); gli utenti RADIUS hanno un massimo più corto e la rinnovano rifacendo il login nel portale. La campanella in alto ti dice quando un amministratore revoca, disattiva o prolunga una tua chiave.
 - **Richieste**: chiedi più quota (temporanea o permanente) o il cambio di gruppo, con un motivo. L'amministratore approva, modifica o
   rifiuta. Puoi avere fino a 3 richieste aperte e annullarle.
 

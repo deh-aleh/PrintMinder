@@ -68,11 +68,11 @@ async def me(request: Request, user: User = Depends(current_user), db: Session =
 # ------------------------------------------------------------------ print keys
 
 @router.post("/keys", dependencies=[Depends(verify_csrf)])
-async def key_create(request: Request, label: str = Form(""), user: User = Depends(current_user),
+async def key_create(request: Request, label: str = Form(""), validity: str = Form(""), user: User = Depends(current_user),
                      db: Session = Depends(get_db)):
-    ttl = keylib.ttl_days_for(user, settings.key_ttl_days_radius, settings.key_ttl_days_local)
     try:
-        row, plain = keylib.create_key(db, user, label, ttl)
+        ttl, once = keylib.parse_duration(user, validity or str(keylib.default_duration(user)))
+        row, plain = keylib.create_key(db, user, label, ttl, once=once)
     except ValueError as exc:
         flash(request, str(exc), "err")
         return back("/me")
@@ -80,7 +80,7 @@ async def key_create(request: Request, label: str = Form(""), user: User = Depen
         record(db, user, "key.create", "print_key", row.id, label=row.label)
         db.commit()
     log.info("print key created user=%s label=%r", user.username, row.label)
-    expires = row.expires_at.strftime("%Y-%m-%d") if row.expires_at else _("never")
+    expires = (row.expires_at.astimezone(_tz()).strftime("%Y-%m-%d %H:%M") if row.single_use else row.expires_at.strftime("%Y-%m-%d")) if row.expires_at else _("never")
     host = request.headers.get("host", "")
     commands = [
         {"queue": q["name"],
@@ -93,7 +93,11 @@ async def key_create(request: Request, label: str = Form(""), user: User = Depen
                   commands=commands,
                   note=_("Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; "
                          "the user name is %(user)s. It expires on %(date)s and works only for printing. "
-                         "If you lose it or lose the device, revoke it here and create another.", user=user.username, date=expires),
+                         "If you lose it or lose the device, revoke it here and create another.", user=user.username, date=expires)
+                       if not row.single_use else
+                       _("Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; "
+                         "the user name is %(user)s. It works for ONE print only, and only until %(date)s if nobody uses it. "
+                         "Create another one for the next print.", user=user.username, date=expires),
                   next_url="/me/keys")
 
 
@@ -101,7 +105,8 @@ async def key_create(request: Request, label: str = Form(""), user: User = Depen
 def keys_page(request: Request, user: User = Depends(current_user), db: Session = Depends(get_db)):
     now = _now()
     rows = db.scalars(select(PrintKey).where(PrintKey.user_id == user.id).order_by(PrintKey.id.desc())).all()
-    return render(request, "keys.html", user, owner=user, keys=[{"k": k, "usable": keylib.key_is_usable(k, now)} for k in rows],
+    return render(request, "keys.html", user, owner=user, keys=keylib.listing(rows, now),
+                  choices=keylib.duration_choices(user), default_choice=str(keylib.default_duration(user)),
                   base="/me/keys", own=True, server=request.headers.get("host", ""), ipp_mode=settings.ipp_auth)
 
 

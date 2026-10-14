@@ -6,7 +6,7 @@ from sqlalchemy import select
 from app.auth import bootstrap
 from app.auth.passwords import hash_password, validate_new_password, verify_password
 from app.config import settings
-from app.db.models import AdminAudit, User
+from app.db.models import AdminAudit, Group, User
 from tests.conftest import StubRadius, csrf_of_page, make_user, portal_login
 
 ORCH = "cups_orchestrator"
@@ -176,6 +176,13 @@ async def test_temporary_password_forces_a_change_and_ends_other_sessions(portal
         assert (await other.get("/me")).status_code == 303                               # the other one is ended
 
 
+async def test_the_forced_password_page_is_the_centred_box_with_show_buttons(portal):
+    make_user(portal.sm, "tmp", password="Temp-password-1", must_change=True)
+    await portal_login(portal, "tmp", "Temp-password-1")
+    html = (await portal.get("/me/password")).text
+    assert 'class="authmain"' in html and "authbox" in html and html.count('class="pwtoggle"') == 3
+
+
 async def test_radius_users_have_no_password_page(portal):
     await portal_login(portal, "rad", "radpw")
     r = await portal.get("/me/password")
@@ -246,6 +253,29 @@ async def test_other_admins_can_be_demoted_but_never_yourself(boss):
     await boss.post(f"/admin/users/{bid}", data={"enabled": "1", "csrf_token": boss.token})   # demote myself
     await boss.post(f"/admin/users/{bid}", data={"is_admin": "1", "csrf_token": boss.token})  # disable myself
     assert user_row(boss, "boss").is_admin and user_row(boss, "boss").enabled
+
+
+async def test_demoting_an_admin_and_choosing_a_group_in_one_save_keeps_the_chosen_group(boss):
+    with boss.sm() as s:
+        s.add(Group(name="staff"))
+        s.commit()
+        staff = s.scalars(select(Group).where(Group.name == "staff")).first().id
+        admins = s.scalars(select(Group).where(Group.name == "administrator")).first()
+        admins_id = admins.id if admins else None
+    make_user(boss.sm, "other", password=GOOD, admin=True)
+    oid = user_row(boss, "other").id
+    await boss.post(f"/admin/users/{oid}", data={"enabled": "1", "group_id": str(staff), "csrf_token": boss.token})
+    u = user_row(boss, "other")
+    assert not u.is_admin and u.group_id == staff
+    # promoted again: always "administrator", whatever the form says
+    await boss.post(f"/admin/users/{oid}", data={"enabled": "1", "is_admin": "1", "group_id": str(staff), "csrf_token": boss.token})
+    u = user_row(boss, "other")
+    assert u.is_admin and (admins_id is None or u.group_id == admins_id)
+    # demoted with "—": back to the default group
+    await boss.post(f"/admin/users/{oid}", data={"enabled": "1", "group_id": "0", "csrf_token": boss.token})
+    with boss.sm() as s:
+        u = s.scalars(select(User).where(User.username == "other")).first()
+        assert not u.is_admin and s.get(Group, u.group_id).name == settings.default_group
 
 
 @pytest.mark.usefixtures("english")

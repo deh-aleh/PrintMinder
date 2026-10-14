@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.admin.common import (
     PAGE, back, current_admin, flash, get_db, localtime, parse_limit, render, verify_csrf,
 )
+from app import notices
 from app.audit.adminlog import record
 from app.auth import keys as keylib
 from app.auth.groups import ADMIN_GROUP, set_admin, system_group_names
@@ -81,7 +82,8 @@ def users(request: Request, admin: User = Depends(current_admin), db: Session = 
     now = datetime.now(timezone.utc)
     group_names = {g.id: g.name for g in db.scalars(select(Group))}
     key_counts = dict(db.execute(select(PrintKey.user_id, func.count(PrintKey.id)).where(
-        PrintKey.revoked_at.is_(None), (PrintKey.expires_at.is_(None)) | (PrintKey.expires_at > now))
+        PrintKey.revoked_at.is_(None), PrintKey.disabled_at.is_(None), PrintKey.used_at.is_(None),
+        (PrintKey.expires_at.is_(None)) | (PrintKey.expires_at > now))
         .group_by(PrintKey.user_id)).all())
     rows = [{"u": u, "group": group_names.get(u.group_id, "—"), "key_count": key_counts.get(u.id, 0),
              "view": _limit_view(db, u, now), "protected": _is_emergency(u)}
@@ -215,7 +217,12 @@ def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled
         changes["enabled"] = bool(enabled)
     if u.is_admin != bool(is_admin):
         changes["is_admin"] = bool(is_admin)
+        old_group = u.group_id
         set_admin(db, u, bool(is_admin))  # administrators live in "administrator"; demoted ones go back to "default"
+        if not is_admin and group_id and not _is_admin_group(db, group_id):
+            u.group_id = group_id  # demoted and a group chosen in the same save: the chosen one wins over "default"
+        if u.group_id != old_group:
+            changes["group_id"] = [old_group, u.group_id]
     elif (u.group_id or 0) != group_id:
         if admin_group is not None and group_id == admin_group.id and not u.is_admin:
             flash(request, _('Group "%(group)s" is only for administrators', group=ADMIN_GROUP), "err")
@@ -323,6 +330,8 @@ def user_revoke_keys(request: Request, user_id: int, admin: User = Depends(curre
     n = keylib.revoke_all(db, u)
     record(db, admin, "user.revoke_keys", "user", u.id, username=u.username, revoked=n)
     db.commit()
+    if n and u.id != admin.id:
+        notices.notify_user(request.app.state.sessionmaker, u.id, "key_revoked_many", {"count": n})
     flash(request, _("%(n)s key(s) of %(user)s revoked", n=n, user=u.username))
     return back(f"/admin/users/{u.id}/keys")
 
@@ -334,7 +343,7 @@ def user_keys(request: Request, user_id: int, admin: User = Depends(current_admi
         raise HTTPException(404)
     now = datetime.now(timezone.utc)
     rows = db.scalars(select(PrintKey).where(PrintKey.user_id == u.id).order_by(PrintKey.id.desc())).all()
-    return render(request, "keys.html", admin, owner=u, keys=[{"k": k, "usable": keylib.key_is_usable(k, now)} for k in rows],
+    return render(request, "keys.html", admin, owner=u, keys=keylib.listing(rows, now), choices=keylib.duration_choices(u), default_choice=str(keylib.default_duration(u)),
                   base=f"/admin/users/{u.id}/keys", own=False)
 
 
@@ -347,7 +356,69 @@ def user_key_revoke(request: Request, user_id: int, key_id: int, admin: User = D
     if keylib.revoke_key(db, k):
         record(db, admin, "key.revoke", "print_key", k.id, username=db.get(User, user_id).username, label=k.label)
         db.commit()
+        _tell_user(request, admin, k, "key_revoked")
         flash(request, _("Key %(label)s revoked", label=repr(k.label)))
+    return back(f"/admin/users/{user_id}/keys")
+
+
+def _tell_user(request: Request, admin: User, k: PrintKey, kind: str) -> None:
+    """The owner of the key finds it in their own bell (not when the administrator is the owner)."""
+    if k.user_id != admin.id:
+        notices.notify_user(request.app.state.sessionmaker, k.user_id, kind,
+                            {"label": k.label, "prefix": k.key_prefix,
+                             "until": k.expires_at.isoformat() if k.expires_at else None})
+
+
+def _owned_key(db: Session, user_id: int, key_id: int) -> PrintKey:
+    k = db.get(PrintKey, key_id)
+    if k is None or k.user_id != user_id:
+        raise HTTPException(404)
+    return k
+
+
+@router.post("/users/{user_id}/keys/{key_id}/disable", dependencies=[Depends(verify_csrf)])
+def user_key_disable(request: Request, user_id: int, key_id: int, admin: User = Depends(current_admin),
+                     db: Session = Depends(get_db)):
+    k = _owned_key(db, user_id, key_id)
+    if keylib.disable_key(db, k):
+        record(db, admin, "key.disable", "print_key", k.id, username=db.get(User, user_id).username, label=k.label)
+        db.commit()
+        _tell_user(request, admin, k, "key_disabled")
+        flash(request, _("Key %(label)s switched off: its expiry date keeps running", label=repr(k.label)))
+    return back(f"/admin/users/{user_id}/keys")
+
+
+@router.post("/users/{user_id}/keys/{key_id}/enable", dependencies=[Depends(verify_csrf)])
+def user_key_enable(request: Request, user_id: int, key_id: int, admin: User = Depends(current_admin),
+                    db: Session = Depends(get_db)):
+    k = _owned_key(db, user_id, key_id)
+    if keylib.enable_key(db, k):
+        record(db, admin, "key.enable", "print_key", k.id, username=db.get(User, user_id).username, label=k.label)
+        db.commit()
+        _tell_user(request, admin, k, "key_enabled")
+        flash(request, _("Key %(label)s switched on", label=repr(k.label)))
+    return back(f"/admin/users/{user_id}/keys")
+
+
+@router.post("/users/{user_id}/keys/{key_id}/extend", dependencies=[Depends(verify_csrf)])
+def user_key_extend(request: Request, user_id: int, key_id: int, validity: str = Form(""), admin: User = Depends(current_admin),
+                    db: Session = Depends(get_db)):
+    k = _owned_key(db, user_id, key_id)
+    owner = db.get(User, user_id)
+    try:
+        days, once = keylib.parse_duration(owner, validity or str(keylib.default_duration(owner)))
+        if once or days is None:
+            raise ValueError(_("choose one of the validity periods in the list"))
+    except ValueError as exc:
+        flash(request, str(exc), "err")
+        return back(f"/admin/users/{user_id}/keys")
+    if keylib.extend_key(db, k, days):
+        record(db, admin, "key.extend", "print_key", k.id, username=owner.username, label=k.label, days=days)
+        db.commit()
+        _tell_user(request, admin, k, "key_extended")
+        flash(request, _("Key %(label)s now expires on %(date)s", label=repr(k.label), date=k.expires_at.strftime("%Y-%m-%d")))
+    else:
+        flash(request, _("This key can not be extended"), "err")
     return back(f"/admin/users/{user_id}/keys")
 
 

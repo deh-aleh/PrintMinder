@@ -26,7 +26,7 @@ def _every(seconds: int) -> str:
 
 @router.get("", response_class=HTMLResponse)
 def listing(request: Request, all: int = 0, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
-    q = select(Notice).order_by(Notice.last_at.desc())
+    q = select(Notice).where(Notice.user_id.is_(None)).order_by(Notice.last_at.desc())
     if not all:
         q = q.where(Notice.dismissed_at.is_(None))
     admin.notices_seen_at = datetime.now(timezone.utc)   # opening the list is what "seeing" them means: the red dot goes away
@@ -38,7 +38,7 @@ def listing(request: Request, all: int = 0, admin: User = Depends(current_admin)
 @router.post("/{nid}/dismiss", dependencies=[Depends(verify_csrf)])
 def dismiss(request: Request, nid: int, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     n = db.get(Notice, nid)
-    if n is None:
+    if n is None or n.user_id is not None:
         raise HTTPException(404)
     if n.dismissed_at is None:
         n.dismissed_at, n.dismissed_by = datetime.now(timezone.utc), admin.username
@@ -50,7 +50,7 @@ def dismiss(request: Request, nid: int, admin: User = Depends(current_admin), db
 @router.post("/dismiss-all", dependencies=[Depends(verify_csrf)])
 def dismiss_all(request: Request, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     now, done = datetime.now(timezone.utc), 0
-    for n in db.scalars(select(Notice).where(Notice.dismissed_at.is_(None))):
+    for n in db.scalars(select(Notice).where(Notice.dismissed_at.is_(None), Notice.user_id.is_(None))):
         n.dismissed_at, n.dismissed_by = now, admin.username
         done += 1
     if done:

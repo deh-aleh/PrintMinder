@@ -69,7 +69,7 @@ autorevole è `app/config.py`. Riassunto:
 |---|---|
 | **Segreto** | `CUPSPL_SECRET_KEY` — firma i cookie di sessione e autentica gateway→mdns. Vuota = casuale a ogni avvio (sessioni perse al riavvio, canale mdns non protetto). Cambiarla fa solo uscire tutti dalle sessioni. |
 | **RADIUS** (facoltativo) | `RADIUS_HOST`, `RADIUS_PORT` (1812), `RADIUS_SECRET`, `RADIUS_TIMEOUT` (5), `AUTH_CACHE_SECONDS` (60). Host e secret vuoti = solo account locali; uno solo compilato = non parte. |
-| **Autenticazione di stampa** | `IPP_AUTH` (`keys` \| `keys+radius`), `KEY_TTL_DAYS_RADIUS` (90), `KEY_TTL_DAYS_LOCAL` (365), `AUTO_CREATE_USERS` (true), `DEFAULT_GROUP` (default), `CUPS_USER_PREFIX` (`gw:`), `ANONYMOUS_DISCOVERY` (true) |
+| **Autenticazione di stampa** | `IPP_AUTH` (`keys` \| `keys+radius`), `KEY_TTL_DAYS_RADIUS` (90, massimo), `KEY_TTL_DAYS_LOCAL` (730, massimo), `KEY_ONCE_HOURS` (24), `KEY_ONCE_GRACE_SECONDS` (120), `KEY_HISTORY_DAYS` (14), `KEY_EXPIRY_WARN_ENABLED` (false), `KEY_EXPIRY_WARN_DAYS` (7), `AUTO_CREATE_USERS` (true), `DEFAULT_GROUP` (default), `CUPS_USER_PREFIX` (`gw:`), `ANONYMOUS_DISCOVERY` (true) |
 | **Primo avvio** | `BOOTSTRAP_ADMIN` (true), `BOOTSTRAP_ADMIN_USERNAME` (`cups_orchestrator`) |
 | **Richieste** | `MAX_OPEN_REQUESTS` (3), `REQUEST_TTL_DAYS` (14) |
 | **Audit** | `AUDIT_MAX_MB` (50), `AUDIT_ARCHIVE_DIR` (`/data/audit-archive`), `AUDIT_CHECK_INTERVAL` (3600) |
@@ -113,7 +113,7 @@ autorevole è `app/config.py`. Riassunto:
 | `groups.py` | I due gruppi di sistema `default` e `administrator`. |
 | `bootstrap.py` | Crea `cups_orchestrator` senza password e stampa il codice monouso `FIRST RUN`. |
 | `passwords.py` | Hash argon2id e regole delle password (minimo 12 caratteri, diversa dal nome utente). |
-| `keys.py` | Chiavi di stampa: creazione, hash sha256, scadenza, verifica, revoca. |
+| `keys.py` | Chiavi di stampa: creazione con durata scelta o monouso, hash sha256, stati, verifica, disattivazione, rinnovo, pulizia. |
 | `radius.py` | Provider RADIUS (pyrad). `base.py`: l'interfaccia dei provider. `cache.py`: breve cache dei login riusciti. |
 | `throttle.py` | Blocco dei login (in memoria; si azzera al riavvio). |
 | `dictionary` | Dizionario degli attributi RADIUS richiesto da pyrad. |

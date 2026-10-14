@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-14 14:35+0200\n"
+"POT-Creation-Date: 2026-10-14 20:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
@@ -117,7 +117,7 @@ msgstr "approvata"
 msgid "rejected"
 msgstr "rifiutata"
 
-#: app/admin/templates/keys.html:15 app/i18n.py:165
+#: app/admin/templates/keys.html:17 app/i18n.py:165
 msgid "expired"
 msgstr "scaduta"
 
@@ -145,13 +145,13 @@ msgstr "fallito"
 msgid "held"
 msgstr "in attesa"
 
-#: app/admin/templates/keys.html:15 app/admin/templates/printers.html:30
+#: app/admin/templates/keys.html:19 app/admin/templates/printers.html:30
 #: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:15
 #: app/i18n.py:167
 msgid "active"
 msgstr "attiva"
 
-#: app/admin/templates/keys.html:15 app/i18n.py:167
+#: app/admin/templates/keys.html:16 app/i18n.py:167
 msgid "revoked"
 msgstr "revocata"
 
@@ -163,7 +163,7 @@ msgstr "terminata"
 msgid "temporary"
 msgstr "temporanea"
 
-#: app/admin/accounts.py:69 app/admin/me.py:44
+#: app/admin/accounts.py:70 app/admin/me.py:44
 #: app/admin/templates/grants.html:24 app/admin/templates/requests.html:12
 #: app/admin/templates/requests.html:19 app/i18n.py:167
 msgid "permanent"
@@ -211,195 +211,218 @@ msgstr "mancante"
 msgid "modified"
 msgstr "modificato"
 
-#: app/admin/accounts.py:36
+#: app/admin/accounts.py:37
 #, python-format
 msgid "%(used)s/%(limit)s %(metric)s (%(period)s)"
 msgstr "%(used)s/%(limit)s %(metric)s (%(period)s)"
 
-#: app/admin/accounts.py:48
+#: app/admin/accounts.py:49
 msgid "You cannot disable or demote yourself"
 msgstr "Non puoi disattivare o declassare te stesso"
 
-#: app/admin/accounts.py:50
+#: app/admin/accounts.py:51
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be disabled or demoted"
 msgstr "%(user)s è l'amministratore di emergenza: non può essere disattivato né declassato"
 
-#: app/admin/accounts.py:52 app/admin/accounts.py:273
+#: app/admin/accounts.py:53 app/admin/accounts.py:280
 msgid "That is the last administrator"
 msgstr "È l'ultimo amministratore"
 
-#: app/admin/accounts.py:68
+#: app/admin/accounts.py:69
 msgid "limit inherited from the group"
 msgstr "limite ereditato dal gruppo"
 
-#: app/admin/accounts.py:69
+#: app/admin/accounts.py:70
 #, python-format
 msgid "temporary, expires on %(date)s"
 msgstr "temporanea, scade il %(date)s"
 
-#: app/admin/accounts.py:132 app/admin/accounts.py:165
-#: app/admin/accounts.py:198
+#: app/admin/accounts.py:134 app/admin/accounts.py:167
+#: app/admin/accounts.py:200
 msgid "Unknown group"
 msgstr "Gruppo sconosciuto"
 
-#: app/admin/accounts.py:133
+#: app/admin/accounts.py:135
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: tick the administrator box instead"
 msgstr "Il gruppo \"%(group)s\" è solo per gli amministratori: spunta invece la casella amministratore"
 
-#: app/admin/accounts.py:134
+#: app/admin/accounts.py:136
 msgid "Invalid username (letters, digits, dot, dash, underscore; max 63)"
 msgstr "Nome utente non valido (lettere, cifre, punto, trattino, trattino basso; max 63)"
 
-#: app/admin/accounts.py:135 app/admin/accounts.py:171
+#: app/admin/accounts.py:137 app/admin/accounts.py:173
 #, python-format
 msgid "User %(name)s already exists"
 msgstr "L'utente %(name)s esiste già"
 
-#: app/admin/accounts.py:151 app/admin/accounts.py:179
+#: app/admin/accounts.py:153 app/admin/accounts.py:181
 #, python-format
 msgid "User %(name)s created"
 msgstr "Utente %(name)s creato"
 
-#: app/admin/accounts.py:151 app/admin/accounts.py:247
-#: app/admin/accounts.py:312
+#: app/admin/accounts.py:153 app/admin/accounts.py:254
+#: app/admin/accounts.py:319
 msgid "Temporary password"
 msgstr "Password temporanea"
 
-#: app/admin/accounts.py:152
+#: app/admin/accounts.py:154
 msgid "Give it to the user over a safe channel. They must choose their own at first login."
 msgstr "Daglielo tramite un canale sicuro. Dovrà sceglierne una propria al primo accesso."
 
-#: app/admin/accounts.py:163
+#: app/admin/accounts.py:165
 msgid "RADIUS is not configured: create a local user instead"
 msgstr "RADIUS non è configurato: crea invece un utente locale"
 
-#: app/admin/accounts.py:167
+#: app/admin/accounts.py:169
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: make them administrator from their page"
 msgstr "Il gruppo \"%(group)s\" è solo per gli amministratori: rendilo amministratore dalla sua pagina"
 
-#: app/admin/accounts.py:169
+#: app/admin/accounts.py:171
 msgid "Invalid username"
 msgstr "Nome utente non valido"
 
-#: app/admin/accounts.py:202
+#: app/admin/accounts.py:204
 msgid "Unknown or unavailable login method"
 msgstr "Metodo di accesso sconosciuto o non disponibile"
 
-#: app/admin/accounts.py:210
+#: app/admin/accounts.py:212
 #, python-format
 msgid "%(user)s is the emergency administrator: it must stay a local account"
 msgstr "%(user)s è l'amministratore di emergenza: deve restare un account locale"
 
-#: app/admin/accounts.py:221
+#: app/admin/accounts.py:228
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators"
 msgstr "Il gruppo \"%(group)s\" è solo per gli amministratori"
 
-#: app/admin/accounts.py:224
+#: app/admin/accounts.py:231
 #, python-format
 msgid "Administrators stay in \"%(group)s\": remove the admin right first"
 msgstr "Gli amministratori restano in \"%(group)s\": togli prima il diritto di amministratore"
 
-#: app/admin/accounts.py:246
+#: app/admin/accounts.py:253
 #, python-format
 msgid "%(user)s is now a local account"
 msgstr "%(user)s ora è un account locale"
 
-#: app/admin/accounts.py:248
+#: app/admin/accounts.py:255
 msgid "The user must choose their own at the next login. Their print keys keep working."
 msgstr "L'utente dovrà sceglierne una propria al prossimo accesso. Le sue chiavi di stampa continuano a funzionare."
 
-#: app/admin/accounts.py:250 app/admin/accounts.py:460
+#: app/admin/accounts.py:257 app/admin/accounts.py:531
 #, python-format
 msgid "Saved %(name)s"
 msgstr "Salvato %(name)s"
 
-#: app/admin/accounts.py:269
+#: app/admin/accounts.py:276
 msgid "You cannot delete yourself"
 msgstr "Non puoi eliminare te stesso"
 
-#: app/admin/accounts.py:271
+#: app/admin/accounts.py:278
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be deleted"
 msgstr "%(user)s è l'amministratore di emergenza: non può essere eliminato"
 
-#: app/admin/accounts.py:285
+#: app/admin/accounts.py:292
 msgid "The name you typed does not match: nothing was deleted"
 msgstr "Il nome scritto non corrisponde: non è stato eliminato nulla"
 
-#: app/admin/accounts.py:293
+#: app/admin/accounts.py:300
 #, python-format
 msgid "Account %(name)s deleted (%(n)s print record(s) kept in the audit)"
 msgstr "Account %(name)s eliminato (%(n)s registrazioni di stampa conservate nell'audit)"
 
-#: app/admin/accounts.py:304
+#: app/admin/accounts.py:311
 msgid "That account signs in through RADIUS: its password is managed there"
 msgstr "Quell'account accede tramite RADIUS: la sua password si gestisce lì"
 
-#: app/admin/accounts.py:311
+#: app/admin/accounts.py:318
 #, python-format
 msgid "New password for %(user)s"
 msgstr "Nuova password per %(user)s"
 
-#: app/admin/accounts.py:313
+#: app/admin/accounts.py:320
 msgid "The user must choose a new one at the next login. Their print keys keep working."
 msgstr "L'utente dovrà sceglierne una nuova al prossimo accesso. Le sue chiavi di stampa continuano a funzionare."
 
-#: app/admin/accounts.py:326
+#: app/admin/accounts.py:335
 #, python-format
 msgid "%(n)s key(s) of %(user)s revoked"
 msgstr "%(n)s chiavi di %(user)s revocate"
 
-#: app/admin/accounts.py:350 app/admin/me.py:121
+#: app/admin/accounts.py:360 app/admin/me.py:126
 #, python-format
 msgid "Key %(label)s revoked"
 msgstr "Chiave %(label)s revocata"
 
-#: app/admin/accounts.py:358
+#: app/admin/accounts.py:387
+#, python-format
+msgid "Key %(label)s switched off: its expiry date keeps running"
+msgstr "Chiave %(label)s disattivata: la data di scadenza continua a scorrere"
+
+#: app/admin/accounts.py:399
+#, python-format
+msgid "Key %(label)s switched on"
+msgstr "Chiave %(label)s riattivata"
+
+#: app/admin/accounts.py:411 app/auth/keys.py:182
+msgid "choose one of the validity periods in the list"
+msgstr "scegli uno dei periodi di validità dell'elenco"
+
+#: app/admin/accounts.py:419
+#, python-format
+msgid "Key %(label)s now expires on %(date)s"
+msgstr "La chiave %(label)s ora scade il %(date)s"
+
+#: app/admin/accounts.py:421
+msgid "This key can not be extended"
+msgstr "Questa chiave non si può prolungare"
+
+#: app/admin/accounts.py:429
 #, python-format
 msgid "The group “%(name)s” has %(n)s user: it will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgid_plural "The group “%(name)s” has %(n)s users: they will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgstr[0] "Il gruppo «%(name)s» ha %(n)s utente: verrà spostato nel gruppo di default «%(group)s» (con i limiti di quel gruppo). Eliminare il gruppo?"
 msgstr[1] "Il gruppo «%(name)s» ha %(n)s utenti: verranno spostati nel gruppo di default «%(group)s» (con i limiti di quel gruppo). Eliminare il gruppo?"
 
-#: app/admin/accounts.py:361
+#: app/admin/accounts.py:432
 #, python-format
 msgid "Delete the group “%(name)s”? It has no users."
 msgstr "Eliminare il gruppo «%(name)s»? Non ha utenti."
 
-#: app/admin/accounts.py:409 app/admin/accounts.py:446
+#: app/admin/accounts.py:480 app/admin/accounts.py:517
 msgid "Invalid group name"
 msgstr "Nome del gruppo non valido"
 
-#: app/admin/accounts.py:411 app/admin/accounts.py:449
+#: app/admin/accounts.py:482 app/admin/accounts.py:520
 #, python-format
 msgid "Group %(name)s already exists"
 msgstr "Il gruppo %(name)s esiste già"
 
-#: app/admin/accounts.py:422
+#: app/admin/accounts.py:493
 #, python-format
 msgid "Group %(name)s created"
 msgstr "Gruppo %(name)s creato"
 
-#: app/admin/accounts.py:443
+#: app/admin/accounts.py:514
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be renamed"
 msgstr "\"%(name)s\" è un gruppo di sistema: non si può rinominare"
 
-#: app/admin/accounts.py:471
+#: app/admin/accounts.py:542
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be deleted"
 msgstr "\"%(name)s\" è un gruppo di sistema: non si può eliminare"
 
-#: app/admin/accounts.py:485
+#: app/admin/accounts.py:556
 #, python-format
 msgid "Group %(name)s deleted"
 msgstr "Gruppo %(name)s eliminato"
 
-#: app/admin/accounts.py:485
+#: app/admin/accounts.py:556
 #, python-format
 msgid "; %(n)s user(s) moved to %(group)s"
 msgstr "; %(n)s utenti spostati in %(group)s"
@@ -591,12 +614,12 @@ msgstr "Backup NON riuscito: %(message)s"
 msgid "Backup “%(name)s” deleted. The files already written in the folder stay where they are"
 msgstr "Backup «%(name)s» eliminato. I file già scritti nella cartella restano dove sono"
 
-#: app/admin/common.py:139
+#: app/admin/common.py:151
 #, python-format
 msgid "invalid limit %(value)s"
 msgstr "limite non valido %(value)s"
 
-#: app/admin/common.py:142
+#: app/admin/common.py:154
 #, python-format
 msgid "limit too large (max %(max)s)"
 msgstr "limite troppo grande (max %(max)s)"
@@ -668,64 +691,74 @@ msgstr "Chiave di stampa"
 msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It expires on %(date)s and works only for printing. If you lose it or lose the device, revoke it here and create another."
 msgstr "Mostrata solo ora. Usala come PASSWORD quando il computer o il telefono chiede di accedere alla stampante; il nome utente è %(user)s. Scade il %(date)s e vale solo per stampare. Se la perdi o perdi il dispositivo, revocala da qui e creane un'altra."
 
-#: app/admin/me.py:111
+#: app/admin/me.py:98
+#, python-format
+msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It works for ONE print only, and only until %(date)s if nobody uses it. Create another one for the next print."
+msgstr "Mostrata solo adesso. Usala come PASSWORD quando il computer o il telefono chiede di accedere alla stampante; il nome utente è %(user)s. Vale per UNA SOLA stampa, e solo fino al %(date)s se nessuno la usa. Per la stampa successiva creane un'altra."
+
+#: app/admin/me.py:116
 #, python-format
 msgid "%(n)s key(s) revoked"
 msgstr "%(n)s chiavi revocate"
 
-#: app/admin/me.py:134
+#: app/admin/me.py:139
 msgid "Your password is managed by RADIUS, not here"
 msgstr "La tua password è gestita da RADIUS, non da qui"
 
-#: app/admin/me.py:153
+#: app/admin/me.py:158
 msgid "Theme saved"
 msgstr "Tema salvato"
 
-#: app/admin/me.py:167
+#: app/admin/me.py:172
 msgid "Language saved"
 msgstr "Lingua salvata"
 
-#: app/admin/me.py:180
+#: app/admin/me.py:185
 #, python-format
 msgid "Enter 0 (off) or a number of seconds between %(min)s and %(max)s"
 msgstr "Inserisci 0 (disattivato) oppure un numero di secondi tra %(min)s e %(max)s"
 
-#: app/admin/me.py:184
+#: app/admin/me.py:189
 msgid "Automatic refresh off"
 msgstr "Aggiornamento automatico disattivato"
 
-#: app/admin/me.py:185 app/admin/templates/autorefresh.html:5
+#: app/admin/me.py:190 app/admin/templates/autorefresh.html:5
 #, python-format
 msgid "Automatic refresh every %(n)s seconds"
 msgstr "Aggiornamento automatico ogni %(n)s secondi"
 
-#: app/admin/me.py:197
+#: app/admin/me.py:202
 msgid "Too many attempts, retry later"
 msgstr "Troppi tentativi, riprova più tardi"
 
-#: app/admin/me.py:201
+#: app/admin/me.py:206
 msgid "The current password is wrong"
 msgstr "La password attuale è errata"
 
-#: app/admin/me.py:203
+#: app/admin/me.py:208
 msgid "the two new passwords differ"
 msgstr "le due nuove password sono diverse"
 
-#: app/admin/me.py:204
+#: app/admin/me.py:209
 msgid "the new password must differ from the current one"
 msgstr "la nuova password deve essere diversa da quella attuale"
 
-#: app/admin/me.py:216
+#: app/admin/me.py:221
 msgid "Password changed"
 msgstr "Password cambiata"
 
-#: app/admin/me.py:238 app/admin/me.py:258
+#: app/admin/me.py:243 app/admin/me.py:263
 msgid "Request sent: an administrator will answer it"
 msgstr "Richiesta inviata: un amministratore risponderà"
 
-#: app/admin/me.py:269
+#: app/admin/me.py:274
 msgid "Request canceled"
 msgstr "Richiesta annullata"
+
+#: app/admin/me_notices.py:45 app/admin/notices.py:59
+#, python-format
+msgid "%(n)s notices dismissed"
+msgstr "%(n)s avvisi chiusi"
 
 #: app/admin/notices.py:21
 #, python-format
@@ -747,11 +780,6 @@ msgid "%(n)s day"
 msgid_plural "%(n)s days"
 msgstr[0] "%(n)s giorno"
 msgstr[1] "%(n)s giorni"
-
-#: app/admin/notices.py:59
-#, python-format
-msgid "%(n)s notices dismissed"
-msgstr "%(n)s avvisi chiusi"
 
 #: app/admin/printers.py:40
 msgid "idle"
@@ -1224,7 +1252,8 @@ msgstr "Filtra"
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:11
 #: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
 #: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:38
-#: app/admin/templates/me.html:47 app/admin/templates/requests.html:7
+#: app/admin/templates/me.html:47 app/admin/templates/me_notices.html:9
+#: app/admin/templates/me_notices.html:12 app/admin/templates/requests.html:7
 #: app/admin/templates/requests.html:37
 msgid "When"
 msgstr "Quando"
@@ -1556,7 +1585,7 @@ msgstr "Versione installata: %(v)s"
 msgid "new version %(v)s available"
 msgstr "nuova versione %(v)s disponibile"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:210
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:216
 msgid "Release notes"
 msgstr "Note di rilascio"
 
@@ -1851,12 +1880,13 @@ msgctxt "menu"
 msgid "Scan"
 msgstr "Scansiona"
 
-#: app/admin/templates/base.html:190 app/admin/templates/notices.html:2
-#: app/admin/templates/notices.html:5
+#: app/admin/templates/base.html:190 app/admin/templates/base.html:196
+#: app/admin/templates/me_notices.html:2 app/admin/templates/me_notices.html:5
+#: app/admin/templates/notices.html:2 app/admin/templates/notices.html:5
 msgid "Notices"
 msgstr "Avvisi"
 
-#: app/admin/templates/base.html:194
+#: app/admin/templates/base.html:200
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -1866,52 +1896,52 @@ msgstr ""
 "\n"
 "Le stampanti spariscono dalla rete (mDNS) e nessun utente potrà stampare né scansionare: solo gli amministratori."
 
-#: app/admin/templates/base.html:197
+#: app/admin/templates/base.html:203
 msgid "LEAVE MAINTENANCE"
 msgstr "ESCI DALLA MANUTENZIONE"
 
-#: app/admin/templates/base.html:197
+#: app/admin/templates/base.html:203
 msgid "PUT IN MAINTENANCE"
 msgstr "METTI IN MANUTENZIONE"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Turn the gateway back on"
 msgstr "Riattiva il gateway"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "Ferma stampa e scansione per tutti tranne gli admin e nasconde le stampanti dalla rete"
 
-#: app/admin/templates/base.html:204
+#: app/admin/templates/base.html:210
 msgid "Log out"
 msgstr "Esci"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "GATEWAY IN MANUTENZIONE"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "stampa e scansione sono ferme per gli utenti; gli amministratori possono ancora usarle"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "printing and scanning are temporarily suspended"
 msgstr "stampa e scansione sono temporaneamente sospese"
 
-#: app/admin/templates/base.html:210
+#: app/admin/templates/base.html:216
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "È disponibile una nuova versione: %(new)s (installata: %(old)s)."
 
-#: app/admin/templates/base.html:210
+#: app/admin/templates/base.html:216
 msgid "To update, run on the server:"
 msgstr "Per aggiornare, esegui sul server:"
 
-#: app/admin/templates/base.html:248
+#: app/admin/templates/base.html:254
 msgid "Copied"
 msgstr "Copiato"
 
-#: app/admin/templates/base.html:248 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:254 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "Copia"
 
@@ -1957,7 +1987,7 @@ msgstr "senza scadenza"
 msgid "Revoke this grant?"
 msgstr "Revocare questa concessione?"
 
-#: app/admin/templates/grants.html:13 app/admin/templates/keys.html:16
+#: app/admin/templates/grants.html:13 app/admin/templates/keys.html:33
 msgid "Revoke"
 msgstr "Revoca"
 
@@ -2294,8 +2324,8 @@ msgid "Each device has its own key: if you lose one, revoke only that key. User 
 msgstr "Ogni dispositivo ha la sua chiave: se ne perdi uno, revoca solo quella. Nome utente <b>%(user)s</b>, server <b>%(server)s</b>."
 
 #: app/admin/templates/keys.html:6
-msgid "Revoke a single key or all of them: the device that uses it immediately gets \"not authorized\"."
-msgstr "Revoca una chiave sola oppure tutte: il dispositivo che la usa riceve subito \"non autorizzato\"."
+msgid "Switch a key off, extend it or revoke it: the device that uses it gets \"not authorized\" at once. A switched-off key keeps ageing: its expiry date does not move."
+msgstr "Disattiva, prolunga o revoca una chiave: il dispositivo che la usa riceve subito «non autorizzato». Una chiave disattivata continua a invecchiare: la sua data di scadenza non si sposta."
 
 #: app/admin/templates/keys.html:8 app/admin/templates/keys.html:11
 msgid "Label"
@@ -2321,46 +2351,79 @@ msgstr "Ultimo uso"
 msgid "never used"
 msgstr "mai usata"
 
-#: app/admin/templates/keys.html:16
+#: app/admin/templates/keys.html:18
+msgid "switched off"
+msgstr "disattivata"
+
+#: app/admin/templates/keys.html:20
+msgid "single use"
+msgstr "monouso"
+
+#: app/admin/templates/keys.html:21
+#, python-format
+msgid "leaves the list on %(date)s"
+msgstr "esce dall'elenco il %(date)s"
+
+#: app/admin/templates/keys.html:25
+msgid "Switch off"
+msgstr "Disattiva"
+
+#: app/admin/templates/keys.html:26
+msgid "Switch on"
+msgstr "Riattiva"
+
+#: app/admin/templates/keys.html:30
+msgid "New validity"
+msgstr "Nuova validità"
+
+#: app/admin/templates/keys.html:31
+msgid "Extend"
+msgstr "Prolunga"
+
+#: app/admin/templates/keys.html:33
 #, python-format
 msgid "Revoke the key “%(label)s”?"
 msgstr "Revocare la chiave \"%(label)s\"?"
 
-#: app/admin/templates/keys.html:18
+#: app/admin/templates/keys.html:36
 msgid "No keys."
 msgstr "Nessuna chiave."
 
-#: app/admin/templates/keys.html:23
+#: app/admin/templates/keys.html:41
 #, python-format
 msgid "Revoke ALL the keys of %(user)s?"
 msgstr "Revocare TUTTE le chiavi di %(user)s?"
 
-#: app/admin/templates/keys.html:23
+#: app/admin/templates/keys.html:41
 msgid "Revoke ALL your keys?"
 msgstr "Revocare TUTTE le tue chiavi?"
 
-#: app/admin/templates/keys.html:24
+#: app/admin/templates/keys.html:42
 #, python-format
 msgid "Revoke all active keys (%(n)s)"
 msgstr "Revoca tutte le chiavi attive (%(n)s)"
 
-#: app/admin/templates/keys.html:30
+#: app/admin/templates/keys.html:48
 msgid "New key"
 msgstr "Nuova chiave"
 
-#: app/admin/templates/keys.html:32
+#: app/admin/templates/keys.html:50
 msgid "For which device? (e.g. laptop)"
 msgstr "Per quale dispositivo? (es. portatile)"
 
-#: app/admin/templates/keys.html:32
+#: app/admin/templates/keys.html:51
+msgid "Valid for"
+msgstr "Valida per"
+
+#: app/admin/templates/keys.html:52
 msgid "Create a key"
 msgstr "Crea una chiave"
 
-#: app/admin/templates/keys.html:33
+#: app/admin/templates/keys.html:53
 msgid "The key is shown only once, together with the ready-made address to paste when adding the printer."
 msgstr "La chiave viene mostrata una volta sola, insieme all'indirizzo già pronto da incollare nell'aggiunta stampante."
 
-#: app/admin/templates/keys.html:36
+#: app/admin/templates/keys.html:56
 msgid "Back to the user"
 msgstr "Torna all'utente"
 
@@ -2548,6 +2611,69 @@ msgstr "Risposta"
 msgid "No requests."
 msgstr "Nessuna richiesta."
 
+#: app/admin/templates/me_notices.html:6
+msgid "What the administrators did that concerns you, for example with your print keys."
+msgstr "Cosa hanno fatto gli amministratori che ti riguarda, per esempio con le tue chiavi di stampa."
+
+#: app/admin/templates/me_notices.html:9 app/admin/templates/me_notices.html:13
+#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:13
+msgid "What happened"
+msgstr "Cosa è successo"
+
+#: app/admin/templates/me_notices.html:15
+#, python-format
+msgid "An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it."
+msgstr "Un amministratore ha revocato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Non funziona più: se ti serve, creane un'altra nel tuo profilo."
+
+#: app/admin/templates/me_notices.html:17
+#, python-format
+msgid "An administrator revoked %(n)s of your print keys. They no longer work: create new ones in your profile if you need them."
+msgstr "Un amministratore ha revocato %(n)s delle tue chiavi di stampa. Non funzionano più: se ti servono, creane di nuove nel tuo profilo."
+
+#: app/admin/templates/me_notices.html:19
+#, python-format
+msgid "An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change."
+msgstr "Un amministratore ha disattivato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Per ora non funziona e la data di scadenza non cambia."
+
+#: app/admin/templates/me_notices.html:21
+#, python-format
+msgid "An administrator switched your print key “%(label)s” (starts with %(prefix)s) back on. It works again."
+msgstr "Un amministratore ha riattivato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Funziona di nuovo."
+
+#: app/admin/templates/me_notices.html:23
+#, python-format
+msgid "An administrator extended your print key “%(label)s” (starts with %(prefix)s). It now expires on %(date)s."
+msgstr "Un amministratore ha prolungato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Ora scade il %(date)s."
+
+#: app/admin/templates/me_notices.html:25
+#, python-format
+msgid "Your print key “%(label)s” (starts with %(prefix)s) expires on %(date)s. Create a new one before then and set it up on your devices."
+msgstr "La tua chiave di stampa «%(label)s» (inizia con %(prefix)s) scade il %(date)s. Creane una nuova prima di quella data e configurala sui tuoi dispositivi."
+
+#: app/admin/templates/me_notices.html:28
+msgid "dismissed"
+msgstr "nascosto"
+
+#: app/admin/templates/me_notices.html:29 app/admin/templates/notices.html:34
+msgid "Dismiss"
+msgstr "Chiudi"
+
+#: app/admin/templates/me_notices.html:33 app/admin/templates/notices.html:38
+msgid "No notices."
+msgstr "Nessun avviso."
+
+#: app/admin/templates/me_notices.html:36 app/admin/templates/notices.html:41
+msgid "Dismiss all"
+msgstr "Chiudi tutti"
+
+#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+msgid "Hide dismissed"
+msgstr "Nascondi i chiusi"
+
+#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+msgid "Show dismissed too"
+msgstr "Mostra anche i chiusi"
+
 #: app/admin/templates/notices.html:6
 #, python-format
 msgid "Things the gateway noticed that administrators should know about. The same notice from the same source is reported again only after a while (now: every %(when)s), and repeats in between are counted."
@@ -2556,10 +2682,6 @@ msgstr "Cose che il gateway ha notato e che gli amministratori dovrebbero sapere
 #: app/admin/templates/notices.html:9 app/admin/templates/notices.html:12
 msgid "Last time"
 msgstr "Ultima volta"
-
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:13
-msgid "What happened"
-msgstr "Cosa è successo"
 
 #: app/admin/templates/notices.html:9 app/admin/templates/notices.html:32
 msgid "Times"
@@ -2620,48 +2742,28 @@ msgstr "<b>L'indirizzo annunciato non è nel certificato TLS.</b> Il gateway si 
 msgid "dismissed by %(who)s"
 msgstr "chiuso da %(who)s"
 
-#: app/admin/templates/notices.html:34
-msgid "Dismiss"
-msgstr "Chiudi"
-
-#: app/admin/templates/notices.html:38
-msgid "No notices."
-msgstr "Nessun avviso."
-
-#: app/admin/templates/notices.html:41
-msgid "Dismiss all"
-msgstr "Chiudi tutti"
-
-#: app/admin/templates/notices.html:43
-msgid "Hide dismissed"
-msgstr "Nascondi i chiusi"
-
-#: app/admin/templates/notices.html:43
-msgid "Show dismissed too"
-msgstr "Mostra anche i chiusi"
-
-#: app/admin/templates/password.html:2 app/admin/templates/password.html:5
+#: app/admin/templates/password.html:2 app/admin/templates/password.html:7
 #: app/admin/templates/settings.html:37 app/admin/templates/settings.html:42
 msgid "Change password"
 msgstr "Cambia password"
 
-#: app/admin/templates/password.html:6
+#: app/admin/templates/password.html:9
 msgid "Your current password is temporary: choose your own to continue."
 msgstr "La password attuale è temporanea: scegline una tua per continuare."
 
-#: app/admin/templates/password.html:8
+#: app/admin/templates/password.html:11
 msgid "Current password"
 msgstr "Password attuale"
 
-#: app/admin/templates/password.html:9 app/admin/templates/setup.html:12
+#: app/admin/templates/password.html:12 app/admin/templates/setup.html:12
 msgid "New password (min. 12 characters)"
 msgstr "Nuova password (min. 12 caratteri)"
 
-#: app/admin/templates/password.html:10
+#: app/admin/templates/password.html:13
 msgid "Repeat the new password"
 msgstr "Ripeti la nuova password"
 
-#: app/admin/templates/password.html:11
+#: app/admin/templates/password.html:14
 msgid "Change"
 msgstr "Cambia"
 
@@ -3694,15 +3796,49 @@ msgstr "Per assegnare gruppo e limiti prima del suo primo accesso."
 msgid "RADIUS username"
 msgstr "username RADIUS"
 
-#: app/auth/keys.py:33
+#: app/auth/keys.py:40
 #, python-format
 msgid "the label must be 1-%(n)s characters"
 msgstr "l'etichetta deve avere da 1 a %(n)s caratteri"
 
-#: app/auth/keys.py:36
+#: app/auth/keys.py:44
 #, python-format
 msgid "at most %(n)s active keys per user: revoke some first"
 msgstr "al massimo %(n)s chiavi attive per utente: revocane prima qualcuna"
+
+#: app/auth/keys.py:161
+msgid "1 month"
+msgstr "1 mese"
+
+#: app/auth/keys.py:161
+msgid "3 months"
+msgstr "3 mesi"
+
+#: app/auth/keys.py:161
+msgid "6 months"
+msgstr "6 mesi"
+
+#: app/auth/keys.py:161
+msgid "1 year"
+msgstr "1 anno"
+
+#: app/auth/keys.py:161
+msgid "1 year and 6 months"
+msgstr "1 anno e 6 mesi"
+
+#: app/auth/keys.py:162
+msgid "2 years"
+msgstr "2 anni"
+
+#: app/auth/keys.py:162
+#, python-format
+msgid "%(n)s days"
+msgstr "%(n)s giorni"
+
+#: app/auth/keys.py:168
+#, python-format
+msgid "one print only (void after %(h)s hours if unused)"
+msgstr "una sola stampa (scade dopo %(h)s ore se non usata)"
 
 #: app/auth/passwords.py:31
 #, python-format

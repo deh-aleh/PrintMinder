@@ -73,7 +73,7 @@ Defaults are sensible; the settings you will most often touch:
 |---|---|
 | `CUPSPL_RADIUS_HOST`, `CUPSPL_RADIUS_SECRET` | You want office (RADIUS) logins. Register this machine as a RADIUS *client* with the same secret. Fill both or neither. |
 | `CUPSPL_PORTAL_URL` | Set `https://print.lan:8631` so messages sent to print clients contain the right link |
-| `CUPSPL_TIMEZONE` | Quota weeks/months and displayed times follow it (default `UTC`: set yours, for example `Europe/Rome`) |
+| `CUPSPL_TIMEZONE` | Quota weeks/months and displayed times follow it (default `UTC`: set yours, for example `Europe/Rome`); the times in the logs (`docker compose logs`) follow it too and show the offset from UTC |
 | `CUPSPL_LANGUAGE` | Default portal language (`en`, `it`, `es`, `ru`, `zh`) |
 | `CUPSPL_MDNS_HOSTNAME` | If the machine name is not in the certificate |
 | `CUPSPL_BACKUP_*` | The general scheduled backup (see [backup.md](backup.md)) |

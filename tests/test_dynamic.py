@@ -155,7 +155,7 @@ async def test_a_printer_that_does_not_answer_is_unreachable_everywhere(stack, m
     import app.admin.printers as printers_mod
     import app.cups_client as cc
 
-    async def dead(uri):
+    async def dead(uri, usb_present=None):
         return False
     monkeypatch.setattr(cc, "is_online", dead)
     monkeypatch.setattr(printers_mod, "is_online", dead)

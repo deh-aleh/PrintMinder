@@ -94,6 +94,7 @@ class User(Base):
     theme: Mapped[str] = mapped_column(String(8), default="auto", server_default="auto")  # auto | light | dark
     language: Mapped[str | None] = mapped_column(String(8))  # None = follow the browser
     notices_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # the bell shows what is newer than this
+    own_notices_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # same, for the notices addressed to this person
     # seconds between automatic reloads of the audit page; 0 = off
     refresh_seconds: Mapped[int] = mapped_column(default=30, server_default="30")
 
@@ -225,6 +226,10 @@ class PrintKey(Base):
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_used_ip: Mapped[str | None] = mapped_column(String(64))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    single_use: Mapped[bool] = mapped_column(default=False, server_default=false())  # valid for one print
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # single-use: when its print was accepted
+    disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # set by an administrator; expires_at keeps running
+    expiry_notified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # the "about to expire" notice was sent
 
 
 class QuotaRequest(Base):
@@ -292,6 +297,7 @@ class Notice(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     kind: Mapped[str] = mapped_column(String(48), index=True)  # a fixed code, translated when shown
     key: Mapped[str] = mapped_column(String(128))  # the source, for example an IP address
+    user_id: Mapped[int | None] = mapped_column(index=True)  # NULL = for the administrators; else for this user only
     first_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     last_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     count: Mapped[int] = mapped_column(default=1)

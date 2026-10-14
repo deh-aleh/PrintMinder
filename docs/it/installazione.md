@@ -72,7 +72,7 @@ I valori predefiniti sono ragionevoli; le impostazioni che toccherai più spesso
 |---|---|
 | `CUPSPL_RADIUS_HOST`, `CUPSPL_RADIUS_SECRET` | Vuoi gli accessi con le credenziali d'ufficio (RADIUS). Registra questa macchina come *client* RADIUS con lo stesso secret. Compila entrambi o nessuno. |
 | `CUPSPL_PORTAL_URL` | Scrivi `https://print.lan:8631` perché i messaggi inviati ai client di stampa contengano il link giusto |
-| `CUPSPL_TIMEZONE` | Settimane/mesi delle quote e orari mostrati la seguono (predefinito `UTC`: imposta il tuo, per esempio `Europe/Rome`) |
+| `CUPSPL_TIMEZONE` | Settimane/mesi delle quote e orari mostrati la seguono (predefinito `UTC`: imposta il tuo, per esempio `Europe/Rome`); anche gli orari dei log (`docker compose logs`) la seguono e mostrano lo scarto da UTC |
 | `CUPSPL_LANGUAGE` | Lingua predefinita del portale (`en`, `it`, `es`, `ru`, `zh`) |
 | `CUPSPL_MDNS_HOSTNAME` | Se il nome della macchina non è nel certificato |
 | `CUPSPL_BACKUP_*` | Il backup generale programmato (vedi [backup.md](backup.md)) |

@@ -52,10 +52,25 @@ password di dominio: usano una **chiave di stampa personale**.
 - La crea l'utente in *Profilo → Crea una chiave* (con un'etichetta per dispositivo). Si mostra **una volta**; si conserva solo
   come hash sha256 di 192 bit casuali.
 - Vale **solo per stampare e scansionare** (gli endpoint IPP ed eSCL); non apre mai il portale.
-- Ha una scadenza: di default 90 giorni per gli utenti RADIUS, 365 per i locali. Un utente RADIUS la rinnova rifacendo il login nel
-  portale — così chi lascia l'azienda smette di stampare alla scadenza. L'amministratore può revocare le chiavi in qualsiasi momento.
+- **La durata la sceglie l'utente** con una tendina nel modulo di creazione: 1 mese, 3 mesi, 6 mesi, **1 anno (proposto)**, 1 anno e 6 mesi,
+  2 anni, oppure **una sola stampa**. Il massimo dipende dal tipo di account: `CUPSPL_KEY_TTL_DAYS_RADIUS` (90 giorni) per gli utenti RADIUS e
+  `CUPSPL_KEY_TTL_DAYS_LOCAL` (730 giorni) per i locali; la tendina mostra solo le durate che ci stanno. Un utente RADIUS ha quindi 30 o 90
+  giorni e deve rifare il login nel portale per averne un'altra — così chi lascia l'azienda smette di stampare alla scadenza.
+- **Chiave monouso**: vale per una sola stampa. Se nessuno la usa smette di valere dopo `CUPSPL_KEY_ONCE_HOURS` ore (24). Appena la stampa è
+  accettata la chiave sparisce dall'elenco; per `CUPSPL_KEY_ONCE_GRACE_SECONDS` secondi (120) può ancora servire a chiedere lo stato del lavoro,
+  non a stamparne un altro. Una stampa respinta dalla quota non la consuma; una stampa accettata ma poi non riuscita sì (se ne crea un'altra).
+- Chi aggiorna dalla 0.2.0: le chiavi già create restano come sono. Se nel tuo `.env` c'è ancora `CUPSPL_KEY_TTL_DAYS_LOCAL=365`, quel valore
+  diventa il massimo che gli utenti locali possono scegliere (prima era la durata fissa).
 - L'ultimo uso (ora e IP) è annotato al massimo una volta al minuto.
 - Si revoca una chiave, o tutte, in *Le mie chiavi* (`/me/keys`) oppure, per un amministratore, in `/admin/users/<id>/keys`.
+- L'amministratore, per ogni chiave, può **disattivarla** (non funziona, ma la scadenza continua a scorrere; si può riattivare), **prolungarla**
+  (nuova scadenza = adesso + la durata scelta, entro il massimo dell'account) o **revocarla**. Ogni azione finisce nell'audit (`key.disable`,
+  `key.enable`, `key.extend`, `key.revoke`) e **l'utente la trova nelle sue notifiche** (la campanella, `/me/notices`), con un testo fisso e senza
+  il nome dell'amministratore. Se l'amministratore agisce su una chiave propria non c'è nessuna notifica.
+- Le chiavi **revocate** e quelle **scadute** spariscono dall'elenco dopo `CUPSPL_KEY_HISTORY_DAYS` giorni (14; 0 = restano per sempre). Finché ci
+  sono, l'elenco dice quando se ne andranno.
+- Facoltativo, spento di default: `CUPSPL_KEY_EXPIRY_WARN_ENABLED=true` avvisa l'utente nella campanella `CUPSPL_KEY_EXPIRY_WARN_DAYS` giorni
+  (7) prima della scadenza, una volta sola per chiave.
 
 `CUPSPL_IPP_AUTH=keys` (predefinito) accetta per stampare solo le chiavi. `keys+radius` accetta anche la password RADIUS per gli utenti
 RADIUS durante una transizione (mai per gli account locali): incoraggia a salvare la password di dominio sui client, quindi usala solo

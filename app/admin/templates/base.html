@@ -64,7 +64,7 @@
   .flash { padding:8px 12px; border-radius:6px; margin-bottom:12px; border:1px solid var(--line); background:var(--card) }
   .flash.ok { color:var(--ok) } .flash.err { color:var(--err) }
   .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; border:1px solid var(--line) }
-  .s-accepted,.s-completed { color:var(--ok) } .s-denied,.s-failed { color:var(--err) } .s-canceled,.s-held,.s-pending { color:var(--warn) } .s-approved,.s-ok,.s-active { color:var(--ok) } .s-rejected,.s-revoked,.s-expired,.s-ended,.s-missing,.s-modified { color:var(--err) }
+  .s-accepted,.s-completed { color:var(--ok) } .s-denied,.s-failed { color:var(--err) } .s-canceled,.s-held,.s-pending { color:var(--warn) } .s-approved,.s-ok,.s-active { color:var(--ok) } .s-disabled { color:var(--warn) } .s-rejected,.s-revoked,.s-expired,.s-ended,.s-missing,.s-modified { color:var(--err) }
   .muted { color:var(--muted) } .mono { font-family:ui-monospace,monospace; font-size:13px } .nowrap { white-space:nowrap }
   .extra { color:var(--extra); font-weight:600 } .inherited { color:var(--muted); font-style:italic }
   .badge { background:var(--err); color:#fff; border-radius:99px; padding:0 7px; font-size:12px }
@@ -186,6 +186,12 @@
   </nav>
   <span class="spacer"></span>
   <div class="hactions">
+  {% if own_open or not me.is_admin %}
+  <a class="bell iconbtn {{ 'on' if request.url.path.startswith('/me/notices') }}" href="/me/notices" aria-label="{{ _t('Notices') }}" title="{{ _t('Notices') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg>
+    {% if own_unseen %}<span class="belln">{{ own_unseen if own_unseen < 100 else '99+' }}</span>{% endif %}
+  </a>
+  {% endif %}
   {% if me.is_admin %}
   <a class="bell iconbtn {{ 'on' if request.url.path.startswith('/admin/notices') }}" href="/admin/notices" aria-label="{{ _t('Notices') }}" title="{{ _t('Notices') }}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg>

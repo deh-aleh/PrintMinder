@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-14 14:35+0200\n"
+"POT-Creation-Date: 2026-10-14 20:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -117,7 +117,7 @@ msgstr "已批准"
 msgid "rejected"
 msgstr "已拒绝"
 
-#: app/admin/templates/keys.html:15 app/i18n.py:165
+#: app/admin/templates/keys.html:17 app/i18n.py:165
 msgid "expired"
 msgstr "已过期"
 
@@ -145,13 +145,13 @@ msgstr "失败"
 msgid "held"
 msgstr "已挂起"
 
-#: app/admin/templates/keys.html:15 app/admin/templates/printers.html:30
+#: app/admin/templates/keys.html:19 app/admin/templates/printers.html:30
 #: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:15
 #: app/i18n.py:167
 msgid "active"
 msgstr "有效"
 
-#: app/admin/templates/keys.html:15 app/i18n.py:167
+#: app/admin/templates/keys.html:16 app/i18n.py:167
 msgid "revoked"
 msgstr "已撤销"
 
@@ -163,7 +163,7 @@ msgstr "已结束"
 msgid "temporary"
 msgstr "临时"
 
-#: app/admin/accounts.py:69 app/admin/me.py:44
+#: app/admin/accounts.py:70 app/admin/me.py:44
 #: app/admin/templates/grants.html:24 app/admin/templates/requests.html:12
 #: app/admin/templates/requests.html:19 app/i18n.py:167
 msgid "permanent"
@@ -211,194 +211,217 @@ msgstr "缺失"
 msgid "modified"
 msgstr "已修改"
 
-#: app/admin/accounts.py:36
+#: app/admin/accounts.py:37
 #, python-format
 msgid "%(used)s/%(limit)s %(metric)s (%(period)s)"
 msgstr "%(used)s/%(limit)s %(metric)s（%(period)s）"
 
-#: app/admin/accounts.py:48
+#: app/admin/accounts.py:49
 msgid "You cannot disable or demote yourself"
 msgstr "您不能停用或降级自己"
 
-#: app/admin/accounts.py:50
+#: app/admin/accounts.py:51
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be disabled or demoted"
 msgstr "%(user)s 是应急管理员：不能被停用或降级"
 
-#: app/admin/accounts.py:52 app/admin/accounts.py:273
+#: app/admin/accounts.py:53 app/admin/accounts.py:280
 msgid "That is the last administrator"
 msgstr "这是最后一位管理员"
 
-#: app/admin/accounts.py:68
+#: app/admin/accounts.py:69
 msgid "limit inherited from the group"
 msgstr "限额继承自群组"
 
-#: app/admin/accounts.py:69
+#: app/admin/accounts.py:70
 #, python-format
 msgid "temporary, expires on %(date)s"
 msgstr "临时，%(date)s 到期"
 
-#: app/admin/accounts.py:132 app/admin/accounts.py:165
-#: app/admin/accounts.py:198
+#: app/admin/accounts.py:134 app/admin/accounts.py:167
+#: app/admin/accounts.py:200
 msgid "Unknown group"
 msgstr "未知群组"
 
-#: app/admin/accounts.py:133
+#: app/admin/accounts.py:135
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: tick the administrator box instead"
 msgstr "群组“%(group)s”仅限管理员：请改为勾选“管理员”选项"
 
-#: app/admin/accounts.py:134
+#: app/admin/accounts.py:136
 msgid "Invalid username (letters, digits, dot, dash, underscore; max 63)"
 msgstr "用户名无效（字母、数字、点、连字符、下划线；最多 63 个字符）"
 
-#: app/admin/accounts.py:135 app/admin/accounts.py:171
+#: app/admin/accounts.py:137 app/admin/accounts.py:173
 #, python-format
 msgid "User %(name)s already exists"
 msgstr "用户 %(name)s 已存在"
 
-#: app/admin/accounts.py:151 app/admin/accounts.py:179
+#: app/admin/accounts.py:153 app/admin/accounts.py:181
 #, python-format
 msgid "User %(name)s created"
 msgstr "已创建用户 %(name)s"
 
-#: app/admin/accounts.py:151 app/admin/accounts.py:247
-#: app/admin/accounts.py:312
+#: app/admin/accounts.py:153 app/admin/accounts.py:254
+#: app/admin/accounts.py:319
 msgid "Temporary password"
 msgstr "临时密码"
 
-#: app/admin/accounts.py:152
+#: app/admin/accounts.py:154
 msgid "Give it to the user over a safe channel. They must choose their own at first login."
 msgstr "请通过安全渠道交给用户。用户首次登录时必须设置自己的密码。"
 
-#: app/admin/accounts.py:163
+#: app/admin/accounts.py:165
 msgid "RADIUS is not configured: create a local user instead"
 msgstr "尚未配置 RADIUS：请改为创建本地用户"
 
-#: app/admin/accounts.py:167
+#: app/admin/accounts.py:169
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: make them administrator from their page"
 msgstr "群组“%(group)s”仅限管理员：请在其页面中将其设为管理员"
 
-#: app/admin/accounts.py:169
+#: app/admin/accounts.py:171
 msgid "Invalid username"
 msgstr "用户名无效"
 
-#: app/admin/accounts.py:202
+#: app/admin/accounts.py:204
 msgid "Unknown or unavailable login method"
 msgstr "未知或不可用的登录方式"
 
-#: app/admin/accounts.py:210
+#: app/admin/accounts.py:212
 #, python-format
 msgid "%(user)s is the emergency administrator: it must stay a local account"
 msgstr "%(user)s 是应急管理员：必须保持为本地账户"
 
-#: app/admin/accounts.py:221
+#: app/admin/accounts.py:228
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators"
 msgstr "群组“%(group)s”仅限管理员"
 
-#: app/admin/accounts.py:224
+#: app/admin/accounts.py:231
 #, python-format
 msgid "Administrators stay in \"%(group)s\": remove the admin right first"
 msgstr "管理员必须留在“%(group)s”中：请先取消其管理员权限"
 
-#: app/admin/accounts.py:246
+#: app/admin/accounts.py:253
 #, python-format
 msgid "%(user)s is now a local account"
 msgstr "%(user)s 现在是本地账户"
 
-#: app/admin/accounts.py:248
+#: app/admin/accounts.py:255
 msgid "The user must choose their own at the next login. Their print keys keep working."
 msgstr "用户下次登录时必须设置自己的密码。其打印密钥仍然有效。"
 
-#: app/admin/accounts.py:250 app/admin/accounts.py:460
+#: app/admin/accounts.py:257 app/admin/accounts.py:531
 #, python-format
 msgid "Saved %(name)s"
 msgstr "已保存 %(name)s"
 
-#: app/admin/accounts.py:269
+#: app/admin/accounts.py:276
 msgid "You cannot delete yourself"
 msgstr "您不能删除自己"
 
-#: app/admin/accounts.py:271
+#: app/admin/accounts.py:278
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be deleted"
 msgstr "%(user)s 是应急管理员：不能被删除"
 
-#: app/admin/accounts.py:285
+#: app/admin/accounts.py:292
 msgid "The name you typed does not match: nothing was deleted"
 msgstr "输入的名称不匹配：未删除任何内容"
 
-#: app/admin/accounts.py:293
+#: app/admin/accounts.py:300
 #, python-format
 msgid "Account %(name)s deleted (%(n)s print record(s) kept in the audit)"
 msgstr "已删除账户 %(name)s（审计中保留了 %(n)s 条打印记录）"
 
-#: app/admin/accounts.py:304
+#: app/admin/accounts.py:311
 msgid "That account signs in through RADIUS: its password is managed there"
 msgstr "该账户通过 RADIUS 登录：其密码在 RADIUS 中管理"
 
-#: app/admin/accounts.py:311
+#: app/admin/accounts.py:318
 #, python-format
 msgid "New password for %(user)s"
 msgstr "%(user)s 的新密码"
 
-#: app/admin/accounts.py:313
+#: app/admin/accounts.py:320
 msgid "The user must choose a new one at the next login. Their print keys keep working."
 msgstr "用户下次登录时必须设置新密码。其打印密钥仍然有效。"
 
-#: app/admin/accounts.py:326
+#: app/admin/accounts.py:335
 #, python-format
 msgid "%(n)s key(s) of %(user)s revoked"
 msgstr "已撤销 %(user)s 的 %(n)s 个密钥"
 
-#: app/admin/accounts.py:350 app/admin/me.py:121
+#: app/admin/accounts.py:360 app/admin/me.py:126
 #, python-format
 msgid "Key %(label)s revoked"
 msgstr "已撤销密钥 %(label)s"
 
-#: app/admin/accounts.py:358
+#: app/admin/accounts.py:387
+#, python-format
+msgid "Key %(label)s switched off: its expiry date keeps running"
+msgstr "密钥 %(label)s 已停用：其到期日期仍在继续计算"
+
+#: app/admin/accounts.py:399
+#, python-format
+msgid "Key %(label)s switched on"
+msgstr "密钥 %(label)s 已重新启用"
+
+#: app/admin/accounts.py:411 app/auth/keys.py:182
+msgid "choose one of the validity periods in the list"
+msgstr "请从列表中选择一个有效期"
+
+#: app/admin/accounts.py:419
+#, python-format
+msgid "Key %(label)s now expires on %(date)s"
+msgstr "密钥 %(label)s 现在的到期日期为 %(date)s"
+
+#: app/admin/accounts.py:421
+msgid "This key can not be extended"
+msgstr "此密钥无法延期"
+
+#: app/admin/accounts.py:429
 #, python-format
 msgid "The group “%(name)s” has %(n)s user: it will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgid_plural "The group “%(name)s” has %(n)s users: they will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgstr[0] "群组“%(name)s”有 %(n)s 个用户：他们将被移到默认群组“%(group)s”（沿用该群组的限额）。要删除该群组吗？"
 
-#: app/admin/accounts.py:361
+#: app/admin/accounts.py:432
 #, python-format
 msgid "Delete the group “%(name)s”? It has no users."
 msgstr "要删除群组“%(name)s”吗？它没有用户。"
 
-#: app/admin/accounts.py:409 app/admin/accounts.py:446
+#: app/admin/accounts.py:480 app/admin/accounts.py:517
 msgid "Invalid group name"
 msgstr "群组名称无效"
 
-#: app/admin/accounts.py:411 app/admin/accounts.py:449
+#: app/admin/accounts.py:482 app/admin/accounts.py:520
 #, python-format
 msgid "Group %(name)s already exists"
 msgstr "群组 %(name)s 已存在"
 
-#: app/admin/accounts.py:422
+#: app/admin/accounts.py:493
 #, python-format
 msgid "Group %(name)s created"
 msgstr "已创建群组 %(name)s"
 
-#: app/admin/accounts.py:443
+#: app/admin/accounts.py:514
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be renamed"
 msgstr "“%(name)s”是系统群组：不能重命名"
 
-#: app/admin/accounts.py:471
+#: app/admin/accounts.py:542
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be deleted"
 msgstr "“%(name)s”是系统群组：不能删除"
 
-#: app/admin/accounts.py:485
+#: app/admin/accounts.py:556
 #, python-format
 msgid "Group %(name)s deleted"
 msgstr "已删除群组 %(name)s"
 
-#: app/admin/accounts.py:485
+#: app/admin/accounts.py:556
 #, python-format
 msgid "; %(n)s user(s) moved to %(group)s"
 msgstr "；%(n)s 个用户已移到 %(group)s"
@@ -590,12 +613,12 @@ msgstr "备份失败：%(message)s"
 msgid "Backup “%(name)s” deleted. The files already written in the folder stay where they are"
 msgstr "已删除备份“%(name)s”。文件夹中已写入的文件会保留在原处"
 
-#: app/admin/common.py:139
+#: app/admin/common.py:151
 #, python-format
 msgid "invalid limit %(value)s"
 msgstr "限额无效：%(value)s"
 
-#: app/admin/common.py:142
+#: app/admin/common.py:154
 #, python-format
 msgid "limit too large (max %(max)s)"
 msgstr "限额过大（最大 %(max)s）"
@@ -667,64 +690,74 @@ msgstr "打印密钥"
 msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It expires on %(date)s and works only for printing. If you lose it or lose the device, revoke it here and create another."
 msgstr "仅在此时显示。当电脑或手机要求登录打印机时，请将其用作密码；用户名为 %(user)s。它将于 %(date)s 到期，只能用于打印。如果丢失密钥或设备，请在此处撤销并重新创建。"
 
-#: app/admin/me.py:111
+#: app/admin/me.py:98
+#, python-format
+msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It works for ONE print only, and only until %(date)s if nobody uses it. Create another one for the next print."
+msgstr "仅显示这一次。当电脑或手机要求登录打印机时，将它用作密码；用户名是 %(user)s。它只能打印一次，若无人使用，则仅在 %(date)s 之前有效。下次打印请再创建一个。"
+
+#: app/admin/me.py:116
 #, python-format
 msgid "%(n)s key(s) revoked"
 msgstr "已撤销 %(n)s 个密钥"
 
-#: app/admin/me.py:134
+#: app/admin/me.py:139
 msgid "Your password is managed by RADIUS, not here"
 msgstr "您的密码由 RADIUS 管理，不能在此处修改"
 
-#: app/admin/me.py:153
+#: app/admin/me.py:158
 msgid "Theme saved"
 msgstr "主题已保存"
 
-#: app/admin/me.py:167
+#: app/admin/me.py:172
 msgid "Language saved"
 msgstr "语言已保存"
 
-#: app/admin/me.py:180
+#: app/admin/me.py:185
 #, python-format
 msgid "Enter 0 (off) or a number of seconds between %(min)s and %(max)s"
 msgstr "请输入 0（关闭）或 %(min)s 到 %(max)s 之间的秒数"
 
-#: app/admin/me.py:184
+#: app/admin/me.py:189
 msgid "Automatic refresh off"
 msgstr "自动刷新已关闭"
 
-#: app/admin/me.py:185 app/admin/templates/autorefresh.html:5
+#: app/admin/me.py:190 app/admin/templates/autorefresh.html:5
 #, python-format
 msgid "Automatic refresh every %(n)s seconds"
 msgstr "每 %(n)s 秒自动刷新"
 
-#: app/admin/me.py:197
+#: app/admin/me.py:202
 msgid "Too many attempts, retry later"
 msgstr "尝试次数过多，请稍后再试"
 
-#: app/admin/me.py:201
+#: app/admin/me.py:206
 msgid "The current password is wrong"
 msgstr "当前密码错误"
 
-#: app/admin/me.py:203
+#: app/admin/me.py:208
 msgid "the two new passwords differ"
 msgstr "两次输入的新密码不一致"
 
-#: app/admin/me.py:204
+#: app/admin/me.py:209
 msgid "the new password must differ from the current one"
 msgstr "新密码必须与当前密码不同"
 
-#: app/admin/me.py:216
+#: app/admin/me.py:221
 msgid "Password changed"
 msgstr "密码已修改"
 
-#: app/admin/me.py:238 app/admin/me.py:258
+#: app/admin/me.py:243 app/admin/me.py:263
 msgid "Request sent: an administrator will answer it"
 msgstr "申请已提交：管理员会予以答复"
 
-#: app/admin/me.py:269
+#: app/admin/me.py:274
 msgid "Request canceled"
 msgstr "申请已取消"
+
+#: app/admin/me_notices.py:45 app/admin/notices.py:59
+#, python-format
+msgid "%(n)s notices dismissed"
+msgstr "已忽略 %(n)s 条通知"
 
 #: app/admin/notices.py:21
 #, python-format
@@ -743,11 +776,6 @@ msgstr[0] "%(n)s 小时"
 msgid "%(n)s day"
 msgid_plural "%(n)s days"
 msgstr[0] "%(n)s 天"
-
-#: app/admin/notices.py:59
-#, python-format
-msgid "%(n)s notices dismissed"
-msgstr "已忽略 %(n)s 条通知"
 
 #: app/admin/printers.py:40
 msgid "idle"
@@ -1219,7 +1247,8 @@ msgstr "筛选"
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:11
 #: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
 #: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:38
-#: app/admin/templates/me.html:47 app/admin/templates/requests.html:7
+#: app/admin/templates/me.html:47 app/admin/templates/me_notices.html:9
+#: app/admin/templates/me_notices.html:12 app/admin/templates/requests.html:7
 #: app/admin/templates/requests.html:37
 msgid "When"
 msgstr "时间"
@@ -1551,7 +1580,7 @@ msgstr "已安装版本:%(v)s"
 msgid "new version %(v)s available"
 msgstr "有新版本 %(v)s"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:210
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:216
 msgid "Release notes"
 msgstr "发行说明"
 
@@ -1846,12 +1875,13 @@ msgctxt "menu"
 msgid "Scan"
 msgstr "扫描"
 
-#: app/admin/templates/base.html:190 app/admin/templates/notices.html:2
-#: app/admin/templates/notices.html:5
+#: app/admin/templates/base.html:190 app/admin/templates/base.html:196
+#: app/admin/templates/me_notices.html:2 app/admin/templates/me_notices.html:5
+#: app/admin/templates/notices.html:2 app/admin/templates/notices.html:5
 msgid "Notices"
 msgstr "通知"
 
-#: app/admin/templates/base.html:194
+#: app/admin/templates/base.html:200
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -1861,52 +1891,52 @@ msgstr ""
 "\n"
 "打印机将从网络（mDNS）中消失，除管理员外，所有用户都无法打印或扫描。"
 
-#: app/admin/templates/base.html:197
+#: app/admin/templates/base.html:203
 msgid "LEAVE MAINTENANCE"
 msgstr "退出维护模式"
 
-#: app/admin/templates/base.html:197
+#: app/admin/templates/base.html:203
 msgid "PUT IN MAINTENANCE"
 msgstr "进入维护模式"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Turn the gateway back on"
 msgstr "恢复网关"
 
-#: app/admin/templates/base.html:198
+#: app/admin/templates/base.html:204
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "除管理员外，停止所有人的打印和扫描，并在网络中隐藏打印机"
 
-#: app/admin/templates/base.html:204
+#: app/admin/templates/base.html:210
 msgid "Log out"
 msgstr "退出登录"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "网关维护中"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "用户的打印和扫描已停止；管理员仍可使用"
 
-#: app/admin/templates/base.html:209
+#: app/admin/templates/base.html:215
 msgid "printing and scanning are temporarily suspended"
 msgstr "打印和扫描已暂时停用"
 
-#: app/admin/templates/base.html:210
+#: app/admin/templates/base.html:216
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "有新版本可用:%(new)s(已安装:%(old)s)。"
 
-#: app/admin/templates/base.html:210
+#: app/admin/templates/base.html:216
 msgid "To update, run on the server:"
 msgstr "要更新,请在服务器上运行:"
 
-#: app/admin/templates/base.html:248
+#: app/admin/templates/base.html:254
 msgid "Copied"
 msgstr "已复制"
 
-#: app/admin/templates/base.html:248 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:254 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "复制"
 
@@ -1952,7 +1982,7 @@ msgstr "无期限"
 msgid "Revoke this grant?"
 msgstr "要撤销此额度授予吗？"
 
-#: app/admin/templates/grants.html:13 app/admin/templates/keys.html:16
+#: app/admin/templates/grants.html:13 app/admin/templates/keys.html:33
 msgid "Revoke"
 msgstr "撤销"
 
@@ -2288,8 +2318,8 @@ msgid "Each device has its own key: if you lose one, revoke only that key. User 
 msgstr "每台设备都有自己的密钥：丢失某台设备时只需撤销对应的密钥。用户名 <b>%(user)s</b>，服务器 <b>%(server)s</b>。"
 
 #: app/admin/templates/keys.html:6
-msgid "Revoke a single key or all of them: the device that uses it immediately gets \"not authorized\"."
-msgstr "可以只撤销一个密钥，也可以全部撤销：使用该密钥的设备会立即收到“未授权”。"
+msgid "Switch a key off, extend it or revoke it: the device that uses it gets \"not authorized\" at once. A switched-off key keeps ageing: its expiry date does not move."
+msgstr "可以停用、延期或撤销密钥：使用该密钥的设备会立即收到“未授权”。停用的密钥仍会继续过期：其到期日期不会改变。"
 
 #: app/admin/templates/keys.html:8 app/admin/templates/keys.html:11
 msgid "Label"
@@ -2315,46 +2345,79 @@ msgstr "最近使用"
 msgid "never used"
 msgstr "从未使用"
 
-#: app/admin/templates/keys.html:16
+#: app/admin/templates/keys.html:18
+msgid "switched off"
+msgstr "已停用"
+
+#: app/admin/templates/keys.html:20
+msgid "single use"
+msgstr "一次性"
+
+#: app/admin/templates/keys.html:21
+#, python-format
+msgid "leaves the list on %(date)s"
+msgstr "将于 %(date)s 从列表中移除"
+
+#: app/admin/templates/keys.html:25
+msgid "Switch off"
+msgstr "停用"
+
+#: app/admin/templates/keys.html:26
+msgid "Switch on"
+msgstr "启用"
+
+#: app/admin/templates/keys.html:30
+msgid "New validity"
+msgstr "新的有效期"
+
+#: app/admin/templates/keys.html:31
+msgid "Extend"
+msgstr "延期"
+
+#: app/admin/templates/keys.html:33
 #, python-format
 msgid "Revoke the key “%(label)s”?"
 msgstr "要撤销密钥“%(label)s”吗？"
 
-#: app/admin/templates/keys.html:18
+#: app/admin/templates/keys.html:36
 msgid "No keys."
 msgstr "没有密钥。"
 
-#: app/admin/templates/keys.html:23
+#: app/admin/templates/keys.html:41
 #, python-format
 msgid "Revoke ALL the keys of %(user)s?"
 msgstr "要撤销 %(user)s 的所有密钥吗？"
 
-#: app/admin/templates/keys.html:23
+#: app/admin/templates/keys.html:41
 msgid "Revoke ALL your keys?"
 msgstr "要撤销您的所有密钥吗？"
 
-#: app/admin/templates/keys.html:24
+#: app/admin/templates/keys.html:42
 #, python-format
 msgid "Revoke all active keys (%(n)s)"
 msgstr "撤销所有有效密钥（%(n)s）"
 
-#: app/admin/templates/keys.html:30
+#: app/admin/templates/keys.html:48
 msgid "New key"
 msgstr "新密钥"
 
-#: app/admin/templates/keys.html:32
+#: app/admin/templates/keys.html:50
 msgid "For which device? (e.g. laptop)"
 msgstr "用于哪台设备？（例如笔记本电脑）"
 
-#: app/admin/templates/keys.html:32
+#: app/admin/templates/keys.html:51
+msgid "Valid for"
+msgstr "有效期"
+
+#: app/admin/templates/keys.html:52
 msgid "Create a key"
 msgstr "创建密钥"
 
-#: app/admin/templates/keys.html:33
+#: app/admin/templates/keys.html:53
 msgid "The key is shown only once, together with the ready-made address to paste when adding the printer."
 msgstr "密钥只显示一次，同时给出可在添加打印机时直接粘贴的地址。"
 
-#: app/admin/templates/keys.html:36
+#: app/admin/templates/keys.html:56
 msgid "Back to the user"
 msgstr "返回用户"
 
@@ -2542,6 +2605,69 @@ msgstr "答复"
 msgid "No requests."
 msgstr "没有申请。"
 
+#: app/admin/templates/me_notices.html:6
+msgid "What the administrators did that concerns you, for example with your print keys."
+msgstr "管理员所做的与你有关的操作，例如对你的打印密钥所做的操作。"
+
+#: app/admin/templates/me_notices.html:9 app/admin/templates/me_notices.html:13
+#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:13
+msgid "What happened"
+msgstr "发生了什么"
+
+#: app/admin/templates/me_notices.html:15
+#, python-format
+msgid "An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it."
+msgstr "管理员撤销了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它已失效：如有需要，请在个人资料中创建新的。"
+
+#: app/admin/templates/me_notices.html:17
+#, python-format
+msgid "An administrator revoked %(n)s of your print keys. They no longer work: create new ones in your profile if you need them."
+msgstr "管理员撤销了你的 %(n)s 个打印密钥。它们已失效：如有需要，请在个人资料中创建新的。"
+
+#: app/admin/templates/me_notices.html:19
+#, python-format
+msgid "An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change."
+msgstr "管理员停用了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它暂时无法使用，到期日期不变。"
+
+#: app/admin/templates/me_notices.html:21
+#, python-format
+msgid "An administrator switched your print key “%(label)s” (starts with %(prefix)s) back on. It works again."
+msgstr "管理员重新启用了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它又可以使用了。"
+
+#: app/admin/templates/me_notices.html:23
+#, python-format
+msgid "An administrator extended your print key “%(label)s” (starts with %(prefix)s). It now expires on %(date)s."
+msgstr "管理员延长了你的打印密钥“%(label)s”（以 %(prefix)s 开头）的有效期。现在它的到期日期为 %(date)s。"
+
+#: app/admin/templates/me_notices.html:25
+#, python-format
+msgid "Your print key “%(label)s” (starts with %(prefix)s) expires on %(date)s. Create a new one before then and set it up on your devices."
+msgstr "你的打印密钥“%(label)s”（以 %(prefix)s 开头）将于 %(date)s 到期。请在此之前创建新的密钥，并在你的设备上设置好。"
+
+#: app/admin/templates/me_notices.html:28
+msgid "dismissed"
+msgstr "已忽略"
+
+#: app/admin/templates/me_notices.html:29 app/admin/templates/notices.html:34
+msgid "Dismiss"
+msgstr "忽略"
+
+#: app/admin/templates/me_notices.html:33 app/admin/templates/notices.html:38
+msgid "No notices."
+msgstr "没有通知。"
+
+#: app/admin/templates/me_notices.html:36 app/admin/templates/notices.html:41
+msgid "Dismiss all"
+msgstr "全部忽略"
+
+#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+msgid "Hide dismissed"
+msgstr "隐藏已忽略"
+
+#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+msgid "Show dismissed too"
+msgstr "同时显示已忽略"
+
 #: app/admin/templates/notices.html:6
 #, python-format
 msgid "Things the gateway noticed that administrators should know about. The same notice from the same source is reported again only after a while (now: every %(when)s), and repeats in between are counted."
@@ -2550,10 +2676,6 @@ msgstr "网关注意到、管理员应当知道的事项。来自同一来源的
 #: app/admin/templates/notices.html:9 app/admin/templates/notices.html:12
 msgid "Last time"
 msgstr "最近一次"
-
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:13
-msgid "What happened"
-msgstr "发生了什么"
 
 #: app/admin/templates/notices.html:9 app/admin/templates/notices.html:32
 msgid "Times"
@@ -2614,48 +2736,28 @@ msgstr "<b>公告的地址不在 TLS 证书中。</b>网关在网络上以 <span
 msgid "dismissed by %(who)s"
 msgstr "由 %(who)s 忽略"
 
-#: app/admin/templates/notices.html:34
-msgid "Dismiss"
-msgstr "忽略"
-
-#: app/admin/templates/notices.html:38
-msgid "No notices."
-msgstr "没有通知。"
-
-#: app/admin/templates/notices.html:41
-msgid "Dismiss all"
-msgstr "全部忽略"
-
-#: app/admin/templates/notices.html:43
-msgid "Hide dismissed"
-msgstr "隐藏已忽略"
-
-#: app/admin/templates/notices.html:43
-msgid "Show dismissed too"
-msgstr "同时显示已忽略"
-
-#: app/admin/templates/password.html:2 app/admin/templates/password.html:5
+#: app/admin/templates/password.html:2 app/admin/templates/password.html:7
 #: app/admin/templates/settings.html:37 app/admin/templates/settings.html:42
 msgid "Change password"
 msgstr "修改密码"
 
-#: app/admin/templates/password.html:6
+#: app/admin/templates/password.html:9
 msgid "Your current password is temporary: choose your own to continue."
 msgstr "当前密码是临时密码：请设置您自己的密码后继续。"
 
-#: app/admin/templates/password.html:8
+#: app/admin/templates/password.html:11
 msgid "Current password"
 msgstr "当前密码"
 
-#: app/admin/templates/password.html:9 app/admin/templates/setup.html:12
+#: app/admin/templates/password.html:12 app/admin/templates/setup.html:12
 msgid "New password (min. 12 characters)"
 msgstr "新密码（至少 12 个字符）"
 
-#: app/admin/templates/password.html:10
+#: app/admin/templates/password.html:13
 msgid "Repeat the new password"
 msgstr "再次输入新密码"
 
-#: app/admin/templates/password.html:11
+#: app/admin/templates/password.html:14
 msgid "Change"
 msgstr "修改"
 
@@ -3685,15 +3787,49 @@ msgstr "用于在其首次登录之前分配群组和限额。"
 msgid "RADIUS username"
 msgstr "RADIUS 用户名"
 
-#: app/auth/keys.py:33
+#: app/auth/keys.py:40
 #, python-format
 msgid "the label must be 1-%(n)s characters"
 msgstr "标签必须为 1 到 %(n)s 个字符"
 
-#: app/auth/keys.py:36
+#: app/auth/keys.py:44
 #, python-format
 msgid "at most %(n)s active keys per user: revoke some first"
 msgstr "每位用户最多 %(n)s 个有效密钥：请先撤销一些"
+
+#: app/auth/keys.py:161
+msgid "1 month"
+msgstr "1 个月"
+
+#: app/auth/keys.py:161
+msgid "3 months"
+msgstr "3 个月"
+
+#: app/auth/keys.py:161
+msgid "6 months"
+msgstr "6 个月"
+
+#: app/auth/keys.py:161
+msgid "1 year"
+msgstr "1 年"
+
+#: app/auth/keys.py:161
+msgid "1 year and 6 months"
+msgstr "1 年零 6 个月"
+
+#: app/auth/keys.py:162
+msgid "2 years"
+msgstr "2 年"
+
+#: app/auth/keys.py:162
+#, python-format
+msgid "%(n)s days"
+msgstr "%(n)s 天"
+
+#: app/auth/keys.py:168
+#, python-format
+msgid "one print only (void after %(h)s hours if unused)"
+msgstr "仅限一次打印（若未使用，%(h)s 小时后失效）"
 
 #: app/auth/passwords.py:31
 #, python-format

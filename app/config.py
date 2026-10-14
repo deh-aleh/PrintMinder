@@ -47,8 +47,15 @@ class Settings(BaseSettings):
     # What a print client may present as password: "keys" = only personal print keys (default),
     # "keys+radius" = also the RADIUS password (transition; it encourages saving the domain password on clients)
     ipp_auth: str = "keys"
-    key_ttl_days_radius: int = 90  # RADIUS-backed users must come back to the portal (a RADIUS login) to renew
-    key_ttl_days_local: int = 365
+    # The longest validity a user may pick for a print key (the menu offers only the durations up to this). RADIUS-backed
+    # users must come back to the portal (a RADIUS login) to renew, so someone who left the company loses access.
+    key_ttl_days_radius: int = 90
+    key_ttl_days_local: int = 730
+    key_once_hours: int = 24  # a single-use key that nobody used is void after this
+    key_once_grace_seconds: int = 120  # after its print, a single-use key still answers status queries for this long
+    key_history_days: int = 14  # revoked and expired keys disappear from the list after this (0 = never)
+    key_expiry_warn_enabled: bool = False  # tell the user in the bell that a key is about to expire
+    key_expiry_warn_days: int = 7
     # public address of the portal, used in messages ("ask for more quota at ..."); derived from the request if empty
     portal_url: str = ""
 

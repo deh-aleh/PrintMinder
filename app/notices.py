@@ -54,7 +54,7 @@ def report(sm, kind: str, key: str, detail: dict | None = None, now: float | Non
         st = _state.get((kind, key))
         if st is None:  # after a restart: the database still knows when this source was last reported
             with sm() as db:
-                last = db.scalar(select(func.max(Notice.last_at)).where(Notice.kind == kind, Notice.key == key))
+                last = db.scalar(select(func.max(Notice.last_at)).where(Notice.kind == kind, Notice.key == key, Notice.user_id.is_(None)))
             if last is not None and now - _aware(last).timestamp() < wait:
                 st = _state[(kind, key)] = {"last": _aware(last).timestamp(), "pending": 0}
         if st is not None and now - st["last"] < wait:
@@ -67,11 +67,11 @@ def report(sm, kind: str, key: str, detail: dict | None = None, now: float | Non
                 del _state[k]
     when = datetime.fromtimestamp(now, timezone.utc)
     with sm() as db:
-        row = db.scalars(select(Notice).where(Notice.kind == kind, Notice.key == key, Notice.dismissed_at.is_(None))).first()
+        row = db.scalars(select(Notice).where(Notice.kind == kind, Notice.key == key, Notice.user_id.is_(None), Notice.dismissed_at.is_(None))).first()
         if row is not None:
             row.last_at, row.count, row.detail_json = when, row.count + pending + 1, detail or row.detail_json
         else:
-            open_now = db.scalar(select(func.count(Notice.id)).where(Notice.kind == kind, Notice.dismissed_at.is_(None))) or 0
+            open_now = db.scalar(select(func.count(Notice.id)).where(Notice.kind == kind, Notice.user_id.is_(None), Notice.dismissed_at.is_(None))) or 0
             if open_now < MAX_OPEN_PER_KIND:
                 db.add(Notice(kind=kind, key=key, first_at=when, last_at=when, count=pending + 1, detail_json=detail))
         for old in db.scalars(select(Notice).where(Notice.dismissed_at < when - KEEP_DISMISSED)):
@@ -88,7 +88,7 @@ def resolve(sm, kind: str, key: str) -> int:
     """Close the open notices of this source because the problem is gone (dismissed by "system"). Returns how many."""
     key = key[:128]
     with sm() as db:
-        rows = list(db.scalars(select(Notice).where(Notice.kind == kind, Notice.key == key, Notice.dismissed_at.is_(None))))
+        rows = list(db.scalars(select(Notice).where(Notice.kind == kind, Notice.key == key, Notice.user_id.is_(None), Notice.dismissed_at.is_(None))))
         for row in rows:
             row.dismissed_at, row.dismissed_by = datetime.now(timezone.utc), "system"
         db.commit()
@@ -105,13 +105,34 @@ def pending(kind: str, key: str) -> int:
         return st["pending"] if st else 0
 
 
-def unseen_count(sm, user_id: int) -> int:
-    """Open notices that are new, or happened again, since this administrator last opened the list (the red dot)."""
+MAX_OPEN_PER_USER = 100
+
+
+def notify_user(sm, user_id: int, kind: str, detail: dict | None = None) -> None:
+    """A notice for one user (their own bell). Every event is written, no rate limit: these are things an administrator
+    just did to the user's keys. The list per user is capped, the oldest open ones are closed first."""
+    when = datetime.now(timezone.utc)
+    with sm() as db:
+        open_rows = list(db.scalars(select(Notice).where(Notice.user_id == user_id, Notice.dismissed_at.is_(None))
+                                    .order_by(Notice.id)))
+        for old in open_rows[:max(0, len(open_rows) - MAX_OPEN_PER_USER + 1)]:
+            old.dismissed_at, old.dismissed_by = when, "system"
+        db.add(Notice(kind=kind, key=str((detail or {}).get("prefix", ""))[:128], user_id=user_id, first_at=when, last_at=when,
+                      count=1, detail_json=detail))
+        for old in db.scalars(select(Notice).where(Notice.dismissed_at < when - KEEP_DISMISSED)):
+            db.delete(old)
+        db.commit()
+
+
+def unseen_count(sm, user_id: int, own: bool = False) -> int:
+    """Open notices that are new, or happened again, since this person last opened the list (the red dot).
+    `own`: the notices addressed to this person; otherwise the administrators' ones."""
     from app.db.models import User
 
     with sm() as db:
-        seen = db.scalar(select(User.notices_seen_at).where(User.id == user_id))
-        q = select(func.count(Notice.id)).where(Notice.dismissed_at.is_(None))
+        seen = db.scalar(select(User.own_notices_seen_at if own else User.notices_seen_at).where(User.id == user_id))
+        q = select(func.count(Notice.id)).where(Notice.dismissed_at.is_(None),
+                                                Notice.user_id == user_id if own else Notice.user_id.is_(None))
         if seen is not None:
             q = q.where(Notice.last_at > seen)
         return db.scalar(q) or 0

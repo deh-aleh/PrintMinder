@@ -103,7 +103,7 @@ def test_last_used_is_recorded_but_not_on_every_request(portal, monkeypatch):
 
 # ---------------------------------------------------------------- the portal pages
 
-async def test_key_is_shown_once_with_the_right_lifetime_per_kind_of_account(portal):
+async def test_key_is_shown_once_with_the_suggested_lifetime_per_kind_of_account(portal):
     make_user(portal.sm, "loc", password=GOOD)
     await portal_login(portal, "loc", GOOD)
     token = await csrf_of_page(portal)
@@ -115,9 +115,9 @@ async def test_key_is_shown_once_with_the_right_lifetime_per_kind_of_account(por
     with portal.sm() as s:
         row = s.scalars(select(PrintKey)).one()
         assert abs((row.expires_at.replace(tzinfo=timezone.utc) - row.created_at.replace(tzinfo=timezone.utc)).days
-                   - settings.key_ttl_days_local) <= 1
+                   - 365) <= 1                                                          # the menu suggests one year
     await portal.post("/admin/logout", data={"csrf_token": token})
-    await portal_login(portal, "rad", "radpw")                                         # RADIUS-backed: shorter life
+    await portal_login(portal, "rad", "radpw")                                         # RADIUS-backed: the longest allowed is 90
     token = await csrf_of_page(portal)
     await portal.post("/me/keys", data={"label": "phone", "csrf_token": token})
     with portal.sm() as s:
@@ -244,3 +244,174 @@ async def test_guessing_keys_is_throttled(ipp):
     for i in range(5):
         assert (await send(ipp, get_jobs(), "ann", f"cpk-guess-{i}")).status_code == 401
     assert (await send(ipp, get_jobs(), "ann", "cpk-guess-again")).status_code == 429
+
+
+# ---------------------------------------------------------------- the lifetime is chosen by the user
+
+def user_of(sm, name):
+    with sm() as s:
+        return s.scalars(select(User).where(User.username == name)).one()
+
+
+def test_the_menu_offers_only_what_the_account_may_have(portal, monkeypatch):
+    make_user(portal.sm, "loc", password=GOOD)
+    make_user(portal.sm, "rad2", provider="radius")
+    loc, rad = user_of(portal.sm, "loc"), user_of(portal.sm, "rad2")
+    assert keys.allowed_durations(loc) == [30, 90, 180, 365, 548, 730] and keys.default_duration(loc) == 365
+    assert keys.allowed_durations(rad) == [30, 90] and keys.default_duration(rad) == 90      # 90 days is the RADIUS maximum
+    assert [v for v, _l in keys.duration_choices(rad)] == ["30", "90", "once"]
+    monkeypatch.setattr(settings, "key_ttl_days_radius", 10)
+    assert keys.allowed_durations(rad) == [10]                                              # even the shortest does not fit: the maximum
+    assert keys.parse_duration(loc, "180") == (180, False) and keys.parse_duration(loc, "once") == (None, True)
+    for bad in ("", "7", "731", "-30", "1e3", "30 ", "once "):
+        with pytest.raises(ValueError):
+            keys.parse_duration(loc, bad)
+    with pytest.raises(ValueError):
+        keys.parse_duration(rad, "365")                                                     # above the RADIUS maximum
+
+
+async def test_the_chosen_validity_is_applied_and_a_forged_one_is_refused(portal):
+    make_user(portal.sm, "loc", password=GOOD)
+    await portal_login(portal, "loc", GOOD)
+    token = await csrf_of_page(portal)
+    await portal.post("/me/keys", data={"label": "six", "validity": "180", "csrf_token": token})
+    await portal.post("/me/keys", data={"label": "forged", "validity": "99999", "csrf_token": token})
+    with portal.sm() as s:
+        rows = s.scalars(select(PrintKey)).all()
+        assert [r.label for r in rows] == ["six"]
+        assert abs((rows[0].expires_at - rows[0].created_at).days - 180) <= 1
+
+
+def test_states_and_a_switched_off_key_keeps_ageing(portal):
+    make_user(portal.sm, "ann", password=GOOD)
+    kid, plain = new_key(portal.sm, "ann", ttl=10)
+    with portal.sm() as s:
+        row = s.get(PrintKey, kid)
+        expires = row.expires_at
+        assert keys.key_state(row, NOW) == "active"
+        assert keys.disable_key(s, row, NOW) and not keys.disable_key(s, row, NOW)
+        assert keys.key_state(row, NOW) == "disabled" and row.expires_at == expires        # the clock is not stopped
+        assert keys.verify_key(s, s.get(User, row.user_id), plain, now=NOW) is None
+        assert keys.key_state(row, NOW + timedelta(days=11)) == "expired"                   # still ageing while off
+        assert keys.enable_key(s, row) and keys.key_state(row, NOW) == "active"
+        assert keys.verify_key(s, s.get(User, row.user_id), plain, now=NOW) is not None
+        assert keys.revoke_key(s, row, NOW) and keys.key_state(row, NOW) == "revoked"
+        assert not keys.enable_key(s, row) and not keys.disable_key(s, row)
+
+
+def test_extending_gives_a_new_date_and_rearms_the_warning(portal):
+    make_user(portal.sm, "ann", password=GOOD)
+    kid, _p = new_key(portal.sm, "ann", ttl=10)
+    with portal.sm() as s:
+        row = s.get(PrintKey, kid)
+        row.expiry_notified_at = NOW
+        assert keys.extend_key(s, row, 90, NOW + timedelta(days=5))
+        assert abs((row.expires_at.replace(tzinfo=timezone.utc) - (NOW + timedelta(days=95))).total_seconds()) < 1
+        assert row.expiry_notified_at is None
+        keys.revoke_key(s, row, NOW)
+        assert not keys.extend_key(s, row, 30)                                              # a revoked key stays revoked
+
+
+def test_a_single_use_key_is_spent_once_and_the_race_has_one_winner(portal):
+    make_user(portal.sm, "ann", password=GOOD)
+    with portal.sm() as s:
+        user = s.scalars(select(User).where(User.username == "ann")).one()
+        row, plain = keys.create_key(s, user, "once", None, NOW, once=True)
+        assert row.single_use and (row.expires_at.replace(tzinfo=timezone.utc) - NOW) == timedelta(hours=settings.key_once_hours)
+        assert keys.verify_key(s, user, plain, now=NOW)
+        assert keys.consume(s, row, NOW) and not keys.consume(s, row, NOW)                  # the second caller loses
+        assert keys.key_state(row, NOW) == "used"
+        assert keys.verify_key(s, user, plain, now=NOW) is None                              # no new job
+        assert keys.verify_key(s, user, plain, now=NOW, read_only=True) is not None          # status queries still work...
+        late = NOW + timedelta(seconds=settings.key_once_grace_seconds + 1)
+        assert keys.verify_key(s, user, plain, now=late, read_only=True) is None             # ...for a short while only
+        assert keys.listing([row], NOW) == []                                                # and it is not in the list
+        assert not keys.consume(s, keys.create_key(s, user, "normal", 30, NOW)[0])           # normal keys are never spent
+
+
+def test_old_keys_leave_the_list_after_the_history_period(portal, monkeypatch):
+    make_user(portal.sm, "ann", password=GOOD)
+    revoked, _a = new_key(portal.sm, "ann", "revoked", ttl=300)
+    expired, _b = new_key(portal.sm, "ann", "expired", ttl=1)
+    live, _c = new_key(portal.sm, "ann", "live", ttl=300)
+    spent = new_key(portal.sm, "ann", "spent", ttl=300)[0]
+    with portal.sm() as s:
+        keys.revoke_key(s, s.get(PrintKey, revoked), NOW)
+        s.get(PrintKey, spent).single_use, s.get(PrintKey, spent).used_at = True, NOW
+        s.commit()
+        day = timedelta(days=1)
+        assert keys.purge(s, NOW + 13 * day) == 1                                              # only the single-use one (grace over)
+        assert keys.purge(s, NOW + 15 * day) == 2                                              # revoked and expired: 14 days later
+        assert [k.label for k in s.scalars(select(PrintKey))] == ["live"]
+        monkeypatch.setattr(settings, "key_history_days", 0)
+        assert keys.purge(s, NOW + 900 * day) == 0                                             # 0 = they stay
+
+
+def test_the_list_says_when_a_finished_key_will_leave(portal):
+    make_user(portal.sm, "ann", password=GOOD)
+    kid, _p = new_key(portal.sm, "ann")
+    with portal.sm() as s:
+        row = s.get(PrintKey, kid)
+        keys.revoke_key(s, row, NOW)
+        item = keys.listing([row], NOW)[0]
+        assert item["state"] == "revoked" and item["vanishes"] == NOW + timedelta(days=14)
+
+
+# ---------------------------------------------------------------- single-use keys at the gateway
+
+def new_once(sm, username, label="once"):
+    with sm() as s:
+        user = s.scalars(select(User).where(User.username == username)).one()
+        row, plain = keys.create_key(s, user, label, None, once=True)
+        return row.id, plain
+
+
+def used_at(sm, kid):
+    with sm() as s:
+        return s.get(PrintKey, kid).used_at
+
+
+@requires_cups
+async def test_a_single_use_key_prints_once_then_only_answers_status_queries(ipp, monkeypatch):
+    make_user(ipp.sm, "ann", password=GOOD)
+    kid, plain = new_once(ipp.sm, "ann")
+    val = c.make_request(c.VALIDATE_JOB, 1, printer_uri="ipp://gw.test/printers/virtual", document_format="text/plain")
+    assert (await send(ipp, val, "ann", plain)).status_code == 200
+    assert used_at(ipp.sm, kid) is None                                                  # asking is not printing
+    assert (await send(ipp, print_job("one.txt"), "ann", plain)).status_code == 200
+    assert used_at(ipp.sm, kid) is not None                                              # the print spent it
+    assert (await send(ipp, print_job("two.txt"), "ann", plain)).status_code == 401      # no second job
+    assert (await send(ipp, val, "ann", plain)).status_code == 401
+    assert (await send(ipp, get_jobs(), "ann", plain)).status_code == 200                # status: still fine for a moment
+    monkeypatch.setattr(settings, "key_once_grace_seconds", 0)
+    assert (await send(ipp, get_jobs(), "ann", plain)).status_code == 401                # then it is gone
+    with ipp.sm() as s:
+        assert [r.title for r in s.scalars(select(JobLog))] == ["one.txt"]               # exactly one job was audited
+
+
+@requires_cups
+async def test_a_job_refused_by_the_quota_does_not_spend_the_single_use_key(ipp):
+    from app.db.models import Metric, Period, SubjectType
+    from app.policy.rules import set_limit
+
+    make_user(ipp.sm, "ann", password=GOOD)
+    kid, plain = new_once(ipp.sm, "ann")
+    with ipp.sm() as s:
+        set_limit(s, SubjectType.user, user_of(ipp.sm, "ann").id, Metric.jobs, 0, Period.weekly)
+        s.commit()
+    r = await send(ipp, print_job(), "ann", plain)
+    assert r.status_code == 200 and c.decode(r.content).code >= 0x0400                   # "not possible": over the limit
+    assert used_at(ipp.sm, kid) is None
+
+
+@requires_cups
+async def test_two_prints_racing_with_one_single_use_key_have_one_winner(ipp):
+    import asyncio
+
+    make_user(ipp.sm, "ann", password=GOOD)
+    kid, plain = new_once(ipp.sm, "ann")
+    first, second = await asyncio.gather(send(ipp, print_job("a.txt"), "ann", plain), send(ipp, print_job("b.txt"), "ann", plain))
+    assert sorted([first.status_code, second.status_code]) == [200, 401]
+    with ipp.sm() as s:
+        done = [r for r in s.scalars(select(JobLog)) if r.state.value == "accepted"]
+        assert len(done) == 1                                                            # the loser's reservation was closed as failed
