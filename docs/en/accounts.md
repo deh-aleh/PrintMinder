@@ -64,7 +64,7 @@ domain password: they use a **personal print key**.
 - Last use (time and IP) is recorded at most once a minute.
 - Revoke one key, or all of them, in *My keys* (`/me/keys`) or, for an administrator, in `/admin/users/<id>/keys`.
 - For each key an administrator can **switch it off** (it does not work, but its expiry keeps running; it can be switched on again), **extend it**
-  (new expiry = now + the chosen duration, within the account's maximum) or **revoke it**. Every action goes to the audit (`key.disable`,
+  (new expiry = now + the chosen duration, within the account's maximum; the time left is **not** added: a key that expires in 2 months, extended by "1 year", expires in 1 year, not in 1 year and 2 months) or **revoke it**. Every action goes to the audit (`key.disable`,
   `key.enable`, `key.extend`, `key.revoke`) and **the user finds it in their notices** (the bell, `/me/notices`), with a fixed text and without the
   administrator's name. When an administrator acts on their own key there is no notice.
 - **Revoked** and **expired** keys disappear from the list `CUPSPL_KEY_HISTORY_DAYS` days later (14; 0 = they stay for ever). While they are there,

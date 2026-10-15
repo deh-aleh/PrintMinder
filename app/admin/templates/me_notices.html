@@ -14,7 +14,7 @@
         {% if n.kind == 'key_revoked' %}
         {{ _("An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it.", label=d.get("label", "?"), prefix=d.get("prefix", "?")) }}
         {% elif n.kind == 'key_revoked_many' %}
-        {{ _("An administrator revoked %(n)s of your print keys. They no longer work: create new ones in your profile if you need them.", n=d.get("count", "?")) }}
+        {{ _("An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them.", n=d.get("count", "?")) }}
         {% elif n.kind == 'key_disabled' %}
         {{ _("An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change.", label=d.get("label", "?"), prefix=d.get("prefix", "?")) }}
         {% elif n.kind == 'key_enabled' %}

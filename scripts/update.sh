@@ -101,7 +101,9 @@ new="$work/x"
 while read -r f; do safe_path "$f" || { rm -rf "$work"; echo "the package lists an unsafe path ($f): nothing was changed" >&2; return 1; }; [ -f "$new/$f" ] || { rm -rf "$work"; echo "the package is incomplete ($f): nothing was changed" >&2; return 1; }; done < "$new/FILES"
 
 echo "3/5 installing the new files ..."
-rm -rf "$prev"; mkdir -p "$prev"
+rm -rf "$prev" 2>/dev/null
+[ ! -e "$prev" ] || { rm -rf "$work"; echo "cannot remove $prev (owned by root, left by an update made from the portal?). Remove it and run again:  sudo rm -rf $prev    Nothing was changed." >&2; return 1; }
+mkdir -p "$prev"
 oldlist=""; [ -f FILES ] && oldlist="$(cat FILES)"
 { cat "$new/FILES"; printf '%s\n' "$oldlist"; } | sort -u | while read -r f; do
     if [ -n "$f" ] && safe_path "$f" && [ -f "$f" ]; then mkdir -p "$prev/$(dirname "$f")"; cp -p "$f" "$prev/$f"; fi
@@ -125,8 +127,9 @@ own="$(stat -c %u:%g . 2>/dev/null || echo 0:0)"
 while read -r f; do
     mkdir -p "$(dirname "$f")"
     cp -p "$new/$f" "$f.pm-tmp" && mv -f "$f.pm-tmp" "$f"
-    if [ "$(id -u)" = 0 ]; then chown "$own" "$f" 2>/dev/null || true; fi   # the updater container runs as root: files stay the user's
+    if [ "$(id -u)" = 0 ]; then chown "$own" "$f" "$(dirname "$f")" 2>/dev/null || true; fi   # the updater container runs as root: files and folders stay the user's
 done < "$new/FILES"
+if [ "$(id -u)" = 0 ]; then chown -R "$own" "$prev" 2>/dev/null || true; fi   # so that a later run of this script by the user can remove it
 # files that the old version had and the new one does not
 printf '%s\n' "$oldlist" | while read -r f; do
     if [ -n "$f" ] && safe_path "$f" && ! grep -qxF "$f" "$new/FILES"; then rm -f "$f"; fi

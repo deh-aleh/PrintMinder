@@ -37,7 +37,7 @@ L'elenco è in sola lettura: limite proprio o ereditato (in corsivo), concession
 - Crea **locale**: si mostra una password temporanea una volta; l'utente la cambia al primo accesso.
 - Crea **RADIUS**: scegli il gruppo; la persona entra con la password d'ufficio.
 - **Reimposta password** (locale): nuova password temporanea, mostrata una volta.
-- **Chiavi**: l'elenco per utente è in `/admin/users/<id>/keys`. Per ogni chiave puoi **disattivarla** (la scadenza continua a scorrere; poi la riattivi), **prolungarla** o **revocarla**; «Revoca tutte» ferma ogni dispositivo dell'utente. L'utente riceve una notifica per ogni azione (non per le sue). Le chiavi revocate e scadute spariscono dopo `CUPSPL_KEY_HISTORY_DAYS` giorni (14).
+- **Chiavi**: l'elenco per utente è in `/admin/users/<id>/keys`. Per ogni chiave puoi **disattivarla** (la scadenza continua a scorrere; poi la riattivi), **prolungarla** (la nuova scadenza parte da oggi, il tempo rimasto non si somma) o **revocarla**; «Revoca tutte» ferma ogni dispositivo dell'utente. L'utente riceve una notifica per ogni azione (non per le sue). Le chiavi revocate e scadute spariscono dopo `CUPSPL_KEY_HISTORY_DAYS` giorni (14).
 - **Flag admin**: la promozione sposta l'utente nel gruppo `administrator`, il declassamento in `default`.
 - Protetti: non puoi disattivare, declassare o eliminare te stesso, l'account di emergenza o l'ultimo amministratore.
 

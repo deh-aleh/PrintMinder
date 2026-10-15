@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-14 20:32+0200\n"
+"POT-Creation-Date: 2026-10-15 08:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -2627,8 +2627,8 @@ msgstr "Un administrador ha revocado tu clave de impresión «%(label)s» (empie
 
 #: app/admin/templates/me_notices.html:17
 #, python-format
-msgid "An administrator revoked %(n)s of your print keys. They no longer work: create new ones in your profile if you need them."
-msgstr "Un administrador ha revocado %(n)s de tus claves de impresión. Ya no funcionan: si las necesitas, crea nuevas en tu perfil."
+msgid "An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them."
+msgstr "Un administrador ha revocado TODAS tus claves de impresión (%(n)s). Ya no funcionan: crea otras nuevas en tu perfil si las necesitas."
 
 #: app/admin/templates/me_notices.html:19
 #, python-format

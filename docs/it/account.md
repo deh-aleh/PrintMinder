@@ -64,7 +64,7 @@ password di dominio: usano una **chiave di stampa personale**.
 - L'ultimo uso (ora e IP) è annotato al massimo una volta al minuto.
 - Si revoca una chiave, o tutte, in *Le mie chiavi* (`/me/keys`) oppure, per un amministratore, in `/admin/users/<id>/keys`.
 - L'amministratore, per ogni chiave, può **disattivarla** (non funziona, ma la scadenza continua a scorrere; si può riattivare), **prolungarla**
-  (nuova scadenza = adesso + la durata scelta, entro il massimo dell'account) o **revocarla**. Ogni azione finisce nell'audit (`key.disable`,
+  (nuova scadenza = adesso + la durata scelta, entro il massimo dell'account; il tempo rimasto **non** si somma: una chiave che scade tra 2 mesi, prolungata di «1 anno», scade tra 1 anno e non tra 1 anno e 2 mesi) o **revocarla**. Ogni azione finisce nell'audit (`key.disable`,
   `key.enable`, `key.extend`, `key.revoke`) e **l'utente la trova nelle sue notifiche** (la campanella, `/me/notices`), con un testo fisso e senza
   il nome dell'amministratore. Se l'amministratore agisce su una chiave propria non c'è nessuna notifica.
 - Le chiavi **revocate** e quelle **scadute** spariscono dall'elenco dopo `CUPSPL_KEY_HISTORY_DAYS` giorni (14; 0 = restano per sempre). Finché ci

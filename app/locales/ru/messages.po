@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-14 20:32+0200\n"
+"POT-Creation-Date: 2026-10-15 08:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -2633,8 +2633,8 @@ msgstr "Администратор отозвал ваш ключ печати �
 
 #: app/admin/templates/me_notices.html:17
 #, python-format
-msgid "An administrator revoked %(n)s of your print keys. They no longer work: create new ones in your profile if you need them."
-msgstr "Администратор отозвал ключей печати: %(n)s. Они больше не работают: при необходимости создайте новые в своём профиле."
+msgid "An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them."
+msgstr "Администратор отозвал ВСЕ ваши ключи печати (%(n)s). Они больше не работают: при необходимости создайте новые в своём профиле."
 
 #: app/admin/templates/me_notices.html:19
 #, python-format

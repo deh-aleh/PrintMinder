@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-14 20:32+0200\n"
+"POT-Creation-Date: 2026-10-15 08:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -2621,8 +2621,8 @@ msgstr "管理员撤销了你的打印密钥“%(label)s”（以 %(prefix)s 开
 
 #: app/admin/templates/me_notices.html:17
 #, python-format
-msgid "An administrator revoked %(n)s of your print keys. They no longer work: create new ones in your profile if you need them."
-msgstr "管理员撤销了你的 %(n)s 个打印密钥。它们已失效：如有需要，请在个人资料中创建新的。"
+msgid "An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them."
+msgstr "管理员已撤销你的所有打印密钥（%(n)s 个）。它们不再有效：如需使用，请在个人资料中创建新的密钥。"
 
 #: app/admin/templates/me_notices.html:19
 #, python-format
