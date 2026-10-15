@@ -15,7 +15,7 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 - `scripts/update.sh` downloads the release package and replaces `docker-compose.yml` and the scripts, never `.env`, `config/` or `data/`. It does not work in a folder
   cloned with git (there you use `git pull`). The new options of a version are not written into your `.env`: they work with their default value; to see them,
   compare `.env` with `docker/env.example`.
-- The *Update* button of the portal needs the optional `updater` container, which holds the Docker socket (root on the host): it is off by default and the portal says so. It only
+- The *Update* button of the portal needs the optional `updater` container, which holds the Docker socket (root on the host): it is off by default. The portal mentions it only when a newer release exists: in the *Backup* menu, *Update* box, the button stays grey and says why (the bar at the top suggests `scripts/update.sh` anyway). With no newer release nothing is shown. It only
   updates inside the same major version and, if the new version does not start, it puts the old one back but does not restore the backup by itself.
 - Backups on a network share: file permissions are decided by the mount (use encryption). An unmounted share receives no backup: the option
   "write only if mounted" is on by default for backups made in the portal, and the portal gives a notice when a backup is skipped. The *General* backup of `.env` has the option off

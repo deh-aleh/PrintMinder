@@ -221,7 +221,7 @@ Ogni release ha anche un **pacchetto** (`printminder-<versione>.tar.gz` con il s
 **Esempio.** Sei alla 1.0.0 e esce la 1.1.0 che cambia `docker-compose.yml` (un volume nuovo). Lanci `scripts/update.sh`: il compose nuovo arriva
 insieme alle immagini nuove, quindi non c'è il rischio di avere immagini 1.1.0 con un compose 1.0.0. Il tuo `.env` resta com'era.
 
-**Avviso di nuova versione.** Una volta al giorno il gateway chiede a GitHub qual è l'ultima release e mostra un avviso agli
+**Avviso di nuova versione.** Una volta ogni 24 ore (la prima 2 minuti dopo l'avvio del gateway, quindi un riavvio lo rifà subito) il gateway chiede a GitHub qual è l'ultima release e mostra un avviso agli
 amministratori. Esce solo quella richiesta e non invia nulla del tuo server. Si spegne con `CUPSPL_UPDATE_CHECK=false`.
 
 **Il contenitore facoltativo `updater`** applica gli aggiornamenti chiesti dal portale. È **spento di default** perché usa il socket

@@ -220,7 +220,7 @@ Each release also has a **package** (`printminder-<version>.tar.gz` with its `SH
 **Example.** You are on 1.0.0 and 1.1.0 comes out, changing `docker-compose.yml` (a new volume). You run `scripts/update.sh`: the new compose file
 arrives together with the new images, so you never end up with 1.1.0 images and a 1.0.0 compose file. Your `.env` stays as it was.
 
-**Notice of a new version.** Once a day the gateway asks GitHub for the newest release and shows a note to administrators.
+**Notice of a new version.** Every 24 hours (the first time 2 minutes after the gateway starts, so a restart checks again at once) the gateway asks GitHub for the newest release and shows a note to administrators.
 Only that one request goes out and it sends nothing about your server. Switch it off with `CUPSPL_UPDATE_CHECK=false`.
 
 **The optional `updater` container** applies updates asked for in the portal. It is **off by default** because it needs the

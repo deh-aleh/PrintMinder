@@ -15,8 +15,8 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 - `scripts/update.sh` scarica il pacchetto della release e sostituisce `docker-compose.yml` e gli script, mai `.env`, `config/` e `data/`. Non funziona in una cartella
   clonata con git (lì si usa `git pull`). Le opzioni nuove di una versione non vengono scritte nel tuo `.env`: funzionano con il valore predefinito; per vederle
   confronta `.env` con `docker/env.example`.
-- Il pulsante *Aggiorna* del portale richiede il contenitore facoltativo `updater`, che tiene il socket di Docker (root sull'host): è spento di default e il portale lo
-  ricorda. Aggiorna solo dentro la stessa versione maggiore e, se la nuova versione non parte, rimette quella vecchia ma non ripristina il backup da solo.
+- Il pulsante *Aggiorna* del portale richiede il contenitore facoltativo `updater`, che tiene il socket di Docker (root sull'host): è spento di default. Il portale lo segnala solo quando esiste una release più nuova: nel menu *Backup*, riquadro *Aggiornamento*, il pulsante
+  resta grigio e dice perché (la barra in cima suggerisce comunque `scripts/update.sh`). Senza una release nuova non compare nessun avviso. Aggiorna solo dentro la stessa versione maggiore e, se la nuova versione non parte, rimette quella vecchia ma non ripristina il backup da solo.
 - Backup su una condivisione di rete: i permessi dei file li decide il montaggio (usa la cifratura). Una condivisione smontata non riceve backup: l'opzione
   «scrivi solo se montato» è attiva di default per i backup creati dal portale e il portale avvisa quando un backup salta. Il backup *Generale* di `.env` ha l'opzione spenta
   di default (va attivata e preparata a mano, vedi [backup.md](backup.md)).
