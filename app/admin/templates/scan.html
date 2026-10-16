@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros.html" import seg %}
 {% block title %}{{ _("Scan") }}{% endblock %}
 {% block body %}
 {% set js = {
@@ -20,38 +21,53 @@
   'downloaded': _js('Downloaded: %(name)s (browser downloads folder).'),
   'error': _js('Error'),
 } %}
-<form class="card" method="post" action="/me/scan" style="max-width:640px;margin-inline:auto" id="sf" data-keep="always">
-  <h1>{{ _("Scan a document") }}</h1>
+<div class="formpage">
+<form class="card" method="post" action="/me/scan" id="sf" data-keep="always">
+  <div class="pagehead">
+    <span class="pico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h18v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M5 14l1.6-6.5h10.8L19 14"/><path d="M17 16.6h.01"/><path d="M8 11h8"/></svg></span>
+    <div><h1>{{ _("Scan a document") }}</h1></div>
+  </div>
   {% if not enabled %}
   <p>{{ _("No scanner available at the moment: it is not connected, it is off, or scanning is not enabled on this server.") }}</p>
   {% else %}
   <p class="muted">{{ _("Put the sheets on the glass or in the automatic feeder, choose how to scan them and press the button.") }}
     {{ _("Every scan is recorded in the audit like prints.") }}</p>
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
-  <dl class="kv" style="align-items:center">
-    <dt>{{ _("Scanner") }}</dt><dd>{% if found|length > 1 %}<select name="scanner" id="scanner">{% for sc in found %}<option value="{{ sc.id }}">{{ sc.name }}</option>{% endfor %}</select>
-      {% else %}<b>{{ found[0].name }}</b><input type="hidden" name="scanner" id="scanner" value="{{ found[0].id }}">{% endif %}</dd>
-    <dt>{{ _("File name") }}</dt><dd><input type="text" name="filename" id="filename" data-nokeep value="{{ default_name }}" maxlength="120" autocomplete="off" style="width:100%"></dd>
-    <dt>{{ _("Format") }}</dt><dd><select name="fmt" id="fmt"><option value="pdf">{{ _("PDF (one page per sheet)") }}</option><option value="jpeg">{{ _("JPEG image (several sheets: ZIP file)") }}</option></select></dd>
-    <dt>{{ _("Where you put the sheets") }}</dt><dd><select name="source" id="source"></select></dd>
-    <dt>{{ _("Colour") }}</dt><dd><select name="color"><option value="color">{{ _("In colour") }}</option><option value="gray">{{ _("Grayscale") }}</option><option value="bw">{{ _("Black and white") }}</option></select></dd>
-    <dt>{{ _("Quality") }}</dt><dd><select name="dpi" id="dpi"></select>
-      <div class="muted" id="dpinote"></div></dd>
-    <dt>{{ _("Where to save it") }}</dt><dd><span id="where" class="muted">{{ _("The browser saves it in the downloads folder.") }}</span></dd>
-  </dl>
-  <div class="actions"><button id="go" style="padding:11px 22px">{{ _("Scan") }}</button><a class="btn sec" href="/me">{{ _("Back") }}</a></div>
-  <p class="muted" id="wait" style="display:none">{{ _("Scanning… with several sheets it can take a minute. You can also leave this page: the file stays below for 15 minutes.") }}</p>
-  <p class="muted" style="margin-bottom:0" id="scaninfo"></p>
+  <div class="frows">
+    <div class="frow"><div class="permhead">{{ _("Scanner") }}</div>
+      <div class="fctl">{% if found|length > 1 %}<select name="scanner" id="scanner">{% for sc in found %}<option value="{{ sc.id }}">{{ sc.name }}</option>{% endfor %}</select>
+      {% else %}<span class="dev">{{ found[0].name }}</span><input type="hidden" name="scanner" id="scanner" value="{{ found[0].id }}">{% endif %}</div></div>
+    <div class="frow"><div class="permhead">{{ _("File name") }}</div>
+      <div class="fctl"><input type="text" name="filename" id="filename" data-nokeep value="{{ default_name }}" maxlength="120" autocomplete="off"></div></div>
+    <div class="frow"><div class="permhead">{{ _("Format") }}</div>
+      <div class="fctl">{{ seg("fmt", [("pdf", _("PDF (one page per sheet)")), ("jpeg", _("JPEG image (several sheets: ZIP file)"))], "pdf") }}</div></div>
+    <div class="frow"><div class="permhead">{{ _("Where you put the sheets") }}</div>
+      <div class="fctl"><span class="seg" id="source" role="radiogroup"></span></div></div>
+    <div class="frow"><div class="permhead">{{ _("Colour") }}</div>
+      <div class="fctl">{{ seg("color", [("color", _("In colour")), ("gray", _("Grayscale")), ("bw", _("Black and white"))], "color") }}</div></div>
+    <div class="frow"><div class="permhead">{{ _("Quality") }}</div>
+      <div class="fctl"><span class="seg compact" id="dpi" role="radiogroup"></span><span class="hint" id="dpinote"></span></div></div>
+    <div class="frow"><div class="permhead">{{ _("Where to save it") }}</div>
+      <div class="fctl"><span id="where" class="muted">{{ _("The browser saves it in the downloads folder.") }}</span></div></div>
+  </div>
+  <div class="actions"><button id="go" class="ico" style="padding:11px 22px"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h18v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M5 14l1.6-6.5h10.8L19 14"/></svg>{{ _("Scan") }}</button><a class="btn sec" href="/me">{{ _("Back") }}</a></div>
+  <div id="wait" style="display:none;margin-top:14px"><div class="bar indet" role="progressbar" aria-label="{{ _('Scanning…') }}"><i></i></div>
+    <p class="muted" style="margin:8px 0 0">{{ _("Scanning… with several sheets it can take a minute. You can also leave this page: the file stays below for 15 minutes.") }}</p></div>
+  <p class="hint" style="margin-bottom:0" id="scaninfo"></p>
   {% endif %}
 </form>
 {% if mine %}
-<div class="card" style="max-width:640px;margin-inline:auto"><h2>{{ _("Your recent scans") }}</h2>
-  {% for m in mine %}<p style="margin:6px 0">
-    {% if m.state == 'running' %}⏳ <b>{{ m.name }}</b> — {{ _("scanning…") }}
-    {% elif m.state == 'done' %}✅ <b>{{ m.name }}</b> — {{ ngettext("%(n)s page", "%(n)s pages", m.pages) }} · <a href="/me/scan/{{ m.id }}/file">{{ _("Download") }}</a>
-    {% else %}❌ <b>{{ m.name }}</b> — {{ m.error }}{% endif %}</p>{% endfor %}
+<div class="card"><h2>{{ _("Your recent scans") }}</h2>
+  <ul class="scanlist">
+  {% for m in mine %}<li>
+    {% if m.state == 'running' %}<span class="st run"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v4h-4"/></svg></span><span class="what"><b>{{ m.name }}</b><small>{{ _("scanning…") }}</small></span>
+    {% elif m.state == 'done' %}<span class="st done"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="what"><b>{{ m.name }}</b><small>{{ ngettext("%(n)s page", "%(n)s pages", m.pages) }}</small></span><a class="btn sec" href="/me/scan/{{ m.id }}/file">{{ _("Download") }}</a>
+    {% else %}<span class="st fail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span><span class="what"><b>{{ m.name }}</b><small>{{ m.error }}</small></span>{% endif %}
+  </li>{% endfor %}
+  </ul>
 </div>
 {% endif %}
+</div>
 <script>
 (function () {
   var f = document.getElementById('sf');
@@ -59,26 +75,35 @@
   var all = {{ caps | tojson }};  // scanner id -> what that device reported about itself
   var sc = document.getElementById('scanner');
   var src = document.getElementById('source'), dpi = document.getElementById('dpi'), note = document.getElementById('dpinote');
-  var fmt = document.getElementById('fmt'), name = document.getElementById('filename'), info = document.getElementById('scaninfo');
+  var name = document.getElementById('filename'), info = document.getElementById('scaninfo');
   var go = document.getElementById('go'), wait = document.getElementById('wait'), where = document.getElementById('where');
   var L = {{ js|tojson }};  // texts for the script, in the language of the page
   function fmtL(s, v) { return s.replace(/%\((\w+)\)s/g, function (m, k) { return v[k]; }); }
   var canPick = !!window.showSaveFilePicker;
   if (canPick) where.textContent = L.pick;
   function cur() { return all[sc.value] || {}; }
+  function val(n) { var c = f.querySelector('input[name=' + n + ']:checked'); return c ? c.value : ''; }
+  function segFill(box, name, opts, keep) {  // the choice is a row of buttons, built from what this scanner offers
+    box.innerHTML = '';
+    opts.forEach(function (o) {
+      var l = document.createElement('label'), i = document.createElement('input'), t = document.createElement('span');
+      i.type = 'radio'; i.name = name; i.value = o[0]; i.checked = String(o[0]) === String(keep); t.textContent = o[1];
+      l.appendChild(i); l.appendChild(t); box.appendChild(l);
+    });
+    if (box.firstChild && !box.querySelector('input:checked')) box.querySelector('input').checked = true;
+  }
   function dpis(which) {
     var c = cur();
     if (which === 'auto') { var a = (c.platen || {}).dpi || [], b = (c.adf || {}).dpi || []; var both = a.filter(function (x) { return b.indexOf(x) >= 0; }); return both.length ? both : a; }
     return (c[which] || {}).dpi || [];
   }
   function sources() {  // only what this scanner really has
-    var c = cur(), keep = src.value;
-    src.innerHTML = '';
+    var c = cur(), keep = val('source');
     var opts = [];
     if (c.adf) opts.push(['auto', L.src_auto]);
     if (c.platen) opts.push(['platen', L.src_platen]);
     if (c.adf) opts.push(['adf', L.src_adf]);
-    opts.forEach(function (o) { var e = document.createElement('option'); e.value = o[0]; e.textContent = o[1]; if (o[0] === keep) e.selected = true; src.appendChild(e); });
+    segFill(src, 'source', opts, keep);
     // what this scanner says about itself (nothing is assumed: a missing value is simply left out)
     var t = [], p = c.platen || {}, a = c.adf || {};
     var size = p.size || a.size; if (size) t.push(fmtL(L.max_size, {size: size}));
@@ -88,18 +113,15 @@
     info.textContent = t.join(' ');
   }
   function fill() {
-    var keep = +dpi.value || 300, list = dpis(src.value);
-    dpi.innerHTML = '';
-    list.forEach(function (r) {
-      var o = document.createElement('option'); o.value = r; o.textContent = r + ' dpi' + (r === 300 ? ' ' + L.recommended : '');
-      if (r === keep || (list.indexOf(keep) < 0 && r === 300)) o.selected = true; dpi.appendChild(o);
-    });
-    note.textContent = src.value === 'auto' && list.length ? fmtL(L.auto_dpi, {n: Math.max.apply(null, list)}) : '';
+    var keep = +val('dpi') || 300, list = dpis(val('source'));
+    var pick = list.indexOf(keep) >= 0 ? keep : list.indexOf(300) >= 0 ? 300 : list[0];
+    segFill(dpi, 'dpi', list.map(function (r) { return [r, r + ' dpi' + (r === 300 ? ' ' + L.recommended : '')]; }), pick);
+    note.textContent = val('source') === 'auto' && list.length ? fmtL(L.auto_dpi, {n: Math.max.apply(null, list)}) : '';
   }
   sc.addEventListener('change', function () { sources(); fill(); });
   sources();
   src.addEventListener('change', fill); fill();
-  function ext() { return fmt.value === 'pdf' ? 'pdf' : 'jpg'; }
+  function ext() { return val('fmt') === 'pdf' ? 'pdf' : 'jpg'; }
   function finish() { go.disabled = false; wait.style.display = 'none'; }
   if (running_now()) { go.disabled = true; go.title = L.busy; }
   function running_now() { return {{ (mine | selectattr('state', 'equalto', 'running') | list | length > 0) | tojson }}; }

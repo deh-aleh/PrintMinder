@@ -21,7 +21,7 @@
     {% if st.backup and st.state in ('rolled_back', 'failed') %}{{ _("Backup taken just before: %(f)s", f=st.backup) }}{% endif %}</p>{% endif %}
   {% if upd.info %}
   {% if upd.reason == '' %}
-  <form method="post" action="/admin/update" onsubmit="return confirm({{ _t('Update now? A backup is made first. The gateway restarts and printing stops for a minute or two.')|tojson|forceescape }})">
+  <form method="post" action="/admin/update" data-confirm="{{ _t('Update now? A backup is made first. The gateway restarts and printing stops for a minute or two.') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf }}">
     <button>{{ _("Update to %(v)s", v=upd.info.version) }}</button>
     <span class="muted">{{ _("A backup is made first (%(name)s).", name=upd.backup.name) }}</span>
@@ -64,7 +64,7 @@
     {% if r.editable %}
     <a class="btn sec" href="/admin/backups/{{ t.id }}/edit">{{ _("Edit") }}</a>
     <form method="post" action="/admin/backups/{{ t.id }}/toggle"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _('Suspend') if t.enabled else _('Activate') }}</button></form>
-    <form method="post" action="/admin/backups/{{ t.id }}/delete" onsubmit="return confirm({{ _t('Delete this scheduled backup? The files already written stay in the folder.')|tojson|forceescape }})">
+    <form method="post" action="/admin/backups/{{ t.id }}/delete" data-confirm="{{ _t('Delete this scheduled backup? The files already written stay in the folder.') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger">{{ _("Delete") }}</button></form>
     {% elif not t.is_global %}<span class="muted">{{ _("belongs to %(owner)s", owner=t.owner_name) }}</span>{% else %}<span class="muted">{{ _("edited in .env") }}</span>{% endif %}
   </div>

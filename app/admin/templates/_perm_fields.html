@@ -2,11 +2,7 @@
    the page's own form, before its Save button: one form, one button.
    Every choice is one row of buttons (radio inputs drawn as a segmented control). The printers and the days only appear once
    "only some printers" / "only at some hours" is chosen, so a printer can not be ticked while the list is not in use. #}
-{% macro seg(name, options, current) %}
-<span class="seg" role="radiogroup">
-  {% for value, label in options %}<label><input type="radio" name="{{ name }}" value="{{ value }}" {{ 'checked' if current == value }}><span>{{ label }}</span></label>{% endfor %}
-</span>
-{% endmacro %}
+{% from "macros.html" import seg %}
 <details class="adv" {{ 'open' if perm.open }}>
   <summary>{{ _("Advanced permissions") }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
   <div class="advbody">

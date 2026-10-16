@@ -88,7 +88,7 @@
       {% else %}<td>+{{ g.amount }} {{ _(g.metric.value) }}</td><td>{{ _(g.scope.value) }}</td>
       <td class="nowrap">{{ g.valid_from|localtime('%Y-%m-%d %H:%M') }}</td><td class="nowrap">{{ g.valid_until|localtime('%Y-%m-%d %H:%M') if g.valid_until else _('no expiry') }}</td>{% endif %}
       <td>{{ x.by or '' }}<div class="muted">{{ g.note or '' }}</div></td>
-      <td><form method="post" action="/admin/{{ 'permission-grants' if x.kind == 'permission' else 'grants' }}/{{ g.id }}/revoke" onsubmit="return confirm({{ _t('Revoke this grant?')|tojson|forceescape }})"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger">{{ _("Revoke") }}</button></form></td></tr>
+      <td><form method="post" action="/admin/{{ 'permission-grants' if x.kind == 'permission' else 'grants' }}/{{ g.id }}/revoke" data-confirm="{{ _t('Revoke this grant?') }}"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger">{{ _("Revoke") }}</button></form></td></tr>
     {% else %}<tr><td colspan="7" class="muted">{{ _("No grants.") }}</td></tr>{% endfor %}
   </table>
   <form method="post" action="/admin/grants" style="margin-top:14px" id="grantform">
@@ -187,7 +187,7 @@
   </table>
   <div class="cardhead" style="margin-top:14px">
     <h2>{{ _("Ended and revoked grants") }} <span class="muted">({{ ended|length }})</span></h2>
-    {% if ended %}<form method="post" action="/admin/grants/purge" onsubmit="return confirm({{ _t("Delete every ended or revoked grant? Active grants are not touched; the administrators' log keeps the history.")|tojson|forceescape }})">
+    {% if ended %}<form method="post" action="/admin/grants/purge" data-confirm="{{ _t("Delete every ended or revoked grant? Active grants are not touched; the administrators' log keeps the history.") }}">
       <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger">{{ _("Delete ended grants") }}</button></form>{% endif %}
   </div>
   <table class="stack">

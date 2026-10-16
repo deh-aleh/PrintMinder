@@ -173,6 +173,80 @@
   .chip input:checked + span::before { content:"✓" }
   .chip i { font-style:normal; opacity:.8 }
   .times { display:flex; flex-wrap:wrap; gap:8px 16px } .times label { display:inline-flex; align-items:center; gap:6px }
+  /* form pages (group, user, scan, print): one centred column, a title with an icon, then one row per setting
+     (name and hint on the left, the choice on the right: the same layout as the advanced permissions) */
+  .formpage { max-width:760px; margin:0 auto }
+  .pagehead { display:flex; align-items:center; gap:14px; margin-bottom:14px }
+  .pagehead .pico { flex:none; width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, var(--card)); border:1px solid color-mix(in srgb, var(--accent) 28%, var(--line)) }
+  .pagehead .pico svg { width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
+  .pagehead h1 { margin:0; font-size:20px } .pagehead p { margin:2px 0 0 }
+  .frows { margin-top:4px }
+  .frow { display:grid; grid-template-columns:minmax(140px,200px) 1fr; gap:6px 16px; padding:12px 0; border-top:1px solid var(--line); align-items:center }
+  .frow:first-child { border-top:0 }
+  .frow > .fctl { min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:6px }
+  .frow > .fctl > .row { gap:8px 12px }
+  .formpage .frow input[type=text], .formpage .frow select { min-height:38px; width:100%; max-width:380px }
+  .formpage .frow input[type=text], .formpage .frow select, .formpage .stepper input { font-size:15px }
+  .formpage select { padding-right:6px }
+  .frow label.check { margin:0 }
+  .hint { color:var(--muted); font-size:12.5px }
+  button.ico, .btn.ico { display:inline-flex; align-items:center; justify-content:center; gap:8px }
+  button.ico svg, .btn.ico svg { width:17px; height:17px; flex:none; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+  /* number with − and + */
+  .stepper { display:inline-flex; align-items:stretch; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--card) }
+  .stepper:focus-within { border-color:var(--accent) }
+  .stepper button { width:40px; min-height:38px; padding:0; border:0; border-radius:0; background:transparent; color:var(--muted); font-size:19px; line-height:1; display:flex; align-items:center; justify-content:center }
+  .stepper button:hover { background:var(--bg); color:var(--accent) }
+  .stepper input[type=number] { width:84px; min-width:0; border:0; border-radius:0; background:var(--card); text-align:center; font-weight:600; -moz-appearance:textfield; appearance:textfield }
+  .stepper input[type=number]:focus { outline:0 }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0 }
+  .stepper input::placeholder { font-weight:400 }
+  .seg.compact { gap:1px; background:var(--line) } .seg.compact label { background:var(--card) } .seg.compact label + label { border-left:0 }
+  /* password form (settings): one box per line, big text, eye button */
+  .pwform .pwrow { margin-bottom:12px }
+  .pwform .pwrow input { width:100%; font-size:17px; min-height:50px; padding:10px 52px 10px 14px }
+  .pwform button.ico { min-height:46px; padding:8px 20px; font-size:15px }
+  /* a progress bar that only says "working" */
+  .bar.indet { position:relative } .bar.indet i { position:absolute; width:35%; background:var(--accent); animation:indet 1.3s ease-in-out infinite }
+  @keyframes indet { 0% { left:-35% } 100% { left:100% } }
+  @media (prefers-reduced-motion: reduce) { .bar.indet i { animation:none; width:100% } }
+  /* the application's own question window (replaces the browser's confirm box) */
+  dialog.confirm { width:min(460px,92vw) }
+  dialog.confirm .cico { flex:none; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, var(--card)) }
+  dialog.confirm.danger .cico { color:var(--err); background:color-mix(in srgb, var(--err) 14%, var(--card)) }
+  dialog.confirm .cico svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+  dialog.confirm [hidden] { display:none !important }  /* label.check is display:flex, which would show the empty tick box */
+  dialog.confirm .ctext { white-space:pre-line; margin:0 0 14px; overflow-wrap:anywhere }
+  dialog.confirm label.check { padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--bg); margin:0 0 14px; cursor:pointer }
+  dialog.confirm button.go.danger-fill { background:var(--err); border-color:var(--err); color:#fff }
+  /* the page of the documentation */
+  .doctiles { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; margin:14px 0 0; padding:0; list-style:none }
+  .doctiles a { display:flex; align-items:center; justify-content:space-between; gap:10px; height:100%; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--fg); text-decoration:none }
+  .doctiles a:hover { border-color:var(--orange); color:var(--orange) }
+  .doctiles svg { flex:none; width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; opacity:.6 }
+  .faq { margin-top:26px; border:1px solid var(--line); border-radius:10px; background:var(--bg) }
+  .faq > summary { list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px; font-weight:600 }
+  .faq > summary::-webkit-details-marker { display:none }
+  .faq > summary svg { flex:none; width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transition:transform .15s }
+  .faq[open] > summary svg { transform:rotate(180deg) }
+  .faq .faqbody { padding:0 16px 14px } .faq .faqbody p { margin:0 0 10px }
+  .badges { display:flex; flex-wrap:wrap; gap:8px }
+  a.badge2 { display:inline-flex; align-items:stretch; border-radius:6px; overflow:hidden; text-decoration:none; font-size:13px; font-weight:600; line-height:1; box-shadow:0 1px 2px rgba(0,0,0,.25) }
+  a.badge2 span { display:flex; align-items:center; gap:6px; padding:8px 11px; color:#fff }
+  a.badge2 .l { background:#24292f } a.badge2 .r { background:var(--orange) }
+  a.badge2 svg { width:16px; height:16px; fill:currentColor }
+  a.badge2:hover { filter:brightness(1.12) }
+  /* scan and print */
+  .dev { display:inline-flex; align-items:center; gap:8px; padding:5px 12px; border:1px solid var(--line); border-radius:99px; background:var(--bg); font-weight:600 }
+  .dev::before { content:""; width:8px; height:8px; border-radius:50%; background:var(--ok) }
+  .scanlist { list-style:none; margin:0; padding:0; display:grid; gap:8px }
+  .scanlist li { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg) }
+  .scanlist .st { flex:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff }
+  .scanlist .st svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round }
+  .scanlist .st.done { background:var(--ok) } .scanlist .st.fail { background:var(--err) } .scanlist .st.run { background:var(--accent) }
+  .scanlist .what { flex:1; min-width:0; overflow-wrap:anywhere } .scanlist .what small { display:block; color:var(--muted) }
+  .scanlist .st.run svg { animation:spin 1.2s linear infinite } @keyframes spin { to { transform:rotate(360deg) } }
+  @media (prefers-reduced-motion: reduce) { .scanlist .st.run svg { animation:none } }
   /* tables marked .stack-md become stacked cards already below 1000px (too many columns for a tablet) */
   @media (max-width:1000px) {
     table.stack-md, table.stack-md tbody, table.stack-md tr, table.stack-md td { display:block; width:100% }
@@ -208,6 +282,11 @@
     .seg { display:flex; flex-direction:column; width:100% } .seg label + label { border-left:0; border-top:1px solid var(--line) }
     .seg span { padding:10px 12px; white-space:normal }
     .chip > span { padding:8px 14px } .times input[type=time] { width:auto }
+    .frow { grid-template-columns:1fr; gap:8px } .frow > .fctl { align-items:stretch }
+    .formpage .frow input[type=text], .formpage .frow select { max-width:none }
+    .frow > .fctl > .stepper, .frow > .fctl > .seg.compact { align-self:flex-start }
+    .stepper button { width:40px; min-height:40px } .seg.compact { flex-direction:row; width:auto } .seg.compact label { flex:1 1 auto; text-align:center }
+    .pagehead .pico { width:40px; height:40px } .doctiles { grid-template-columns:1fr }
   }
 </style>
 </head>
@@ -252,12 +331,13 @@
   <a class="helpbtn iconbtn {{ 'on' if request.url.path.startswith('/admin/docs') }}" href="/admin/docs" aria-label="{{ _t('Documentation') }}" title="{{ _t('Documentation') }}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.6-2.4 2.1-2.4 3.5"/><path d="M12 17.2h.01"/></svg>
   </a>
-  <form method="post" action="/admin/maintenance" {% if not maintenance %}onsubmit="return confirm({{ _t('Put the WHOLE gateway in maintenance?\n\nThe printers disappear from the network (mDNS) and no user will be able to print or scan: only administrators.')|tojson|forceescape }})"{% endif %}>
+  <form method="post" action="/admin/maintenance" data-confirm="{{ _t('Turn the gateway back on?') if maintenance else _t('Put the WHOLE gateway in maintenance?\n\nThe printers disappear from the network (mDNS) and no user will be able to print or scan: only administrators.') }}" data-confirm-title="{{ _t('LEAVE MAINTENANCE') if maintenance else _t('PUT IN MAINTENANCE') }}" data-confirm-ok="{{ _t('LEAVE MAINTENANCE') if maintenance else _t('PUT IN MAINTENANCE') }}"{% if not maintenance %} data-confirm-danger{% endif %} data-confirm-check="{{ _t('Tell all users in their notices (administrators too)') }}" data-confirm-check-name="notify" data-confirm-check-on>
     <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="next" value="{{ request.url.path }}">
     <input type="hidden" name="on" value="{{ '0' if maintenance else '1' }}">
     {% set mlabel = _t('LEAVE MAINTENANCE') if maintenance else _t('PUT IN MAINTENANCE') %}
     <button class="maint iconbtn {{ 'on' if maintenance }}" aria-label="{{ mlabel }}" title="{{ mlabel }} — {{ _t('Turn the gateway back on') if maintenance else _t('Stops printing and scanning for everyone except the admins and hides the printers from the network') }}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.4 11.6 5.5 18.5"/><path d="M16.2 4.3A4.3 4.3 0 1 0 19.7 7.8"/></svg>
+      {# a traffic cone: "work in progress" #}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 21h17"/><path d="M6.5 21 9.8 4h4.4l3.3 17"/><path d="M8.3 12h7.4"/><path d="M7.4 16.5h9.2"/></svg>
     </button>
   </form>
   {% endif %}
@@ -381,6 +461,56 @@
       } catch (x) {}
     });
   })();
+</script>
+{% if me %}
+<dialog id="appconfirm" class="confirm" aria-labelledby="ac-title" data-default-title="{{ _t('Are you sure?') }}">
+  <div class="dlghead"><span class="cico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.5h.01"/></svg></span><h3 id="ac-title"></h3></div>
+  <p class="ctext" id="ac-text"></p>
+  <label class="check" id="ac-check" hidden><input type="checkbox"><span></span></label>
+  <div class="actions"><button type="button" class="sec" id="ac-no">{{ _("Cancel") }}</button><button type="button" class="go" id="ac-yes"></button></div>
+</dialog>
+{% endif %}
+<script>
+  // the application's own question window: a form with data-confirm="text" asks first (data-confirm-title, data-confirm-ok,
+  // data-confirm-danger; data-confirm-check="label" + data-confirm-check-name="field" adds a tick that is sent as field=1)
+  (function () {
+    var dlg = document.getElementById('appconfirm'); if (!dlg) return;
+    var title = dlg.querySelector('#ac-title'), text = dlg.querySelector('#ac-text'), yes = dlg.querySelector('#ac-yes'),
+        no = dlg.querySelector('#ac-no'), box = dlg.querySelector('#ac-check'), tick = box.querySelector('input'), asking = null;
+    document.addEventListener('submit', function (ev) {
+      var f = ev.target; if (!f.hasAttribute || !f.hasAttribute('data-confirm') || f.__ok) return;
+      ev.preventDefault();
+      if (!dlg.showModal) { if (confirm(f.getAttribute('data-confirm'))) { f.__ok = true; f.submit(); } return; }  // very old browser
+      asking = f;
+      var btn = ev.submitter || f.querySelector('button:not([type=button])');  // title, label and colour default to the button's own
+      var danger = f.hasAttribute('data-confirm-danger') || !!(btn && btn.classList.contains('danger'));
+      title.textContent = f.getAttribute('data-confirm-title') || dlg.getAttribute('data-default-title');
+      text.textContent = f.getAttribute('data-confirm');
+      yes.textContent = f.getAttribute('data-confirm-ok') || (btn && btn.textContent.trim()) || 'OK';
+      dlg.classList.toggle('danger', danger); yes.classList.toggle('danger-fill', danger);
+      var label = f.getAttribute('data-confirm-check');
+      box.hidden = !label; box.querySelector('span').textContent = label || ''; tick.checked = f.hasAttribute('data-confirm-check-on');
+      dlg.showModal(); no.focus();
+    }, true);
+    no.addEventListener('click', function () { asking = null; dlg.close(); });
+    dlg.addEventListener('cancel', function () { asking = null; });
+    yes.addEventListener('click', function () {
+      var f = asking; asking = null; dlg.close(); if (!f) return;
+      var name = f.getAttribute('data-confirm-check-name');
+      if (name && !box.hidden && tick.checked) { var h = document.createElement('input'); h.type = 'hidden'; h.name = name; h.value = '1'; f.appendChild(h); }
+      f.__ok = true; f.submit();
+    });
+  })();
+</script>
+<script>
+  // number boxes with − and + (macros.html, stepper): an empty box starts at the smallest sensible value
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.stepper button'); if (!b) return;
+    var i = b.parentNode.querySelector('input'), d = +b.dataset.step, v = i.value === '' ? NaN : +i.value,
+        lo = i.min !== '' ? +i.min : -Infinity, hi = i.max !== '' ? +i.max : Infinity;
+    if (isNaN(v)) { if (d < 0) return; v = Math.min(hi, Math.max(lo, 1)); } else v = Math.min(hi, Math.max(lo, v + d));
+    i.value = v; i.dispatchEvent(new Event('input', {bubbles: true}));
+  });
 </script>
 </body>
 </html>

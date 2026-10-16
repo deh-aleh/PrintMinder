@@ -125,6 +125,24 @@ def notify_user(sm, user_id: int, kind: str, detail: dict | None = None, key: st
         db.commit()
 
 
+def notify_all_users(sm, kind: str, detail: dict | None = None, key: str = "", exclude_user_id: int | None = None) -> int:
+    """The same notice in the bell of every active account, administrators included (an administrator reads theirs in the
+    administrators' page). `exclude_user_id`: the person who did it, who needs no telling. One write for everybody, and the
+    per-user cap applies as in notify_user. Returns how many people were notified."""
+    from app.db.models import User
+
+    when = datetime.now(timezone.utc)
+    with sm() as db:
+        ids = [i for i in db.scalars(select(User.id).where(User.enabled.is_(True))) if i != exclude_user_id]
+        for uid in ids:
+            open_rows = list(db.scalars(select(Notice).where(Notice.user_id == uid, Notice.dismissed_at.is_(None)).order_by(Notice.id)))
+            for old in open_rows[:max(0, len(open_rows) - MAX_OPEN_PER_USER + 1)]:
+                old.dismissed_at, old.dismissed_by = when, "system"
+            db.add(Notice(kind=kind, key=key[:128], user_id=uid, first_at=when, last_at=when, count=1, detail_json=detail))
+        db.commit()
+    return len(ids)
+
+
 def notify_user_once(sm, user_id: int, kind: str, key: str, detail: dict | None = None) -> bool:
     """Like notify_user, but not again while an open notice of this kind and subject exists. True when one was written."""
     with sm() as db:

@@ -1,22 +1,32 @@
 {% extends "base.html" %}
 {% block title %}{{ _("Print") }}{% endblock %}
 {% block body %}
+{% from "macros.html" import seg, stepper %}
 <style>
-  .drop { border:2px dashed var(--line); border-radius:12px; padding:28px 16px; text-align:center; cursor:pointer; display:block }
-  .drop:hover, .drop.over { border-color:var(--accent); background:var(--bg) }
-  .drop input { display:none } .drop .big { font-size:17px; font-weight:600 } .drop .name { margin-top:8px; word-break:break-all }
-  .steps { counter-reset:s; list-style:none; padding:0; margin:0 }
-  .steps > li { counter-increment:s; margin:0 0 18px; padding-left:34px; position:relative }
-  .steps > li::before { content:counter(s); position:absolute; left:0; top:-2px; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; text-align:center; line-height:24px; font-size:13px }
-  .steps h2 { margin:0 0 6px }
+  .drop { border:2px dashed var(--line); border-radius:12px; padding:26px 16px; text-align:center; cursor:pointer; display:block; background:var(--bg) }
+  .drop:hover, .drop.over { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 6%, var(--bg)) }
+  .drop input { display:none } .drop .big { font-size:17px; font-weight:600; display:block } .drop .name { margin-top:8px; word-break:break-all; font-weight:600 }
+  .drop svg { width:34px; height:34px; stroke:var(--accent); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; margin-bottom:6px }
+  .sh { display:flex; align-items:center; gap:10px; margin:22px 0 10px !important; font-size:16px } .sh:first-of-type { margin-top:8px !important }
+  .sh b { flex:none; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; text-align:center; line-height:24px; font-size:13px }
   .printers { display:grid; gap:8px }
-  .printers label { display:flex; gap:10px; align-items:center; border:1px solid var(--line); border-radius:8px; padding:10px 12px; cursor:pointer }
-  .printers input:checked + span b { color:var(--accent) } .printers label:has(input:checked) { border-color:var(--accent); background:var(--bg) }
-  .copies { display:flex; align-items:center; gap:8px } .copies input { width:80px; text-align:center }
-  .copies button { width:42px; padding:0 }
+  .printers label { display:flex; gap:12px; align-items:center; border:1px solid var(--line); border-radius:10px; padding:10px 12px; cursor:pointer; background:var(--card) }
+  .printers label:hover { border-color:var(--accent) }
+  .printers input { accent-color:var(--accent); width:18px; height:18px; flex:none; margin:0 }
+  .printers .pi { flex:none; width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:var(--bg); color:var(--muted); border:1px solid var(--line) }
+  .printers .pi svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round }
+  .printers .pt { min-width:0; overflow-wrap:anywhere } .printers .pt small { display:flex; gap:6px; flex-wrap:wrap; margin-top:3px }
+  .printers .pt small .pill { font-size:11.5px; color:var(--muted) }
+  .printers label:has(input:checked) { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 7%, var(--card)) }
+  .printers label:has(input:checked) .pi { color:var(--accent); border-color:var(--accent) }
+  .printers input:checked + .pi + .pt b { color:var(--accent) }
 </style>
-<form class="card" method="post" action="/me/print" enctype="multipart/form-data" style="max-width:640px;margin-inline:auto" id="pf" data-keep>
-  <h1>{{ _("Print a file") }}</h1>
+<div class="formpage">
+<form class="card" method="post" action="/me/print" enctype="multipart/form-data" id="pf" data-keep>
+  <div class="pagehead">
+    <span class="pico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg></span>
+    <div><h1>{{ _("Print a file") }}</h1></div>
+  </div>
   {% if outside_hours %}<p class="pill blocked" style="display:block;border-radius:8px;padding:8px 12px">{{ _("You can print %(window)s. Printing now is not possible.", window=outside_hours) }}</p>{% endif %}
   {% if offline %}<p class="muted">{{ _("Not reachable right now: %(printers)s.", printers=offline|join(', ')) }}</p>{% endif %}
   {% if forbidden_all %}
@@ -25,49 +35,55 @@
     <p>{{ _("No printer available at the moment. Try again shortly or tell an administrator.") }}</p>
   {% else %}
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
-  <ol class="steps">
-    <li><h2>{{ _("Choose the file") }}</h2>
-      <label class="drop" id="drop">
-        <input type="file" name="file" id="file" accept=".pdf,.jpg,.jpeg,.png,.gif,.txt,application/pdf,image/*,text/plain" required>
-        <span class="big">{{ _("Tap to choose a file") }}</span>
-        <div class="muted">{{ _("or drag it here · PDF, photo (JPEG, PNG, GIF) or text · at most %(mb)s MB", mb=max_mb) }}</div>
-        <div class="name" id="fname"></div>
-      </label></li>
-    <li><h2>{{ _("Choose the printer") }}</h2>
-      <div class="printers">
-        {% for q in queues %}
-        <label><input type="radio" name="queue" value="{{ q.name }}" {{ 'checked' if loop.first }} required>
-          {# the test printers store their description in CUPS in the language they were created in: say it in the reader's #}
-          {% set info = _("Test printer (%(name)s)", name=q.name) if q.virtual and q.name.startswith('debugprinter') else q.info %}
-          <span><b>{{ info if info and info != q.name else q.name }}</b>{% if info and info != q.name %} <span class="muted">({{ q.name }})</span>{% endif %}
-            <span class="muted">{{ ' · ' ~ _('colour') if q.color }}{{ ' · ' ~ _('double-sided') if q.duplex }}</span></span></label>
-        {% endfor %}
-      </div></li>
-    <li><h2>{{ _("Print options") }}</h2>
-      <dl class="kv" style="align-items:center">
-        <dt>{{ _("Comment") }}</dt><dd><input type="text" name="comment" maxlength="{{ comment_max }}" placeholder="{{ _('What it contains (optional, max %(n)s characters)', n=comment_max) }}" autocomplete="off" style="width:100%">
-          <div class="muted">{{ _("It stays in the print log, under the file name.") }}</div></dd>
-        <dt>{{ _("Paper size") }}</dt><dd><select name="media" id="media"></select></dd>
-        <dt>{{ _("Orientation") }}</dt><dd><select name="orientation"><option value="">{{ _("Automatic") }}</option><option value="portrait">{{ _("Portrait") }}</option><option value="landscape">{{ _("Landscape") }}</option></select></dd>
-        {% if perms.color %}<dt id="colorlbl">{{ _("Colour") }}</dt><dd id="colorrow"><select name="color" id="color"><option value="">{{ _("Printer default") }}</option><option value="color">{{ _("In colour") }}</option><option value="monochrome">{{ _("Black and white") }}</option></select></dd>{% endif %}
-        {% if perms.one_sided %}<dt id="sideslbl">{{ _("Sides") }}</dt><dd id="sidesrow"><select name="sides"><option value="">{{ _("Printer default") }}</option><option value="one-sided">{{ _("One-sided") }}</option><option value="two-sided-long-edge">{{ _("Double-sided, long edge") }}</option><option value="two-sided-short-edge">{{ _("Double-sided, short edge") }}</option></select></dd>{% endif %}
-        <dt>{{ _("Pages") }}</dt><dd><input type="text" name="pages" id="pages" placeholder="{{ _('All — or 1,5 or 2-4') }}" inputmode="text" autocomplete="off" style="width:100%"></dd>
-        <dt>{{ _("Copies") }}</dt><dd><div class="copies"><button type="button" class="sec" id="minus" aria-label="{{ _('fewer') }}">−</button>
-          <input type="number" name="copies" id="copies" value="1" min="1" max="{{ max_copies }}" inputmode="numeric">
-          <button type="button" class="sec" id="plus" aria-label="{{ _('more') }}">+</button>
-          <span class="muted">({{ _("at most %(n)s", n=max_copies) }})</span></div></dd>
-      </dl></li>
-  </ol>
-  <div class="actions"><button id="go" style="padding:11px 22px" disabled>{{ _("Print") }}</button><a class="btn sec" href="/me">{{ _("Cancel") }}</a></div>
+  <h2 class="sh"><b>1</b> {{ _("Choose the file") }}</h2>
+  <label class="drop" id="drop">
+    <input type="file" name="file" id="file" accept=".pdf,.jpg,.jpeg,.png,.gif,.txt,application/pdf,image/*,text/plain" required>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"/></svg>
+    <span class="big">{{ _("Tap to choose a file") }}</span>
+    <div class="muted">{{ _("or drag it here · PDF, photo (JPEG, PNG, GIF) or text · at most %(mb)s MB", mb=max_mb) }}</div>
+    <div class="name" id="fname"></div>
+  </label>
+  <h2 class="sh"><b>2</b> {{ _("Choose the printer") }}</h2>
+  <div class="printers">
+    {% for q in queues %}
+    <label><input type="radio" name="queue" value="{{ q.name }}" {{ 'checked' if loop.first }} required>
+      {# the test printers store their description in CUPS in the language they were created in: say it in the reader's #}
+      {% set info = _("Test printer (%(name)s)", name=q.name) if q.virtual and q.name.startswith('debugprinter') else q.info %}
+      <span class="pi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg></span>
+      <span class="pt"><b>{{ info if info and info != q.name else q.name }}</b>{% if info and info != q.name %} <span class="muted">({{ q.name }})</span>{% endif %}
+        {% if q.color or q.duplex %}<small>{% if q.color %}<span class="pill">{{ _('colour') }}</span>{% endif %}{% if q.duplex %}<span class="pill">{{ _('double-sided') }}</span>{% endif %}</small>{% endif %}</span></label>
+    {% endfor %}
+  </div>
+  <h2 class="sh"><b>3</b> {{ _("Print options") }}</h2>
+  <div class="frows">
+    <div class="frow"><div class="permhead">{{ _("Comment") }}</div>
+      <div class="fctl"><input type="text" name="comment" maxlength="{{ comment_max }}" placeholder="{{ _('What it contains (optional, max %(n)s characters)', n=comment_max) }}" autocomplete="off">
+        <span class="hint">{{ _("It stays in the print log, under the file name.") }}</span></div></div>
+    <div class="frow"><div class="permhead">{{ _("Paper size") }}</div><div class="fctl"><select name="media" id="media"></select></div></div>
+    <div class="frow"><div class="permhead">{{ _("Orientation") }}</div>
+      <div class="fctl">{{ seg("orientation", [("", _("Automatic")), ("portrait", _("Portrait")), ("landscape", _("Landscape"))], "") }}</div></div>
+    {% if perms.color %}<div class="frow" id="colorrow"><div class="permhead">{{ _("Colour") }}</div>
+      <div class="fctl">{{ seg("color", [("", _("Printer default")), ("color", _("In colour")), ("monochrome", _("Black and white"))], "") }}</div></div>{% endif %}
+    {% if perms.one_sided %}<div class="frow" id="sidesrow"><div class="permhead">{{ _("Sides") }}</div>
+      <div class="fctl">{{ seg("sides", [("", _("Printer default")), ("one-sided", _("One-sided")), ("two-sided-long-edge", _("Double-sided, long edge")), ("two-sided-short-edge", _("Double-sided, short edge"))], "", "compact") }}</div></div>{% endif %}
+    <div class="frow"><div class="permhead">{{ _("Pages") }}</div>
+      <div class="fctl"><input type="text" name="pages" id="pages" placeholder="{{ _('All — or 1,5 or 2-4') }}" inputmode="text" autocomplete="off"></div></div>
+    <div class="frow"><div class="permhead">{{ _("Copies") }}</div>
+      <div class="fctl"><div class="row">{{ stepper("copies", 1, min=1, max=max_copies, id="copies", label=_("Copies"), required=true) }}
+        <span class="hint">({{ _("at most %(n)s", n=max_copies) }})</span></div></div></div>
+  </div>
+  <div class="actions"><button id="go" class="ico" style="padding:11px 22px" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg><span id="golabel">{{ _("Print") }}</span></button><a class="btn sec" href="/me">{{ _("Cancel") }}</a></div>
   <p class="muted" style="margin-bottom:0">{{ _("It counts as a normal print: same limits and same log. The pages are counted before printing.") }}</p>
   {% endif %}
 </form>
+</div>
 <script>
 (function () {
   var f = document.getElementById('file'), go = document.getElementById('go'), n = document.getElementById('fname'),
       drop = document.getElementById('drop'), c = document.getElementById('copies'), max = {{ max_copies }};
   if (!f) return;
-  var qs = {{ queues_js | tojson }}, media = document.getElementById('media'), colorSel = document.getElementById('color');
+  var qs = {{ queues_js | tojson }}, media = document.getElementById('media');
+  function reset(name) { var r = document.querySelector('input[name=' + name + '][value=""]'); if (r) r.checked = true; }  // back to "printer default"
   function opts() {
     var r = document.querySelector('input[name=queue]:checked'), q = r && qs[r.value] || {media: [], color: false};
     media.innerHTML = '<option value="">' + {{ _t('Printer default')|tojson }} + '</option>';
@@ -75,14 +91,15 @@
       var o = document.createElement('option'); o.value = m.id; o.textContent = m.label + (m.id === q.media_default ? ' ' + {{ _t('(default)')|tojson }} : '');
       media.appendChild(o);
     });
-    if (colorSel) {
-      document.getElementById('colorrow').style.display = document.getElementById('colorlbl').style.display = q.color ? '' : 'none';
-      if (!q.color) colorSel.value = '';
+    var colorRow = document.getElementById('colorrow');
+    if (colorRow) {
+      colorRow.style.display = q.color ? '' : 'none';
+      if (!q.color) reset('color');
     }
-    var sidesSel = document.querySelector('select[name=sides]');
-    if (sidesSel) {  // only a printer with a duplex unit offers the choice
-      document.getElementById('sidesrow').style.display = document.getElementById('sideslbl').style.display = q.duplex ? '' : 'none';
-      if (!q.duplex) sidesSel.value = '';
+    var sidesRow = document.getElementById('sidesrow');
+    if (sidesRow) {  // only a printer with a duplex unit offers the choice
+      sidesRow.style.display = q.duplex ? '' : 'none';
+      if (!q.duplex) reset('sides');
     }
   }
   Array.prototype.forEach.call(document.querySelectorAll('input[name=queue]'), function (r) { r.addEventListener('change', opts); });
@@ -92,9 +109,7 @@
   ['dragenter', 'dragover'].forEach(function (e) { drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.add('over'); }); });
   ['dragleave', 'drop'].forEach(function (e) { drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.remove('over'); }); });
   drop.addEventListener('drop', function (ev) { if (ev.dataTransfer.files.length) { f.files = ev.dataTransfer.files; upd(); } });
-  document.getElementById('minus').onclick = function () { c.value = Math.max(1, (+c.value || 1) - 1); };
-  document.getElementById('plus').onclick = function () { c.value = Math.min(max, (+c.value || 1) + 1); };
-  document.getElementById('pf').addEventListener('submit', function () { go.disabled = true; go.textContent = {{ _t('Sending…')|tojson }}; });
+  document.getElementById('pf').addEventListener('submit', function () { go.disabled = true; document.getElementById('golabel').textContent = {{ _t('Sending…')|tojson }}; });
   upd();
 })();
 </script>

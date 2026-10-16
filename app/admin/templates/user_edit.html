@@ -1,28 +1,39 @@
 {% extends "base.html" %}
+{% from "macros.html" import seg, stepper %}
 {% block title %}{{ _("Edit %(user)s", user=u.username) }}{% endblock %}
 {% block body %}
-<form class="card" method="post" action="/admin/users/{{ u.id }}" style="max-width:760px">
-  <h1>{{ _("Edit %(user)s", user=u.username) }}</h1>
+<div class="formpage">
+<form class="card" method="post" action="/admin/users/{{ u.id }}">
+  <div class="pagehead">
+    <span class="pico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5"/></svg></span>
+    <div><h1>{{ _("Edit %(user)s", user=u.username) }}</h1></div>
+  </div>
   {% if protected %}<p class="muted">{{ _("%(user)s is the emergency administrator: it cannot be disabled, demoted, deleted or moved to RADIUS.", user=u.username) }}</p>{% endif %}
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
-  <dl class="kv" style="align-items:center">
-    <dt>{{ _("Origin (sign-in)") }}</dt>
-    <dd><b>{{ _('local (password in the gateway)') if u.provider == 'local' else _('%(provider)s (password on the server)', provider=u.provider) }}</b>
-      <div class="muted">{{ _("Shown for information: the way this account signs in is set when it is created.") }}</div></dd>
-    <dt>{{ _("Group") }}</dt>
-    <dd><select name="group_id">
-      <option value="0">—</option>
-      {% for g in groups %}<option value="{{ g.id }}" {{ 'selected' if u.group_id == g.id }}>{{ g.name }}</option>{% endfor %}
-    </select><div class="muted">{{ _("“%(group)s” is reserved for administrators: it changes by itself with the flag below.", group=admin_group) }}</div></dd>
-    <dt>{{ _("State") }}</dt><dd><label><input type="checkbox" name="enabled" value="1" {{ 'checked' if u.enabled }}> {{ _("active") }}</label></dd>
-    <dt>{{ _("Administrator") }}</dt><dd><label><input type="checkbox" name="is_admin" value="1" {{ 'checked' if u.is_admin }}> {{ _("can use the administration panel") }}</label></dd>
-    <dt>{{ _("Job limit") }}</dt><dd><input type="number" min="0" name="jobs_limit" value="{{ jobs }}" placeholder="{{ _('inherit') }}">
-      <span class="muted">{{ _("empty = inherit from the group") }}{% if view.jobs.extra %} · {{ _('<span class="extra">+%(n)s</span> granted', n=view.jobs.extra) }}{% endif %}</span></dd>
-    <dt>{{ _("Page limit") }}</dt><dd><input type="number" min="0" name="pages_limit" value="{{ pages }}" placeholder="{{ _('inherit') }}">
-      <span class="muted">{{ _("empty = inherit from the group") }}{% if view.pages.extra %} · {{ _('<span class="extra">+%(n)s</span> granted', n=view.pages.extra) }}{% endif %}</span></dd>
-    <dt>{{ _("Period") }}</dt><dd><select name="period">{% for p in periods %}<option value="{{ p }}" {{ 'selected' if view.period == p }}>{{ {'weekly': _('weekly'), 'monthly': _('monthly')}[p] }}</option>{% endfor %}</select></dd>
-    <dt>{{ _("Usage") }}</dt><dd class="muted">{% for l in view.usage %}<div>{{ l }}</div>{% else %}{{ _("no limit") }}{% endfor %}</dd>
-  </dl>
+  <div class="frows">
+    <div class="frow"><div class="permhead">{{ _("Origin (sign-in)") }}</div>
+      <div class="fctl"><b>{{ _('local (password in the gateway)') if u.provider == 'local' else _('%(provider)s (password on the server)', provider=u.provider) }}</b>
+        <span class="hint">{{ _("Shown for information: the way this account signs in is set when it is created.") }}</span></div></div>
+    <div class="frow"><div class="permhead">{{ _("Group") }}</div>
+      <div class="fctl"><select name="group_id">
+        <option value="0">—</option>
+        {% for g in groups %}<option value="{{ g.id }}" {{ 'selected' if u.group_id == g.id }}>{{ g.name }}</option>{% endfor %}
+      </select><span class="hint">{{ _("“%(group)s” is reserved for administrators: it changes by itself with the flag below.", group=admin_group) }}</span></div></div>
+    <div class="frow"><div class="permhead">{{ _("State") }}</div>
+      <div class="fctl">{{ seg("enabled", [("1", _("active")), ("", _("disabled"))], "1" if u.enabled else "") }}</div></div>
+    <div class="frow"><div class="permhead">{{ _("Administrator") }}<small>{{ _("can use the administration panel") }}</small></div>
+      <div class="fctl">{{ seg("is_admin", [("1", _("yes")), ("", _("no"))], "1" if u.is_admin else "") }}</div></div>
+    <div class="frow"><div class="permhead">{{ _("Job limit") }}</div>
+      <div class="fctl">{{ stepper("jobs_limit", jobs, placeholder=_('inherit'), label=_("Job limit")) }}
+        <span class="hint">{{ _("empty = inherit from the group") }}{% if view.jobs.extra %} · {{ _('<span class="extra">+%(n)s</span> granted', n=view.jobs.extra) }}{% endif %}</span></div></div>
+    <div class="frow"><div class="permhead">{{ _("Page limit") }}</div>
+      <div class="fctl">{{ stepper("pages_limit", pages, placeholder=_('inherit'), label=_("Page limit")) }}
+        <span class="hint">{{ _("empty = inherit from the group") }}{% if view.pages.extra %} · {{ _('<span class="extra">+%(n)s</span> granted', n=view.pages.extra) }}{% endif %}</span></div></div>
+    <div class="frow"><div class="permhead">{{ _("Period") }}</div>
+      <div class="fctl">{{ seg("period", [("weekly", _("weekly")), ("monthly", _("monthly"))], view.period) }}</div></div>
+    <div class="frow"><div class="permhead">{{ _("Usage") }}</div>
+      <div class="fctl muted">{% for l in view.usage %}<div>{{ l }}</div>{% else %}{{ _("no limit") }}{% endfor %}</div></div>
+  </div>
   {% include "_perm_fields.html" %}
   {% if perm_grants %}
   <p class="muted" style="margin-top:10px">{{ _("Permissions granted after a request or directly:") }}
@@ -31,15 +42,16 @@
   {% endif %}
   <div class="actions"><button>{{ _("Save") }}</button><a class="btn sec" href="/admin/users">{{ _("Cancel") }}</a></div>
 </form>
-<div class="card" style="max-width:760px">
+<div class="card">
   <h2>{{ _("Other actions") }}</h2>
   <div class="row">
     <a class="btn sec" href="/admin/users/{{ u.id }}/keys">{{ _("Print keys") }}</a>
     {% if u.provider == 'local' %}
-    <form method="post" action="/admin/users/{{ u.id }}/password" onsubmit="return confirm({{ _t('Generate a new temporary password for %(user)s?', user=u.username)|tojson|forceescape }})">
+    <form method="post" action="/admin/users/{{ u.id }}/password" data-confirm="{{ _t('Generate a new temporary password for %(user)s?', user=u.username) }}" data-confirm-title="{{ _t('Reset password') }}" data-confirm-ok="{{ _t('Reset password') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec" type="submit">{{ _("Reset password") }}</button></form>
     {% endif %}
     {% if not protected and not is_self %}<a class="btn danger" href="/admin/users/{{ u.id }}/delete">{{ _("Delete account…") }}</a>{% endif %}
   </div>
+</div>
 </div>
 {% endblock %}

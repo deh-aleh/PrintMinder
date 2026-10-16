@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros.html" import stepper %}
 {% block title %}{{ _("Settings") }}{% endblock %}
 {% block body %}
 <div class="narrow">
@@ -28,19 +29,19 @@
   <h2>{{ _("Audit: automatic refresh") }}</h2>
   <p class="muted">{{ _("How many seconds between the automatic reloads of the Audit page while its switch is on (it does not reload while you type in the filters or have a popup open). With 0 the switch starts off, and uses 30 seconds when you turn it on.") }}</p>
   <div class="row">
-    <input type="number" name="seconds" min="0" max="{{ refresh_max }}" value="{{ me.refresh_seconds }}" aria-label="{{ _('Seconds') }}" required> {{ _("seconds") }}
+    {{ stepper("seconds", me.refresh_seconds, min=0, max=refresh_max, label=_("Seconds"), required=true) }} {{ _("seconds") }}
     <input type="hidden" name="csrf_token" value="{{ csrf }}"><button>{{ _("Save") }}</button>
   </div>
 </form>
 {% endif %}
 {% if me.provider == 'local' %}
-<form class="card" method="post" action="/me/password">
+<form class="card pwform" method="post" action="/me/password">
   <h2>{{ _("Change password") }}</h2>
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
-  <div class="row"><input type="password" name="current" placeholder="{{ _('current password') }}" autocomplete="current-password" required></div>
-  <div class="row" style="margin-top:8px"><input type="password" name="new" placeholder="{{ _('new password (min. 12)') }}" autocomplete="new-password" required>
-    <input type="password" name="confirm" placeholder="{{ _('repeat the new one') }}" autocomplete="new-password" required></div>
-  <p><button>{{ _("Change password") }}</button></p>
+  {% with name="current", placeholder=_t('current password'), autocomplete="current-password" %}{% include "_pwfield.html" %}{% endwith %}
+  {% with name="new", placeholder=_t('new password (min. 12)'), autocomplete="new-password" %}{% include "_pwfield.html" %}{% endwith %}
+  {% with name="confirm", placeholder=_t('repeat the new one'), autocomplete="new-password" %}{% include "_pwfield.html" %}{% endwith %}
+  <p><button class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4"/><path d="M10.5 12.5 20 3M16.5 6.5l3 3M13.5 9.5l2 2"/></svg>{{ _("Change password") }}</button></p>
   <p class="muted">{{ _("Other sessions open with this account will be closed. Print keys stay valid.") }}</p>
 </form>
 {% else %}

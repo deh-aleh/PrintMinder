@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros.html" import stepper %}
 {% block title %}{{ _("Printers") }}{% endblock %}
 {% block body %}
 <h1 style="margin:0 0 4px;font-size:18px">{{ _("Printers") }} <span class="muted" style="font-size:13px">({{ _("data read from the printers; physical ones first, in your own order") }})</span></h1>
@@ -11,7 +12,7 @@
   <div><b>{{ _("Find printers") }}</b><div class="muted">{{ _("USB printers are added by themselves within a minute of being plugged in: through ipp-usb when the printer supports it, otherwise with a CUPS driver.") }}
     {% if remove_after %}{{ _("A USB printer that stops answering is removed after %(hours)s hours.", hours=remove_hours) }}{% else %}{{ _("Queues of unplugged printers are not removed by themselves.") }}{% endif %}</div>
     {% for n in notes %}<div style="color:var(--err)">{{ n }}</div>{% endfor %}</div>
-  <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _("Look now") }}</button>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>{{ _("Look now") }}</button>
 </form>
 {% for d in devices %}{% set dev = d.device %}
 <div class="card">
@@ -44,7 +45,9 @@
     <p class="pill blocked" style="display:block;border-radius:8px;padding:8px 12px">{{ _("Computers and phones where the printer was set up by hand with the old address will stop printing until they are set up again. Block, maintenance print and the places in the lists follow the queue; the audit keeps the old name for what already happened.") }}</p>
     {% for q in d.queues %}
     <form method="post" action="/admin/printers/{{ q.name|urlencode }}/rename" class="rnform" style="margin-top:8px"
-          onsubmit="return confirm({{ _t('Rename %(printer)s? Computers and phones where it was set up by hand with the old address will stop printing until they are set up again.', printer=q.name)|tojson|forceescape }})">
+          data-confirm="{{ _t('Rename %(printer)s? Computers and phones where it was set up by hand with the old address will stop printing until they are set up again.', printer=q.name) }}"
+          data-confirm-title="{{ _t('Rename the queue') }}" data-confirm-ok="{{ _t('Rename') }}" data-confirm-danger
+          data-confirm-check="{{ _t('Tell all users in their notices (administrators too)') }}" data-confirm-check-name="notify" data-confirm-check-on>
       <input type="hidden" name="csrf_token" value="{{ csrf }}">
       <label class="muted" for="rn-{{ loop.index }}-{{ q.name }}">{{ _("New name for %(printer)s", printer=q.name) }}</label>
       <div class="row">
@@ -89,7 +92,7 @@
       <input type="hidden" name="csrf_token" value="{{ csrf }}">
       <label>{{ _("Every") }}</label>
       <div class="row" style="margin:4px 0 8px">
-        <input type="number" name="amount" min="1" max="2160" value="{{ cur[0] }}" required style="width:90px" aria-label="{{ _('Interval') }}">
+        {{ stepper("amount", cur[0], min=1, max=2160, label=_("Interval"), required=true) }}
         <select name="unit" aria-label="{{ _('Unit') }}"><option value="days" {{ 'selected' if cur[1] == 'days' }}>{{ _("days") }}</option><option value="hours" {{ 'selected' if cur[1] == 'hours' }}>{{ _("hours") }}</option></select>
       </div>
       <div class="row" style="margin-bottom:10px">
@@ -130,7 +133,7 @@
     {% if c and c.blocked %}<span class="pill blocked" title="{{ _('Applies to all users, also to the accounts of the administrator group') }}">{{ _("BLOCKED FOR EVERYONE · admins included") }}</span>{% endif %}
     {% if c and c.mdns_hidden %}<span class="pill s-pending" title="{{ _('It is not announced on the network: still usable by whoever knows it') }}">{{ _("hidden from the network (mDNS)") }}</span>{% endif %}
     <form method="post" action="/admin/printers/{{ q.name|urlencode }}/block"
-          {% if not (c and c.blocked) %}onsubmit="return confirm({{ _t('Block %(printer)s for EVERYONE, administrators included?', printer=q.name)|tojson|forceescape }})"{% endif %}>
+          {% if not (c and c.blocked) %}data-confirm="{{ _t('Block %(printer)s for EVERYONE, administrators included?', printer=q.name) }}"{% endif %}>
       <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="on" value="{{ '0' if c and c.blocked else '1' }}">
       <button class="{{ 'sec' if c and c.blocked else 'danger' }}" title="{{ _('If blocked nobody can print, not even the admins') }}">{{ _('Unblock use') if c and c.blocked else _('Block use') }}</button>
     </form>
@@ -139,11 +142,11 @@
       <button class="sec" title="{{ _('Removes (or restores) the printer from the automatic announcement on the network') }}">{{ _('Show on mDNS') if c and c.mdns_hidden else _('Hide from mDNS') }}</button>
     </form>
     {% if q.device_uri.startswith('cups-pdf:') %}
-    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/delete" onsubmit="return confirm({{ _t('Delete the virtual printer %(printer)s? The PDFs already produced stay where they are.', printer=q.name)|tojson|forceescape }})">
+    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/delete" data-confirm="{{ _t('Delete the virtual printer %(printer)s? The PDFs already produced stay where they are.', printer=q.name) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger" title="{{ _('Only virtual printers can be deleted') }}">{{ _("Delete") }}</button>
     </form>
     {% elif not q.online %}
-    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/delete" onsubmit="return confirm({{ _t('Delete the queue %(printer)s? The printer does not answer. Its settings (block, maintenance print) are forgotten; if it comes back it is added again as a new printer.', printer=q.name)|tojson|forceescape }})">
+    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/delete" data-confirm="{{ _t('Delete the queue %(printer)s? The printer does not answer. Its settings (block, maintenance print) are forgotten; if it comes back it is added again as a new printer.', printer=q.name) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger" title="{{ _('The printer does not answer: remove its queue now') }}">{{ _("Delete queue") }}</button>
     </form>
     {% endif %}

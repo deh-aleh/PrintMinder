@@ -124,7 +124,7 @@ async def test_unplugging_a_scanner_removes_it_and_plugging_it_back_restores_it(
     two_scanners.state["down"].add("scan-b")
     two_scanners.app.state.scanners_cache = None                                                     # (it expires after 30 s)
     page = (await two_scanners.get("/me/scan")).text
-    assert ">beta<" not in page and "<b>alpha</b>" in page                                           # one left: shown as a name
+    assert ">beta<" not in page and ">alpha</span>" in page                                           # one left: shown as a name
     assert (await two_scanners.get("/eSCL-beta/ScannerCapabilities")).status_code == 404
     code, body = await do_scan(two_scanners, scanner="beta", source="platen", dpi="300")
     assert code == 409 and "beta" in body["error"] and "non risponde" in body["error"]
@@ -257,7 +257,7 @@ async def test_print_and_scan_forms_are_centred(portal):
     portal.app.state.scan = None
     for path in ("/me/print", "/me/scan"):
         page = (await portal.get(path)).text
-        assert "margin-inline:auto" in page, path
+        assert 'class="formpage"' in page, path
 
 
 async def test_scan_without_credentials_is_refused_and_reported_once(two_scanners, monkeypatch):

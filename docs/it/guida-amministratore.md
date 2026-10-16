@@ -18,7 +18,7 @@ Per chi gestisce l'installazione. Il portale è su `https://<server>:8631/admin`
 | **Logo, nome e (utente)** | `/me/settings` | Il blocco in alto a sinistra apre le impostazioni: tema, lingua, aggiornamento |
 | **Campanella** (solo amministratori) | `/admin/notices` | Cose che il gateway ha notato (il numero indica quelle aperte), vedi «Avvisi» sotto |
 | **?** (solo amministratori) | `/admin/docs` | Questa documentazione, in italiano o inglese (selettore in cima a ogni pagina) |
-| **Manutenzione** (chiave inglese rossa) | — | Ferma stampa e scansione per tutti tranne gli amministratori |
+| **Manutenzione** (cono stradale rosso) | — | Ferma stampa e scansione per tutti tranne gli amministratori |
 | **Porta con freccia** | — | Esci |
 
 ## 1. Primi passi
@@ -72,7 +72,7 @@ Tutto viene registrato.
 ## 5. Stampanti
 
 Blocca una stampante (nessuno stampa, amministratori compresi), nascondila da mDNS, crea stampanti di prova, imposta la stampa periodica
-di manutenzione, invia una stampa di prova con le statistiche, attiva la **manutenzione del gateway** (pulsante rosso con la chiave inglese). Vedi
+di manutenzione, invia una stampa di prova con le statistiche, attiva la **manutenzione del gateway** (pulsante rosso con il cono stradale). Vedi
 [stampanti.md](stampanti.md).
 
 ## 6. Audit e archivio

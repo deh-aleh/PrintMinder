@@ -57,6 +57,12 @@
         {% elif n.kind == 'job_adjusted' %}
         {% set who = d.get("printer") or "?" %}
         {% for c in d.get("changed", []) %}{% if not loop.first %}<br>{% endif %}{% if c == 'color' %}{{ _("Your print to “%(printer)s” was made in black and white: colour printing is not allowed for your account.", printer=who) }}{% elif c == 'one_sided' %}{{ _("Your print to “%(printer)s” was made double-sided: one-sided printing is not allowed for your account.", printer=who) }}{% endif %}{% endfor %}
+        {% elif n.kind == 'printer_renamed' %}
+        {{ _("The printer “%(old)s” is now called “%(new)s”. If you had set it up by hand on a computer or phone with the old address, set it up again with the new name.", old=d.get("old", "?"), new=d.get("new", "?")) }}
+        {% elif n.kind == 'maintenance_on' %}
+        {{ _("The gateway is in maintenance: printing and scanning are suspended for now. You will be able to use them again when an administrator ends the maintenance.") }}
+        {% elif n.kind == 'maintenance_off' %}
+        {{ _("The maintenance is over: printing and scanning work again.") }}
         {% elif n.kind == 'secret_key_save' %}
         {{ _("<b>Save the secret key in a safe place.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> in the <span class=\"mono\">.env</span> file encrypts the file names kept in the audit and signs the portal sessions. A backup without encryption does not contain it: if the server breaks and you restore the backup with a new key, the names stay unreadable (<span class=\"mono\">[encrypted]</span>) for good. Copy the line from <span class=\"mono\">.env</span> into a password manager, or make encrypted backups (they include <span class=\"mono\">.env</span>).") }}
         {% else %}{{ n.kind }}{% endif %}

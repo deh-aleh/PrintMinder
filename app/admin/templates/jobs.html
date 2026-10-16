@@ -11,7 +11,7 @@
 {% endif %}
 <div class="card">
   <style>.tdot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:7px; background:var(--ok) } .tdot.off { background:var(--err) }</style>
-  <form method="post" action="/admin/jobs/titles" style="float:right;margin:0"{% if titles_on %} onsubmit="return confirm({{ _t('Stop saving the names of the files? From now on new prints and scans will be listed without a file name. The names already saved stay. You can turn it on again at any time.')|tojson|forceescape }})"{% endif %}>
+  <form method="post" action="/admin/jobs/titles" style="float:right;margin:0"{% if titles_on %} data-confirm="{{ _t('Stop saving the names of the files? From now on new prints and scans will be listed without a file name. The names already saved stay. You can turn it on again at any time.') }}"{% endif %}>
     <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="on" value="{{ '0' if titles_on else '1' }}">
     <button class="sec" title="{{ _('Click to stop saving the names of new files') if titles_on else _('Click to start saving the names of new files again') }}"><span class="tdot{{ '' if titles_on else ' off' }}"></span>{{ _("File names are being saved") if titles_on else _("File names are not being saved") }}</button>
   </form>
@@ -73,7 +73,7 @@
           <form method="dialog" style="margin-top:12px"><button class="sec">{{ _("Close") }}</button></form>
         </dialog>{% endif %}</td>
       <td>{% if j.state.value == 'accepted' and j.cups_job_id and j.printer and r.name %}
-        <form method="post" action="/admin/jobs/{{ j.id }}/cancel" onsubmit="return confirm({{ _t('Cancel this queued job?')|tojson|forceescape }})">
+        <form method="post" action="/admin/jobs/{{ j.id }}/cancel" data-confirm="{{ _t('Cancel this queued job?') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger">{{ _("Cancel") }}</button></form>{% endif %}</td>
     </tr>
     {% else %}<tr><td colspan="10" class="muted">{{ _("No jobs.") }}</td></tr>{% endfor %}

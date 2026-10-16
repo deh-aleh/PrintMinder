@@ -83,8 +83,8 @@ in grigio come segnaposto). Il nome è l'ultima parte dell'indirizzo, `…/print
 — stesso driver (stampanti IPP: senza driver; USB: il driver che CUPS ha per quel modello; virtuali: CUPS-PDF), stessa descrizione e
 posizione — e solo dopo toglie la vecchia; se qualcosa fallisce la vecchia resta. Blocco, nascondimento da mDNS, impostazioni della stampa di
 manutenzione, conto alla rovescia e posizione negli elenchi seguono la coda; l'audit conserva il vecchio nome per ciò che è già successo.
-Cliccando *Rinomina* si chiede conferma e si avverte che **i computer e i telefoni configurati a mano con il vecchio indirizzo smetteranno di
-stampare** finché non vengono configurati di nuovo. Si rifiuta una coda con job in attesa, un nome già in uso o una coda di cui il gateway
+Cliccando *Rinomina* si apre una finestra di conferma (nello stile del portale) che avverte che **i computer e i telefoni configurati a mano con il vecchio indirizzo smetteranno di
+stampare** finché non vengono configurati di nuovo. La finestra ha una spunta, attiva di default, per **avvisare tutti gli utenti nelle loro notifiche** (la campanella, amministratori compresi, tranne chi ha rinominato): ognuno trova «la stampante X ora si chiama Y». Si rifiuta una coda con job in attesa, un nome già in uso o una coda di cui il gateway
 non può conoscere il driver (per esempio una coda `socket://`). Le opzioni impostate a mano in CUPS (carta predefinita, …) non vengono
 riportate. Le stampanti consentite a gruppi e utenti ([quote.md](quote.md#5-permessi-avanzati)), i permessi concessi per quella stampante e
 le richieste per essa ancora in attesa seguono il nuovo nome.
@@ -144,8 +144,8 @@ sempre in inglese ([lingue.md](lingue.md)).
 
 - **Blocca una stampante** — non accetta job da nessuno, **amministratori compresi** (guasta o riservata). Per coda.
 - **Nascondi da mDNS** — la stampante non viene più annunciata sulla rete; resta usabile con l'indirizzo.
-- **Manutenzione del gateway** (pulsante rosso con la chiave inglese, in alto) — ferma stampa **e scansione** per tutti tranne gli amministratori e ritira ogni
-  annuncio mDNS. Un banner rosso mostra lo stato su ogni pagina.
+- **Manutenzione del gateway** (pulsante rosso con il cono stradale, in alto) — ferma stampa **e scansione** per tutti tranne gli amministratori e ritira ogni
+  annuncio mDNS. Un banner rosso mostra lo stato su ogni pagina. La finestra di conferma ha una spunta, attiva di default, per **avvisare tutti gli utenti nelle loro notifiche** (amministratori compresi, tranne chi agisce) che la stampa è sospesa o che funziona di nuovo; uscendo dalla manutenzione l'avviso «in manutenzione» precedente viene chiuso.
 
 L'annunciatore mDNS interroga il gateway (`/mdns/policy`, autenticato da un codice derivato da `CUPSPL_SECRET_KEY`).
 

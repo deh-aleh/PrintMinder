@@ -42,7 +42,7 @@ async def test_index_lists_the_pages_of_that_language(boss):
     en = (await boss.get("/admin/docs/en/")).text
     assert 'href="/admin/docs/en/backup"' in en and "Backup and restore" in en
     assert 'href="/admin/docs/en/configuration"' in en
-    assert 'href="/admin/docs/it/' not in en.split('class="docindex"')[1]
+    assert 'href="/admin/docs/it/' not in en.split('class="doctiles"')[1]
     it = (await boss.get("/admin/docs/it/")).text
     assert 'href="/admin/docs/it/backup"' in it and 'href="/admin/docs/it/configurazione"' in it
 

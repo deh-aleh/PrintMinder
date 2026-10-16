@@ -79,8 +79,9 @@ audit (`printer.move`). A printer you never moved follows the default order desc
 placeholder). The name is the last part of the address, `…/printers/<name>`: letters, digits and `. _ @ + -`. CUPS can not rename a queue, so the gateway creates the new one on the same device — same driver (IPP printers:
 driverless; USB: the driver CUPS has for it; virtual: CUPS-PDF), same description and location — and only then removes the old one; if
 anything fails the old queue stays. Block, hide-from-mDNS, maintenance-print settings, the countdown and the places in the lists follow the
-queue; the audit keeps the old name for what already happened. Clicking *Rename* asks for confirmation and warns that **computers and
-phones set up by hand with the old address will stop printing** until they are set up again. A queue with jobs waiting, a name already
+queue; the audit keeps the old name for what already happened. Clicking *Rename* opens a confirmation window (in the portal's own style) that warns that **computers and
+phones set up by hand with the old address will stop printing** until they are set up again. The window has a tick, on by default, to
+**tell all users in their notices** (the bell, administrators included, except the one who renamed): each one finds "the printer X is now called Y". A queue with jobs waiting, a name already
 in use, or a queue whose driver the gateway can not know (for example a `socket://` queue) is refused. Options set by hand in CUPS
 (default paper, …) are not carried over. The printers allowed to groups and users ([quotas.md](quotas.md#5-advanced-permissions)), the
 permissions granted for that printer and the requests for it still waiting follow the new name.
@@ -140,8 +141,8 @@ English ([languages.md](languages.md)).
 
 - **Block a printer** — takes no job from anybody, **administrators included** (out of order or reserved). Per queue.
 - **Hide from mDNS** — the printer is no longer announced on the network; still usable by address.
-- **Gateway maintenance** (red wrench button at the top) — stops printing **and scanning** for everybody except administrators and
-  withdraws every mDNS announcement. A red banner shows the state on every page.
+- **Gateway maintenance** (red traffic-cone button at the top) — stops printing **and scanning** for everybody except administrators and
+  withdraws every mDNS announcement. A red banner shows the state on every page. The confirmation window has a tick, on by default, to **tell all users in their notices** (administrators too, except the one who acts) that printing is suspended, or that it works again; leaving maintenance closes the earlier "in maintenance" notice.
 
 The mDNS announcer asks the gateway (`/mdns/policy`, authenticated by a code derived from `CUPSPL_SECRET_KEY`).
 

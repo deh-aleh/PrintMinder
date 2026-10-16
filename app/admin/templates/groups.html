@@ -16,7 +16,7 @@
       <td data-l="{{ _('Requestable') }}">{{ _('yes') if g.requestable else '—' }}</td>
       <td><div class="row">
         <a class="btn sec" href="/admin/groups/{{ g.id }}/edit">{{ _("Edit") }}</a>
-        <form method="post" action="/admin/groups/{{ g.id }}/delete" onsubmit="return confirm({{ r.warning|tojson|forceescape }})">
+        <form method="post" action="/admin/groups/{{ g.id }}/delete" data-confirm="{{ r.warning }}">
           <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger" {{ 'disabled' if g.name in system }}>{{ _("Delete") }}</button>
         </form>
       </div></td>

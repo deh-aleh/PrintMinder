@@ -819,3 +819,41 @@ async def test_the_printers_and_the_days_sit_under_the_choice_that_uses_them(adm
     days = page.index('data-show="perm_hours" data-value="window"')
     assert printers < page.index('name="perm_printer"') < days < page.index('name="perm_day"')
     assert 'class="seg"' in page and 'type="radio" name="perm_printers" value="list"' in page
+
+
+@pytest.mark.usefixtures("english")
+async def test_renaming_can_tell_every_active_user_in_their_notices(adm):
+    cl = adm
+    assert 'data-confirm-check-name="notify"' in (await cl.get("/admin/printers")).text           # the tick is in the application's own window
+    with cl.sm() as s:
+        gone = User(username="gone", provider="local", enabled=False)
+        s.add(gone)
+        s.commit()
+    r = await cl.post("/admin/printers/color/rename", data={"csrf_token": cl.token, "new_name": "Colour3", "notify": "1"})
+    assert r.status_code == 303
+    with cl.sm() as s:
+        rows = list(s.scalars(select(Notice).where(Notice.kind == "printer_renamed")))
+        names = {s.get(User, n.user_id).username for n in rows}
+        assert "ann" in names and "boss" not in names and "gone" not in names                     # not the one who renamed, not a disabled account
+        assert all(n.detail_json == {"old": "color", "new": "Colour3"} and n.key == "Colour3" for n in rows)
+
+
+@pytest.mark.usefixtures("english")
+async def test_renaming_without_the_tick_tells_nobody(adm):
+    r = await rename(adm, "color", "Colour4")
+    assert r.status_code == 303
+    with adm.sm() as s:
+        assert not list(s.scalars(select(Notice).where(Notice.kind == "printer_renamed")))
+
+
+@pytest.mark.usefixtures("english")
+async def test_maintenance_can_tell_the_users_and_leaving_closes_that_notice(adm):
+    cl = adm
+    await cl.post("/admin/maintenance", data={"csrf_token": cl.token, "on": "1", "notify": "1"})
+    with cl.sm() as s:
+        rows = list(s.scalars(select(Notice).where(Notice.kind == "maintenance_on", Notice.dismissed_at.is_(None))))
+        assert {s.get(User, n.user_id).username for n in rows} == {"ann"}                           # not the administrator who did it
+    await cl.post("/admin/maintenance", data={"csrf_token": cl.token, "on": "0", "notify": "1"})
+    with cl.sm() as s:
+        assert not list(s.scalars(select(Notice).where(Notice.kind == "maintenance_on", Notice.dismissed_at.is_(None))))
+        assert list(s.scalars(select(Notice).where(Notice.kind == "maintenance_off")))

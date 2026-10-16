@@ -18,7 +18,7 @@ For people who run the installation. The portal is at `https://<server>:8631/adm
 | **Logo, name and (user)** | `/me/settings` | The block at the top left opens the settings: theme, language, refresh |
 | **Bell** (administrators only) | `/admin/notices` | Things the gateway noticed (badge = open ones), see "Notices" below |
 | **?** (administrators only) | `/admin/docs` | This documentation, in English or Italian (switch at the top of each page) |
-| **Maintenance** (red wrench) | — | Stops print and scan for everyone but administrators |
+| **Maintenance** (red traffic cone) | — | Stops print and scan for everyone but administrators |
 | **Door with arrow** | — | Log out |
 
 ## 1. First steps
@@ -71,7 +71,7 @@ Everything is logged.
 ## 5. Printers
 
 Block a printer (nobody prints, administrators included), hide it from mDNS, create test printers, set up the periodic maintenance
-print, send a test print with statistics, switch on **gateway maintenance** (red wrench button). See [printers.md](printers.md).
+print, send a test print with statistics, switch on **gateway maintenance** (red traffic-cone button). See [printers.md](printers.md).
 
 ## 6. Audit and archive
 

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from app.admin.common import back, current_admin, flash, get_db, safe_next, verify_csrf
-from app import certwatch
+from app import certwatch, notices
 from app.audit.adminlog import record
 from app.cups_client import list_queues
 from app.db.models import User
@@ -23,12 +23,19 @@ QUEUE_RE = re.compile(r"^[A-Za-z0-9._@+-]{1,127}$")
 
 
 @router.post("/admin/maintenance", dependencies=[Depends(verify_csrf)])
-def maintenance(request: Request, on: str = Form("1"), next: str = Form("/admin/printers"),
+def maintenance(request: Request, on: str = Form("1"), next: str = Form("/admin/printers"), notify: str = Form(""),
                 admin: User = Depends(current_admin), db: Session = Depends(get_db)):
+    """`notify`: the tick in the confirmation window: a notice in the bell of every active account (not the administrator
+    who did it). Leaving maintenance also closes the "in maintenance" notices that are still open."""
     flag = on == "1"
     control.set_maintenance(db, flag)
-    record(db, admin, "maintenance.on" if flag else "maintenance.off", "gateway", None)
+    record(db, admin, "maintenance.on" if flag else "maintenance.off", "gateway", None, notified_users=bool(notify))
     db.commit()
+    sm = request.app.state.sessionmaker
+    if not flag:
+        notices.resolve_users(sm, "maintenance_on", "gateway")
+    if notify:
+        notices.notify_all_users(sm, "maintenance_on" if flag else "maintenance_off", key="gateway", exclude_user_id=admin.id)
     log.warning("admin %s %s maintenance mode", admin.username, "ENABLED" if flag else "disabled")
     flash(request, _("Gateway in maintenance: printing and scanning stopped for users, printers hidden from the network (within ~30 s)")
           if flag else _("Maintenance over: the gateway is operational again"), "err" if flag else "ok")

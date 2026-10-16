@@ -8,8 +8,8 @@
   .langsw a, .langsw span { padding:4px 12px; text-decoration:none; font-size:13px }
   .langsw span { background:var(--bg); color:var(--orange); font-weight:600 }
   .langsw a { color:var(--muted) } .langsw a:hover { color:var(--orange) }
-  .doc { line-height:1.6; overflow-wrap:anywhere; max-width:900px }
-  .doc h1 { font-size:20px; margin:4px 0 12px } .doc h2 { font-size:16.5px; margin:22px 0 8px } .doc h3 { font-size:15px; margin:18px 0 6px }
+  .doc { line-height:1.65; overflow-wrap:anywhere; max-width:900px; font-size:15px }
+  .doc h1 { font-size:22px; margin:4px 0 14px } .doc h2 { font-size:17.5px; margin:28px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line) } .doc h3 { font-size:15.5px; margin:20px 0 6px }
   .doc h4, .doc h5, .doc h6 { font-size:14px; margin:14px 0 6px }
   .doc h1, .doc h2, .doc h3, .doc h4 { scroll-margin-top:80px }
   .doc p, .doc ul, .doc ol { margin:8px 0 }
@@ -18,12 +18,13 @@
   .doc pre { background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:10px 12px; overflow-x:auto; margin:10px 0 }
   .doc pre code { background:none; border:0; padding:0; white-space:pre }
   .doc blockquote { margin:10px 0; padding:2px 14px; border-left:3px solid var(--orange); background:var(--bg); border-radius:0 6px 6px 0; color:var(--muted) }
+  .doc tr:nth-child(even) td { background:color-mix(in srgb, var(--fg) 4%, transparent) }
+  .doc a { text-underline-offset:2px }
   .doc table { display:block; overflow-x:auto; width:max-content; max-width:100%; margin:10px 0; border:1px solid var(--line) }
   .doc th, .doc td { border:1px solid var(--line); vertical-align:top; text-align:left }
   .doc th { text-transform:none; font-size:13px; color:var(--fg); background:var(--bg) }
   .doc hr { border:0; border-top:1px solid var(--line); margin:18px 0 }
   .doc img { max-width:100% }
-  .docindex { list-style:none; margin:0; padding:0 } .docindex li { padding:7px 0; border-bottom:1px solid var(--line) } .docindex li:last-child { border-bottom:0 }
 </style>
 <div class="card">
   {% if kind == "missing" %}
@@ -43,13 +44,14 @@
   {% if kind == "index" %}
   <div class="doc" lang="{{ doc_lang }}">
     <h1>{{ _("Documentation") }}</h1>
-    <ul class="docindex">
-      {% for name, title in entries %}<li><a href="/admin/docs/{{ doc_lang }}/{{ name|urlencode }}">{{ title }}</a></li>{% endfor %}
+    <ul class="doctiles">
+      {% for name, title in entries %}<li><a href="/admin/docs/{{ doc_lang }}/{{ name|urlencode }}"><span>{{ title }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>{% endfor %}
     </ul>
   </div>
   {% else %}
   <div class="doc" lang="{{ doc_lang }}">{{ html|safe }}</div>
   {% endif %}
+  {% include "_docs_faq.html" %}
   {% endif %}
 </div>
 {% endblock %}

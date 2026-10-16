@@ -23,7 +23,7 @@ from app.config import settings
 from app.cups_client import is_online
 from app.db.models import JobKind, JobLog, JobState, User
 from app.ipp import codec
-from app import i18n
+from app import i18n, notices
 from app.i18n import N_, _, ngettext
 from app.policy import control, discovery, keepalive, ordering, permissions, testpage
 
@@ -300,11 +300,12 @@ async def printer_move(request: Request, name: str, direction: str = Form(...), 
 
 
 @router.post("/printers/{name}/rename", dependencies=[Depends(verify_csrf)])
-async def printer_rename(request: Request, name: str, new_name: str = Form(...), admin: User = Depends(current_admin)):
+async def printer_rename(request: Request, name: str, new_name: str = Form(...), notify: str = Form(""), admin: User = Depends(current_admin)):
     """Give a queue another name. CUPS can not rename a queue, so the gateway makes the new one on the same device (same
     driver, same description) and only then removes the old one. What the gateway keeps under the name (block, maintenance
     print, places in the lists, the printers allowed to groups and users) follows. Devices that were set up by hand with the
-    old address stop printing, unless a printer is later given that old name again (see `discovery.former_names`)."""
+    old address stop printing, unless a printer is later given that old name again (see `discovery.former_names`).
+    `notify`: tick in the confirmation window, puts a notice in the bell of every active account (the administrator who renamed excluded)."""
     new_name = new_name.strip()
     if not NAME_RE.match(name):
         raise HTTPException(404)
@@ -348,9 +349,13 @@ async def printer_rename(request: Request, name: str, new_name: str = Form(...),
             lists = permissions.rename_printer(db, name, new_name)  # the printer lists of groups and users follow the queue
             discovery.note_former(db, name, "renamed")
             discovery.took_name(db, new_name)
-            record(db, db.get(User, admin.id), "printer.rename", "printer", None, printer=name, new_name=new_name, permission_lists=lists)
+            record(db, db.get(User, admin.id), "printer.rename", "printer", None, printer=name, new_name=new_name, permission_lists=lists,
+                   notified_users=bool(notify))
             db.commit()
     await run_in_threadpool(move)
+    if notify:
+        await run_in_threadpool(notices.notify_all_users, request.app.state.sessionmaker, "printer_renamed",
+                                {"old": name, "new": new_name}, new_name, admin.id)
     request.app.state.printers_cache = request.app.state.queues_cache = None
     flash(request, _("%(old)s is now called %(new)s. Computers and phones set up by hand with the old address must be set up again.", old=name, new=new_name), "ok")
     return back("/admin/printers")
