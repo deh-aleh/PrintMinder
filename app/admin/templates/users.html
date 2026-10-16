@@ -34,7 +34,7 @@
       <select name="group_id"><option value="0">{{ _("Default group (%(group)s)", group=default_group) }}</option>{% for g in groups if g.name != default_group %}<option value="{{ g.id }}">{{ g.name }}</option>{% endfor %}</select>
     </div>
     <div class="row" style="margin-top:8px">
-      <input type="password" name="password" placeholder="{{ _('temporary password (min. 12)') }}" autocomplete="new-password">
+      <div class="pwcell" style="flex:0 1 280px;min-width:200px">{% with name="password", placeholder=_t('temporary password (min. 12)'), autocomplete="new-password", optional=true %}{% include "_pwfield.html" %}{% endwith %}</div>
       <label><input type="checkbox" name="is_admin" value="1"> {{ _("administrator") }}</label>
       <button>{{ _("Create") }}</button>
     </div>

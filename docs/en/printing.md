@@ -41,7 +41,7 @@ Address: `ipps://<server>:8631/printers/<queue>`. The client authenticates with 
 | **Android + Mopria Print Service** | Sees the announced printers, asks for name and key per printer and remembers them. | ✅ tested (Android 13) |
 | **Android system print service** | Sees the printers but can not ask for credentials: it gives up at the 401. Manual add accepts only an IP, so the key can not be put in the address. | ❌ not usable — use Mopria or the browser |
 | **iPhone / iPad** | The announcement carries the AirPrint subtype and `air=username,password`; whether iOS sends the credentials is unknown. | ⬜ not tested |
-| **Windows 11** | "Add device" finds the announced printers; the password is entered at the first print. Steps in the [Windows 11](#windows-11) section below. | 🟡 tested on Windows 11 25H2 |
+| **Windows 11** | "Add device" finds the announced printers and adds them at the first attempt; Windows asks for the credentials when you print, with a "remember" checkbox. Steps in the [Windows 11](windows.md) section below. | ✅ tested on Windows 11 25H2 |
 | **macOS** | Add a network printer with the IPP address and enter user name + key; "remember". | ⬜ not tested |
 
 The device must trust the server's certificate. Printers announced by mDNS also appear on Linux desktops (Avahi) without
@@ -51,33 +51,7 @@ Scripts: `scripts/print-test.sh [queue] [user]` sends one small text page (uses 
 
 ### Windows 11
 
-Tested on Windows 11 Home 25H2, with a server that has a trusted certificate and a name the PC resolves. The PC must trust the
-server's certificate (see [certificates.md](certificates.md)): with a self-signed certificate that is not installed, Windows refuses
-the connection before it sends any request, and nothing shows in the gateway log.
-
-1. Open *Settings → Bluetooth & devices → Printers & scanners → Add device*. After a few seconds the announced printers appear,
-   named `<printer> @ <server name>`.
-   - If no printer appears, restart the PC. If that is not enough, the same page (*Printers & scanners*) has
-     *Windows protected print mode*: turn it on and off, then try again.
-   - If the printers never appear, the PC and the server are usually on different networks (VLANs) and the mDNS announcement does not
-     cross: you need an mDNS repeater (many routers have an "mDNS repeater" option) or the manual way, below.
-2. Click the printer and press *Add*. Windows says "Connecting…": **wait up to 3-4 minutes**. In the end the printer shows as ready.
-3. At the first print Windows asks for the user name and the **print key** (not the account password). Tick "Remember my credentials":
-   later prints ask nothing.
-4. If the printer does not connect after 3-4 minutes, save the credentials beforehand:
-   *Control Panel → User Accounts → Credential Manager → Windows Credentials → Add a Windows credential*.
-   - Internet or network address: the same server name you use for the printer (for example `print.example.org`).
-   - User name: your portal user name.
-   - Password: the **print key**, not the account password.
-
-   Then remove the printer from the list and repeat from step 1.
-
-**Adding by hand**, when the announcement does not arrive: *Add device → Add manually → Select a shared printer by name* and paste
-`https://<server>:8631/printers/<queue>` (without `:8631` when the server is behind a proxy on port 443). Windows picks the
-"Microsoft IPP Class Driver" by itself. This way has not yet been tested all the way to a print.
-
-If you rename a queue in the portal the PC does not know: the old entry stops working and the new one has to be added as above.
-Saved credentials can be listed and removed with `cmdkey /list` and `cmdkey /delete:<entry>`.
+Full step-by-step guide: [windows.md](windows.md). In short: *Settings → Printers & scanners → Add device*, press *Add* on the announced printer, and at the first print enter your user name and the **print key** with *Remember my credentials* ticked. The PC must trust the server's certificate ([certificates.md](certificates.md)).
 
 ## 3. What the gateway does with each IPP operation
 

@@ -1,11 +1,12 @@
-"""The documentation inside the portal, for administrators: the Markdown pages of docs/ shown as web pages.
+"""The documentation inside the portal: the Markdown pages of docs/ shown as web pages. Administrators see all of them; every
+other user only the few pages in USER_PAGES (the guide for users and the Windows guide), never the rest (architecture, .env...).
 
 The files are the same ones read on GitHub, so nothing is written twice. Safety rules:
   * `lang` is exactly "en" or "it"; `page` must be the name of a .md file that is really in the folder (the list comes from a
     directory listing, the URL text is never joined to a path);
   * raw HTML written in a Markdown file is shown as text, never passed on (markdown-it `html: False`), and links keep
     markdown-it's own check (no `javascript:` and the like);
-  * links are rewritten so they work in the portal: the other pages stay in /admin/docs, anything else in the repository
+  * links are rewritten so they work in the portal: the other pages stay in /docs, anything else in the repository
     (source files, the README) goes to GitHub, at the tag of the version that runs."""
 
 import posixpath
@@ -21,12 +22,14 @@ from starlette.concurrency import run_in_threadpool
 
 import app as app_package
 from app import i18n
-from app.admin.common import current_admin, render
+from app.admin.common import current_user, render
 from app.backup.core import app_version
 from app.db.models import User
 
-router = APIRouter(prefix="/admin")
+router = APIRouter()
 LANGS = ("en", "it")
+# what a user who is not an administrator may read (page names, per language); administrators read everything
+USER_PAGES = {"en": {"user-guide", "windows"}, "it": {"guida-utente", "windows"}}
 REPO = "https://github.com/deh-aleh/PrintMinder"
 # the image puts the docs here; deploy/install.sh puts them in $PREFIX/docs (its default PREFIX); a source tree has them next to app/
 DOCS_DIRS = (Path("/opt/printminder/docs"), Path("/opt/cups-policy-gateway/docs"),
@@ -87,10 +90,10 @@ def rewrite_link(href: str, lang: str, names: dict[str, set[str]]) -> tuple[str,
         return "#", False
     frag = quote(u.fragment, safe="-_.~")
     if repo_path == "docs/README.md":
-        return f"/admin/docs/{lang}/" + (f"#{frag}" if frag else ""), False
+        return f"/docs/{lang}/" + (f"#{frag}" if frag else ""), False
     m = re.fullmatch(r"docs/(en|it)/([^/]+)\.md", repo_path)
     if m and m.group(2) in names.get(m.group(1), ()):
-        return f"/admin/docs/{m.group(1)}/{quote(m.group(2))}" + (f"#{frag}" if frag else ""), False
+        return f"/docs/{m.group(1)}/{quote(m.group(2))}" + (f"#{frag}" if frag else ""), False
     return _github(repo_path, frag, folder=u.path.endswith("/")), True
 
 
@@ -122,7 +125,7 @@ def render_markdown(text: str, lang: str, names: dict[str, set[str]]) -> tuple[s
     # the first paragraph under the title is the "Documentation index · English · Italiano" line: the page has its own
     for j, t in enumerate(tokens[:6]):
         if t.type == "paragraph_open" and tokens[j + 1].children and tokens[j + 1].children[0].type == "link_open" \
-                and tokens[j + 1].children[0].attrGet("href") == "/admin/docs/" + lang + "/":
+                and tokens[j + 1].children[0].attrGet("href") == "/docs/" + lang + "/":
             del tokens[j:j + 3]
             break
     return md.renderer.render(tokens, md.options, {}), title
@@ -139,7 +142,7 @@ def page_title(path: Path) -> str:
     try:
         for line in path.read_text(encoding="utf-8", errors="replace").splitlines()[:5]:
             if line.startswith("# "):
-                return line[2:].strip()
+                return line[2:].strip().replace("`", "")
     except OSError:
         pass
     return path.stem
@@ -162,20 +165,20 @@ def index_entries(root: Path, lang: str, files: dict[str, Path]) -> list[tuple[s
     return [(n, page_title(files[n])) for n in order]
 
 
-def build(lang: str, page: str | None) -> dict:
+def build(lang: str, page: str | None, admin: bool = True) -> dict:
     """Everything the template needs; raises 404 for an unknown language or page. `kind` = "missing" when no docs are installed."""
     if lang not in LANGS:
         raise HTTPException(404)
     root = docs_root()
     if root is None:
         return {"kind": "missing", "doc_lang": lang}
-    all_files = {code: page_files(root, code) for code in LANGS}
+    all_files = {code: {n: p for n, p in page_files(root, code).items() if admin or n in USER_PAGES[code]} for code in LANGS}
     names = {code: set(files) for code, files in all_files.items()}
     files = all_files[lang]
     other = "it" if lang == "en" else "en"
     if not page:
         return {"kind": "index", "doc_lang": lang, "other": other, "entries": index_entries(root, lang, files),
-                "switch": f"/admin/docs/{other}/", "title": ""}
+                "switch": f"/docs/{other}/", "title": ""}
     path = files.get(page)  # only a name found in the folder listing gets here
     if path is None:
         raise HTTPException(404)
@@ -183,25 +186,32 @@ def build(lang: str, page: str | None) -> dict:
     html, title = render_markdown(text, lang, names)
     twin = counterpart(text, lang, names)
     return {"kind": "page", "doc_lang": lang, "other": other, "html": html, "title": title or page,
-            "switch": f"/admin/docs/{other}/" + (quote(twin) if twin else "")}
+            "switch": f"/docs/{other}/" + (quote(twin) if twin else "")}
 
 
-async def _show(request: Request, admin: User, lang: str, page: str | None):
-    ctx = await run_in_threadpool(build, lang, page)
-    return render(request, "docs.html", admin, status_code=404 if ctx["kind"] == "missing" else 200, **ctx)
+async def _show(request: Request, user: User, lang: str, page: str | None):
+    ctx = await run_in_threadpool(build, lang, page, user.is_admin)
+    return render(request, "docs.html", user, status_code=404 if ctx["kind"] == "missing" else 200, **ctx)
 
 
 @router.get("/docs")
-async def docs_home(admin: User = Depends(current_admin)):
+async def docs_home(user: User = Depends(current_user)):
     """Opens the documentation in the language of the portal (Italian, otherwise English)."""
-    return RedirectResponse("/admin/docs/" + ("it" if i18n.current().startswith("it") else "en") + "/", status_code=303)
+    return RedirectResponse("/docs/" + ("it" if i18n.current().startswith("it") else "en") + "/", status_code=303)
+
+
+@router.get("/docs/windows", include_in_schema=False)
+async def docs_windows(user: User = Depends(current_user)):
+    """The Windows guide in the language of the portal (the profile page links here)."""
+    lang = "it" if i18n.current().startswith("it") else "en"
+    return RedirectResponse(f"/docs/{lang}/windows", status_code=303)
 
 
 @router.get("/docs/{lang}/", response_class=HTMLResponse)
-async def docs_index(request: Request, lang: str, admin: User = Depends(current_admin)):
-    return await _show(request, admin, lang, None)
+async def docs_index(request: Request, lang: str, user: User = Depends(current_user)):
+    return await _show(request, user, lang, None)
 
 
 @router.get("/docs/{lang}/{page}", response_class=HTMLResponse)
-async def docs_page(request: Request, lang: str, page: str, admin: User = Depends(current_admin)):
-    return await _show(request, admin, lang, page)
+async def docs_page(request: Request, lang: str, page: str, user: User = Depends(current_user)):
+    return await _show(request, user, lang, page)

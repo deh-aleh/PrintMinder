@@ -397,11 +397,11 @@ def decide(perms: Perms, printer: str | None, caps: dict, job_attrs: dict, mode:
 
 
 def notify_refused(sm, user_id: int, printer: str | None, d: PermDecision) -> None:
-    """Tell the person in their bell that a print was refused (once, until they dismiss it: a program that retries does
-    not fill the list)."""
+    """Tell the person in their bell that a print was refused. Every refusal counts (the notice is renewed and the bell
+    lights up again), but a program that retries does not fill the list."""
     from app import notices
 
-    notices.notify_user_once(sm, user_id, "job_refused", key=f"{d.why}:{printer}",
+    notices.notify_user_counted(sm, user_id, "job_refused", key=f"{d.why}:{printer}",
                              detail={"printer": printer, "why": d.why, **d.detail})
 
 
@@ -409,5 +409,13 @@ def notify_adjusted(sm, user_id: int, printer: str | None, d: PermDecision) -> N
     """Tell the person that a print was made in black and white / double-sided because they asked for something they may not have."""
     from app import notices
 
-    notices.notify_user_once(sm, user_id, "job_adjusted", key=f"adjusted:{printer}",
-                             detail={"printer": printer, "changed": list(d.changed)})
+    notices.notify_user_counted(sm, user_id, "job_adjusted", key=f"adjusted:{printer}",
+                                detail={"printer": printer, "changed": list(d.changed)})
+
+
+def notify_quota(sm, user_id: int, printer: str | None, quota: dict) -> None:
+    """Tell the person that a print was refused because a quota limit is reached (same renewal rule as a refusal)."""
+    from app import notices
+
+    notices.notify_user_counted(sm, user_id, "quota_reached", key=f"{quota.get('period')}:{quota.get('metric')}",
+                                detail={"printer": printer, **quota})

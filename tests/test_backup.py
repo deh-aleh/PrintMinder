@@ -213,7 +213,7 @@ async def test_admins_have_their_own_backups(portal, dirs):
     assert list((dirs / "nas" / "ada").glob("audit-archive-*/*.enc"))
 
     # another administrator sees it, runs it, but cannot change it
-    await portal.post("/admin/logout", data=dict(csrf_token=csrf))
+    await portal.post("/logout", data=dict(csrf_token=csrf))
     await portal_login(portal, "eli", GOOD)
     csrf2 = await csrf_of_page(portal, "/admin/backups")
     text = (await portal.get("/admin/backups")).text
@@ -229,7 +229,7 @@ async def test_admins_have_their_own_backups(portal, dirs):
         assert {t.owner_name for t in s.scalars(select(BackupTarget))} == {"ada", "eli"}
 
     # a plain user has no access at all
-    await portal.post("/admin/logout", data=dict(csrf_token=csrf2))
+    await portal.post("/logout", data=dict(csrf_token=csrf2))
     await portal_login(portal, "pia", GOOD)
     assert (await portal.get("/admin/backups")).status_code == 403
 

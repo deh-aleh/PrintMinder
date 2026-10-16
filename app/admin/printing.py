@@ -201,6 +201,8 @@ async def print_submit(request: Request, user: User = Depends(current_user)):
         if decision.reason in (control.BLOCKED_REASON, control.MAINTENANCE_REASON):
             flash(request, decision.text(), "err")  # not a quota matter: stay on the print page
             return back("/me/print")
+        if decision.quota:
+            await run_in_threadpool(permissions.notify_quota, sm, user.id, queue, decision.quota)
         flash(request, _("%(reason)s. You can ask for more quota below.", reason=decision.text()), "err")
         return back("/me")
 

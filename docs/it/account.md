@@ -20,7 +20,7 @@ l'accesso è negato (fail closed). I nomi RADIUS si confrontano senza distinguer
 ## 2. Il primo amministratore
 
 `cups_orchestrator` esiste senza password. Al primo avvio il gateway scrive nei log un **codice monouso**
-(`docker compose logs gateway | grep "FIRST RUN"`); `/admin/setup` lo chiede insieme alla nuova password e poi si disattiva.
+(`docker compose logs gateway | grep "FIRST RUN"`); `/setup` lo chiede insieme alla nuova password e poi si disattiva.
 Il codice è protetto da throttling. In alternativa: `cups-policy-admin set-admin-password`. Di proposito non esiste una pagina aperta
 a tutti per diventare amministratore.
 

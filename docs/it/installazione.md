@@ -42,7 +42,7 @@ docker compose up -d
 
 # 4. leggi il codice monouso e scegli la password dell'amministratore
 docker compose logs gateway | grep "FIRST RUN"
-#    apri https://<server>:8631/admin/setup
+#    apri https://<server>:8631/setup
 ```
 
 L'account amministratore è `cups_orchestrator`. Da terminale si ottiene lo stesso con
@@ -134,7 +134,7 @@ Verifica: `curl -sk https://<server>:8631/healthz` risponde 200; `docker compose
 
 ### 3.6 Primo amministratore
 
-`docker compose logs gateway | grep "FIRST RUN"` mostra un codice monouso. Apri `https://<server>:8631/admin/setup`, inserisci il
+`docker compose logs gateway | grep "FIRST RUN"` mostra un codice monouso. Apri `https://<server>:8631/setup`, inserisci il
 codice e scegli la password di `cups_orchestrator` (minimo 12 caratteri). Il codice vale una volta sola ed è protetto dai tentativi a caso.
 Se non compare nulla, probabilmente l'account ha già una password (questa cartella è già stata usata e il volume Docker ha tenuto il database): il log dice allora "already has a password"; accedi, oppure reimposta con `docker compose exec -it gateway cups-policy-admin set-admin-password`. Altre cause: [risoluzione-problemi.md](risoluzione-problemi.md).
 
@@ -151,7 +151,7 @@ quando un computer o un telefono chiede le credenziali. Vedi [guida-utente.md](g
 | Qualunque telefono / computer | Portale → **Stampa** (`/me/print`): carica PDF, JPEG, PNG, GIF o testo. Nulla da installare. |
 | Linux | Dopo aver creato una chiave la pagina del profilo mostra un comando `lpadmin` già pronto; oppure `scripts/add-printer-linux.sh <server> <coda> <utente>`. |
 | Android | **Mopria Print Service** trova le stampanti e chiede nome e chiave. Il servizio di stampa di sistema di Android non sa autenticarsi. |
-| Windows, macOS, iPhone | Aggiungi una stampante di rete `ipps://<server>:8631/printers/<coda>`; quando richiesto inserisci nome utente e chiave. Non ancora provato dal progetto. |
+| Windows, macOS, iPhone | Aggiungi una stampante di rete `ipps://<server>:8631/printers/<coda>`; quando richiesto inserisci nome utente e chiave. Windows 11 25H2 è provato ([windows.md](windows.md)); macOS e iPhone no. |
 
 Il dispositivo deve fidarsi del certificato. Dettagli in [stampa.md](stampa.md).
 

@@ -62,7 +62,7 @@ def current_user(request: Request, db: Session = Depends(get_db)) -> User:
     user = db.get(User, uid) if uid else None
     if user is None or not user.enabled or request.session.get("stamp", "") != session_stamp(user):
         request.session.clear()
-        raise HTTPException(303, headers={"Location": "/admin/login"})
+        raise HTTPException(303, headers={"Location": "/login"})
     if request.session.get("lang") != (user.language or ""):  # chosen on another device since this session started
         request.session["lang"] = user.language or ""
     if user.must_change_password and request.url.path != "/me/password":
@@ -88,6 +88,10 @@ def flash(request: Request, msg: str, kind: str = "ok") -> None:
 
 
 def render(request: Request, name: str, user: User | None = None, status_code: int = 200, **ctx) -> HTMLResponse:
+    if user is not None:
+        from app import notices
+
+        notices.read_secondary(request.app.state.sessionmaker, user.id, user.secondary_read_minutes)
     ctx.update(me=user, csrf=request.session.get("csrf", ""), flashes=request.session.pop("flash", []),
                radius_enabled=settings.radius_enabled,
                pending_requests=_pending_requests(request) if user is not None and user.is_admin else 0,

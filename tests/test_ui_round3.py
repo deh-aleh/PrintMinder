@@ -60,7 +60,7 @@ async def test_local_and_radius_users_can_be_created_in_a_chosen_group(portal, m
     # the pre-registered person logs in through RADIUS later and keeps the group chosen for them
     # (the stub RADIUS knows "rad"/"radpw": pre-register that name, then let them in)
     await portal.post("/admin/users", data=dict(csrf_token=csrf, username="rad", group_id=gid["docenti"]))
-    await portal.post("/admin/logout", data=dict(csrf_token=csrf))
+    await portal.post("/logout", data=dict(csrf_token=csrf))
     login = await portal_login(portal, "rad", "radpw")
     assert login.status_code in (200, 303)
     with portal.sm() as s:

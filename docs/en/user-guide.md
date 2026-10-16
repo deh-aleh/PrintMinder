@@ -14,6 +14,7 @@ credentials if the installation uses RADIUS. A temporary password must be change
 
 - **Consumption**: jobs and pages used in the current week or month, your limit (including any extra quota granted to you),
   and when it resets.
+- **Documentation**: the **?** icon in the top bar (`/docs`) opens this guide and the step-by-step guide for [Windows](windows.md). Administrators find the whole documentation there, with the same icon.
 - **Print keys**: create a key for each device (give it a label). It is shown **once**: copy it at once (copy button). Use it
   as the password when the computer or phone asks for credentials; the user name is yours. A key only prints and scans — it
   never opens the portal and your domain password is never needed on a device. Revoke a key (or all of them) in *My keys* if a device is lost.
@@ -32,6 +33,17 @@ If a print is refused for quota, the message includes the link to ask for an exc
 the message points to this page, and the bell tells you what happened and what to change. When a print is made in black and white or
 double-sided because of your permissions, the bell tells you that too.
 
+**Every refused or changed print gets its notice.** While a notice of the same kind is still open it is renewed instead of
+repeated: its time is updated, it shows how many times it happened (×3) and the bell lights up again, so a program that retries does not fill the list.
+This holds for prints refused because of your permissions, prints refused because you reached a quota limit
+(weekly or monthly, jobs or pages: the notice says how much you used and that you can ask for more quota) and prints changed by your permissions.
+
+**Secondary notices.** Some notices are only information about one print. They are marked as read by themselves after a while, so they do not
+pile up. Today the secondary ones are the prints **forced** by your permissions (made in black and white, made double-sided; more kinds of forced
+print will join them). The delay is in *Settings* (`/me/settings`, "Secondary notices"): 20 minutes by default, counted from the last such
+print; 0 means they stay until you dismiss them. A notice marked as read is not deleted: it is in the list under *Show dismissed too*.
+All the other notices (refused prints, quota reached, keys, group, requests) stay until you dismiss them.
+
 ## 3. Print (`/me/print`)
 
 Upload a PDF, photo (JPEG, PNG, GIF) or plain text. Choose the printer (only the ones you may use are listed), paper size, orientation, colour or black and white (only if you may print in colour), one-sided or double-sided (only if you may print one-sided and the printer has a duplex unit), a page
@@ -44,6 +56,33 @@ computer.
 Choose the scanner (if more than one), the source (automatic, glass, or feeder for all sheets), colour mode, quality, paper size,
 format (PDF or JPEG) and a file name. You can leave the page while it scans and come back to download the file within 15 minutes.
 See [scanning.md](scanning.md).
+
+### Scanning from an app that cannot sign in
+
+Most scan programs (NAPS2 and many others) cannot send a user name and password, so the gateway refuses them. If the button with
+a scanner and a clock is at the top right of *Scan*, you can let your program in for a few minutes:
+
+1. On the **computer where the scan program runs**, open *Scan* and press the button.
+2. A box shows the address the server sees you at and a countdown (3 minutes unless the administrator changed it; 1 to 15 minutes are possible).
+3. Start the scan in your program. Scans from that address are accepted as yours: your quota and permissions apply and they
+   appear in the audit under your name. You can scan as often as you like until the time ends; a scan that has already
+   started is delivered even if the time runs out. *Close the window* in the box ends it earlier.
+
+If a scan comes from a different address it is refused, the audit records both addresses and your bell says that the window was for
+one address and the request came from the other.
+
+Limits, because the gateway can only compare addresses:
+
+- **NAT**: behind a router shared with other devices (another network, VPN, guest Wi-Fi) the server may see the same address for
+  every device, so during the window those devices can scan too. If browser and scan app are NATed differently, the addresses differ.
+- **IPv4 and IPv6**: if the portal is reached over IPv6 and the scan app uses IPv4 (or the reverse), the addresses never match. Open
+  the portal with the same kind of address the scan app uses.
+- **Proxy**: behind a reverse proxy the server may see the proxy's address, not your device's. The box warns you when it
+  detects one.
+- Press the button on the same device that scans (on a phone it opens the window for the phone). A restart of the server closes all windows.
+
+If the address in the box is not your device's address, ask your administrator: the window can not work on that network.
+Details: [scanning.md](scanning.md).
 
 ## 5. Settings (click your name, top right)
 

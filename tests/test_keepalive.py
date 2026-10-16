@@ -164,7 +164,7 @@ async def test_save_does_not_switch_on_and_the_toggle_is_shared_by_all_admins(cu
     await cups.post("/admin/printers/mono1/keepalive/toggle", data={"csrf_token": tok, "on": "1"})
     page = (await cups.get("/admin/printers")).text
     assert "Stampa periodica attiva: ogni 3 giorni" in page
-    await cups.post("/admin/logout", data={"csrf_token": tok})                          # another administrator sees the same state
+    await cups.post("/logout", data={"csrf_token": tok})                          # another administrator sees the same state
     await portal_login(cups, "boss2", GOOD)
     assert "Stampa periodica attiva: ogni 3 giorni" in (await cups.get("/admin/printers")).text
     tok = await csrf_of_page(cups, "/admin/printers")
@@ -189,7 +189,7 @@ async def test_bad_input_and_colour_on_a_mono_printer_are_refused(cups):
 
 
 async def test_only_admins_can_use_them(cups):
-    await cups.post("/admin/logout", data={"csrf_token": await csrf_of_page(cups, "/admin/printers")})
+    await cups.post("/logout", data={"csrf_token": await csrf_of_page(cups, "/admin/printers")})
     await portal_login(cups, "ann", GOOD)
     tok = await csrf_of_page(cups, "/me")
     for path in ("keepalive/toggle", "keepalive", "testprint"):

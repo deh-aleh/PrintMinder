@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-16 18:32+0200\n"
+"POT-Creation-Date: 2026-10-17 00:11+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -18,89 +18,97 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: app/escl.py:446
+#: app/escl.py:512
 msgid "Scanning is not enabled on this server"
 msgstr "Сканирование не включено на этом сервере"
 
-#: app/escl.py:451
+#: app/escl.py:517
 msgid "This scanner has no automatic feeder"
 msgstr "У этого сканера нет автоподатчика"
 
-#: app/escl.py:451
+#: app/escl.py:517
 msgid "Source not available"
 msgstr "Источник недоступен"
 
-#: app/escl.py:453
+#: app/escl.py:519
 #, python-format
 msgid "With the feeder the maximum quality is %(n)s dpi"
 msgstr "С автоподатчиком максимальное качество — %(n)s dpi"
 
-#: app/escl.py:454
+#: app/escl.py:520
 #, python-format
 msgid "With the glass the maximum quality is %(n)s dpi"
 msgstr "Со стеклом максимальное качество — %(n)s dpi"
 
-#: app/escl.py:460
+#: app/escl.py:526
 #, python-format
 msgid "%(reason)s. You can ask for more quota from your profile."
 msgstr "%(reason)s. Вы можете запросить больше квоты в своём профиле."
 
-#: app/escl.py:471
+#: app/escl.py:537
 msgid "The feeder is empty or the scanner was paused: remove and reload the sheets, then try again."
 msgstr "Автоподатчик пуст или сканер был приостановлен: выньте и снова вложите листы, затем повторите попытку."
 
-#: app/escl.py:472
+#: app/escl.py:538
 msgid "The scanner is busy: try again in a few seconds."
 msgstr "Сканер занят: повторите попытку через несколько секунд."
 
-#: app/escl.py:473
+#: app/escl.py:539
 #, python-format
 msgid "The scanner refused the job (status %(code)s). %(hint)s"
 msgstr "Сканер отклонил задание (статус %(code)s). %(hint)s"
 
-#: app/escl.py:476
+#: app/escl.py:542
 msgid "Unexpected answer from the scanner"
 msgstr "Неожиданный ответ сканера"
 
-#: app/escl.py:483
+#: app/escl.py:549
 msgid "The scanner delivered no page"
 msgstr "Сканер не выдал ни одной страницы"
 
-#: app/escl.py:487
+#: app/escl.py:553
 msgid "The scanner does not answer"
 msgstr "Сканер не отвечает"
 
-#: app/escl.py:518
+#: app/escl.py:584
 msgid "in progress"
 msgstr "выполняется"
 
-#: app/escl.py:518
+#: app/escl.py:584
 msgid "ready"
 msgstr "готово"
 
-#: app/escl.py:518
+#: app/escl.py:584
 msgid "unsuccessful"
 msgstr "не удалось"
 
-#: app/escl.py:522
+#: app/escl.py:588
 #, python-format
 msgid "scan-%(stamp)s"
 msgstr "скан-%(stamp)s"
 
-#: app/escl.py:543
+#: app/escl.py:609
 msgid "Unexpected error during the scan"
 msgstr "Непредвиденная ошибка при сканировании"
 
-#: app/escl.py:572
+#: app/escl.py:651
+msgid "The server can not tell which address you are connecting from."
+msgstr "Сервер не может определить, с какого адреса вы подключаетесь."
+
+#: app/escl.py:654
+msgid "Too many scan windows are open: try again in a few minutes."
+msgstr "Открыто слишком много окон сканирования: повторите через несколько минут."
+
+#: app/escl.py:677
 #, python-format
 msgid "The scanner “%(name)s” does not answer: refresh the page."
 msgstr "Сканер «%(name)s» не отвечает: обновите страницу."
 
-#: app/escl.py:572
+#: app/escl.py:677
 msgid "No scanner available."
 msgstr "Нет доступных сканеров."
 
-#: app/escl.py:579
+#: app/escl.py:684
 #, python-format
 msgid "%(name)s is already scanning: wait for it to finish."
 msgstr "%(name)s уже сканирует: дождитесь окончания."
@@ -121,27 +129,27 @@ msgstr "отклонено"
 msgid "expired"
 msgstr "истекло"
 
-#: app/admin/templates/jobs.html:96 app/i18n.py:165
+#: app/admin/templates/jobs.html:107 app/i18n.py:165
 msgid "canceled"
 msgstr "отменено"
 
-#: app/admin/templates/jobs.html:92 app/i18n.py:166
+#: app/admin/templates/jobs.html:103 app/i18n.py:166
 msgid "accepted"
 msgstr "принято"
 
-#: app/admin/templates/jobs.html:94 app/i18n.py:166
+#: app/admin/templates/jobs.html:105 app/i18n.py:166
 msgid "denied"
 msgstr "отклонено"
 
-#: app/admin/templates/jobs.html:93 app/i18n.py:166
+#: app/admin/templates/jobs.html:104 app/i18n.py:166
 msgid "completed"
 msgstr "завершено"
 
-#: app/admin/templates/jobs.html:95 app/i18n.py:166
+#: app/admin/templates/jobs.html:106 app/i18n.py:166
 msgid "failed"
 msgstr "ошибка"
 
-#: app/admin/templates/jobs.html:97 app/i18n.py:166
+#: app/admin/templates/jobs.html:108 app/i18n.py:166
 msgid "held"
 msgstr "ожидает"
 
@@ -199,11 +207,11 @@ msgstr "еженедельно"
 msgid "monthly"
 msgstr "ежемесячно"
 
-#: app/i18n.py:168
+#: app/admin/templates/_own_notices.html:58 app/i18n.py:168
 msgid "page"
 msgstr "страница"
 
-#: app/i18n.py:168
+#: app/admin/templates/_own_notices.html:58 app/i18n.py:168
 msgid "job"
 msgstr "задание"
 
@@ -551,7 +559,7 @@ msgstr "альбомная"
 
 #: app/admin/audit_view.py:34 app/admin/templates/_perm_fields.html:15
 #: app/admin/templates/me.html:29 app/admin/templates/print.html:65
-#: app/admin/templates/scan.html:46
+#: app/admin/templates/scan.html:53
 msgid "Colour"
 msgstr "Цвет"
 
@@ -564,7 +572,7 @@ msgid "Sides"
 msgstr "Стороны"
 
 #: app/admin/audit_view.py:40 app/admin/templates/jobs.html:24
-#: app/admin/templates/scan.html:40
+#: app/admin/templates/scan.html:47
 msgid "File name"
 msgstr "Имя файла"
 
@@ -576,7 +584,7 @@ msgstr "Имя документа"
 msgid "Comment"
 msgstr "Комментарий"
 
-#: app/admin/audit_view.py:46 app/admin/templates/scan.html:42
+#: app/admin/audit_view.py:46 app/admin/templates/scan.html:49
 msgid "Format"
 msgstr "Формат"
 
@@ -686,12 +694,12 @@ msgstr "Резервное копирование НЕ удалось: %(message
 msgid "Backup “%(name)s” deleted. The files already written in the folder stay where they are"
 msgstr "Резервная копия «%(name)s» удалена. Уже записанные в папке файлы остаются на месте"
 
-#: app/admin/common.py:142
+#: app/admin/common.py:146
 #, python-format
 msgid "invalid limit %(value)s"
 msgstr "недопустимый лимит %(value)s"
 
-#: app/admin/common.py:145
+#: app/admin/common.py:149
 #, python-format
 msgid "limit too large (max %(max)s)"
 msgstr "лимит слишком велик (макс. %(max)s)"
@@ -777,76 +785,90 @@ msgstr "Отозвано ключей: %(n)s"
 msgid "Your password is managed by RADIUS, not here"
 msgstr "Ваш пароль управляется RADIUS, а не здесь"
 
-#: app/admin/me.py:177
+#: app/admin/me.py:178
 msgid "Theme saved"
 msgstr "Тема сохранена"
 
-#: app/admin/me.py:191
+#: app/admin/me.py:192
 msgid "Language saved"
 msgstr "Язык сохранён"
 
-#: app/admin/me.py:204
+#: app/admin/me.py:206
+#, python-format
+msgid "Enter 0 (never) or a number of minutes up to %(max)s"
+msgstr "Введите 0 (никогда) или число минут не более %(max)s"
+
+#: app/admin/me.py:210
+msgid "Secondary notices are not read automatically"
+msgstr "Второстепенные уведомления не отмечаются прочитанными автоматически"
+
+#: app/admin/me.py:211
+#, python-format
+msgid "Secondary notices are read automatically after %(n)s minutes"
+msgstr "Второстепенные уведомления отмечаются прочитанными через %(n)s мин."
+
+#: app/admin/me.py:221
 #, python-format
 msgid "Enter 0 (off) or a number of seconds between %(min)s and %(max)s"
 msgstr "Введите 0 (выключено) или число секунд от %(min)s до %(max)s"
 
-#: app/admin/me.py:208
+#: app/admin/me.py:225
 msgid "Automatic refresh off"
 msgstr "Автообновление выключено"
 
-#: app/admin/me.py:209 app/admin/templates/autorefresh.html:5
+#: app/admin/me.py:226 app/admin/templates/autorefresh.html:5
 #, python-format
 msgid "Automatic refresh every %(n)s seconds"
 msgstr "Автообновление каждые %(n)s с"
 
-#: app/admin/me.py:221
+#: app/admin/me.py:238
 msgid "Too many attempts, retry later"
 msgstr "Слишком много попыток, повторите позже"
 
-#: app/admin/me.py:225
+#: app/admin/me.py:242
 msgid "The current password is wrong"
 msgstr "Текущий пароль неверен"
 
-#: app/admin/me.py:227
+#: app/admin/me.py:244
 msgid "the two new passwords differ"
 msgstr "два новых пароля не совпадают"
 
-#: app/admin/me.py:228
+#: app/admin/me.py:245
 msgid "the new password must differ from the current one"
 msgstr "новый пароль должен отличаться от текущего"
 
-#: app/admin/me.py:240
+#: app/admin/me.py:257
 msgid "Password changed"
 msgstr "Пароль изменён"
 
-#: app/admin/me.py:262 app/admin/me.py:282 app/admin/me.py:321
+#: app/admin/me.py:279 app/admin/me.py:299 app/admin/me.py:338
 msgid "Request sent: an administrator will answer it"
 msgstr "Запрос отправлен: администратор ответит на него"
 
-#: app/admin/me.py:300 app/admin/templates/requests.html:116
+#: app/admin/me.py:317 app/admin/templates/requests.html:116
 #: app/policy/permissions.py:251
 msgid "colour printing"
 msgstr "цветная печать"
 
-#: app/admin/me.py:300 app/admin/templates/requests.html:116
+#: app/admin/me.py:317 app/admin/templates/requests.html:116
 #: app/policy/permissions.py:251
 msgid "one-sided printing"
 msgstr "односторонняя печать"
 
-#: app/admin/me.py:301 app/admin/templates/requests.html:117
+#: app/admin/me.py:318 app/admin/templates/requests.html:117
 #: app/policy/permissions.py:251
 msgid "printing outside the hours"
 msgstr "печать вне разрешённых часов"
 
-#: app/admin/me.py:301 app/admin/templates/requests.html:117
+#: app/admin/me.py:318 app/admin/templates/requests.html:117
 msgid "a printer"
 msgstr "принтер"
 
-#: app/admin/me.py:316
+#: app/admin/me.py:333
 msgid "that printer does not exist"
 msgstr "такого принтера нет"
 
-#: app/admin/me.py:332
+#: app/admin/me.py:349
 msgid "Request canceled"
 msgstr "Запрос отменён"
 
@@ -1090,9 +1112,9 @@ msgstr "Остаток чернил"
 
 #: app/admin/printers.py:484 app/admin/printers.py:490
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:57
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:68
 #: app/admin/templates/keys.html:8 app/admin/templates/keys.html:15
-#: app/admin/templates/me.html:62 app/admin/templates/printers.html:198
+#: app/admin/templates/me.html:63 app/admin/templates/printers.html:198
 #: app/admin/templates/requests.html:181 app/admin/templates/requests.html:194
 #: app/admin/templates/user_edit.html:22 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:15
@@ -1142,7 +1164,7 @@ msgid "Alerts"
 msgstr "Предупреждения"
 
 #: app/admin/printers.py:490 app/admin/templates/printers.html:197
-#: app/admin/templates/scan.html:37
+#: app/admin/templates/scan.html:44
 msgid "Scanner"
 msgstr "Сканер"
 
@@ -1216,22 +1238,22 @@ msgstr "Альбомная ориентация доступна для PDF-фа
 msgid "This PDF can not be turned to landscape (protected or damaged): choose automatic orientation"
 msgstr "Этот PDF нельзя повернуть в альбомную ориентацию (защищён или повреждён): выберите автоматическую ориентацию"
 
-#: app/admin/printing.py:204
+#: app/admin/printing.py:206
 #, python-format
 msgid "%(reason)s. You can ask for more quota below."
 msgstr "%(reason)s. Вы можете запросить больше квоты ниже."
 
-#: app/admin/printing.py:248
+#: app/admin/printing.py:250
 #, python-format
 msgid "Sent to %(printer)s: %(title)s"
 msgstr "Отправлено на %(printer)s: %(title)s"
 
-#: app/admin/printing.py:248
+#: app/admin/printing.py:250
 #, python-format
 msgid " — %(n)s page(s)"
 msgstr " — страниц: %(n)s"
 
-#: app/admin/printing.py:250
+#: app/admin/printing.py:252
 msgid "The print server did not accept the file. Try another format (PDF works best)."
 msgstr "Сервер печати не принял файл. Попробуйте другой формат (лучше всего подходит PDF)."
 
@@ -1289,48 +1311,48 @@ msgstr[2] "Удалено завершённых выделений: %(n)s"
 msgid "No ended grants to delete"
 msgstr "Нет завершённых выделений для удаления"
 
-#: app/admin/routes.py:52
+#: app/admin/routes.py:53
 msgid "Too many failed attempts, retry later"
 msgstr "Слишком много неудачных попыток, повторите позже"
 
-#: app/admin/routes.py:58
+#: app/admin/routes.py:59
 msgid "Invalid credentials"
 msgstr "Неверные учётные данные"
 
-#: app/admin/routes.py:111
+#: app/admin/routes.py:112
 msgid "Too many wrong codes, retry later"
 msgstr "Слишком много неверных кодов, повторите позже"
 
-#: app/admin/routes.py:116
+#: app/admin/routes.py:117
 msgid "Wrong code. It is in the gateway log (docker compose logs gateway)"
 msgstr "Неверный код. Он находится в журнале шлюза (docker compose logs gateway)"
 
-#: app/admin/routes.py:119
+#: app/admin/routes.py:120
 msgid "the two passwords differ"
 msgstr "два пароля не совпадают"
 
-#: app/admin/routes.py:140
+#: app/admin/routes.py:141
 #, python-format
 msgid "Password set. Log in as %(name)s."
 msgstr "Пароль задан. Войдите как %(name)s."
 
-#: app/admin/routes.py:227
+#: app/admin/routes.py:228
 msgid "From now on the names of new files are saved"
 msgstr "С этого момента имена новых файлов сохраняются"
 
-#: app/admin/routes.py:228
+#: app/admin/routes.py:229
 msgid "From now on the names of new files are not saved"
 msgstr "С этого момента имена новых файлов не сохраняются"
 
-#: app/admin/routes.py:251
+#: app/admin/routes.py:252
 msgid "That job is not waiting in a queue"
 msgstr "Это задание не ожидает в очереди"
 
-#: app/admin/routes.py:271
+#: app/admin/routes.py:272
 msgid "Cancel requested"
 msgstr "Отмена запрошена"
 
-#: app/admin/routes.py:271
+#: app/admin/routes.py:272
 msgid "CUPS did not accept the cancel (already printed?)"
 msgstr "CUPS не принял отмену (уже напечатано?)"
 
@@ -1375,7 +1397,7 @@ msgstr "Репозиторий"
 #: app/admin/templates/archive_view.html:11
 #: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
 #: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:39
-#: app/admin/templates/me.html:62 app/admin/templates/requests.html:7
+#: app/admin/templates/me.html:63 app/admin/templates/requests.html:7
 #: app/admin/templates/requests.html:181
 msgid "When"
 msgstr "Когда"
@@ -1554,44 +1576,54 @@ msgstr "Ваша печать на «%(printer)s» отклонена."
 
 #: app/admin/templates/_own_notices.html:59
 #, python-format
+msgid "Your print to “%(printer)s” was refused: the %(period)s %(noun)s limit is reached (%(used)s/%(limit)s). You can ask for more quota from your profile."
+msgstr "Печать на «%(printer)s» отклонена: достигнут лимит (%(noun)s, %(period)s): %(used)s/%(limit)s. Можно запросить больше квоты в профиле."
+
+#: app/admin/templates/_own_notices.html:62
+#, python-format
 msgid "Your print to “%(printer)s” was made in black and white: colour printing is not allowed for your account."
 msgstr "Ваша печать на «%(printer)s» выполнена в чёрно-белом режиме: цветная печать вашей учётной записи недоступна."
 
-#: app/admin/templates/_own_notices.html:59
+#: app/admin/templates/_own_notices.html:62
 #, python-format
 msgid "Your print to “%(printer)s” was made double-sided: one-sided printing is not allowed for your account."
 msgstr "Ваша печать на «%(printer)s» выполнена в двустороннем режиме: односторонняя печать вашей учётной записи недоступна."
 
-#: app/admin/templates/_own_notices.html:61
+#: app/admin/templates/_own_notices.html:64
+#, python-format
+msgid "Scan refused: the window was for %(expected)s, the request comes from %(got)s. Open the portal from the device that scans, or see the scanning help in the user guide."
+msgstr "Сканирование отклонено: окно было открыто для %(expected)s, а запрос пришёл с %(got)s. Откройте портал с устройства, которое сканирует, или прочитайте раздел о сканировании в руководстве пользователя."
+
+#: app/admin/templates/_own_notices.html:66
 #, python-format
 msgid "The printer “%(old)s” is now called “%(new)s”. If you had set it up by hand on a computer or phone with the old address, set it up again with the new name."
 msgstr "Принтер «%(old)s» теперь называется «%(new)s». Если вы настраивали его вручную на компьютере или телефоне по старому адресу, настройте его заново с новым именем."
 
-#: app/admin/templates/_own_notices.html:63
+#: app/admin/templates/_own_notices.html:68
 msgid "The gateway is in maintenance: printing and scanning are suspended for now. You will be able to use them again when an administrator ends the maintenance."
 msgstr "Шлюз находится на обслуживании: печать и сканирование временно приостановлены. Вы сможете пользоваться ими снова, когда администратор завершит обслуживание."
 
-#: app/admin/templates/_own_notices.html:65
+#: app/admin/templates/_own_notices.html:70
 msgid "The maintenance is over: printing and scanning work again."
 msgstr "Обслуживание завершено: печать и сканирование снова работают."
 
-#: app/admin/templates/_own_notices.html:67 app/admin/templates/notices.html:44
+#: app/admin/templates/_own_notices.html:72 app/admin/templates/notices.html:44
 msgid "<b>Save the secret key in a safe place.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> in the <span class=\"mono\">.env</span> file encrypts the file names kept in the audit and signs the portal sessions. A backup without encryption does not contain it: if the server breaks and you restore the backup with a new key, the names stay unreadable (<span class=\"mono\">[encrypted]</span>) for good. Copy the line from <span class=\"mono\">.env</span> into a password manager, or make encrypted backups (they include <span class=\"mono\">.env</span>)."
 msgstr "<b>Сохраните секретный ключ в надёжном месте.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> в файле <span class=\"mono\">.env</span> шифрует имена файлов в аудите и подписывает сеансы портала. Резервная копия без шифрования его не содержит: если сервер сломается и вы восстановите копию с новым ключом, имена навсегда останутся нечитаемыми (<span class=\"mono\">[encrypted]</span>). Скопируйте строку из <span class=\"mono\">.env</span> в менеджер паролей или делайте зашифрованные копии (они включают <span class=\"mono\">.env</span>)."
 
-#: app/admin/templates/_own_notices.html:70
+#: app/admin/templates/_own_notices.html:76
 msgid "dismissed"
 msgstr "скрыто"
 
-#: app/admin/templates/_own_notices.html:71 app/admin/templates/notices.html:53
+#: app/admin/templates/_own_notices.html:77 app/admin/templates/notices.html:53
 msgid "Dismiss"
 msgstr "Закрыть"
 
-#: app/admin/templates/_own_notices.html:75 app/admin/templates/notices.html:57
+#: app/admin/templates/_own_notices.html:81 app/admin/templates/notices.html:57
 msgid "No notices."
 msgstr "Уведомлений нет."
 
-#: app/admin/templates/_own_notices.html:78 app/admin/templates/notices.html:60
+#: app/admin/templates/_own_notices.html:84 app/admin/templates/notices.html:60
 msgid "Dismiss all"
 msgstr "Закрыть все"
 
@@ -1723,7 +1755,7 @@ msgid "Who"
 msgstr "Кто"
 
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:15
-#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:50
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:61
 msgid "Action"
 msgstr "Действие"
 
@@ -1736,18 +1768,18 @@ msgid "No actions."
 msgstr "Действий нет."
 
 #: app/admin/templates/actions.html:20 app/admin/templates/archive_view.html:22
-#: app/admin/templates/jobs.html:83
+#: app/admin/templates/jobs.html:94
 msgid "Previous"
 msgstr "Назад"
 
 #: app/admin/templates/actions.html:21 app/admin/templates/archive_view.html:23
-#: app/admin/templates/jobs.html:84
+#: app/admin/templates/jobs.html:95
 #, python-format
 msgid "Page %(page)s / %(pages)s"
 msgstr "Страница %(page)s из %(pages)s"
 
 #: app/admin/templates/actions.html:22 app/admin/templates/archive_view.html:24
-#: app/admin/templates/jobs.html:85
+#: app/admin/templates/jobs.html:96
 msgid "Next"
 msgstr "Вперёд"
 
@@ -1777,7 +1809,7 @@ msgid "Current size of the active tables:"
 msgstr "Текущий размер активных таблиц:"
 
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:59
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:70
 msgid "File"
 msgstr "Файл"
 
@@ -1817,7 +1849,7 @@ msgstr "на месте"
 msgid "Open"
 msgstr "Открыть"
 
-#: app/admin/templates/archive.html:25 app/admin/templates/scan.html:64
+#: app/admin/templates/archive.html:25 app/admin/templates/scan.html:83
 msgid "Download"
 msgstr "Скачать"
 
@@ -1884,7 +1916,7 @@ msgid "Pages"
 msgstr "Страницы"
 
 #: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:35
-#: app/admin/templates/jobs.html:69
+#: app/admin/templates/jobs.html:80
 msgid "Notes"
 msgstr "Примечания"
 
@@ -1965,13 +1997,14 @@ msgstr "здесь это не меняется, чтобы не потерят�
 #: app/admin/templates/backup_edit.html:22
 #: app/admin/templates/group_edit.html:27 app/admin/templates/printers.html:106
 #: app/admin/templates/settings.html:14 app/admin/templates/settings.html:24
-#: app/admin/templates/settings.html:33 app/admin/templates/user_edit.html:43
+#: app/admin/templates/settings.html:32 app/admin/templates/settings.html:41
+#: app/admin/templates/user_edit.html:43
 msgid "Save"
 msgstr "Сохранить"
 
-#: app/admin/templates/backup_edit.html:22 app/admin/templates/base.html:470
-#: app/admin/templates/group_edit.html:27 app/admin/templates/jobs.html:77
-#: app/admin/templates/me.html:67 app/admin/templates/print.html:75
+#: app/admin/templates/backup_edit.html:22 app/admin/templates/base.html:473
+#: app/admin/templates/group_edit.html:27 app/admin/templates/jobs.html:88
+#: app/admin/templates/me.html:68 app/admin/templates/print.html:75
 #: app/admin/templates/printers.html:114
 #: app/admin/templates/request_group.html:15
 #: app/admin/templates/request_permission.html:24
@@ -2045,7 +2078,7 @@ msgstr "Установленная версия: %(v)s"
 msgid "new version %(v)s available"
 msgstr "доступна новая версия %(v)s"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:351
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:354
 msgid "Release notes"
 msgstr "Примечания к выпуску"
 
@@ -2275,82 +2308,82 @@ msgstr "Без шифрования файл содержит базу данн�
 msgid "Create backup"
 msgstr "Создать резервную копию"
 
-#: app/admin/templates/base.html:296 app/admin/templates/settings.html:3
+#: app/admin/templates/base.html:297 app/admin/templates/settings.html:3
 #: app/admin/templates/settings.html:7
 msgid "Settings"
 msgstr "Настройки"
 
-#: app/admin/templates/base.html:304
+#: app/admin/templates/base.html:305
 msgctxt "menu"
 msgid "Audit"
 msgstr "Аудит"
 
-#: app/admin/templates/base.html:305
+#: app/admin/templates/base.html:306
 msgctxt "menu"
 msgid "Users"
 msgstr "Пользователи"
 
-#: app/admin/templates/base.html:306
+#: app/admin/templates/base.html:307
 msgctxt "menu"
 msgid "Groups"
 msgstr "Группы"
 
-#: app/admin/templates/base.html:307
+#: app/admin/templates/base.html:308
 msgctxt "menu"
 msgid "Requests"
 msgstr "Запросы"
 
-#: app/admin/templates/base.html:308
+#: app/admin/templates/base.html:309
 msgctxt "menu"
 msgid "Actions"
 msgstr "Действия"
 
-#: app/admin/templates/base.html:309
+#: app/admin/templates/base.html:310
 msgctxt "menu"
 msgid "Printers"
 msgstr "Принтеры"
 
-#: app/admin/templates/base.html:310
+#: app/admin/templates/base.html:311
 msgctxt "menu"
 msgid "Backup"
 msgstr "Копии"
 
-#: app/admin/templates/base.html:311
+#: app/admin/templates/base.html:312
 msgctxt "menu"
 msgid "Archive"
 msgstr "Архив"
 
-#: app/admin/templates/base.html:314
+#: app/admin/templates/base.html:315
 msgctxt "menu"
 msgid "Profile"
 msgstr "Профиль"
 
-#: app/admin/templates/base.html:315
+#: app/admin/templates/base.html:316
 msgctxt "menu"
 msgid "Print"
 msgstr "Печать"
 
-#: app/admin/templates/base.html:316
+#: app/admin/templates/base.html:317
 msgctxt "menu"
 msgid "Scan"
 msgstr "Скан"
 
-#: app/admin/templates/base.html:321 app/admin/templates/base.html:327
+#: app/admin/templates/base.html:322 app/admin/templates/base.html:328
 #: app/admin/templates/me_notices.html:2 app/admin/templates/me_notices.html:5
 #: app/admin/templates/notices.html:2 app/admin/templates/notices.html:12
 msgid "Notices"
 msgstr "Уведомления"
 
-#: app/admin/templates/base.html:331 app/admin/templates/docs.html:2
+#: app/admin/templates/base.html:333 app/admin/templates/docs.html:2
 #: app/admin/templates/docs.html:31 app/admin/templates/docs.html:46
 msgid "Documentation"
 msgstr "Документация"
 
-#: app/admin/templates/base.html:334
+#: app/admin/templates/base.html:337
 msgid "Turn the gateway back on?"
 msgstr "Снова включить шлюз?"
 
-#: app/admin/templates/base.html:334
+#: app/admin/templates/base.html:337
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -2360,60 +2393,60 @@ msgstr ""
 "\n"
 "Принтеры исчезнут из сети (mDNS), и никто из пользователей не сможет печатать и сканировать — только администраторы."
 
-#: app/admin/templates/base.html:334 app/admin/templates/base.html:337
+#: app/admin/templates/base.html:337 app/admin/templates/base.html:340
 msgid "LEAVE MAINTENANCE"
 msgstr "ВЫЙТИ ИЗ РЕЖИМА ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:334 app/admin/templates/base.html:337
+#: app/admin/templates/base.html:337 app/admin/templates/base.html:340
 msgid "PUT IN MAINTENANCE"
 msgstr "ПЕРЕВЕСТИ В РЕЖИМ ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:334 app/admin/templates/printers.html:50
+#: app/admin/templates/base.html:337 app/admin/templates/printers.html:50
 msgid "Tell all users in their notices (administrators too)"
 msgstr "Сообщить всем пользователям в их уведомлениях (включая администраторов)"
 
-#: app/admin/templates/base.html:338
+#: app/admin/templates/base.html:341
 msgid "Turn the gateway back on"
 msgstr "Снова включить шлюз"
 
-#: app/admin/templates/base.html:338
+#: app/admin/templates/base.html:341
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "Останавливает печать и сканирование для всех, кроме администраторов, и скрывает принтеры из сети"
 
-#: app/admin/templates/base.html:345
+#: app/admin/templates/base.html:348
 msgid "Log out"
 msgstr "Выйти"
 
-#: app/admin/templates/base.html:350
+#: app/admin/templates/base.html:353
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "ШЛЮЗ В РЕЖИМЕ ОБСЛУЖИВАНИЯ"
 
-#: app/admin/templates/base.html:350
+#: app/admin/templates/base.html:353
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "печать и сканирование остановлены для пользователей; администраторы по-прежнему могут ими пользоваться"
 
-#: app/admin/templates/base.html:350
+#: app/admin/templates/base.html:353
 msgid "printing and scanning are temporarily suspended"
 msgstr "печать и сканирование временно приостановлены"
 
-#: app/admin/templates/base.html:351
+#: app/admin/templates/base.html:354
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "Доступна новая версия: %(new)s (установлена: %(old)s)."
 
-#: app/admin/templates/base.html:351
+#: app/admin/templates/base.html:354
 msgid "To update, run on the server:"
 msgstr "Для обновления выполните на сервере:"
 
-#: app/admin/templates/base.html:389
+#: app/admin/templates/base.html:392
 msgid "Copied"
 msgstr "Скопировано"
 
-#: app/admin/templates/base.html:389 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:392 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "Копировать"
 
-#: app/admin/templates/base.html:466
+#: app/admin/templates/base.html:469
 msgid "Are you sure?"
 msgstr "Вы уверены?"
 
@@ -2612,7 +2645,7 @@ msgstr "Поиск по имени файла просматривает пос�
 msgid "No."
 msgstr "№"
 
-#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:49
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:60
 #: app/admin/templates/me.html:50
 msgid "Device"
 msgstr "Устройство"
@@ -2621,7 +2654,7 @@ msgstr "Устройство"
 msgid "What the states mean"
 msgstr "Что означают состояния"
 
-#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:58
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:69
 msgid "Pg."
 msgstr "Стр."
 
@@ -2639,108 +2672,133 @@ msgstr "Сканирование без входа · № %(id)s"
 msgid "Whoever scanned did not sign in: they are recorded as “%(name)s”. This is all that is known about them."
 msgstr "Тот, кто сканировал, не выполнил вход: он записан как «%(name)s». Это всё, что о нём известно."
 
-#: app/admin/templates/jobs.html:45
+#: app/admin/templates/jobs.html:45 app/admin/templates/jobs.html:56
 msgid "IP address"
 msgstr "IP-адрес"
 
-#: app/admin/templates/jobs.html:46
+#: app/admin/templates/jobs.html:46 app/admin/templates/jobs.html:57
 msgid "Host name"
 msgstr "Имя узла"
 
-#: app/admin/templates/jobs.html:46
+#: app/admin/templates/jobs.html:46 app/admin/templates/jobs.html:57
 msgid "not available (no name registered in the DNS)"
 msgstr "недоступно (в DNS не зарегистрировано имя)"
 
-#: app/admin/templates/jobs.html:47 app/admin/templates/jobs.html:55
-#: app/admin/templates/jobs.html:67 app/admin/templates/jobs.html:73
-#: app/admin/templates/jobs.html:99 app/admin/templates/printers.html:42
-#: app/admin/templates/printers.html:87 app/admin/templates/printers.html:212
-#: app/admin/templates/printers.html:218 app/admin/templates/requests.html:47
-#: app/admin/templates/requests.html:51
+#: app/admin/templates/jobs.html:47 app/admin/templates/jobs.html:58
+#: app/admin/templates/jobs.html:66 app/admin/templates/jobs.html:78
+#: app/admin/templates/jobs.html:84 app/admin/templates/jobs.html:110
+#: app/admin/templates/printers.html:42 app/admin/templates/printers.html:87
+#: app/admin/templates/printers.html:212 app/admin/templates/printers.html:218
+#: app/admin/templates/requests.html:47 app/admin/templates/requests.html:51
 msgid "Close"
 msgstr "Закрыть"
 
-#: app/admin/templates/jobs.html:50 app/admin/templates/scan.html:19
+#: app/admin/templates/jobs.html:49 app/admin/templates/scan.html:68
+msgid "Scan window"
+msgstr "Окно сканирования"
+
+#: app/admin/templates/jobs.html:51
+#, python-format
+msgid "Scan window · no. %(id)s"
+msgstr "Окно сканирования · № %(id)s"
+
+#: app/admin/templates/jobs.html:52
+msgid "Refused: the window was opened for one address and the request came from another."
+msgstr "Отклонено: окно было открыто для одного адреса, а запрос пришёл с другого."
+
+#: app/admin/templates/jobs.html:53
+msgid "Address the window was for"
+msgstr "Адрес, для которого открыто окно"
+
+#: app/admin/templates/jobs.html:54
+msgid "Address the request came from"
+msgstr "Адрес, с которого пришёл запрос"
+
+#: app/admin/templates/jobs.html:55
+msgid "The person pressed the scan window button, and this scan came from the address they opened it for."
+msgstr "Пользователь нажал кнопку окна сканирования, и это сканирование пришло с адреса, для которого оно было открыто."
+
+#: app/admin/templates/jobs.html:61 app/admin/templates/scan.html:19
 msgid "scan"
 msgstr "скан"
 
-#: app/admin/templates/jobs.html:50
+#: app/admin/templates/jobs.html:61
 msgid "Scanned with the automatic document feeder (ADF)"
 msgstr "Отсканировано через автоподатчик документов (ADF)"
 
-#: app/admin/templates/jobs.html:50
+#: app/admin/templates/jobs.html:61
 msgid "print"
 msgstr "печать"
 
-#: app/admin/templates/jobs.html:51
+#: app/admin/templates/jobs.html:62
 msgid "Specifications of this print"
 msgstr "Параметры этой печати"
 
-#: app/admin/templates/jobs.html:53
+#: app/admin/templates/jobs.html:64
 #, python-format
 msgid "Print specifications · no. %(id)s"
 msgstr "Параметры печати · № %(id)s"
 
-#: app/admin/templates/jobs.html:61 app/admin/templates/jobs.html:62
-#: app/admin/templates/jobs.html:63
+#: app/admin/templates/jobs.html:72 app/admin/templates/jobs.html:73
+#: app/admin/templates/jobs.html:74
 msgid "Show all"
 msgstr "Показать всё"
 
-#: app/admin/templates/jobs.html:61 app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:72 app/admin/templates/jobs.html:73
 msgid "Show the complete information of the file"
 msgstr "Показать полную информацию о файле"
 
-#: app/admin/templates/jobs.html:63
+#: app/admin/templates/jobs.html:74
 msgid "Show the complete comment"
 msgstr "Показать комментарий полностью"
 
-#: app/admin/templates/jobs.html:65
+#: app/admin/templates/jobs.html:76
 #, python-format
 msgid "File · no. %(id)s"
 msgstr "Файл · № %(id)s"
 
-#: app/admin/templates/jobs.html:69
+#: app/admin/templates/jobs.html:80
 msgid "Show and copy the whole note"
 msgstr "Показать и скопировать всё примечание"
 
-#: app/admin/templates/jobs.html:71
+#: app/admin/templates/jobs.html:82
 #, python-format
 msgid "Note · no. %(id)s"
 msgstr "Примечание · № %(id)s"
 
-#: app/admin/templates/jobs.html:76
+#: app/admin/templates/jobs.html:87
 msgid "Cancel this queued job?"
 msgstr "Отменить это задание в очереди?"
 
-#: app/admin/templates/jobs.html:79
+#: app/admin/templates/jobs.html:90
 msgid "No jobs."
 msgstr "Заданий нет."
 
-#: app/admin/templates/jobs.html:90
+#: app/admin/templates/jobs.html:101
 msgid "States of a print or scan"
 msgstr "Состояния печати или сканирования"
 
-#: app/admin/templates/jobs.html:92
+#: app/admin/templates/jobs.html:103
 msgid "<b>Accepted.</b> It passed the checks (identity, quota, blocks, maintenance) and was handed to CUPS or the scanner: it is printing, queued or in progress. It already counts toward the quota."
 msgstr "<b>Принято.</b> Прошло проверки (личность, квота, блокировки, обслуживание) и передано в CUPS или сканеру: печатается, стоит в очереди или выполняется. Уже учитывается в квоте."
 
-#: app/admin/templates/jobs.html:93
+#: app/admin/templates/jobs.html:104
 msgid "<b>Completed.</b> Print finished (CUPS confirms it) or scan delivered. The real pages replace the estimate made before printing."
 msgstr "<b>Завершено.</b> Печать окончена (CUPS подтверждает) или скан доставлен. Реальное число страниц заменяет оценку, сделанную до печати."
 
-#: app/admin/templates/jobs.html:94
+#: app/admin/templates/jobs.html:105
 msgid "<b>Denied.</b> The gateway refused it and nothing started: quota used up, printer blocked, gateway in maintenance, invalid file… The reason is in the Notes column. It does not count toward the quota."
 msgstr "<b>Отклонено.</b> Шлюз отказал, ничего не запущено: квота исчерпана, принтер заблокирован, шлюз в режиме обслуживания, недопустимый файл… Причина указана в столбце «Примечания». В квоте не учитывается."
 
-#: app/admin/templates/jobs.html:95
+#: app/admin/templates/jobs.html:106
 msgid "<b>Failed.</b> It had been accepted but the printer or scanner could not carry it out (CUPS reported an error, the device did not answer). It does not count toward the quota."
 msgstr "<b>Ошибка.</b> Задание было принято, но принтер или сканер не смогли его выполнить (CUPS сообщил об ошибке, устройство не отвечало). В квоте не учитывается."
 
-#: app/admin/templates/jobs.html:96
+#: app/admin/templates/jobs.html:107
 msgid "<b>Canceled.</b> Stopped before printing, by the user, by an administrator (“Cancel”) or by the scanning program. The quota is freed."
 msgstr "<b>Отменено.</b> Остановлено до печати пользователем, администратором («Отмена») или программой сканирования. Квота освобождается."
 
-#: app/admin/templates/jobs.html:97
+#: app/admin/templates/jobs.html:108
 msgid "<b>On hold.</b> CUPS is holding it (queue paused or waiting for someone to act). Until it restarts it counts toward the quota."
 msgstr "<b>Ожидает.</b> CUPS удерживает задание (очередь приостановлена или ждёт вмешательства). Пока оно не возобновится, оно учитывается в квоте."
 
@@ -2871,7 +2929,7 @@ msgstr "Вернуться к пользователю"
 msgid "Login"
 msgstr "Вход"
 
-#: app/admin/templates/login.html:9 app/admin/templates/settings.html:48
+#: app/admin/templates/login.html:9 app/admin/templates/settings.html:56
 msgid "Password"
 msgstr "Пароль"
 
@@ -2944,7 +3002,7 @@ msgid "My usage"
 msgstr "Моё использование"
 
 #: app/admin/templates/me.html:10 app/admin/templates/me.html:12
-#: app/admin/templates/me.html:62
+#: app/admin/templates/me.html:63
 #: app/admin/templates/request_permission.html:11
 #: app/admin/templates/request_quota.html:11
 #: app/admin/templates/requests.html:83 app/admin/templates/requests.html:194
@@ -2977,7 +3035,7 @@ msgid "Print a file"
 msgstr "Напечатать файл"
 
 #: app/admin/templates/me.html:19 app/admin/templates/scan.html:3
-#: app/admin/templates/scan.html:53
+#: app/admin/templates/scan.html:60
 msgid "Scan"
 msgstr "Сканировать"
 
@@ -3089,33 +3147,42 @@ msgstr "Либо <span class=\"mono\">scripts/add-printer-linux.sh</span> из �
 
 #: app/admin/templates/me.html:54
 #, python-format
+msgid "Settings → Printers &amp; scanners → Add device, then enter <b>%(user)s</b> and the key when you print and tick \"Remember my credentials\"."
+msgstr "Параметры → Принтеры и сканеры → Добавить устройство; при печати введите <b>%(user)s</b> и ключ и отметьте «Запомнить мои учётные данные»."
+
+#: app/admin/templates/me.html:54
+msgid "Step-by-step guide"
+msgstr "Пошаговое руководство"
+
+#: app/admin/templates/me.html:55
+#, python-format
 msgid "Add a network printer with the address <span class=\"mono\">ipps://%(server)s/printers/&lt;name&gt;</span>; when it asks for the user name and password enter <b>%(user)s</b> and the key, and choose \"remember\"."
 msgstr "Добавьте сетевой принтер с адресом <span class=\"mono\">ipps://%(server)s/printers/&lt;имя&gt;</span>; когда запросят имя пользователя и пароль, введите <b>%(user)s</b> и ключ и выберите «запомнить»."
 
-#: app/admin/templates/me.html:54
+#: app/admin/templates/me.html:55
 msgid "Not yet tried on these systems."
 msgstr "На этих системах пока не проверялось."
 
-#: app/admin/templates/me.html:56
+#: app/admin/templates/me.html:57
 msgid "Available printers:"
 msgstr "Доступные принтеры:"
 
-#: app/admin/templates/me.html:60
+#: app/admin/templates/me.html:61
 msgid "My requests"
 msgstr "Мои запросы"
 
-#: app/admin/templates/me.html:62 app/admin/templates/request_group.html:13
+#: app/admin/templates/me.html:63 app/admin/templates/request_group.html:13
 #: app/admin/templates/request_permission.html:22
 #: app/admin/templates/request_quota.html:23
 #: app/admin/templates/requests.html:7 app/admin/templates/requests.html:46
 msgid "Reason"
 msgstr "Причина"
 
-#: app/admin/templates/me.html:62
+#: app/admin/templates/me.html:63
 msgid "Answer"
 msgstr "Ответ"
 
-#: app/admin/templates/me.html:69
+#: app/admin/templates/me.html:70
 msgid "No requests."
 msgstr "Запросов нет."
 
@@ -3242,7 +3309,7 @@ msgid "dismissed by %(who)s"
 msgstr "закрыл(а): %(who)s"
 
 #: app/admin/templates/password.html:2 app/admin/templates/password.html:7
-#: app/admin/templates/settings.html:39 app/admin/templates/settings.html:44
+#: app/admin/templates/settings.html:47 app/admin/templates/settings.html:52
 msgid "Change password"
 msgstr "Сменить пароль"
 
@@ -3348,11 +3415,11 @@ msgstr "Альбомная"
 msgid "Printer default"
 msgstr "По умолчанию для принтера"
 
-#: app/admin/templates/print.html:66 app/admin/templates/scan.html:47
+#: app/admin/templates/print.html:66 app/admin/templates/scan.html:54
 msgid "In colour"
 msgstr "Цветная"
 
-#: app/admin/templates/print.html:66 app/admin/templates/scan.html:47
+#: app/admin/templates/print.html:66 app/admin/templates/scan.html:54
 msgid "Black and white"
 msgstr "Чёрно-белая"
 
@@ -4207,71 +4274,120 @@ msgstr "Скачано: %(name)s (папка загрузок браузера).
 msgid "Error"
 msgstr "Ошибка"
 
+#: app/admin/templates/scan.html:25
+#, python-format
+msgid "%(m)s min %(s)s s"
+msgstr "%(m)s мин %(s)s с"
+
+#: app/admin/templates/scan.html:26
+msgid "Window ended"
+msgstr "Окно закрыто"
+
+#: app/admin/templates/scan.html:27
+msgid "The request came through a proxy: the address above may be the proxy’s, not your device’s. If your scan app has a different address, the scan will be refused."
+msgstr "Запрос прошёл через прокси: адрес выше может быть адресом прокси, а не вашего устройства. Если у приложения для сканирования другой адрес, сканирование будет отклонено."
+
 #: app/admin/templates/scan.html:28
+msgid "This is an IPv6 address. If your scan app connects over IPv4 (or the reverse), the addresses will not match."
+msgstr "Это адрес IPv6. Если приложение для сканирования подключается по IPv4 (или наоборот), адреса не совпадут."
+
+#: app/admin/templates/scan.html:34
 msgid "Scan a document"
 msgstr "Сканировать документ"
 
-#: app/admin/templates/scan.html:31
+#: app/admin/templates/scan.html:35
+msgid "Let my scan app scan for a few minutes"
+msgstr "Разрешить моему приложению сканировать на несколько минут"
+
+#: app/admin/templates/scan.html:38
 msgid "No scanner available at the moment: it is not connected, it is off, or scanning is not enabled on this server."
 msgstr "Сейчас нет доступных сканеров: он не подключён, выключен или сканирование не включено на этом сервере."
 
-#: app/admin/templates/scan.html:33
+#: app/admin/templates/scan.html:40
 msgid "Put the sheets on the glass or in the automatic feeder, choose how to scan them and press the button."
 msgstr "Положите листы на стекло или в автоподатчик, выберите параметры сканирования и нажмите кнопку."
 
-#: app/admin/templates/scan.html:34
+#: app/admin/templates/scan.html:41
 msgid "Every scan is recorded in the audit like prints."
 msgstr "Каждое сканирование записывается в аудит так же, как и печать."
 
-#: app/admin/templates/scan.html:43
+#: app/admin/templates/scan.html:50
 msgid "PDF (one page per sheet)"
 msgstr "PDF (одна страница на лист)"
 
-#: app/admin/templates/scan.html:43
+#: app/admin/templates/scan.html:50
 msgid "JPEG image (several sheets: ZIP file)"
 msgstr "Изображение JPEG (несколько листов: ZIP-файл)"
 
-#: app/admin/templates/scan.html:44
+#: app/admin/templates/scan.html:51
 msgid "Where you put the sheets"
 msgstr "Куда вы положили листы"
 
-#: app/admin/templates/scan.html:47
+#: app/admin/templates/scan.html:54
 msgid "Grayscale"
 msgstr "Оттенки серого"
 
-#: app/admin/templates/scan.html:48
+#: app/admin/templates/scan.html:55
 msgid "Quality"
 msgstr "Качество"
 
-#: app/admin/templates/scan.html:50
+#: app/admin/templates/scan.html:57
 msgid "Where to save it"
 msgstr "Куда сохранить"
 
-#: app/admin/templates/scan.html:51
+#: app/admin/templates/scan.html:58
 msgid "The browser saves it in the downloads folder."
 msgstr "Браузер сохранит файл в папку загрузок."
 
-#: app/admin/templates/scan.html:53
+#: app/admin/templates/scan.html:60
 msgid "Back"
 msgstr "Назад"
 
-#: app/admin/templates/scan.html:54
+#: app/admin/templates/scan.html:61
 msgid "Scanning…"
 msgstr "Идёт сканирование…"
 
-#: app/admin/templates/scan.html:55
+#: app/admin/templates/scan.html:62
 msgid "Scanning… with several sheets it can take a minute. You can also leave this page: the file stays below for 15 minutes."
 msgstr "Идёт сканирование… при нескольких листах это может занять минуту. Можно покинуть страницу: файл останется ниже на 15 минут."
 
-#: app/admin/templates/scan.html:60
+#: app/admin/templates/scan.html:69
+msgid "Your scan app can scan now, without a password, from the address below. Only that address is accepted; any other is refused."
+msgstr "Ваше приложение для сканирования может сканировать сейчас без пароля с адреса ниже. Принимается только этот адрес, любой другой отклоняется."
+
+#: app/admin/templates/scan.html:70
+msgid "Address the server sees you at"
+msgstr "Адрес, с которого вас видит сервер"
+
+#: app/admin/templates/scan.html:71
+msgid "Time left"
+msgstr "Осталось времени"
+
+#: app/admin/templates/scan.html:73
+msgid "A scan that has already started is finished even if the time runs out. If this is not the address of the device that scans (another network, a proxy, IPv4 versus IPv6), the scan is refused: you will see it in the bell."
+msgstr "Уже начатое сканирование будет завершено, даже если время истечёт. Если это не адрес устройства, которое сканирует (другая сеть, прокси, IPv4 и IPv6), сканирование будет отклонено: вы увидите это в колокольчике."
+
+#: app/admin/templates/scan.html:74
+msgid "Read the limits in the user guide"
+msgstr "Прочитать об ограничениях в руководстве пользователя"
+
+#: app/admin/templates/scan.html:75
+msgid "Close the window"
+msgstr "Закрыть окно"
+
+#: app/admin/templates/scan.html:75
+msgid "OK"
+msgstr "ОК"
+
+#: app/admin/templates/scan.html:79
 msgid "Your recent scans"
 msgstr "Ваши последние сканирования"
 
-#: app/admin/templates/scan.html:63
+#: app/admin/templates/scan.html:82
 msgid "scanning…"
 msgstr "идёт сканирование…"
 
-#: app/admin/templates/scan.html:64
+#: app/admin/templates/scan.html:83
 #, python-format
 msgid "%(n)s page"
 msgid_plural "%(n)s pages"
@@ -4332,39 +4448,55 @@ msgstr "Язык"
 msgid "Automatic (as the browser)"
 msgstr "Автоматически (как в браузере)"
 
+#: app/admin/templates/settings.html:28
+msgid "Secondary notices"
+msgstr "Второстепенные уведомления"
+
 #: app/admin/templates/settings.html:29
+msgid "Notices about a single print that was changed for you (for example made in black and white or double-sided because your account has no permission) are marked as read by themselves after this many minutes, counted from the last one. They stay in the list under “Show dismissed too”. With 0 they stay until you dismiss them."
+msgstr "Уведомления об отдельной печати, изменённой для вас (например, чёрно-белой или двусторонней, потому что у вашей учётной записи нет разрешения), сами отмечаются прочитанными через указанное число минут после последнего. Они остаются в списке под «Показать и закрытые». При 0 они остаются, пока вы их не закроете."
+
+#: app/admin/templates/settings.html:31
+msgid "Minutes"
+msgstr "Минуты"
+
+#: app/admin/templates/settings.html:31
+msgid "minutes"
+msgstr "мин."
+
+#: app/admin/templates/settings.html:37
 msgid "Audit: automatic refresh"
 msgstr "Аудит: автообновление"
 
-#: app/admin/templates/settings.html:30
+#: app/admin/templates/settings.html:38
 msgid "How many seconds between the automatic reloads of the Audit page while its switch is on (it does not reload while you type in the filters or have a popup open). With 0 the switch starts off, and uses 30 seconds when you turn it on."
 msgstr "Сколько секунд между автоматическими перезагрузками страницы «Аудит», пока её переключатель включён (страница не перезагружается, пока вы вводите текст в фильтрах или открыто окно). При 0 переключатель изначально выключен и при включении использует 30 секунд."
 
-#: app/admin/templates/settings.html:32
+#: app/admin/templates/settings.html:40
 msgid "Seconds"
 msgstr "Секунды"
 
-#: app/admin/templates/settings.html:32
+#: app/admin/templates/settings.html:40
 msgid "seconds"
 msgstr "секунд"
 
-#: app/admin/templates/settings.html:41
+#: app/admin/templates/settings.html:49
 msgid "current password"
 msgstr "текущий пароль"
 
-#: app/admin/templates/settings.html:42
+#: app/admin/templates/settings.html:50
 msgid "new password (min. 12)"
 msgstr "новый пароль (мин. 12)"
 
-#: app/admin/templates/settings.html:43
+#: app/admin/templates/settings.html:51
 msgid "repeat the new one"
 msgstr "повторите новый"
 
-#: app/admin/templates/settings.html:45
+#: app/admin/templates/settings.html:53
 msgid "Other sessions open with this account will be closed. Print keys stay valid."
 msgstr "Остальные сеансы этой учётной записи будут завершены. Ключи печати остаются действительными."
 
-#: app/admin/templates/settings.html:48
+#: app/admin/templates/settings.html:56
 msgid "Your password is managed by the RADIUS server: it cannot be changed here."
 msgstr "Ваш пароль управляется сервером RADIUS: здесь его изменить нельзя."
 
@@ -4728,16 +4860,16 @@ msgstr "принтер отключён администратором (дейс
 msgid "gateway in maintenance: only administrators can print or scan"
 msgstr "шлюз в режиме обслуживания: печатать и сканировать могут только администраторы"
 
-#: app/policy/engine.py:142
+#: app/policy/engine.py:143
 msgid "user disabled"
 msgstr "пользователь отключён"
 
-#: app/policy/engine.py:149
+#: app/policy/engine.py:150
 #, python-format
 msgid "%(period)s page limit would be exceeded (used %(used)s, this document %(pages)s, limit %(limit)s)"
 msgstr "будет превышен лимит страниц (%(period)s): использовано %(used)s, этот документ — %(pages)s, лимит %(limit)s"
 
-#: app/policy/engine.py:154
+#: app/policy/engine.py:156
 #, python-format
 msgid "%(period)s %(noun)s limit reached (%(used)s/%(limit)s)"
 msgstr "достигнут лимит (%(period)s, %(noun)s): %(used)s/%(limit)s"

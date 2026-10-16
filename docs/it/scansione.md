@@ -48,6 +48,45 @@ richiede HTTP Basic con **nome utente + chiave di stampa**, stessa autenticazion
   l'account locale senza password `ospite-scansione` (non può entrare nel portale), con l'IP di chi chiama nelle opzioni dell'audit.
   Credenziali sbagliate restano 401. Finché l'opzione è spenta, una richiesta senza credenziali viene rifiutata (401) e compare come avviso nella campanella ([guida-amministratore.md](guida-amministratore.md)), al massimo una volta per intervallo e per fonte. **Predefinito spento**; chiunque nella rete raggiunga la porta 8631 potrebbe scansionare: usalo solo su
   rete fidata. NAPS2 non ha trovato l'annuncio mDNS: inserisci IP e porta a mano.
+- **Finestra di scansione** (`CUPSPL_ESCL_WINDOW`, accesa di default): un pulsante in alto a destra in *Scansione* (uno scanner con un
+  timer) dice al gateway «la mia app sta per scansionare». Il gateway si segna l'indirizzo che vede per quella connessione e, per
+  `CUPSPL_ESCL_WINDOW_SECONDS` (60–900, predefinito 180), accetta richieste **senza credenziali solo da quell'indirizzo**, a nome di
+  chi ha premuto il pulsante: valgono la sua quota e i suoi permessi e l'audit riporta il suo nome e l'indirizzo. Finché la finestra
+  è aperta si possono fare quante scansioni si vuole. La finestra decide solo se può partire una scansione **nuova**: una scansione
+  già iniziata viene consegnata, e può essere chiusa con DELETE, anche se nel frattempo la finestra scade o viene chiusa (il job
+  resta legato all'indirizzo che l'ha avviato). Non gira nulla in background: una finestra scaduta è solo un orario passato. Le
+  finestre stanno in memoria, quindi un riavvio le chiude. Una persona ha una sola finestra; se due persone premono dallo stesso
+  indirizzo vale l'ultima pressione.
+  Con `CUPSPL_ESCL_ANONYMOUS=true` la finestra cambia solo a chi va la scansione: alla persona, invece che a `ospite-scansione`. Con
+  `CUPSPL_ESCL_WINDOW=false` pulsante, script e testi non sono proprio nella pagina.
+  Quando una richiesta senza credenziali arriva da un altro indirizzo mentre c'è una finestra aperta, viene rifiutata (401). L'audit
+  riceve una riga *negata* per il proprietario della finestra con i due indirizzi (l'icona informazioni li mostra) e la sua
+  campanella dice «scansione rifiutata: la finestra era per X, la richiesta arriva da Y». La stessa coppia è registrata al massimo
+  una volta al minuto, così un programma che riprova di continuo non riempie l'audit.
+
+### Limiti della finestra di scansione
+
+Il gateway può solo confrontare l'indirizzo della connessione TCP. Tutto ciò che cambia quell'indirizzo rompe il metodo:
+
+- **NAT**: se il browser e l'app di scansione stanno dietro lo stesso router, per il server (per esempio un'altra rete, una VPN o il
+  Wi-Fi ospiti), il server vede l'indirizzo del router per *entrambi*. La finestra accetta allora anche ogni altro dispositivo dietro
+  quell'indirizzo, finché è aperta. Se i due stanno su reti diverse con NAT diversi, gli indirizzi differiscono e la scansione è
+  rifiutata.
+- **IPv4 e IPv6 insieme**: un computer può raggiungere il portale in IPv6 e l'app di scansione collegarsi in IPv4 (o il contrario). I due
+  indirizzi sono diversi e non coincidono. Apri il portale con l'indirizzo della stessa famiglia usata dall'app (il riquadro che si
+  apre premendo il pulsante dice quale indirizzo ha visto il server). Un indirizzo IPv4 scritto in forma IPv6 (`::ffff:192.168.1.5`) è
+  trattato come quello IPv4.
+- **Proxy**: dietro un reverse proxy il server vede l'indirizzo del proxy, uguale per tutti, a meno che il proxy sia considerato
+  attendibile per inoltrare quello vero (`X-Forwarded-For`; il server dell'applicazione ci crede solo da `127.0.0.1`). Il riquadro
+  mostra un avviso quando la richiesta al portale portava un'intestazione di questo tipo. Le app di scansione di norma si collegano
+  direttamente alla porta 8631, non attraverso il proxy, quindi i due indirizzi differiscono.
+- **Un altro dispositivo**: il pulsante va premuto dal computer su cui gira l'app di scansione. Premerlo da un telefono apre la
+  finestra per il telefono.
+- **Indirizzo che cambia**: DHCP o roaming Wi-Fi durante la finestra interrompono la corrispondenza.
+
+Se l'indirizzo nel riquadro non è quello del dispositivo che scansiona, la finestra non può funzionare su quella rete: usa
+`CUPSPL_ESCL_ANONYMOUS=true` su una rete fidata, oppure un'app di scansione che sa inviare nome utente e chiave di stampa. La guida
+utente riporta gli stessi limiti in forma breve per chi preme il pulsante.
 
 ## 4. Note
 

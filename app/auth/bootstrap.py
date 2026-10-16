@@ -32,10 +32,10 @@ def ensure_orchestrator(sm) -> str | None:
             return None
         if user.password_hash:
             # nothing to claim: say so, because people look for the FIRST RUN line and find nothing
-            log.info("administrator %r already has a password (first-run setup is done): sign in at /admin/login. "
+            log.info("administrator %r already has a password (first-run setup is done): sign in at /login. "
                      "To set a new one: docker compose exec -it gateway cups-policy-admin set-admin-password", name)
             return None
     code = secrets.token_urlsafe(16)
-    log.warning("FIRST RUN: administrator %r has no password yet. Open /admin/setup and use the one-time code: %s",
+    log.warning("FIRST RUN: administrator %r has no password yet. Open /setup and use the one-time code: %s",
                 name, code)
     return code

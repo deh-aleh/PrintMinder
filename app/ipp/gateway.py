@@ -227,6 +227,8 @@ async def ipp_proxy(path: str, request: Request) -> Response:
             refused = _refused_by(perm, decision)
             if refused:
                 await run_in_threadpool(permissions.notify_refused, sm, user.id, printer, perm)
+            elif decision.quota:
+                await run_in_threadpool(permissions.notify_quota, sm, user.id, printer, decision.quota)
             return _ipp_error(msg, codec.STATUS_NOT_POSSIBLE, _with_portal_hint(request, decision.reason, permission=refused))
         if perm is not None:
             _apply_permission(msg, perm)

@@ -45,6 +45,9 @@ from app.ipp.gateway import _parse_basic, _unauthorized
 from app.policy import audit, control
 from app.i18n import _
 from app.i18n import N_, _
+from app.escl_window import Windows, normalize_ip
+from app import i18n
+from app.admin.docs import slugify
 
 log = logging.getLogger("app.escl")
 router = APIRouter()
@@ -60,6 +63,7 @@ GUEST = "ospite-scansione"  # identity of scans sent without credentials (CUPSPL
 MAX_PAGES = 100
 FALLBACK_DPI = (75, 100, 150, 200, 300)
 
+JOB_FOLLOW_SECONDS = 1800.0  # a scan started without credentials can be followed by its address this long (a feeder can take minutes)
 SCANNERS_TTL = 30.0
 CAPS_TTL = 120.0
 A4 = (2480, 3507)  # ThreeHundredthsOfInches: what a scanner is asked for when it does not tell its own maximum
@@ -243,7 +247,62 @@ def _guest(sm) -> User:
 
 
 def _jobs(request: Request) -> dict:
-    return request.app.state.__dict__.setdefault("scan_jobs", {})  # "<root>/<scan job id>" -> (log_id, user_id, scanner base)
+    return request.app.state.__dict__.setdefault("scan_jobs", {})  # "<root>/<scan job id>" -> (log_id, user_id, scanner base, address that started it, monotonic start)
+
+
+def _windows(app) -> Windows:
+    w = getattr(app.state, "scan_windows", None)
+    if w is None:
+        w = app.state.scan_windows = Windows()
+    return w
+
+
+def _enabled_user(sm, user_id: int) -> User | None:
+    with sm() as s:
+        user = s.get(User, user_id)
+        if user is None or not user.enabled:
+            return None
+        s.expunge(user)
+        return user
+
+
+async def _without_credentials(request: Request, parts: list[str], root: str, peer: str) -> tuple[User | None, bool]:
+    """Who a request with no credentials is, if the scan window says so: (user, True), or (None, False).
+    1. A scan job that started from this address goes on for the person it belongs to, even after the window ended
+       (a window that closes mid-scan must not cut the scan off: the page of the scan would never arrive).
+    2. Otherwise an open window for this address makes the request the window owner's."""
+    if not settings.escl_window:
+        return None, False
+    sm = request.app.state.sessionmaker
+    if len(parts) >= 2 and parts[0] == "ScanJobs":
+        owner = _jobs(request).get(f"{root}/{parts[1]}")
+        if owner is not None and len(owner) > 4 and owner[3] == peer and time.monotonic() - owner[4] < JOB_FOLLOW_SECONDS:
+            user = await run_in_threadpool(_enabled_user, sm, owner[1])
+            return user, user is not None
+    win = _windows(request.app).for_ip(peer)
+    if win is None:
+        return None, False
+    user = await run_in_threadpool(_enabled_user, sm, win.user_id)
+    return user, user is not None
+
+
+def _report_mismatch(app, got: str) -> None:
+    """A request without credentials came from `got` while windows are open for other addresses: write the refusal in the
+    audit (for the person who opened it) and in their bell, with both addresses. Rate limited per pair."""
+    sm = app.state.sessionmaker
+    windows = _windows(app)
+    for w in windows.others(got):
+        if not windows.mismatch_due(w.ip, got):
+            continue
+        reason = f"scan window is for {w.ip}, request from {got}"
+        with sm() as s:
+            s.add(JobLog(ts=audit.now_utc(), user_id=w.user_id, user_name=w.username, kind=JobKind.scan, printer="scanner",
+                         title="scan", state=JobState.denied, denied_reason=reason,
+                         options_json={"via": "escl", "window_ip": w.ip, "got_ip": got}))
+            s.commit()
+        notices.notify_user_counted(sm, w.user_id, "scan_window_mismatch", key=f"{w.ip}|{got}",
+                                    detail={"expected": w.ip, "got": got})
+        log.warning("scan refused: window of %s is for %s, request from %s", w.username, w.ip, got)
 
 
 # ---- native eSCL clients
@@ -279,16 +338,24 @@ async def _escl(request: Request, path: str, sid: str | None) -> Response:
 
     user = None
     creds = _parse_basic(request.headers.get("authorization"))
-    if creds is None and settings.escl_anonymous and path not in OPEN_PATHS:
+    sm = request.app.state.sessionmaker
+    peer = normalize_ip(request.client.host if request.client else None) or (request.client.host if request.client else "?")
+    window_used = False
+    if creds is None:
+        user, window_used = await _without_credentials(request, parts, root, peer)
+    if user is not None:
+        pass
+    elif creds is None and settings.escl_anonymous and path not in OPEN_PATHS:
         # many scan apps (NAPS2, ...) cannot send credentials: opt-in guest identity, audited with the client IP
-        user = await run_in_threadpool(_guest, request.app.state.sessionmaker)
+        user = await run_in_threadpool(_guest, sm)
     elif not (path in OPEN_PATHS and settings.anonymous_discovery):
         if creds is None:
             if path not in OPEN_PATHS and not settings.escl_anonymous:  # an app that sends no credentials: tell the administrators once in a while
-                await run_in_threadpool(notices.report, request.app.state.sessionmaker, "escl_anonymous_refused",
-                                        request.client.host if request.client else "?", {"path": path})
+                await run_in_threadpool(notices.report, sm, "escl_anonymous_refused", peer, {"path": path})
+            if settings.escl_window:  # somebody is waiting for a scan from another address: tell them what went wrong
+                await run_in_threadpool(_report_mismatch, request.app, peer)
             return _unauthorized()
-        throttle, ip = request.app.state.throttle, request.client.host if request.client else "?"
+        throttle, ip = request.app.state.throttle, peer
         ukey, ikey = f"u:{creds[0].strip().lower()}|{ip}", f"ip:{ip}"
         if throttle.blocked(ukey, USER_FAILS) or throttle.blocked(ikey, IP_FAILS):
             return Response("too many failed attempts", status_code=429, headers={"Retry-After": "60"})
@@ -299,7 +366,6 @@ async def _escl(request: Request, path: str, sid: str | None) -> Response:
             return _unauthorized("invalid credentials")
         throttle.clear(ukey)
 
-    sm = request.app.state.sessionmaker
     try:
         if request.method == "GET" and path in OPEN_PATHS:
             r = await scan.get(scanner.base + "/eSCL/" + path)
@@ -310,9 +376,10 @@ async def _escl(request: Request, path: str, sid: str | None) -> Response:
             if len(body) > MAX_SETTINGS:
                 return Response("too large", status_code=413, media_type="text/plain")
             via = {"via": "escl"}
-            if user.username == GUEST:
-                ip = request.client.host if request.client else "?"
-                via.update(guest_ip=ip, guest_host=await _hostname(ip))
+            if window_used:
+                via.update(window_ip=peer, window_host=await _hostname(peer))
+            elif user.username == GUEST:
+                via.update(guest_ip=peer, guest_host=await _hostname(peer))
             if b"Feeder" in body:  # the client asked for the document feeder (ADF)
                 via["source"] = "adf"
             decision, log_id = await run_in_threadpool(_start, sm, user, "scan", via, scanner)
@@ -329,7 +396,7 @@ async def _escl(request: Request, path: str, sid: str | None) -> Response:
             jobs = _jobs(request)
             while len(jobs) >= 256:
                 jobs.pop(next(iter(jobs)))  # forgotten jobs never pile up
-            jobs[f"{root}/{job}"] = (log_id, user.id, scanner.base)
+            jobs[f"{root}/{job}"] = (log_id, user.id, scanner.base, peer if window_used else None, time.monotonic())  # a window scan: that address may finish it on its own
             log.info("scan job %s on %s user=%s", job, scanner.name, user.username)
             return Response(status_code=201, headers={"Location": f"{_public(request)}/{root}/ScanJobs/{job}"})
 
@@ -556,7 +623,46 @@ async def scan_form(request: Request, user: User = Depends(current_user)):
     caps = {sid: await scanner_caps(request.app, sc) for sid, sc in found.items()}
     mine = [_view(sid, r) for sid, r in reversed(list(_scans(request.app).items())) if r["user_id"] == user.id]
     return render(request, "scan.html", user, enabled=bool(found), found=list(found.values()), caps=caps,
-                  default_name=_default_scan_name(), mine=mine)
+                  default_name=_default_scan_name(), mine=mine,
+                  window_on=settings.escl_window and bool(found), window_seconds=settings.escl_window_seconds,
+                  window_left=_windows(request.app).remaining(user.id), window_doc=_window_doc_href())
+
+
+# the section of the user guide about the scan window (the popup links to it); the headings are in docs/{en,it}/
+WINDOW_DOC = {"en": ("user-guide", "Scanning from an app that cannot sign in"),
+              "it": ("guida-utente", "Scansione da un'app che non sa accedere")}
+
+
+def _window_doc_href() -> str:
+    lang = "it" if i18n.current().startswith("it") else "en"
+    page, heading = WINDOW_DOC[lang]
+    return f"/docs/{lang}/{page}#{slugify(heading)}"
+
+
+_PROXY_HEADERS = ("x-forwarded-for", "forwarded", "x-real-ip")
+
+
+@me_router.post("/scan/window", dependencies=[Depends(verify_csrf)])
+async def window_open(request: Request, user: User = Depends(current_user)):
+    """The button: from now on, scan requests without credentials that come from this address are this person's."""
+    if not settings.escl_window or not await scanners(request.app):
+        raise HTTPException(404)
+    seen = normalize_ip(request.client.host if request.client else None)
+    if not seen:
+        return JSONResponse({"error": _("The server can not tell which address you are connecting from.")}, status_code=409)
+    w = _windows(request.app).open(seen, user.id, user.username, settings.escl_window_seconds)
+    if w is None:
+        return JSONResponse({"error": _("Too many scan windows are open: try again in a few minutes.")}, status_code=503)
+    log.info("scan window opened user=%s ip=%s seconds=%d", user.username, seen, settings.escl_window_seconds)
+    return JSONResponse({"ip": seen, "seconds": settings.escl_window_seconds, "ipv6": ":" in seen,
+                         "proxy": any(h in request.headers for h in _PROXY_HEADERS)},
+                        headers={"Cache-Control": "no-store"})
+
+
+@me_router.post("/scan/window/close", dependencies=[Depends(verify_csrf)])
+async def window_close(request: Request, user: User = Depends(current_user)):
+    _windows(request.app).close(user.id)  # a scan that already started goes on: it is tied to the address, not to the window
+    return JSONResponse({"closed": True}, headers={"Cache-Control": "no-store"})
 
 
 @me_router.post("/scan", dependencies=[Depends(verify_csrf)])

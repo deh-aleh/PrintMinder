@@ -24,6 +24,14 @@
     <input type="hidden" name="csrf_token" value="{{ csrf }}"><button>{{ _("Save") }}</button>
   </div>
 </form>
+<form class="card" method="post" action="/me/settings/notices">
+  <h2>{{ _("Secondary notices") }}</h2>
+  <p class="muted">{{ _("Notices about a single print that was changed for you (for example made in black and white or double-sided because your account has no permission) are marked as read by themselves after this many minutes, counted from the last one. They stay in the list under “Show dismissed too”. With 0 they stay until you dismiss them.") }}</p>
+  <div class="row">
+    {{ stepper("minutes", me.secondary_read_minutes, min=0, max=secondary_max, label=_("Minutes"), required=true) }} {{ _("minutes") }}
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><button>{{ _("Save") }}</button>
+  </div>
+</form>
 {% if me.is_admin %}
 <form class="card" method="post" action="/me/settings/refresh">
   <h2>{{ _("Audit: automatic refresh") }}</h2>

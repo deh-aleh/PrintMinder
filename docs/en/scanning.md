@@ -49,6 +49,44 @@ everything else needs HTTP Basic with **user name + print key**, same authentica
   as the passwordless local account `ospite-scansione` (it can not log in to the portal), with the caller's IP in the audit
   options. Wrong credentials are still 401. While the option is off, a request without credentials is refused (401) and shows up as a notice in the bell ([admin-guide.md](admin-guide.md)), at most once per interval and source. **Default off**; anyone on the network who reaches port 8631 could scan: use only on a trusted
   network. NAPS2 did not find the mDNS announcement: type IP and port by hand.
+- **Scan window** (`CUPSPL_ESCL_WINDOW`, on by default): a button at the top right of *Scan* (a scanner with a clock) tells the
+  gateway "my scan app is about to scan". The gateway notes the address it sees for that connection and, for
+  `CUPSPL_ESCL_WINDOW_SECONDS` (60–900, default 180), accepts requests **without credentials from that address only**, as
+  the person who pressed the button: their quota and permissions apply and the audit shows their name and the address. Any
+  number of scans can be made while the window is open. The window only decides whether a **new** scan may start: a scan that
+  has begun is delivered, and can be closed with DELETE, even if the window ends or is closed meanwhile (the job stays tied to
+  the address that started it). Nothing runs in the background; an expired window is just a time that has passed. Windows live
+  in memory, so a restart closes them. A person has one window; if two people press from the same address, the last press wins.
+  With `CUPSPL_ESCL_ANONYMOUS=true` the window changes only who gets the scan: the person, instead of `ospite-scansione`. With
+  `CUPSPL_ESCL_WINDOW=false` the button, the script and the texts are not in the page at all.
+  When a request without credentials comes from another address while a window is open, it is refused (401). The audit gets a
+  *denied* row for the window's owner with both addresses (the information icon shows them) and their bell says "scan refused:
+  the window was for X, the request comes from Y". The same pair is recorded at most once a minute, so a program that keeps
+  retrying does not fill the audit.
+
+### Limits of the scan window
+
+The gateway can only compare the address of the TCP connection. Everything that changes that address breaks the method:
+
+- **NAT**: if the browser and the scan app are behind the same router as seen by the server (for example another network, a VPN
+  or a guest Wi-Fi), the server sees the router's address for *both*. The window then also accepts every other device behind
+  that address, for as long as it is open. If the two are on different networks that are NATed differently, the addresses differ
+  and the scan is refused.
+- **IPv4 and IPv6 together**: a computer can reach the portal over IPv6 and the scan app can connect over IPv4 (or the reverse).
+  The two addresses are different and do not match. Open the portal with the address of the same family that the scan app uses
+  (the box that opens when you press the button says which address the server saw). An IPv4 address written in IPv6 form
+  (`::ffff:192.168.1.5`) is treated as the IPv4 one.
+- **Proxies**: behind a reverse proxy the server sees the proxy's address, the same for everybody, unless the proxy is trusted
+  to pass the real one on (`X-Forwarded-For`; the application server only believes it from `127.0.0.1`). The box shows a warning
+  when the portal request carried such a header. Scan apps normally connect straight to port 8631, not through the proxy, so the
+  two addresses differ.
+- **A different device**: the button must be pressed from the computer that runs the scan app. Pressing it on a phone opens the
+  window for the phone.
+- **Changing address**: DHCP or Wi-Fi roaming during the window ends the match.
+
+If the address in the box is not the one of the device that scans, the window can not work on that network: use
+`CUPSPL_ESCL_ANONYMOUS=true` on a trusted network, or a scan app that sends the user name and the print key. The user guide has
+the same limits in short form for the people who press the button.
 
 ## 4. Notes
 

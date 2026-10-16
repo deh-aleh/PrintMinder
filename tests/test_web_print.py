@@ -141,8 +141,8 @@ async def test_csrf_login_and_content_length_are_required(web):
     anon = httpx.AsyncClient(transport=httpx.ASGITransport(app=web.app, client=("10.0.0.50", 1)), base_url="https://gw.test")
     async with anon:
         r = await anon.post("/me/print", data={"queue": "virtual", "csrf_token": "x"}, files={"file": ("a.pdf", PDF)})
-        assert r.status_code == 303 and r.headers["location"] == "/admin/login"
-        assert (await anon.get("/me/print")).headers["location"] == "/admin/login"
+        assert r.status_code == 303 and r.headers["location"] == "/login"
+        assert (await anon.get("/me/print")).headers["location"] == "/login"
     assert rows(web) == []
 
 
@@ -151,7 +151,7 @@ async def test_a_disabled_user_can_not_print_from_an_old_session(web):
         s.query(User).filter_by(username="ann").update({"enabled": False}); s.commit()
     web.app.state.queues_cache = (__import__("time").monotonic(), [{"name": "virtual", "info": "", "model": ""}])
     r = await send(web)
-    assert r.status_code == 303 and r.headers["location"] == "/admin/login" and rows(web) == []
+    assert r.status_code == 303 and r.headers["location"] == "/login" and rows(web) == []
 
 
 @pytest.mark.usefixtures("english")
@@ -192,7 +192,7 @@ async def test_the_key_page_gives_a_ready_command_per_printer_and_never_logs_the
 async def test_the_profile_explains_how_to_connect_each_kind_of_device(web):
     web.app.state.queues_cache = (__import__("time").monotonic(), [{"name": "HP7305", "info": "", "model": ""}])
     page = (await web.get("/me")).text
-    assert "Telefono o tablet" in page and "/me/print" in page and "Linux" in page and "Windows / macOS" in page
+    assert "Telefono o tablet" in page and "/me/print" in page and "Linux" in page and "Windows" in page and "macOS" in page and "/docs/windows" in page
     assert "ipps://gw.test/printers/" in page and "HP7305" in page
 
 

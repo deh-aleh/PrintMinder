@@ -98,6 +98,8 @@ class User(Base):
     own_notices_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # same, for the notices addressed to this person
     # seconds between automatic reloads of the audit page; 0 = off
     refresh_seconds: Mapped[int] = mapped_column(default=30, server_default="30")
+    # minutes after which "secondary" notices (see app.notices.SECONDARY_KINDS) are marked as read by themselves; 0 = never
+    secondary_read_minutes: Mapped[int] = mapped_column(default=20, server_default="20")
 
     group: Mapped[Group | None] = relationship(back_populates="users")
 

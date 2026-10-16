@@ -81,4 +81,8 @@ def audit_row(j: JobLog, name: str | None, scanner: str | None) -> dict:
         "note": note, "note_cut": note_cut,
         # scan sent without credentials: the only thing known about the sender is where it came from
         "guest": {"ip": o["guest_ip"], "host": o.get("guest_host") or ""} if o.get("guest_ip") else None,
+        # scan through a scan window (the person pressed the button): where it came from; or refused because it came from
+        # another address than the window's
+        "win": ({"expected": o["window_ip"], "got": o["got_ip"]} if o.get("got_ip") and o.get("window_ip") else
+                {"ip": o["window_ip"], "host": o.get("window_host") or ""} if o.get("window_ip") else None),
     }

@@ -89,7 +89,8 @@
   .authbox button.primary svg { width:20px; height:20px }
   .authbox .muted { text-align:center; margin:16px 0 0 }
   .pwrow { position:relative } .pwrow input { padding-right:50px }
-  .pwtoggle { position:absolute; right:4px; top:4px; width:40px; height:40px; min-height:0; padding:0; background:transparent; border:0; color:var(--muted); display:flex; align-items:center; justify-content:center }
+  .pwcell .pwrow input { width:100% }
+  .pwtoggle { position:absolute; right:4px; top:50%; transform:translateY(-50%); width:40px; height:40px; min-height:0; padding:0; background:transparent; border:0; color:var(--muted); display:flex; align-items:center; justify-content:center }
   .pwtoggle:hover { color:var(--orange) } .pwtoggle svg { width:22px; height:22px }
   .pwtoggle .off { display:none } .pwtoggle.shown .on { display:none } .pwtoggle.shown .off { display:block }
   .bar { height:10px; border-radius:99px; background:var(--line); overflow:hidden; min-width:80px } .bar i { display:block; height:100% }
@@ -328,9 +329,11 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg>
     {% set bell_n = notices_unseen + own_unseen %}{% if bell_n %}<span class="belln">{{ bell_n if bell_n < 100 else '99+' }}</span>{% endif %}
   </a>
-  <a class="helpbtn iconbtn {{ 'on' if request.url.path.startswith('/admin/docs') }}" href="/admin/docs" aria-label="{{ _t('Documentation') }}" title="{{ _t('Documentation') }}">
+  {% endif %}
+  <a class="helpbtn iconbtn {{ 'on' if request.url.path.startswith('/docs') }}" href="/docs" aria-label="{{ _t('Documentation') }}" title="{{ _t('Documentation') }}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.6-2.4 2.1-2.4 3.5"/><path d="M12 17.2h.01"/></svg>
   </a>
+  {% if me.is_admin %}
   <form method="post" action="/admin/maintenance" data-confirm="{{ _t('Turn the gateway back on?') if maintenance else _t('Put the WHOLE gateway in maintenance?\n\nThe printers disappear from the network (mDNS) and no user will be able to print or scan: only administrators.') }}" data-confirm-title="{{ _t('LEAVE MAINTENANCE') if maintenance else _t('PUT IN MAINTENANCE') }}" data-confirm-ok="{{ _t('LEAVE MAINTENANCE') if maintenance else _t('PUT IN MAINTENANCE') }}"{% if not maintenance %} data-confirm-danger{% endif %} data-confirm-check="{{ _t('Tell all users in their notices (administrators too)') }}" data-confirm-check-name="notify" data-confirm-check-on>
     <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="next" value="{{ request.url.path }}">
     <input type="hidden" name="on" value="{{ '0' if maintenance else '1' }}">
@@ -341,7 +344,7 @@
     </button>
   </form>
   {% endif %}
-  <form method="post" action="/admin/logout"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{ csrf }}">
     <button class="sec iconbtn" aria-label="{{ _t('Log out') }}" title="{{ _t('Log out') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg></button>
   </form>
   </div>

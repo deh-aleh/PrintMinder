@@ -82,7 +82,7 @@ server must list this machine as a client, with the same secret. If RADIUS does 
 ### First start
 
 On the first start an emergency administrator exists **without a password**. The gateway prints a one-time code in the log; with it you
-choose the password at `https://<server>:8631/admin/setup` (see [installation.md](installation.md)). The code works once.
+choose the password at `https://<server>:8631/setup` (see [installation.md](installation.md)). The code works once.
 
 | Variable | Default | What it does |
 |---|---|---|
@@ -167,6 +167,8 @@ How to update: [installation.md](installation.md).
 | `CUPSPL_SCAN_URL` | the image sets `http://ipp-usb:60000` | eSCL scanners. Scanners are found by themselves; write this only to **add** some that are not (a network printer with eSCL on an unusual port), as `name=address` separated by commas: `http://ipp-usb:60000,office=https://192.168.1.50:443`. Empty = scanning is off. |
 | `CUPSPL_SCAN_TIMEOUT` | `180` | Seconds for one scan (a page from the glass can be slow). |
 | `CUPSPL_ESCL_ANONYMOUS` | `false` | `true` accepts scans from apps that cannot send credentials (for example NAPS2). They are credited to the account `ospite-scansione` with the sender's IP. Leave `false` unless your network is trusted ([scanning.md](scanning.md)). |
+| `CUPSPL_ESCL_WINDOW` | `true` | `true` shows a button on *Scan* that opens a **scan window**: for a few minutes, scan requests without credentials from the IP address of the person who pressed it are accepted as that person. `false` removes the button. Works with `CUPSPL_ESCL_ANONYMOUS` on or off ([scanning.md](scanning.md)). |
+| `CUPSPL_ESCL_WINDOW_SECONDS` | `180` | How long the window stays open: **60 to 900** seconds. The line present but empty means 60. Any other value stops the gateway at start (`docker compose logs gateway`). A scan that has started is finished even if the time ends. |
 
 ## 7. Printers
 

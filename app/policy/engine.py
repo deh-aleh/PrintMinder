@@ -32,6 +32,7 @@ class Decision:
     allowed: bool
     reason: str | None = None
     localized: Callable[[], str] | None = field(default=None, compare=False, repr=False)
+    quota: dict | None = field(default=None, compare=False, repr=False)  # set when a quota limit is the reason (for the user's bell)
 
     def text(self) -> str | None:
         if self.localized is not None:
@@ -147,10 +148,12 @@ def check_job(session: Session, user: User, resource: Resource, now: datetime, t
             return Decision(False, f"{rule.period.value} page limit would be exceeded "
                                    f"(used {used}, this document {pages}, limit {limit})",
                             lambda: _("%(period)s page limit would be exceeded (used %(used)s, this document %(pages)s, limit %(limit)s)",
-                                      period=_(rule.period.value), used=used, pages=pages, limit=limit))
+                                      period=_(rule.period.value), used=used, pages=pages, limit=limit),
+                            quota={"period": rule.period.value, "metric": rule.metric.value, "used": used, "limit": limit, "pages": pages})
         if used >= limit:
             noun = "page" if rule.metric is Metric.pages else "job"
             return Decision(False, f"{rule.period.value} {noun} limit reached ({used}/{limit})",
                             lambda: _("%(period)s %(noun)s limit reached (%(used)s/%(limit)s)", period=_(rule.period.value),
-                                      noun=_(noun), used=used, limit=limit))
+                                      noun=_(noun), used=used, limit=limit),
+                            quota={"period": rule.period.value, "metric": rule.metric.value, "used": used, "limit": limit})
     return Decision(True)

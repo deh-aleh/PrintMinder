@@ -49,7 +49,7 @@ browser ───────https───────────▶     │  
 | | Exceptions: user requests, administrator approval, temporary or permanent grants; group change on request | ✅ |
 | | Pages counted before printing for PDF, images, text and PostScript | ✅ soft limit for other files |
 | | Limits per feature (colour, duplex) or per printer; allowed hours | 🟡 not yet tested on real printers |
-| **Scanning** | eSCL through the gateway (same keys, audit, together with printing) and scanning from the portal | ✅ |
+| **Scanning** | eSCL through the gateway (same keys, audit, together with printing), scanning from the portal, and a scan window so apps that cannot send a password can scan from the IP of whoever pressed a button | ✅ |
 | | Native eSCL clients that can authenticate (field test) | ⬜ |
 | **Audit** | Print/scan audit with real pages; separate log of administrative actions | ✅ |
 | | Unlimited retention with verified compressed archives; CSV export, filters, archive viewer and download | ✅ |
@@ -80,7 +80,7 @@ The full list, with workarounds, is in [docs/en/limitations.md](docs/en/limitati
   crosses the limit *is printed* and its real pages then block the following ones. With `Create-Job` + `Send-Document` the count
   arrives after the job was accepted. A `Create-Job` without a document frees its quota only when CUPS cancels it (default 3 h).
 - **Linux host required** for USB printers and mDNS announcement (Docker Desktop on Windows/macOS: network printers only, no discovery).
-- **Android's system print service cannot authenticate**: use Mopria Print Service or print from the browser. Windows 11 is partly tested ([printing.md](docs/en/printing.md#windows-11)); iPhone and macOS are untested.
+- **Android's system print service cannot authenticate**: use Mopria Print Service or print from the browser. Windows 11 25H2 is tested ([windows.md](docs/en/windows.md)); iPhone and macOS are untested.
 - **One gateway per USB printer** and **one per SQLite database** (no high availability). Images are built for the building machine's
   architecture; going back to an older version after a migration needs a backup.
 - **TLS is mandatory**: install the self-signed certificate on clients or use your CA's.
@@ -115,7 +115,7 @@ docker compose up -d
 
 # 5. read the one-time code and set the password of the administrator "cups_orchestrator"
 docker compose logs gateway | grep "FIRST RUN"
-#    then open https://<server>:8631/admin/setup
+#    then open https://<server>:8631/setup
 ```
 
 Then: create users and groups in the portal (`https://<server>:8631/admin`); every user creates a **print key** in *Profile*

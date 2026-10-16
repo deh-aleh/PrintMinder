@@ -62,28 +62,28 @@ async def test_bootstrap_can_be_switched_off(portal, monkeypatch):
 
 
 async def test_setup_page_exists_only_while_pending(portal):
-    assert (await portal.get("/admin/setup")).status_code == 404
+    assert (await portal.get("/setup")).status_code == 404
     portal.app.state.setup_code = "the-code"
-    assert (await portal.get("/admin/setup")).status_code == 200
-    assert "/admin/setup" in (await portal.get("/admin/login")).text       # the login page points to it
+    assert (await portal.get("/setup")).status_code == 200
+    assert "/setup" in (await portal.get("/login")).text       # the login page points to it
 
 
 async def test_setup_flow_sets_the_password_once(portal):
     bootstrap_code = bootstrap.ensure_orchestrator(portal.sm)
     portal.app.state.setup_code = bootstrap_code
-    bad = await portal.post("/admin/setup", data={"code": "wrong", "password": GOOD, "confirm": GOOD})
+    bad = await portal.post("/setup", data={"code": "wrong", "password": GOOD, "confirm": GOOD})
     assert bad.status_code == 303 and user_row(portal, ORCH).password_hash is None      # wrong code
-    r = await portal.post("/admin/setup", data={"code": bootstrap_code, "password": GOOD, "confirm": GOOD + "x"})
+    r = await portal.post("/setup", data={"code": bootstrap_code, "password": GOOD, "confirm": GOOD + "x"})
     assert user_row(portal, ORCH).password_hash is None                                   # passwords differ
-    r = await portal.post("/admin/setup", data={"code": bootstrap_code, "password": "short", "confirm": "short"})
+    r = await portal.post("/setup", data={"code": bootstrap_code, "password": "short", "confirm": "short"})
     assert user_row(portal, ORCH).password_hash is None                                   # too weak
-    r = await portal.post("/admin/setup", data={"code": bootstrap_code, "password": GOOD, "confirm": GOOD})
-    assert r.status_code == 303 and r.headers["location"] == "/admin/login"
+    r = await portal.post("/setup", data={"code": bootstrap_code, "password": GOOD, "confirm": GOOD})
+    assert r.status_code == 303 and r.headers["location"] == "/login"
     assert verify_password(user_row(portal, ORCH).password_hash, GOOD)
     assert "admin.setup" in audit_actions(portal)
     # the code is burned: neither page nor POST works any more
-    assert (await portal.get("/admin/setup")).status_code == 404
-    again = await portal.post("/admin/setup", data={"code": bootstrap_code, "password": GOOD + "!", "confirm": GOOD + "!"})
+    assert (await portal.get("/setup")).status_code == 404
+    again = await portal.post("/setup", data={"code": bootstrap_code, "password": GOOD + "!", "confirm": GOOD + "!"})
     assert again.status_code == 404 and verify_password(user_row(portal, ORCH).password_hash, GOOD)
     assert (await portal_login(portal, ORCH, GOOD)).headers["location"] == "/admin/"
 
@@ -91,9 +91,9 @@ async def test_setup_flow_sets_the_password_once(portal):
 async def test_setup_code_guessing_is_throttled(portal):
     portal.app.state.setup_code = "right-code-1234567890"
     for i in range(5):
-        await portal.post("/admin/setup", data={"code": f"guess{i}", "password": GOOD, "confirm": GOOD})
-    r = await portal.post("/admin/setup", data={"code": "right-code-1234567890", "password": GOOD, "confirm": GOOD})
-    assert r.status_code == 303 and r.headers["location"] == "/admin/setup"     # locked out, even with the right code
+        await portal.post("/setup", data={"code": f"guess{i}", "password": GOOD, "confirm": GOOD})
+    r = await portal.post("/setup", data={"code": "right-code-1234567890", "password": GOOD, "confirm": GOOD})
+    assert r.status_code == 303 and r.headers["location"] == "/setup"     # locked out, even with the right code
     assert portal.app.state.setup_code == "right-code-1234567890"
 
 
@@ -102,10 +102,10 @@ async def test_setup_code_guessing_is_throttled(portal):
 async def test_local_login_and_where_each_kind_of_user_lands(portal):
     make_user(portal.sm, "boss", password=GOOD, admin=True)
     make_user(portal.sm, "ann", password=GOOD)
-    assert (await portal_login(portal, "ann", GOOD + "x")).headers["location"] == "/admin/login"
+    assert (await portal_login(portal, "ann", GOOD + "x")).headers["location"] == "/login"
     assert (await portal_login(portal, "ann", GOOD)).headers["location"] == "/me"
     assert (await portal.get("/admin/jobs")).status_code == 403
-    await portal.post("/admin/logout", data={"csrf_token": await csrf_of_page(portal)})
+    await portal.post("/logout", data={"csrf_token": await csrf_of_page(portal)})
     assert (await portal_login(portal, "BOSS ", GOOD)).headers["location"] == "/admin/"
     assert (await portal.get("/admin/jobs")).status_code == 200
     assert "login" in audit_actions(portal)                                          # admin logins are recorded
@@ -113,14 +113,14 @@ async def test_local_login_and_where_each_kind_of_user_lands(portal):
 
 async def test_disabled_and_unknown_local_users_cannot_log_in(portal):
     make_user(portal.sm, "off", password=GOOD, enabled=False)
-    assert (await portal_login(portal, "off", GOOD)).headers["location"] == "/admin/login"
-    assert (await portal_login(portal, "ghost", GOOD)).headers["location"] == "/admin/login"
+    assert (await portal_login(portal, "off", GOOD)).headers["location"] == "/login"
+    assert (await portal_login(portal, "ghost", GOOD)).headers["location"] == "/login"
 
 
 async def test_radius_cannot_open_a_local_account(portal):
     """The provider is decided by the row in the database, never by who says yes."""
     make_user(portal.sm, "rad", password=GOOD)                    # LOCAL account that happens to share a RADIUS name
-    assert (await portal_login(portal, "rad", "radpw")).headers["location"] == "/admin/login"   # RADIUS would say yes
+    assert (await portal_login(portal, "rad", "radpw")).headers["location"] == "/login"   # RADIUS would say yes
     assert (await portal_login(portal, "rad", GOOD)).headers["location"] == "/me"                # the local password works
 
 
@@ -131,7 +131,7 @@ async def test_radius_user_is_created_at_first_login_and_name_collisions_are_ref
     assert u.provider == "radius" and u.password_hash is None
     # a local user can not take a name that is already somebody else's
     make_user(portal.sm, "boss", password=GOOD, admin=True)
-    await portal.post("/admin/logout", data={"csrf_token": await csrf_of_page(portal)})
+    await portal.post("/logout", data={"csrf_token": await csrf_of_page(portal)})
     await portal_login(portal, "boss", GOOD)
     token = await csrf_of_page(portal, "/admin/users")
     r = await portal.post("/admin/users/local", data={"username": "rad", "csrf_token": token})
@@ -142,7 +142,7 @@ async def test_radius_user_is_created_at_first_login_and_name_collisions_are_ref
 async def test_without_radius_only_local_accounts_exist(portal):
     portal.app.state.auth = None
     make_user(portal.sm, "boss", password=GOOD, admin=True)
-    assert (await portal_login(portal, "rad", "radpw")).headers["location"] == "/admin/login"
+    assert (await portal_login(portal, "rad", "radpw")).headers["location"] == "/login"
     assert user_row(portal, "rad") is None
     await portal_login(portal, "boss", GOOD)
     token = await csrf_of_page(portal, "/admin/users")
@@ -167,7 +167,7 @@ async def test_temporary_password_forces_a_change_and_ends_other_sessions(portal
     import httpx
     other = httpx.AsyncClient(transport=httpx.ASGITransport(app=portal.app, client=("10.0.0.8", 1)), base_url="https://gw.test")
     async with other:
-        await other.post("/admin/login", data={"username": "tmp", "password": "Temp-password-1"})
+        await other.post("/login", data={"username": "tmp", "password": "Temp-password-1"})
         r = await portal.post("/me/password", data={"current": "Temp-password-1", "new": "a-fine-new-pass1",
                                                     "confirm": "a-fine-new-pass1", "csrf_token": token})
         assert r.status_code == 303 and r.headers["location"] == "/me"

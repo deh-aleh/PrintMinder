@@ -149,7 +149,7 @@ question, remembered for a minute). If CUPS does not answer, nothing is forced b
 corrected.
 
 A refused job is written in the audit as `denied` with the reason, uses **no quota and no pages**, and the user gets a notice
-(only one while it is open, so a program that retries does not fill the bell). The IPP client receives the reason and the address
+(each refusal renews the open one and raises its counter, so a program that retries does not fill the bell). The IPP client receives the reason and the address
 of the profile page, where the user sees their permissions and can ask for the missing one; it does not suggest asking for more quota.
 
 ### Read this before choosing the mode
@@ -174,7 +174,7 @@ of the profile page, where the user sees their permissions and can ask for the m
 - *Print*: only the allowed printers; no colour choice without the colour permission; a double-sided choice (one-sided / long edge
   / short edge) on printers that have a duplex unit, only for those who may print one-sided; a banner with the allowed hours when
   they are outside them, and the job is refused.
-- The bell: "refused" and "changed" notices when it happens, and one when an administrator changes the person's own permissions.
+- The bell: "refused" and "changed" notices when it happens (the "changed" one is *secondary*: it is read automatically after the time the user chose in `/me/settings`, 20 minutes by default), and one when an administrator changes the person's own permissions.
 
 The administrators' log (*Actions*) records every change to a group's or a user's permissions with the old and the new values.
 

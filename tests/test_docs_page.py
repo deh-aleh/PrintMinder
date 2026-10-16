@@ -30,53 +30,60 @@ async def boss(portal):
 
 
 async def test_home_goes_to_the_language_of_the_portal(boss):
-    r = await boss.get("/admin/docs", follow_redirects=False)
-    assert r.status_code == 303 and r.headers["location"] == "/admin/docs/en/"
+    r = await boss.get("/docs", follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/docs/en/"
     set_language(boss, "boss", "it")
     await boss.get("/me")  # the session picks up the language chosen on another device
-    r = await boss.get("/admin/docs", follow_redirects=False)
-    assert r.status_code == 303 and r.headers["location"] == "/admin/docs/it/"
+    r = await boss.get("/docs", follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/docs/it/"
 
 
 async def test_index_lists_the_pages_of_that_language(boss):
-    en = (await boss.get("/admin/docs/en/")).text
-    assert 'href="/admin/docs/en/backup"' in en and "Backup and restore" in en
-    assert 'href="/admin/docs/en/configuration"' in en
-    assert 'href="/admin/docs/it/' not in en.split('class="doctiles"')[1]
-    it = (await boss.get("/admin/docs/it/")).text
-    assert 'href="/admin/docs/it/backup"' in it and 'href="/admin/docs/it/configurazione"' in it
+    en = (await boss.get("/docs/en/")).text
+    assert 'href="/docs/en/backup"' in en and "Backup and restore" in en
+    assert 'href="/docs/en/configuration"' in en
+    assert 'href="/docs/it/' not in en.split('class="doctiles"')[1]
+    it = (await boss.get("/docs/it/")).text
+    assert 'href="/docs/it/backup"' in it and 'href="/docs/it/configurazione"' in it
 
 
 async def test_a_page_has_heading_ids_rewritten_links_and_the_language_switch(boss):
-    r = await boss.get("/admin/docs/en/backup")
+    r = await boss.get("/docs/en/backup")
     assert r.status_code == 200
     assert '<h3 id="save-the-secret-key">' in r.text
-    assert 'href="/admin/docs/en/data-protection"' in r.text      # [data-protection.md](data-protection.md)
-    assert 'href="/admin/docs/en/"' in r.text                      # back to the index
+    assert 'href="/docs/en/data-protection"' in r.text      # [data-protection.md](data-protection.md)
+    assert 'href="/docs/en/"' in r.text                      # back to the index
     # the "English · Italiano" line leads to the same page in the other language
-    assert re.search(r'class="langsw".*?href="/admin/docs/it/backup"', r.text, re.S)
-    r = await boss.get("/admin/docs/it/backup")
-    assert re.search(r'class="langsw".*?href="/admin/docs/en/backup"', r.text, re.S)
-    r = await boss.get("/admin/docs/it/account")
-    assert 'href="/admin/docs/en/accounts"' in r.text              # different file names, same page
+    assert re.search(r'class="langsw".*?href="/docs/it/backup"', r.text, re.S)
+    r = await boss.get("/docs/it/backup")
+    assert re.search(r'class="langsw".*?href="/docs/en/backup"', r.text, re.S)
+    r = await boss.get("/docs/it/account")
+    assert 'href="/docs/en/accounts"' in r.text              # different file names, same page
 
 
-async def test_only_administrators_and_only_real_names(portal):
+async def test_other_users_see_only_the_user_guide_and_the_windows_guide(portal):
     make_user(portal.sm, "ann", password=GOOD)
+    set_language(portal, "ann", "en")
     await portal_login(portal, "ann", GOOD)
-    for path in ("/admin/docs", "/admin/docs/en/", "/admin/docs/en/backup"):
-        assert (await portal.get(path, follow_redirects=False)).status_code == 403
+    index = (await portal.get("/docs/en/")).text
+    assert 'href="/docs/en/user-guide"' in index and 'href="/docs/en/windows"' in index
+    assert 'href="/docs/en/architecture"' not in index and 'href="/docs/en/configuration"' not in index
+    assert (await portal.get("/docs/en/windows")).status_code == 200
+    assert (await portal.get("/docs/it/guida-utente")).status_code == 200
+    for path in ("/docs/en/architecture", "/docs/en/application-internals", "/docs/en/configuration", "/docs/it/architettura"):
+        assert (await portal.get(path, follow_redirects=False)).status_code == 404
+    assert (await portal.get("/docs/windows", follow_redirects=False)).headers["location"] == "/docs/en/windows"
 
 
 async def test_not_logged_in_goes_to_the_login(portal):
-    r = await portal.get("/admin/docs/en/backup", follow_redirects=False)
-    assert r.status_code == 303 and r.headers["location"] == "/admin/login"
+    r = await portal.get("/docs/en/backup", follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/login"
 
 
 @pytest.mark.parametrize("path", [
-    "/admin/docs/fr/", "/admin/docs/fr/backup", "/admin/docs/en/nothing", "/admin/docs/en/backup.md",
-    "/admin/docs/en/..%2F..%2Fapp%2Fconfig", "/admin/docs/en/..%2F..%2Fapp%2Fconfig.py", "/admin/docs/en/%2e%2e",
-    "/admin/docs/en/README", "/admin/docs/..%2Fen/backup", "/admin/docs/en/%00",
+    "/docs/fr/", "/docs/fr/backup", "/docs/en/nothing", "/docs/en/backup.md",
+    "/docs/en/..%2F..%2Fapp%2Fconfig", "/docs/en/..%2F..%2Fapp%2Fconfig.py", "/docs/en/%2e%2e",
+    "/docs/en/README", "/docs/..%2Fen/backup", "/docs/en/%00",
 ])
 async def test_unknown_language_or_page_is_404(boss, path):
     assert (await boss.get(path)).status_code == 404
@@ -96,9 +103,9 @@ def test_raw_html_is_shown_as_text():
 def test_links_are_rewritten():
     h = render("[a](backup.md#save-the-secret-key) [b](../it/backup.md) [c](../README.md#x) [d](#local) "
                "[e](../../app/config.py) [f](../../README.it.md) [g](https://example.com/p) [h](nothing.md)", "en")
-    assert 'href="/admin/docs/en/backup#save-the-secret-key"' in h
-    assert 'href="/admin/docs/it/backup"' in h
-    assert 'href="/admin/docs/en/#x"' in h
+    assert 'href="/docs/en/backup#save-the-secret-key"' in h
+    assert 'href="/docs/it/backup"' in h
+    assert 'href="/docs/en/#x"' in h
     assert 'href="#local"' in h and 'href="#local" target' not in h
     version = docs.app_version()
     ref = f"v{version}" if version != "unknown" else "main"
@@ -127,10 +134,10 @@ def test_a_wide_table_is_scrollable_inside_the_card():
 
 async def test_missing_docs_folder_gives_a_friendly_page(boss, monkeypatch):
     monkeypatch.setattr(docs, "docs_root", lambda: None)
-    for path in ("/admin/docs/en/", "/admin/docs/it/backup"):
+    for path in ("/docs/en/", "/docs/it/backup"):
         r = await boss.get(path)
         assert r.status_code == 404 and "not installed" in r.text
-    assert (await boss.get("/admin/docs/fr/")).status_code == 404
+    assert (await boss.get("/docs/fr/")).status_code == 404
 
 
 def test_docs_root_prefers_the_first_existing_folder(tmp_path, monkeypatch):
@@ -148,9 +155,9 @@ async def test_every_page_of_every_language_renders(boss):
     """No page may break the portal, and none of its links may point at a page or a heading that is not there."""
     for lang in docs.LANGS:
         for name in docs.page_files(ROOT / "docs", lang):
-            r = await boss.get(f"/admin/docs/{lang}/{name}")
+            r = await boss.get(f"/docs/{lang}/{name}")
             assert r.status_code == 200, (lang, name)
-            for link, frag in re.findall(r'href="(/admin/docs/[^"#]*)(?:#([^"]*))?"', r.text):
+            for link, frag in re.findall(r'href="(/docs/[^"#]*)(?:#([^"]*))?"', r.text):
                 target = await boss.get(link)
                 assert target.status_code == 200, (lang, name, link)
                 assert not frag or f'id="{frag}"' in target.text, (lang, name, link, frag)   # the anchor exists
@@ -172,10 +179,29 @@ def test_every_setting_is_described_in_both_configuration_pages():
             assert f"{prefix}{name.upper()}" in text
 
 
-async def test_the_question_mark_is_only_for_administrators(boss):
+async def test_the_question_mark_is_one_button_for_everybody(boss):
     page = (await boss.get("/admin/jobs")).text
-    assert 'class="helpbtn iconbtn " href="/admin/docs"' in page
-    assert 'class="helpbtn iconbtn on" href="/admin/docs"' in (await boss.get("/admin/docs/en/backup")).text
-    make_user(boss.sm, "ann", password=GOOD)
+    assert page.count('class="helpbtn iconbtn ') == 1 and 'href="/docs"' in page
+    assert 'class="helpbtn iconbtn on" href="/docs"' in (await boss.get("/docs/en/backup")).text
+    with boss.sm() as s:   # a user who becomes an administrator keeps the same single button and gets every page
+        make_user(boss.sm, "ann", password=GOOD)
     await portal_login(boss, "ann", GOOD)
-    assert "/admin/docs" not in (await boss.get("/me")).text
+    me = (await boss.get("/me")).text
+    assert me.count('class="helpbtn iconbtn ') == 1 and 'href="/docs"' in me
+    assert (await boss.get("/docs/en/backup")).status_code == 404
+    with boss.sm() as s:
+        s.scalars(select(User).where(User.username == "ann")).one().is_admin = True
+        s.commit()
+    assert (await boss.get("/docs/en/backup")).status_code == 200
+    assert (await boss.get("/me")).text.count('class="helpbtn iconbtn ') == 1
+
+
+async def test_create_user_form_has_the_show_password_button_and_the_profile_links_the_windows_guide(boss):
+    form = (await boss.get("/admin/users")).text
+    assert 'name="password"' in form and form.count("pwtoggle") >= 1
+    make_user(boss.sm, "ann", password=GOOD)
+    set_language(boss, "ann", "en")
+    await portal_login(boss, "ann", GOOD)
+    me = (await boss.get("/me")).text
+    assert 'href="/docs/windows"' in me and "Not yet tried" in me   # macOS keeps its note, Windows lost it
+    assert me.count("Not yet tried") == 1

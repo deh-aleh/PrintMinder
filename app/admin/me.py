@@ -164,7 +164,8 @@ def password_form(request: Request, user: User = Depends(current_user)):
 
 @router.get("/settings", response_class=HTMLResponse)
 def settings_page(request: Request, user: User = Depends(current_user)):
-    return render(request, "settings.html", user, themes=THEMES, refresh_min=REFRESH_MIN, refresh_max=REFRESH_MAX)
+    return render(request, "settings.html", user, themes=THEMES, refresh_min=REFRESH_MIN, refresh_max=REFRESH_MAX,
+                  secondary_max=SECONDARY_MAX)
 
 
 @router.post("/settings/theme", dependencies=[Depends(verify_csrf)])
@@ -193,6 +194,22 @@ def settings_language(request: Request, language: str = Form(""), user: User = D
 
 
 REFRESH_MIN, REFRESH_MAX = 5, 3600
+SECONDARY_MAX = 7 * 24 * 60   # minutes (a week)
+
+
+@router.post("/settings/notices", dependencies=[Depends(verify_csrf)])
+def settings_notices(request: Request, minutes: str = Form("20"), user: User = Depends(current_user),
+                     db: Session = Depends(get_db)):
+    """Minutes after which secondary notices are marked as read by themselves; 0 = never."""
+    raw = minutes.strip()
+    if not (raw.isascii() and raw.isdigit()) or int(raw) > SECONDARY_MAX:
+        flash(request, _("Enter 0 (never) or a number of minutes up to %(max)s", max=SECONDARY_MAX), "err")
+        return back("/me/settings")
+    user.secondary_read_minutes = int(raw)
+    db.commit()
+    flash(request, _("Secondary notices are not read automatically") if user.secondary_read_minutes == 0
+          else _("Secondary notices are read automatically after %(n)s minutes", n=user.secondary_read_minutes))
+    return back("/me/settings")
 
 
 @router.post("/settings/refresh", dependencies=[Depends(verify_csrf)])

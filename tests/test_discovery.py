@@ -388,7 +388,7 @@ def _all_audits(usb):
 
 
 async def _as(usb, name):
-    await usb.post("/admin/logout", data={"csrf_token": await csrf_of_page(usb, "/admin/printers")})
+    await usb.post("/logout", data={"csrf_token": await csrf_of_page(usb, "/admin/printers")})
     await portal_login(usb, name, GOOD)
 
 

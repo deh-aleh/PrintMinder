@@ -106,6 +106,9 @@ def pending(kind: str, key: str) -> int:
 
 
 MAX_OPEN_PER_USER = 100
+# Notices about something that happened to one print, not to the account: they are marked as read by themselves after the
+# time the person chose (User.secondary_read_minutes). Today: prints changed by the permissions (colour, one-sided...).
+SECONDARY_KINDS = ("job_adjusted",)
 
 
 def notify_user(sm, user_id: int, kind: str, detail: dict | None = None, key: str | None = None) -> None:
@@ -123,6 +126,36 @@ def notify_user(sm, user_id: int, kind: str, detail: dict | None = None, key: st
         for old in db.scalars(select(Notice).where(Notice.dismissed_at < when - KEEP_DISMISSED)):
             db.delete(old)
         db.commit()
+
+
+def notify_user_counted(sm, user_id: int, kind: str, key: str, detail: dict | None = None) -> None:
+    """One notice per event for the person, without filling the list: while an open notice of this kind and subject exists
+    it is renewed (time, counter, detail) and shows as new again in the bell; once dismissed, the next event opens a new one."""
+    key = key[:128]
+    with sm() as db:
+        row = db.scalars(select(Notice).where(Notice.user_id == user_id, Notice.kind == kind, Notice.key == key,
+                                              Notice.dismissed_at.is_(None))).first()
+        if row is not None:
+            row.last_at, row.count, row.detail_json = datetime.now(timezone.utc), row.count + 1, detail or row.detail_json
+            db.commit()
+            return
+    notify_user(sm, user_id, kind, detail, key=key)
+
+
+def read_secondary(sm, user_id: int, minutes: int, now: datetime | None = None) -> int:
+    """Mark as read (dismissed by "auto") the secondary notices of this person whose last event is older than `minutes`.
+    0 = never. Returns how many."""
+    if minutes <= 0:
+        return 0
+    now = now or datetime.now(timezone.utc)
+    with sm() as db:
+        rows = list(db.scalars(select(Notice).where(Notice.user_id == user_id, Notice.kind.in_(SECONDARY_KINDS),
+                                                    Notice.dismissed_at.is_(None), Notice.last_at < now - timedelta(minutes=minutes))))
+        for row in rows:
+            row.dismissed_at, row.dismissed_by = now, "auto"
+        if rows:
+            db.commit()
+    return len(rows)
 
 
 def notify_all_users(sm, kind: str, detail: dict | None = None, key: str = "", exclude_user_id: int | None = None) -> int:

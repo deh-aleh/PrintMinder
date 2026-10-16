@@ -91,6 +91,6 @@ async def test_only_administrators(rep):
     make_user(rep.sm, "carl", password=GOOD)
     import httpx
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=rep.app, client=("10.0.0.9", 1)), base_url="https://gw.test") as c:
-        await c.post("/admin/login", data={"username": "carl", "password": GOOD})
+        await c.post("/login", data={"username": "carl", "password": GOOD})
         for path in ("/admin/report", "/admin/report/download?format=csv"):
             assert (await c.get(path, follow_redirects=False)).status_code in (303, 403)

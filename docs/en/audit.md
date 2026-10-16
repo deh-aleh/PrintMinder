@@ -33,7 +33,7 @@ rows, long texts shortened with «…» and a popup for the full text, columns *
 adaptive layout and a menu that is always visible. Filters and **CSV export** are available (formula injection is neutralised).
 The *Cancel* button stops a queued job (the owner's identity is used).
 
-Scans without credentials (anonymous eSCL) show the caller's IP and host name in the information column.
+Scans without credentials (anonymous eSCL) show the caller's IP and host name in the information column. A scan made through a scan window shows the same icon with the address it came from. A request refused because it came from another address than the one the window was opened for is a *denied* row under the window's owner; the icon shows the two addresses.
 
 ### Usage report
 

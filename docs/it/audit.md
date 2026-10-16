@@ -33,7 +33,7 @@ imposta nelle *Impostazioni*, predefinito 30 s; con 0 l'interruttore parte spent
 (caricatore, colore, fronte-retro), layout adattivo e menu sempre visibile. Sono disponibili filtri ed **esportazione CSV** (l'iniezione
 di formule è neutralizzata). Il pulsante *Annulla* ferma un job in coda (si usa l'identità del proprietario).
 
-Le scansioni senza credenziali (eSCL anonimo) mostrano IP e nome host di chi chiama nella colonna delle informazioni.
+Le scansioni senza credenziali (eSCL anonimo) mostrano IP e nome host di chi chiama nella colonna delle informazioni. Una scansione fatta con una finestra di scansione mostra la stessa icona con l'indirizzo da cui è arrivata. Una richiesta rifiutata perché arrivava da un indirizzo diverso da quello per cui è stata aperta la finestra è una riga *negata* a nome del proprietario della finestra; l'icona mostra i due indirizzi.
 
 ### Report di utilizzo
 

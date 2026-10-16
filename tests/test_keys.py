@@ -116,7 +116,7 @@ async def test_key_is_shown_once_with_the_suggested_lifetime_per_kind_of_account
         row = s.scalars(select(PrintKey)).one()
         assert abs((row.expires_at.replace(tzinfo=timezone.utc) - row.created_at.replace(tzinfo=timezone.utc)).days
                    - 365) <= 1                                                          # the menu suggests one year
-    await portal.post("/admin/logout", data={"csrf_token": token})
+    await portal.post("/logout", data={"csrf_token": token})
     await portal_login(portal, "rad", "radpw")                                         # RADIUS-backed: the longest allowed is 90
     token = await csrf_of_page(portal)
     await portal.post("/me/keys", data={"label": "phone", "csrf_token": token})
@@ -160,8 +160,8 @@ async def test_a_print_key_is_not_a_portal_password(portal):
     make_user(portal.sm, "radu", provider="radius")
     _, k1 = new_key(portal.sm, "ann")
     _, k2 = new_key(portal.sm, "radu")
-    assert (await portal_login(portal, "ann", k1)).headers["location"] == "/admin/login"
-    assert (await portal_login(portal, "radu", k2)).headers["location"] == "/admin/login"
+    assert (await portal_login(portal, "ann", k1)).headers["location"] == "/login"
+    assert (await portal_login(portal, "radu", k2)).headers["location"] == "/login"
 
 
 # ---------------------------------------------------------------- IPP: who may print, in each mode

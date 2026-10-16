@@ -215,7 +215,7 @@ async def test_only_virtual_printers_can_be_deleted_and_only_by_admins(stack):
     tok = await csrf_of_page(stack, "/admin/printers")
     await stack.post("/admin/printers/doesnotexist/delete", data={"csrf_token": tok})
     assert "stampante non trovata" in (await stack.get("/admin/printers")).text
-    await stack.post("/admin/logout", data={"csrf_token": tok})
+    await stack.post("/logout", data={"csrf_token": tok})
     await portal_login(stack, "ann", GOOD)
     tok = await csrf_of_page(stack, "/me")
     assert (await stack.post("/admin/printers/debug", data={"csrf_token": tok})).status_code == 403

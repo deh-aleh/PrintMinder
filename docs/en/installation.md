@@ -43,7 +43,7 @@ docker compose up -d
 
 # 4. read the one-time code and choose the administrator password
 docker compose logs gateway | grep "FIRST RUN"
-#    open https://<server>:8631/admin/setup
+#    open https://<server>:8631/setup
 ```
 
 The administrator account is `cups_orchestrator`. From a shell you can do the same with
@@ -132,7 +132,7 @@ Check: `curl -sk https://<server>:8631/healthz` answers 200; `docker compose ps`
 
 ### 3.6 First administrator
 
-`docker compose logs gateway | grep "FIRST RUN"` prints a one-time code. Open `https://<server>:8631/admin/setup`, enter
+`docker compose logs gateway | grep "FIRST RUN"` prints a one-time code. Open `https://<server>:8631/setup`, enter
 the code and choose the password of `cups_orchestrator` (minimum 12 characters). The code is single-use and protected
 against guessing. If nothing appears, the account probably already has a password (this folder ran before and the Docker volume kept the database): the log then says "already has a password"; sign in, or reset it with `docker compose exec -it gateway cups-policy-admin set-admin-password`. More causes: [troubleshooting.md](troubleshooting.md).
 
@@ -149,7 +149,7 @@ when a computer or phone asks for credentials. See [user-guide.md](user-guide.md
 | Any phone / computer | Portal → **Print** (`/me/print`): upload PDF, JPEG, PNG, GIF or text. Nothing to install. |
 | Linux | After creating a key the profile page shows a ready `lpadmin` command; or `scripts/add-printer-linux.sh <server> <queue> <user>`. |
 | Android | **Mopria Print Service** discovers the printers and asks for name and key. The built-in Android print service cannot authenticate. |
-| Windows, macOS, iPhone | Add a network printer `ipps://<server>:8631/printers/<queue>`; enter user name and key when asked. Not yet tested by the project. |
+| Windows, macOS, iPhone | Add a network printer `ipps://<server>:8631/printers/<queue>`; enter user name and key when asked. Windows 11 25H2 is tested ([windows.md](windows.md)); macOS and iPhone are not. |
 
 The device must trust the certificate. Details in [printing.md](printing.md).
 

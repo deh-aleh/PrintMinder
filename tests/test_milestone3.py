@@ -488,6 +488,6 @@ async def test_a_scan_survives_leaving_the_page_and_belongs_to_its_owner(scanner
     assert "Scarica" in page and scan_rows(scanner)[0][1] is JobState.completed
     sid = re.search(r"/me/scan/([\w-]+)/file", page).group(1)
     assert (await scanner.get(f"/me/scan/{sid}/file")).content == b"%PDF-fake"
-    await scanner.post("/admin/logout", data={"csrf_token": tok})
+    await scanner.post("/logout", data={"csrf_token": tok})
     await portal_login(scanner, "sam", GOOD)
     assert (await scanner.get(f"/me/scan/{sid}/file")).status_code == 404       # someone else's scan

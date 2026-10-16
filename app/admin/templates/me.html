@@ -51,7 +51,8 @@
     <tr><td><b>{{ _("Phone or tablet") }}</b></td><td>{{ _('The easiest way: <a href="/me/print">Print a file</a> (PDF, photo, text) and <a href="/me/scan">Scan</a>, without installing or configuring anything. Alternatively on Android: <b>Mopria Print Service</b>, which shows the printers and asks for the name and key.') }}</td></tr>
     <tr><td><b>Linux</b></td><td>{{ _("Create a key above: the next page shows the ready-made command (user name and key included), to paste just once.") }}
       {{ _('Or <span class="mono">scripts/add-printer-linux.sh</span> from the project.') }}</td></tr>
-    <tr><td><b>Windows / macOS</b></td><td>{{ _('Add a network printer with the address <span class="mono">ipps://%(server)s/printers/&lt;name&gt;</span>; when it asks for the user name and password enter <b>%(user)s</b> and the key, and choose "remember".', server=server, user=me.username) }} <span class="muted">({{ _("Not yet tried on these systems.") }})</span></td></tr>
+    <tr><td><b>Windows</b></td><td>{{ _('Settings → Printers &amp; scanners → Add device, then enter <b>%(user)s</b> and the key when you print and tick "Remember my credentials".', user=me.username) }} <a href="/docs/windows">{{ _("Step-by-step guide") }}</a></td></tr>
+    <tr><td><b>macOS</b></td><td>{{ _('Add a network printer with the address <span class="mono">ipps://%(server)s/printers/&lt;name&gt;</span>; when it asks for the user name and password enter <b>%(user)s</b> and the key, and choose "remember".', server=server, user=me.username) }} <span class="muted">({{ _("Not yet tried on these systems.") }})</span></td></tr>
   </table>
   {% if queues %}<p class="muted">{{ _("Available printers:") }} {% for q in queues %}<span class="mono">{{ q.name }}</span>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
 </div>

@@ -11,6 +11,7 @@ La documentazione è scritta in due lingue con la stessa struttura. L'inglese è
 | Configuration reference (every `.env` variable) | [configuration.md](en/configuration.md) | [configurazione.md](it/configurazione.md) |
 | Troubleshooting | [troubleshooting.md](en/troubleshooting.md) | [risoluzione-problemi.md](it/risoluzione-problemi.md) |
 | User guide | [user-guide.md](en/user-guide.md) | [guida-utente.md](it/guida-utente.md) |
+| Windows 11: step-by-step guide | [windows.md](en/windows.md) | [windows.md](it/windows.md) |
 | Administrator guide | [admin-guide.md](en/admin-guide.md) | [guida-amministratore.md](it/guida-amministratore.md) |
 | Accounts, groups, print keys | [accounts.md](en/accounts.md) | [account.md](it/account.md) |
 | Quotas, requests, grants | [quotas.md](en/quotas.md) | [quote.md](it/quote.md) |
@@ -26,6 +27,6 @@ La documentazione è scritta in due lingue con la stessa struttura. L'inglese è
 
 Project README: [English](../README.md) · [Italiano](../README.it.md).
 
-The same pages are shown to administrators inside the portal (the **?** icon in the top bar, `/admin/docs`), in English or Italian.
+The same pages are shown inside the portal (the **?** icon in the top bar, `/docs`), in English or Italian. Administrators see all of them; the other users only the user guide and the Windows guide.
 
 When you change behaviour, update **both** languages (same section order, so they stay easy to compare).

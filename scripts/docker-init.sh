@@ -44,4 +44,4 @@ if [ ! -e config/tls/privkey.pem ]; then
     echo "(replace config/tls/fullchain.pem + privkey.pem with your CA-signed pair when you have it)"
 fi
 echo "next: edit .env (RADIUS is optional), then: docker compose up -d"
-echo "then read the one-time code:  docker compose logs gateway | grep 'FIRST RUN'   and open https://<server>:8631/admin/setup"
+echo "then read the one-time code:  docker compose logs gateway | grep 'FIRST RUN'   and open https://<server>:8631/setup"

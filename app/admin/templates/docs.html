@@ -8,7 +8,7 @@
   .langsw a, .langsw span { padding:4px 12px; text-decoration:none; font-size:13px }
   .langsw span { background:var(--bg); color:var(--orange); font-weight:600 }
   .langsw a { color:var(--muted) } .langsw a:hover { color:var(--orange) }
-  .doc { line-height:1.65; overflow-wrap:anywhere; max-width:900px; font-size:15px }
+  .doc { line-height:1.65; overflow-wrap:anywhere; font-size:15px }
   .doc h1 { font-size:22px; margin:4px 0 14px } .doc h2 { font-size:17.5px; margin:28px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line) } .doc h3 { font-size:15.5px; margin:20px 0 6px }
   .doc h4, .doc h5, .doc h6 { font-size:14px; margin:14px 0 6px }
   .doc h1, .doc h2, .doc h3, .doc h4 { scroll-margin-top:80px }
@@ -20,7 +20,7 @@
   .doc blockquote { margin:10px 0; padding:2px 14px; border-left:3px solid var(--orange); background:var(--bg); border-radius:0 6px 6px 0; color:var(--muted) }
   .doc tr:nth-child(even) td { background:color-mix(in srgb, var(--fg) 4%, transparent) }
   .doc a { text-underline-offset:2px }
-  .doc table { display:block; overflow-x:auto; width:max-content; max-width:100%; margin:10px 0; border:1px solid var(--line) }
+  .doc table { width:100%; border-collapse:collapse; margin:10px 0; border:1px solid var(--line) }
   .doc th, .doc td { border:1px solid var(--line); vertical-align:top; text-align:left }
   .doc th { text-transform:none; font-size:13px; color:var(--fg); background:var(--bg) }
   .doc hr { border:0; border-top:1px solid var(--line); margin:18px 0 }
@@ -34,7 +34,7 @@
     <a href="https://github.com/deh-aleh/PrintMinder/tree/main/docs" target="_blank" rel="noopener noreferrer">github.com/deh-aleh/PrintMinder</a></p>
   {% else %}
   <div class="docbar">
-    {% if kind == "page" %}<a href="/admin/docs/{{ doc_lang }}/">&larr; {{ _("Documentation index") }}</a>{% endif %}
+    {% if kind == "page" %}<a href="/docs/{{ doc_lang }}/">&larr; {{ _("Documentation index") }}</a>{% endif %}
     <span class="sp"></span>
     <span class="langsw" role="group" aria-label="{{ _('Language of the documentation') }}">
       {% if doc_lang == "en" %}<span aria-current="true">EN</span><a href="{{ switch }}" hreflang="it" lang="it" title="Italiano">IT</a>
@@ -45,7 +45,7 @@
   <div class="doc" lang="{{ doc_lang }}">
     <h1>{{ _("Documentation") }}</h1>
     <ul class="doctiles">
-      {% for name, title in entries %}<li><a href="/admin/docs/{{ doc_lang }}/{{ name|urlencode }}"><span>{{ title }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>{% endfor %}
+      {% for name, title in entries %}<li><a href="/docs/{{ doc_lang }}/{{ name|urlencode }}"><span>{{ title }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>{% endfor %}
     </ul>
   </div>
   {% else %}

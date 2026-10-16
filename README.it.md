@@ -49,7 +49,7 @@ browser ───────https───────────▶     │  
 | | Deroghe: richieste degli utenti, approvazione dell'admin, concessioni temporanee o permanenti; cambio gruppo su richiesta | ✅ |
 | | Pagine contate prima di stampare per PDF, immagini, testo e PostScript | ✅ limite morbido per gli altri file |
 | | Limiti per funzionalità (colore, fronte-retro) o per stampante; orari consentiti | 🟡 non ancora provato su stampanti vere |
-| **Scansione** | eSCL attraverso il gateway (stesse chiavi, audit, insieme alla stampa) e scansione dal portale | ✅ |
+| **Scansione** | eSCL attraverso il gateway (stesse chiavi, audit, insieme alla stampa), scansione dal portale e una finestra di scansione perché le app che non sanno inviare una password possano scansionare dall'IP di chi ha premuto un pulsante | ✅ |
 | | Client eSCL nativi che sanno autenticarsi (prova sul campo) | ⬜ |
 | **Audit** | Audit di stampe e scansioni con pagine reali; registro separato delle azioni amministrative | ✅ |
 | | Conservazione illimitata con archivi compressi verificati; esportazione CSV, filtri, consultazione e download degli archivi | ✅ |
@@ -80,7 +80,7 @@ L'elenco completo, con le soluzioni, è in [docs/it/limiti.md](docs/it/limiti.md
   supera il limite *viene stampato* e le sue pagine reali bloccano poi i successivi. Con `Create-Job` + `Send-Document` il conteggio
   arriva dopo l'accettazione del job. Un `Create-Job` senza documento libera la quota solo quando CUPS lo annulla (di default 3 h).
 - **Serve un host Linux** per le stampanti USB e per l'annuncio mDNS (Docker Desktop su Windows/macOS: solo stampanti di rete, niente scoperta).
-- **Il servizio di stampa di sistema di Android non sa autenticarsi**: usa Mopria Print Service o stampa dal browser. Windows 11 è provato in parte ([stampa.md](docs/it/stampa.md#windows-11)); iPhone e macOS non sono provati.
+- **Il servizio di stampa di sistema di Android non sa autenticarsi**: usa Mopria Print Service o stampa dal browser. Windows 11 25H2 è provato ([windows.md](docs/it/windows.md)); iPhone e macOS non sono provati.
 - **Un gateway per stampante USB** e **uno per database SQLite** (nessuna alta disponibilità). Le immagini sono costruite per
   l'architettura della macchina che le compila; tornare a una versione precedente dopo una migrazione richiede un backup.
 - **TLS obbligatorio**: installa il certificato autofirmato sui client o usa quello della tua CA.
@@ -115,7 +115,7 @@ docker compose up -d
 
 # 5. leggi il codice monouso e scegli la password dell'amministratore "cups_orchestrator"
 docker compose logs gateway | grep "FIRST RUN"
-#    poi apri https://<server>:8631/admin/setup
+#    poi apri https://<server>:8631/setup
 ```
 
 Poi: crea utenti e gruppi nel portale (`https://<server>:8631/admin`); ogni utente crea una **chiave di stampa** in *Profilo* e

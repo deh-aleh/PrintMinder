@@ -25,7 +25,7 @@ from app.admin.me_notices import router as me_notices_router
 from app.admin.printing import router as print_router
 from app.admin.reports import router as reports_router
 from app.admin.requests import router as requests_router
-from app.admin.routes import router as admin_router
+from app.admin.routes import auth_router, router as admin_router
 from app.audit.archive import repair, run_archiver
 from app.auth.bootstrap import ensure_orchestrator
 from app.auth.cache import CachedAuth
@@ -167,6 +167,7 @@ async def favicon():
 
 
 # IPP router is a catch-all POST; admin routers must be included before it.
+app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(accounts_router)
 app.include_router(printers_router)

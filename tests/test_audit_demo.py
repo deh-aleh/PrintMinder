@@ -46,7 +46,7 @@ async def test_print_on_the_virtual_printer_and_save_the_audit_page(portal):
                          options_json={"color": "monochrome", "sides": "two-sided-long-edge", "document_format": "text/plain"}))
             s.commit()
         portal.app.state.scanner_device_cache = (time.monotonic(), "virtual")
-        await portal.post("/admin/logout", data={"csrf_token": tok})
+        await portal.post("/logout", data={"csrf_token": tok})
         await portal_login(portal, "boss", GOOD)
         html = (await portal.get("/admin/jobs")).text
     finally:
@@ -69,7 +69,7 @@ async def test_save_the_other_pages_too(two_scanners):
     (OUT / "scan-demo.html").write_text((await cl.get("/me/scan")).text)
     tok = await csrf_of_page(cl, "/me/keys")
     (OUT / "key-demo.html").write_text((await cl.post("/me/keys", data={"csrf_token": tok, "label": "portatile"})).text)
-    await cl.post("/admin/logout", data={"csrf_token": tok})
+    await cl.post("/logout", data={"csrf_token": tok})
     make_user(cl.sm, "boss", password=GOOD, admin=True)
     make_user(cl.sm, "emma", password=GOOD, admin=True)
     await portal_login(cl, "boss", GOOD)

@@ -30,18 +30,19 @@ from app.ipp import codec
 
 log = logging.getLogger("app.admin")
 router = APIRouter(prefix="/admin")
+auth_router = APIRouter()  # /login, /logout, /setup: for every user, not only admins
 JOBS_PAGE = 30  # audit rows per page
 
 
 # ------------------------------------------------------------------ login / logout
 
-@router.get("/login", response_class=HTMLResponse)
+@auth_router.get("/login", response_class=HTMLResponse)
 def login_form(request: Request):
     return render(request, "login.html", setup_pending=bool(getattr(request.app.state, "setup_code", None)),
                   setup_user=settings.bootstrap_admin_username)
 
 
-@router.post("/login")
+@auth_router.post("/login")
 async def login(request: Request, username: str = Form(""), password: str = Form("")):
     if request.url.scheme != "https" and not settings.allow_insecure_auth:
         raise HTTPException(403, "TLS required")
@@ -50,13 +51,13 @@ async def login(request: Request, username: str = Form(""), password: str = Form
     ukey, ikey = f"u:{username.strip().lower()}|{ip}", f"ip:{ip}"
     if throttle.blocked(ukey, USER_FAILS) or throttle.blocked(ikey, IP_FAILS):
         flash(request, _("Too many failed attempts, retry later"), "err")
-        return back("/admin/login")
+        return back("/login")
     user = await service.portal_login(request.app, username, password)
     if user is None:
         register_failure(throttle, ukey, ikey, password)
         log.warning("portal login failed user=%r ip=%s", username, ip)
         flash(request, _("Invalid credentials"), "err")
-        return back("/admin/login")
+        return back("/login")
     throttle.clear(ukey)
     request.session.clear()  # new session on login
     request.session.update(uid=user.id, csrf=secrets.token_urlsafe(32), stamp=session_stamp(user),
@@ -73,10 +74,10 @@ async def login(request: Request, username: str = Form(""), password: str = Form
     return back("/admin/" if user.is_admin else "/me")
 
 
-@router.post("/logout", dependencies=[Depends(verify_csrf)])
+@auth_router.post("/logout", dependencies=[Depends(verify_csrf)])
 def logout(request: Request):
     request.session.clear()
-    return back("/admin/login")
+    return back("/login")
 
 
 @router.get("/")
@@ -91,14 +92,14 @@ def _setup_pending(request: Request) -> bool:
     return bool(getattr(request.app.state, "setup_code", None))
 
 
-@router.get("/setup", response_class=HTMLResponse)
+@auth_router.get("/setup", response_class=HTMLResponse)
 def setup_form(request: Request):
     if not _setup_pending(request):
         raise HTTPException(404)
     return render(request, "setup.html", username=settings.bootstrap_admin_username)
 
 
-@router.post("/setup")
+@auth_router.post("/setup")
 async def setup(request: Request, code: str = Form(""), password: str = Form(""), confirm: str = Form("")):
     if request.url.scheme != "https" and not settings.allow_insecure_auth:
         raise HTTPException(403, "TLS required")
@@ -109,18 +110,18 @@ async def setup(request: Request, code: str = Form(""), password: str = Form("")
     key = f"setup|{ip}"
     if throttle.blocked(key, USER_FAILS):
         flash(request, _("Too many wrong codes, retry later"), "err")
-        return back("/admin/setup")
+        return back("/setup")
     if not hmac.compare_digest(code.strip(), request.app.state.setup_code):
         throttle.fail(key)
         log.warning("first-run setup: wrong code from %s", ip)
         flash(request, _("Wrong code. It is in the gateway log (docker compose logs gateway)"), "err")
-        return back("/admin/setup")
+        return back("/setup")
     name = settings.bootstrap_admin_username
     error = None if password == confirm else _("the two passwords differ")
     error = error or validate_new_password(password, name)
     if error:
         flash(request, error, "err")
-        return back("/admin/setup")
+        return back("/setup")
 
     def apply() -> bool:
         with request.app.state.sessionmaker() as db:
@@ -138,7 +139,7 @@ async def setup(request: Request, code: str = Form(""), password: str = Form("")
     request.app.state.setup_code = None  # one use only
     log.info("first-run setup completed for %s from %s", name, ip)
     flash(request, _("Password set. Log in as %(name)s.", name=name))
-    return back("/admin/login")
+    return back("/login")
 
 
 # ------------------------------------------------------------------ print audit

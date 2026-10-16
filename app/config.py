@@ -4,6 +4,9 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+ESCL_WINDOW_MIN, ESCL_WINDOW_MAX = 60, 900
+
+
 class Settings(BaseSettings):
     # only real environment variables: a .env here belongs to docker compose, not to the app
     model_config = SettingsConfigDict(env_prefix="CUPSPL_", extra="ignore")
@@ -37,6 +40,11 @@ class Settings(BaseSettings):
     anonymous_discovery: bool = True
     # eSCL scans without credentials (NAPS2 and others cannot send them): attributed to the guest account "ospite-scansione"
     escl_anonymous: bool = False
+    # "scan window": a button on /me/scan lets the person tell the gateway "my scan app is about to scan"; for this many
+    # seconds (plus the scan itself) credential-less eSCL requests from the IP that pressed it are accepted, as that person.
+    # The line present but empty = 60. Allowed 60-900, anything else stops the start (see app/__main__.py).
+    escl_window: bool = True
+    escl_window_seconds: int = 180
     max_request_mb: int = 200  # IPP request (document included) larger than this is refused
     reconcile_interval: float = 30.0  # seconds between CUPS job-state syncs
     secret_key: str | None = None  # signs admin session cookies; random per start if unset
@@ -149,6 +157,17 @@ class Settings(BaseSettings):
     backup_recipient: str = ""  # from `cups-policy-admin backup-key`; empty = no encryption (and no secrets in the file)
 
 
+    @field_validator("escl_window_seconds", mode="before")
+    @classmethod
+    def _window_seconds(cls, v):
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "":
+                return ESCL_WINDOW_MIN  # "CUPSPL_ESCL_WINDOW_SECONDS=" in .env
+            if not (v.isascii() and v.isdigit()):
+                return -1  # reported with a readable message by escl_window_problem()
+        return v
+
     @field_validator("printers_refresh_seconds", mode="after")
     @classmethod
     def _refresh_in_range(cls, v: int) -> int:
@@ -157,6 +176,14 @@ class Settings(BaseSettings):
     @property
     def radius_enabled(self) -> bool:
         return bool(self.radius_host and self.radius_secret)
+
+
+def escl_window_problem(value: int) -> str | None:
+    """Why CUPSPL_ESCL_WINDOW_SECONDS can not be used, or None."""
+    if ESCL_WINDOW_MIN <= value <= ESCL_WINDOW_MAX:
+        return None
+    return (f"CUPSPL_ESCL_WINDOW_SECONDS must be a whole number of seconds from {ESCL_WINDOW_MIN} to {ESCL_WINDOW_MAX} "
+            f"(or empty = {ESCL_WINDOW_MIN}); it is not usable here")
 
 
 settings = Settings()

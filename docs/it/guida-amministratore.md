@@ -17,7 +17,7 @@ Per chi gestisce l'installazione. Il portale è su `https://<server>:8631/admin`
 | **Stampa / Scansiona / Profilo** | `/me…` | Le stesse pagine degli utenti → [guida-utente.md](guida-utente.md) |
 | **Logo, nome e (utente)** | `/me/settings` | Il blocco in alto a sinistra apre le impostazioni: tema, lingua, aggiornamento |
 | **Campanella** (solo amministratori) | `/admin/notices` | Cose che il gateway ha notato (il numero indica quelle aperte), vedi «Avvisi» sotto |
-| **?** (solo amministratori) | `/admin/docs` | Questa documentazione, in italiano o inglese (selettore in cima a ogni pagina) |
+| **?** (tutti) | `/docs` | Questa documentazione, in italiano o inglese (selettore in cima a ogni pagina). Gli utenti che non sono amministratori vedono solo la guida utente e la guida Windows |
 | **Manutenzione** (cono stradale rosso) | — | Ferma stampa e scansione per tutti tranne gli amministratori |
 | **Porta con freccia** | — | Esci |
 

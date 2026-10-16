@@ -17,7 +17,7 @@ For people who run the installation. The portal is at `https://<server>:8631/adm
 | **Print / Scan / Profile** | `/me…` | The same pages users have → [user-guide.md](user-guide.md) |
 | **Logo, name and (user)** | `/me/settings` | The block at the top left opens the settings: theme, language, refresh |
 | **Bell** (administrators only) | `/admin/notices` | Things the gateway noticed (badge = open ones), see "Notices" below |
-| **?** (administrators only) | `/admin/docs` | This documentation, in English or Italian (switch at the top of each page) |
+| **?** (everybody) | `/docs` | This documentation, in English or Italian (switch at the top of each page). Users who are not administrators see only the user guide and the Windows guide |
 | **Maintenance** (red traffic cone) | — | Stops print and scan for everyone but administrators |
 | **Door with arrow** | — | Log out |
 

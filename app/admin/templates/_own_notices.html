@@ -54,9 +54,14 @@
         {% elif why == 'color' %}{{ _("Your print to “%(printer)s” was refused: colour printing is not allowed for your account. Choose black and white in the print window and send it again.", printer=who) }}
         {% elif why == 'one_sided' %}{{ _("Your print to “%(printer)s” was refused: one-sided printing is not allowed for your account. Choose double-sided in the print window and send it again.", printer=who) }}
         {% else %}{{ _("Your print to “%(printer)s” was refused.", printer=who) }}{% endif %}
+        {% elif n.kind == 'quota_reached' %}
+        {% set noun = _("page") if d.get("metric") == "pages" else _("job") %}
+        {{ _("Your print to “%(printer)s” was refused: the %(period)s %(noun)s limit is reached (%(used)s/%(limit)s). You can ask for more quota from your profile.", printer=d.get("printer") or "?", period=_(d.get("period", "")), noun=noun, used=d.get("used", "?"), limit=d.get("limit", "?")) }}
         {% elif n.kind == 'job_adjusted' %}
         {% set who = d.get("printer") or "?" %}
         {% for c in d.get("changed", []) %}{% if not loop.first %}<br>{% endif %}{% if c == 'color' %}{{ _("Your print to “%(printer)s” was made in black and white: colour printing is not allowed for your account.", printer=who) }}{% elif c == 'one_sided' %}{{ _("Your print to “%(printer)s” was made double-sided: one-sided printing is not allowed for your account.", printer=who) }}{% endif %}{% endfor %}
+        {% elif n.kind == 'scan_window_mismatch' %}
+        {{ _("Scan refused: the window was for %(expected)s, the request comes from %(got)s. Open the portal from the device that scans, or see the scanning help in the user guide.", expected=d.get("expected", "?"), got=d.get("got", "?")) }}
         {% elif n.kind == 'printer_renamed' %}
         {{ _("The printer “%(old)s” is now called “%(new)s”. If you had set it up by hand on a computer or phone with the old address, set it up again with the new name.", old=d.get("old", "?"), new=d.get("new", "?")) }}
         {% elif n.kind == 'maintenance_on' %}
@@ -66,6 +71,7 @@
         {% elif n.kind == 'secret_key_save' %}
         {{ _("<b>Save the secret key in a safe place.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> in the <span class=\"mono\">.env</span> file encrypts the file names kept in the audit and signs the portal sessions. A backup without encryption does not contain it: if the server breaks and you restore the backup with a new key, the names stay unreadable (<span class=\"mono\">[encrypted]</span>) for good. Copy the line from <span class=\"mono\">.env</span> into a password manager, or make encrypted backups (they include <span class=\"mono\">.env</span>).") }}
         {% else %}{{ n.kind }}{% endif %}
+        {% if n.count > 1 and n.kind in ('job_refused', 'job_adjusted', 'quota_reached', 'scan_window_mismatch') %}<span class="muted">(×{{ n.count }})</span>{% endif %}
       </td>
       <td>{% if n.dismissed_at %}<span class="muted">{{ _("dismissed") }}</span>
         {% else %}<form method="post" action="/me/notices/{{ n.id }}/dismiss"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _("Dismiss") }}</button></form>{% endif %}</td>

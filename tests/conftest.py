@@ -107,7 +107,7 @@ async def portal(monkeypatch, tmp_path):
 
 
 async def portal_login(cl, username, password):
-    return await cl.post("/admin/login", data={"username": username, "password": password})
+    return await cl.post("/login", data={"username": username, "password": password})
 
 
 async def csrf_of_page(cl, path="/me"):

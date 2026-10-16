@@ -857,3 +857,18 @@ async def test_maintenance_can_tell_the_users_and_leaving_closes_that_notice(adm
     with cl.sm() as s:
         assert not list(s.scalars(select(Notice).where(Notice.kind == "maintenance_on", Notice.dismissed_at.is_(None))))
         assert list(s.scalars(select(Notice).where(Notice.kind == "maintenance_off")))
+
+
+@pytest.mark.usefixtures("english")
+async def test_reaching_the_quota_tells_the_user_on_every_refused_print(gw):
+    from app.db.models import Metric, Period
+    from app.policy.rules import set_limit
+
+    with gw.sm() as s:
+        set_limit(s, SubjectType.user, uid_of(gw.sm, "ann"), Metric.jobs, 0, Period.weekly)
+        s.commit()
+    for _ in range(2):
+        assert (await send(gw, job())).code == c.STATUS_NOT_POSSIBLE
+    [n] = open_notices(gw, "quota_reached")                                             # one notice, counted
+    assert n.count == 2 and n.key == "weekly:jobs"
+    assert n.detail_json["used"] == 0 and n.detail_json["limit"] == 0 and n.detail_json["printer"] == "color"

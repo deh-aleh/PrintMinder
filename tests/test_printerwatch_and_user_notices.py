@@ -144,7 +144,7 @@ async def test_users_are_told_about_group_admin_grants_and_requests(boss):
     assert len(mine(boss, "ann", "grant_revoked")) == 1
     async with __import__("httpx").AsyncClient(transport=__import__("httpx").ASGITransport(app=boss.app, client=("10.0.0.9", 1)),
                                                base_url="https://gw.test") as a:
-        await a.post("/admin/login", data={"username": "ann", "password": GOOD})
+        await a.post("/login", data={"username": "ann", "password": GOOD})
         text = (await a.get("/me/notices")).text
     for part in ("moved you from the group", "made you an administrator", "removed your administrator rights",
                  "gave you extra quota", "withdrew your extra quota"):

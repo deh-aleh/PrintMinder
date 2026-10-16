@@ -76,7 +76,7 @@ authoritative list is `app/config.py`. Summary:
 | **Backup** (general) | `BACKUP_ENABLED` (false), `BACKUP_DIR` (`general`), `BACKUP_HOUR` (3), `BACKUP_KEEP_DAILY/WEEKLY/MONTHLY` (7/4/12), `BACKUP_RECIPIENT` (recovery key; empty = unencrypted, no secrets in the file), `BACKUP_ROOT` (`/backups`), `BACKUP_CONFIG_DIR` (`/config`) |
 | **Printers page** | `PRINTERS_REFRESH_SECONDS` (15; 0 or invalid = 15; 5–3600) |
 | **USB printers** | `AUTO_DISCOVER` (true), `DISCOVERY_INTERVAL` (30), `USB_BRIDGE_HOST` (`ipp-usb`), `USB_BRIDGE_PORTS` (`60000-60099`), `USB_DIRECT` (true), `OFFLINE_REMOVE_HOURS` (8; 0 = never) |
-| **Printing / scanning** | `WEB_UPLOAD_MB` (25), `WEB_MAX_COPIES` (20), `MAX_REQUEST_MB` (200), `RECONCILE_INTERVAL` (30), `SCAN_URL`, `SCAN_TIMEOUT` (180), `ESCL_ANONYMOUS` (false) |
+| **Printing / scanning** | `WEB_UPLOAD_MB` (25), `WEB_MAX_COPIES` (20), `MAX_REQUEST_MB` (200), `RECONCILE_INTERVAL` (30), `SCAN_URL`, `SCAN_TIMEOUT` (180), `ESCL_ANONYMOUS` (false), `ESCL_WINDOW` (true), `ESCL_WINDOW_SECONDS` (180) |
 | **Network / mDNS** | `PORTAL_URL`, `MDNS_HOSTNAME`, `MDNS_ADDRESSES`, `MDNS_PORT`, `MDNS_INTERVAL` (30), `PUBLIC_SCHEME` |
 | **Misc** | `TIMEZONE` (UTC), `LANGUAGE` (en), `LOG_LEVEL` (INFO), `NOTICE_INTERVAL` (0 = by log level), `HEALTHZ_INFO` (empty = status only), `UPDATE_CHECK` (true) |
 | **Set by the image/compose, do not set** | `TLS_CERTFILE`, `TLS_KEYFILE`, `DATABASE_URL`, `CUPS_URL`, `ALLOW_INSECURE_AUTH` (never in production), `HOST`, `PORT` |
@@ -144,7 +144,7 @@ authoritative list is `app/config.py`. Summary:
 | `accounts.py` | Users, groups, limits, advanced permissions (the form block and its checks), user keys, admin-action log (`/admin/users`, `/groups`, `/actions`). |
 | `requests.py` | One page for requests and grants: pending requests, approval/rejection, active grants, direct grants, history, deleting ended grants (`/admin/requests`). |
 | `reports.py` | Usage report: top users in a period, page / CSV / PDF (`/admin/report`). |
-| `docs.py` | The documentation for administrators: shows the Markdown files of `docs/` as pages (`/admin/docs`), in English or Italian. Only names found in the folder are served; raw HTML in the files is shown as text; links between pages are rewritten, links to source files go to GitHub at the tag of the running version. The folder is `/opt/printminder/docs` in the image, `$PREFIX/docs` in the host install, `docs/` in a source tree. |
+| `docs.py` | The documentation in the portal: shows the Markdown files of `docs/` as pages (`/docs`), in English or Italian. Administrators see every page; other users only `USER_PAGES` (user guide and Windows guide), anything else is a 404 for them. Only names found in the folder are served; raw HTML in the files is shown as text; links between pages are rewritten, links to source files go to GitHub at the tag of the running version. The folder is `/opt/printminder/docs` in the image, `$PREFIX/docs` in the host install, `docs/` in a source tree. |
 | `printers.py` | Printers overview, counters, test printers, keep-alive and test print (`/admin/printers`). |
 | `controls.py` | Maintenance mode, block / hide a printer, `/mdns/policy` feed for the announcer. |
 | `backups.py` | Backup targets (`/admin/backups`). |
@@ -165,7 +165,7 @@ authoritative list is `app/config.py`. Summary:
 | `app/backup/crypto.py` | Recovery-key encryption (X25519 + HKDF + AES-256-GCM; private key wrapped by scrypt of the passphrase). |
 | `app/backup/service.py` | `backup_target` bookkeeping and the 60 s scheduler. |
 | `app/db/models.py` | All SQLAlchemy models. `session.py`: engine and sessions (SQLite WAL). `migrate.py`: runs Alembic from inside the app. |
-| `app/notices.py`, `app/admin/notices.py` | The bell: notices for administrators with a limit on how often the same one is reported (interval by `CUPSPL_LOG_LEVEL`), and notices for one user; table `notice`. |
+| `app/notices.py`, `app/admin/notices.py` | The bell: notices for administrators with a limit on how often the same one is reported (interval by `CUPSPL_LOG_LEVEL`), and notices for one user; table `notice`. For users: `notify_user_counted` renews the open notice of the same kind and subject (counter, time) instead of adding rows; `SECONDARY_KINDS` (today `job_adjusted`, the forced prints) are marked read by `read_secondary` after `user.secondary_read_minutes` (default 20, 0 = never; `/me/settings`), run on every page render. |
 | `app/secretcheck.py` | At every start: notice when `CUPSPL_SECRET_KEY` is missing or has changed (with how many file names it locked), and the one-time reminder to save it. What was already said is kept in `gateway_setting`, never the key itself. |
 | `app/printerwatch.py` | Every minute: paper jam, paper out, ink out/low on the physical printers, as notices for administrators and for the users waiting. |
 | `app/keywatch.py` | Every hour: forgets old print keys, if turned on warns of keys about to expire, and tells people whose temporary permission ended. |

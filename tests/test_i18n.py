@@ -42,8 +42,8 @@ def test_translation_falls_back_to_english_and_formats(english):
 
 async def test_page_follows_the_browser_then_the_users_choice(portal, english):
     make_user(portal.sm, "ann", password=GOOD, group="staff")
-    assert "<html lang=\"en\"" in (await portal.get("/admin/login")).text
-    r = await portal.get("/admin/login", headers={"Accept-Language": "ru,en;q=0.5"})
+    assert "<html lang=\"en\"" in (await portal.get("/login")).text
+    r = await portal.get("/login", headers={"Accept-Language": "ru,en;q=0.5"})
     assert '<html lang="ru"' in r.text
     await portal_login(portal, "ann", GOOD)
     assert "<h1>Settings</h1>" in (await portal.get("/me/settings")).text
@@ -65,7 +65,7 @@ async def test_the_choice_follows_the_user_to_a_new_login(portal, english):
     make_user(portal.sm, "ann", password=GOOD, group="staff")
     await portal_login(portal, "ann", GOOD)
     await portal.post("/me/settings/language", data={"csrf_token": await csrf_of_page(portal, "/me/settings"), "language": "zh"})
-    await portal.post("/admin/logout", data={"csrf_token": await csrf_of_page(portal, "/me/settings")})
+    await portal.post("/logout", data={"csrf_token": await csrf_of_page(portal, "/me/settings")})
     await portal_login(portal, "ann", GOOD)
     assert '<html lang="zh"' in (await portal.get("/me/settings")).text
 

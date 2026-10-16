@@ -3,7 +3,7 @@ import sys
 
 import uvicorn
 
-from app.config import settings
+from app.config import escl_window_problem, settings
 from app.logsetup import setup_logging
 
 
@@ -18,6 +18,9 @@ def main() -> int:
     if bool(settings.radius_host) != bool(settings.radius_secret):
         print("refusing to start: set both CUPSPL_RADIUS_HOST and CUPSPL_RADIUS_SECRET, or neither (local accounts only)",
               file=sys.stderr)
+        return 2
+    if (problem := escl_window_problem(settings.escl_window_seconds)):
+        print(f"refusing to start: {problem}", file=sys.stderr)
         return 2
     uvicorn.run(
         "app.main:app", host=settings.host, port=settings.port,

@@ -200,7 +200,7 @@ async def two(portal):
 
 
 async def as_user(cl, name):
-    await cl.post("/admin/logout", data={"csrf_token": await csrf_of_page(cl, "/me")}) if cl.cookies else None
+    await cl.post("/logout", data={"csrf_token": await csrf_of_page(cl, "/me")}) if cl.cookies else None
     cl.cookies.clear()
     await portal_login(cl, name, GOOD)
     return await csrf_of_page(cl, "/me")
@@ -264,7 +264,7 @@ async def test_switches_are_admin_only_and_need_csrf(portal):
         assert (await portal.post(path, data={"csrf_token": tok, "on": "1"})).status_code == 403
     with portal.sm() as s:
         assert not control.is_maintenance(s) and s.scalars(select(PrinterControl)).first() is None
-    await portal.post("/admin/logout", data={"csrf_token": tok})
+    await portal.post("/logout", data={"csrf_token": tok})
     make_user(portal.sm, "boss", password=GOOD, admin=True)
     await portal_login(portal, "boss", GOOD)
     assert (await portal.post("/admin/maintenance", data={"on": "1", "csrf_token": "wrong"})).status_code == 403
@@ -412,7 +412,7 @@ async def test_refused_anonymous_scans_make_one_notice_a_day_not_one_per_try(por
     with sm() as s:
         assert s.get(Notice, nid).dismissed_by == "ada"
         assert "notice.dismiss" in [a.action for a in s.scalars(select(AdminAudit))]
-    await portal.post("/admin/logout", data=dict(csrf_token=csrf))
+    await portal.post("/logout", data=dict(csrf_token=csrf))
     await portal_login(portal, "pia", "correct horse battery")
     assert (await portal.get("/admin/notices")).status_code == 403
     assert 'href="/admin/notices"' not in (await portal.get("/me")).text

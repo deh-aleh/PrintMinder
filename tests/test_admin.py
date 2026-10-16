@@ -37,7 +37,7 @@ async def env():
 
 
 async def login(cl, user="boss", pw="pw"):
-    r = await cl.post("/admin/login", data={"username": user, "password": pw})
+    r = await cl.post("/login", data={"username": user, "password": pw})
     return r
 
 
@@ -56,18 +56,18 @@ def q(cl, model, **kw):
 
 async def test_requires_login(env):
     r = await env.get("/admin/jobs")
-    assert r.status_code == 303 and r.headers["location"] == "/admin/login"
-    assert (await env.get("/admin/login")).status_code == 200
+    assert r.status_code == 303 and r.headers["location"] == "/login"
+    assert (await env.get("/login")).status_code == 200
 
 
 async def test_login_rules(env):
-    assert (await login(env, "boss", "bad")).headers["location"] == "/admin/login"
+    assert (await login(env, "boss", "bad")).headers["location"] == "/login"
     r = await login(env, "mario", "pw1")                                              # valid RADIUS, not an admin:
     assert r.headers["location"] == "/me"                                              # he gets his own page...
     assert (await env.get("/admin/jobs")).status_code == 403                           # ...and not the admin ones
     assert (await env.get("/admin/users")).status_code == 403
-    await env.post("/admin/logout", data={"csrf_token": csrf_of((await env.get("/me")).text)})
-    assert (await login(env, "ghost", "x")).headers["location"] == "/admin/login"
+    await env.post("/logout", data={"csrf_token": csrf_of((await env.get("/me")).text)})
+    assert (await login(env, "ghost", "x")).headers["location"] == "/login"
     assert (await env.get("/admin/jobs")).status_code == 303
     assert (await login(env)).headers["location"] == "/admin/"
     assert (await env.get("/admin/jobs")).status_code == 200
@@ -77,7 +77,7 @@ async def test_login_throttled(env):
     for i in range(5):
         await login(env, "boss", f"bad{i}")      # five different guesses
     r = await login(env)  # correct password, but locked out
-    assert r.headers["location"] == "/admin/login"
+    assert r.headers["location"] == "/login"
     assert (await env.get("/admin/jobs")).status_code == 303
 
 
@@ -215,12 +215,13 @@ async def test_filters_and_csv_injection(env):
 async def test_logout_invalidates_session(env):
     await login(env)
     t = await token(env)
-    await env.post("/admin/logout", data={"csrf_token": t})
+    await env.post("/logout", data={"csrf_token": t})
     assert (await env.get("/admin/jobs")).status_code == 303
 
 
-async def test_docs_not_exposed(env):
-    assert (await env.get("/docs")).status_code in (404, 405)
+async def test_docs_need_a_login(env):
+    r = await env.get("/docs", follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/login"
 
 
 async def test_unknown_group_and_absurd_limits_are_rejected(env):
@@ -259,7 +260,7 @@ async def test_same_typo_repeated_does_not_lock_the_admin_login(env):
 
 
 async def test_icon_is_public_and_linked_from_the_pages(portal):
-    login = await portal.get("/admin/login")
+    login = await portal.get("/login")
     assert 'href="/admin/static/icon.svg?v=' in login.text and 'href="/admin/static/favicon.ico?v=' in login.text
     for path, kind in (("/admin/static/icon.svg", "image/svg+xml"), ("/admin/static/icon-dark.svg", "image/svg+xml"), ("/admin/static/icon-light.svg", "image/svg+xml"), ("/admin/static/favicon.ico", "image/"),
                        ("/admin/static/apple-touch-icon.png", "image/png")):

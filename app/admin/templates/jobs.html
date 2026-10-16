@@ -45,6 +45,17 @@
           <dl class="kv"><dt>{{ _("IP address") }}</dt><dd class="mono">{{ r.guest.ip }}</dd>
             <dt>{{ _("Host name") }}</dt><dd class="mono">{{ r.guest.host or _('not available (no name registered in the DNS)') }}</dd></dl>
           <form method="dialog"><button class="sec">{{ _("Close") }}</button></form>
+        </dialog>{% endif %}{% if r.win %}
+        <button type="button" class="dots" title="{{ _('Scan window') }}" aria-label="{{ _('Scan window') }}" onclick="this.nextElementSibling.showModal()">ⓘ</button>
+        <dialog>
+          <h2>{{ _("Scan window · no. %(id)s", id=j.id) }}</h2>
+          {% if r.win.expected %}<p class="muted">{{ _("Refused: the window was opened for one address and the request came from another.") }}</p>
+          <dl class="kv"><dt>{{ _("Address the window was for") }}</dt><dd class="mono">{{ r.win.expected }}</dd>
+            <dt>{{ _("Address the request came from") }}</dt><dd class="mono">{{ r.win.got }}</dd></dl>
+          {% else %}<p class="muted">{{ _("The person pressed the scan window button, and this scan came from the address they opened it for.") }}</p>
+          <dl class="kv"><dt>{{ _("IP address") }}</dt><dd class="mono">{{ r.win.ip }}</dd>
+            <dt>{{ _("Host name") }}</dt><dd class="mono">{{ r.win.host or _('not available (no name registered in the DNS)') }}</dd></dl>{% endif %}
+          <form method="dialog"><button class="sec">{{ _("Close") }}</button></form>
         </dialog>{% endif %}</td>
       <td data-l="{{ _('Device') }}" class="wrap">{{ r.device }}</td>
       <td data-l="{{ _('Action') }}">{% if r.scan %}{{ _("scan") }}{% if r.adf %}<div><span class="pill" title="{{ _('Scanned with the automatic document feeder (ADF)') }}">ADF</span></div>{% endif %}{% else %}{{ _("print") }}

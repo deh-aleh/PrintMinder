@@ -150,7 +150,7 @@ coda cosa sa fare (una sola domanda, ricordata per un minuto). Se CUPS non rispo
 che il client ha indicato in modo esplicito.
 
 Un lavoro rifiutato finisce nell'audit come `denied` con il motivo, **non consuma quota né pagine**, e all'utente arriva un avviso
-(uno solo finché è aperto, così un programma che riprova non riempie la campanella). Il client IPP riceve il motivo e l'indirizzo della
+(ogni rifiuto rinnova quello aperto e ne alza il contatore, così un programma che riprova non riempie la campanella). Il client IPP riceve il motivo e l'indirizzo della
 pagina del profilo, dove l'utente vede i suoi permessi e può chiedere quello che manca; non gli suggerisce di chiedere più quota.
 
 ### Da leggere prima di scegliere la modalità
@@ -175,7 +175,7 @@ pagina del profilo, dove l'utente vede i suoi permessi e può chiedere quello ch
 - *Stampa*: solo le stampanti consentite; niente scelta del colore senza il permesso colore; una scelta fronte-retro (solo fronte / lato
   lungo / lato corto) sulle stampanti che hanno l'unità fronte-retro, solo per chi può stampare solo fronte; un avviso in cima con gli
   orari consentiti quando è fuori orario, e il lavoro viene rifiutato.
-- La campanella: gli avvisi "rifiutato" e "modificato" quando succede, e uno quando un amministratore cambia i permessi propri della persona.
+- La campanella: gli avvisi "rifiutato" e "modificato" quando succede (quello "modificato" è *secondario*: si legge da solo dopo il tempo scelto dall'utente in `/me/settings`, 20 minuti di base), e uno quando un amministratore cambia i permessi propri della persona.
 
 Il registro degli amministratori (*Azioni*) annota ogni modifica ai permessi di un gruppo o di un utente con i valori vecchi e nuovi.
 

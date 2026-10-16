@@ -110,7 +110,7 @@ async def test_the_owner_sees_their_notices_and_nobody_else_does(boss):
     make_user(boss.sm, "bob", password=GOOD)
     nid = own_notices(boss, "ann")[0].id
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=boss.app, client=("10.0.0.9", 1)), base_url="https://gw.test") as ann:
-        await ann.post("/admin/login", data={"username": "ann", "password": GOOD})
+        await ann.post("/login", data={"username": "ann", "password": GOOD})
         assert notices.unseen_count(boss.sm, uid(boss, "ann"), own=True) == 1
         page = await ann.get("/me/notices")
         assert page.status_code == 200 and "my laptop" in page.text and "revoked your print key" in page.text
@@ -121,7 +121,7 @@ async def test_the_owner_sees_their_notices_and_nobody_else_does(boss):
         assert (await ann.post(f"/me/notices/{nid}/dismiss", data={"csrf_token": token})).status_code == 303
     assert own_notices(boss, "ann") == []
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=boss.app, client=("10.0.0.10", 1)), base_url="https://gw.test") as bob:
-        await bob.post("/admin/login", data={"username": "bob", "password": GOOD})
+        await bob.post("/login", data={"username": "bob", "password": GOOD})
         assert "my laptop" not in (await bob.get("/me/notices?all=1")).text
         t = re.search(r'name="csrf_token" value="([^"]+)"', (await bob.get("/me/notices")).text)
         tok = t.group(1) if t else (await csrf_of_page(boss, "/me"))
@@ -140,7 +140,7 @@ async def test_the_administrators_list_cannot_dismiss_a_users_notice(boss):
 async def test_the_users_own_revoke_tells_nobody(boss):
     kid, _p = key_of(boss, "ann", "x")
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=boss.app, client=("10.0.0.9", 1)), base_url="https://gw.test") as ann:
-        await ann.post("/admin/login", data={"username": "ann", "password": GOOD})
+        await ann.post("/login", data={"username": "ann", "password": GOOD})
         token = await csrf_of_page(ann, "/me/keys")
         await ann.post(f"/me/keys/{kid}/revoke", data={"csrf_token": token})
     assert own_notices(boss, "ann") == []
@@ -151,7 +151,7 @@ async def test_the_key_pages_show_the_new_buttons_and_the_menu(boss):
     page = (await boss.get(f"/admin/users/{uid(boss, 'ann')}/keys")).text
     assert f"/keys/{kid}/disable" in page and f"/keys/{kid}/extend" in page and "/revoke-keys" in page
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=boss.app, client=("10.0.0.9", 1)), base_url="https://gw.test") as ann:
-        await ann.post("/admin/login", data={"username": "ann", "password": GOOD})
+        await ann.post("/login", data={"username": "ann", "password": GOOD})
         mine = (await ann.get("/me/keys")).text
         assert 'name="validity"' in mine and '<option value="365" selected>' in mine and 'value="once"' in mine
         assert "/disable" not in mine and "/extend" not in mine                             # only administrators do those
@@ -191,3 +191,47 @@ def test_a_user_notice_is_capped_so_it_can_not_grow_for_ever(portal):
     for i in range(notices.MAX_OPEN_PER_USER + 5):
         notices.notify_user(portal.sm, uid(portal, "ann"), "key_revoked", {"label": str(i), "prefix": "cpk-x"})
     assert len(own_notices(portal, "ann")) == notices.MAX_OPEN_PER_USER
+
+
+def test_a_repeated_event_renews_one_notice_and_counts_it(portal):
+    make_user(portal.sm, "ann", password=GOOD)
+    for _ in range(3):
+        notices.notify_user_counted(portal.sm, uid(portal, "ann"), "job_adjusted", "adjusted:hp", {"printer": "hp", "changed": ["color"]})
+    [n] = own_notices(portal, "ann")
+    assert n.count == 3
+    with portal.sm() as s:   # once dismissed, the next event opens a new notice
+        s.get(Notice, n.id).dismissed_at = datetime.now(timezone.utc)
+        s.commit()
+    notices.notify_user_counted(portal.sm, uid(portal, "ann"), "job_adjusted", "adjusted:hp", {"printer": "hp", "changed": ["color"]})
+    assert [x.count for x in own_notices(portal, "ann")] == [1]
+
+
+def test_secondary_notices_are_read_after_the_chosen_time_and_others_are_not(portal):
+    make_user(portal.sm, "ann", password=GOOD)
+    a = uid(portal, "ann")
+    notices.notify_user_counted(portal.sm, a, "job_adjusted", "adjusted:hp", {"printer": "hp", "changed": ["color"]})
+    notices.notify_user_counted(portal.sm, a, "quota_reached", "weekly:jobs", {"printer": "hp", "period": "weekly", "metric": "jobs", "used": 5, "limit": 5})
+    soon, later = datetime.now(timezone.utc) + timedelta(minutes=10), datetime.now(timezone.utc) + timedelta(minutes=25)
+    assert notices.read_secondary(portal.sm, a, 20, now=soon) == 0
+    assert notices.read_secondary(portal.sm, a, 0, now=later) == 0            # 0 = never
+    assert notices.read_secondary(portal.sm, a, 20, now=later) == 1
+    assert [n.kind for n in own_notices(portal, "ann")] == ["quota_reached"]  # a quota notice is not secondary
+    with portal.sm() as s:
+        assert s.scalars(select(Notice).where(Notice.kind == "job_adjusted")).one().dismissed_by == "auto"
+
+
+async def test_the_delay_for_secondary_notices_is_a_setting(portal):
+    make_user(portal.sm, "ann", password=GOOD)
+    await portal_login(portal, "ann", GOOD)
+    tok = await csrf_of_page(portal, "/me/settings")
+    with portal.sm() as s:
+        assert s.scalars(select(User).where(User.username == "ann")).one().secondary_read_minutes == 20   # default
+    for bad in ("-1", "abc", "99999999"):
+        await portal.post("/me/settings/notices", data={"csrf_token": tok, "minutes": bad})
+    await portal.post("/me/settings/notices", data={"csrf_token": tok, "minutes": "45"})
+    with portal.sm() as s:
+        assert s.scalars(select(User).where(User.username == "ann")).one().secondary_read_minutes == 45
+
+
+async def test_login_lives_at_the_root(portal):
+    assert (await portal.get("/login")).status_code == 200

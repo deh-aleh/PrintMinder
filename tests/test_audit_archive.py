@@ -276,7 +276,7 @@ async def test_nothing_in_the_portal_can_delete_audit_data(admin):
 
 
 async def test_archives_are_for_administrators_only(admin):
-    await admin.post("/admin/logout", data={"csrf_token": admin.token})
+    await admin.post("/logout", data={"csrf_token": admin.token})
     await portal_login(admin, "ann", GOOD)
     for path in ("/admin/archive", f"/admin/archive/{admin.aid}/view", f"/admin/archive/{admin.aid}/download"):
         assert (await admin.get(path)).status_code == 403
