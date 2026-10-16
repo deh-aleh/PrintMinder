@@ -7,9 +7,8 @@
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
   <dl class="kv" style="align-items:center">
     <dt>{{ _("Origin (sign-in)") }}</dt>
-    <dd><select name="provider" {{ 'disabled' if protected }}>{% for p in providers %}<option value="{{ p }}" {{ 'selected' if u.provider == p }}>{{ _('local (password in the gateway)') if p == 'local' else _('%(provider)s (password on the server)', provider=p) }}</option>{% endfor %}
-      {% if u.provider not in providers %}<option value="{{ u.provider }}" selected>{{ _("%(provider)s (not available)", provider=u.provider) }}</option>{% endif %}</select>
-      <div class="muted">{{ _("From RADIUS to local generates a temporary password; from local to RADIUS deletes the password stored here.") }}</div></dd>
+    <dd><b>{{ _('local (password in the gateway)') if u.provider == 'local' else _('%(provider)s (password on the server)', provider=u.provider) }}</b>
+      <div class="muted">{{ _("Shown for information: the way this account signs in is set when it is created.") }}</div></dd>
     <dt>{{ _("Group") }}</dt>
     <dd><select name="group_id">
       <option value="0">—</option>
@@ -24,7 +23,13 @@
     <dt>{{ _("Period") }}</dt><dd><select name="period">{% for p in periods %}<option value="{{ p }}" {{ 'selected' if view.period == p }}>{{ {'weekly': _('weekly'), 'monthly': _('monthly')}[p] }}</option>{% endfor %}</select></dd>
     <dt>{{ _("Usage") }}</dt><dd class="muted">{% for l in view.usage %}<div>{{ l }}</div>{% else %}{{ _("no limit") }}{% endfor %}</dd>
   </dl>
-  <div class="row" style="margin-top:14px"><button>{{ _("Save") }}</button><a class="btn sec" href="/admin/users">{{ _("Cancel") }}</a></div>
+  {% include "_perm_fields.html" %}
+  {% if perm_grants %}
+  <p class="muted" style="margin-top:10px">{{ _("Permissions granted after a request or directly:") }}
+    {% for g in perm_grants %}<b>+ {{ g.what }}</b> ({{ _("until %(date)s", date=g.until) if g.until else _("permanent") }}){% if not loop.last %}, {% endif %}{% endfor %}
+    · <a href="/admin/requests#grants">{{ _("manage") }}</a></p>
+  {% endif %}
+  <div class="actions"><button>{{ _("Save") }}</button><a class="btn sec" href="/admin/users">{{ _("Cancel") }}</a></div>
 </form>
 <div class="card" style="max-width:760px">
   <h2>{{ _("Other actions") }}</h2>

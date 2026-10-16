@@ -58,6 +58,8 @@ Differenze consapevoli rispetto a uno schema "classico":
 | Backend di stampa | **CUPS 2.4** | Dipendenza non modificata; filtri e driver già pronti |
 | Ponte USB | **ipp-usb** | Espone la stampante USB come IPP/eSCL |
 | Conteggio pagine | **pypdf** (+ intestazioni di immagini, URF, PostScript) | Il limite pagine deve valere anche per un file da 200 pagine |
+| Documentazione nel portale | **markdown-it-py** | Mostra le pagine Markdown di `docs/` con l'HTML grezzo disattivato; i file restano leggibili su GitHub così come sono |
+| PDF del report di utilizzo | **reportlab** | Tabelle con interruzioni di pagina e intestazione ripetuta, senza browser né programmi esterni |
 | Backup | **cryptography** (X25519, HKDF, AES-256-GCM, scrypt) | Cifrati con una chiave di recupero, passphrase mai conservata |
 | Annuncio sulla rete | **python-zeroconf** (servizio `mdns`, rete host) | Il multicast non attraversa la rete bridge di docker |
 | Contenitori | **Docker Compose** | Nulla installato sull'host; test riproducibili |
@@ -124,7 +126,8 @@ Tabelle (Alembic applica le migrazioni all'avvio; un test fallisce se un modello
 | `policy_rule` | Limite per un utente o un gruppo: risorsa, metrica (**job** o **pagine**), quantità, periodo (settimanale / mensile) |
 | `job_log` | Audit di stampe e scansioni: utente, dispositivo, nome file, esito, pagine, motivo, opzioni |
 | `print_key` | Chiavi di stampa personali (solo l'hash), scadenza, revoca, ultimo uso |
-| `quota_request`, `quota_grant` | Richieste degli utenti e concessioni prodotte dalle approvazioni |
+| `quota_request`, `quota_grant` | Richieste degli utenti (quota, gruppo, permesso) e concessioni di quota prodotte dalle approvazioni |
+| `permission_rule`, `permission_grant` | Colore / solo fronte / stampanti / orari di un gruppo o utente, e permessi aggiunti a un utente dopo una richiesta (permanenti o fino a una data) |
 | `admin_audit` | Chi ha fatto cosa nel portale |
 | `audit_archive` | Registro dei file di audit compressi (percorso, intervallo, righe, sha256) |
 | `printer_control` | Blocco e nascondimento mDNS per coda |

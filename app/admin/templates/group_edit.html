@@ -13,7 +13,8 @@
     <dt>{{ _("Period") }}</dt><dd><select name="period">{% for p in periods %}<option value="{{ p }}" {{ 'selected' if period == p }}>{{ {'weekly': _('weekly'), 'monthly': _('monthly')}.get(p, p) }}</option>{% endfor %}</select></dd>
     <dt>{{ _("Requestable") }}</dt><dd><label><input type="checkbox" name="requestable" value="1" {{ 'checked' if g and g.requestable }}> {{ _("users can ask to be moved to this group") }}</label></dd>
   </dl>
-  <div class="row" style="margin-top:12px"><button>{{ _("Save") if g else _("Create group") }}</button><a class="btn sec" href="/admin/groups">{{ _("Cancel") }}</a></div>
+  {% include "_perm_fields.html" %}
+  <div class="actions"><button>{{ _("Save") if g else _("Create group") }}</button><a class="btn sec" href="/admin/groups">{{ _("Cancel") }}</a></div>
 </form>
 {% if g %}
 <form class="card" method="post" action="/admin/groups/{{ g.id }}/delete" style="max-width:720px" onsubmit="return confirm({{ warning|tojson|forceescape }})">

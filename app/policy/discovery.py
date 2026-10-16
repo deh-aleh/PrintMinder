@@ -26,7 +26,7 @@ from starlette.concurrency import run_in_threadpool
 from app.audit.adminlog import record
 from app.config import settings
 from app.cups_client import list_queues
-from app.db.models import PrinterControl, PrinterKeepalive, PrinterOffline
+from app.db.models import PrinterControl, PrinterFormer, PrinterKeepalive, PrinterOffline
 from app.ipp import codec
 from app.policy import ordering
 
@@ -214,6 +214,7 @@ async def _cups_admin(app, req: codec.IppMessage) -> bool:
         return False
     app.state.printers_cache = None
     app.state.queues_cache = None
+    app.state.queue_caps_cache = None
     return ok
 
 
@@ -249,18 +250,65 @@ async def delete_queue(app, name: str) -> bool:
                                                      requesting_user_name=CUPS_ADMIN))
 
 
-def forget_queue(db, name: str) -> None:
-    """Everything the gateway remembers about a queue that no longer exists (its settings, its place in the list)."""
+FORMER_REASONS = ("deleted", "removed_offline", "renamed")
+FORMER_KEEP = 200  # names remembered; the oldest go first
+
+
+def note_former(db, name: str, reason: str) -> None:
+    """Remember that a queue used to have this name: the rename dialog offers it, so a replacement printer can take over the
+    old address (and the permissions that name has in the lists)."""
+    if reason not in FORMER_REASONS:
+        raise ValueError(reason)
+    key = ordering.key(name)
+    row = db.get(PrinterFormer, key)
+    now = datetime.now(timezone.utc)
+    if row is None:
+        db.add(PrinterFormer(name=key, display=name.strip()[:128], removed_at=now, reason=reason))
+    else:
+        row.display, row.removed_at, row.reason = name.strip()[:128], now, reason
+    db.flush()
+    extra = db.query(PrinterFormer).order_by(PrinterFormer.removed_at.desc()).offset(FORMER_KEEP).all()
+    for old in extra:
+        db.delete(old)
+
+
+def took_name(db, name: str) -> None:
+    """A queue has this name again (a rename, or a new queue): it is no longer a name of the past."""
+    row = db.get(PrinterFormer, ordering.key(name))
+    if row is not None:
+        db.delete(row)
+
+
+def former_names(db, current: list[str]) -> list[PrinterFormer]:
+    """The names of the past that no queue has now, most recent first (at most 20), for the rename dialog."""
+    taken = {ordering.key(n) for n in current}
+    rows = db.query(PrinterFormer).order_by(PrinterFormer.removed_at.desc()).all()
+    return [r for r in rows if r.name not in taken][:20]
+
+
+def forget_queue(db, name: str, reason: str) -> None:
+    """Everything the gateway remembers about a queue that no longer exists (its settings, its place in the list); the name
+    itself is kept as a name of the past (`reason`: deleted, removed_offline). Permissions that name a printer keep the name,
+    so a replacement given the same name finds them again."""
     for model in (PrinterControl, PrinterKeepalive, PrinterOffline):
         row = db.get(model, ordering.key(name))
         if row is not None:
             db.delete(row)
     ordering.forget(db, name)  # also takes the queue out of every administrator's list
+    note_former(db, name, reason)
 
 
 def _audit(sm, action: str, name: str, **detail) -> None:
     with sm() as db:
         record(db, None, action, "printer", None, actor_name="system", printer=name, **detail)
+        db.commit()
+
+
+def _created(sm, name: str, **detail) -> None:
+    """A queue was made by discovery: audit it, and its name stops being a name of the past."""
+    _audit(sm, "printer.auto_add", name, **detail)
+    with sm() as db:
+        took_name(db, name)
         db.commit()
 
 
@@ -315,7 +363,7 @@ async def _create_new(app, notes: list[dict]) -> int:
             taken.add(ordering.key(name))
             created += 1
             log.info("new USB printer %r on the ipp-usb bridge: queue %s created", p["model"], name)
-            await run_in_threadpool(_audit, app.state.sessionmaker, "printer.auto_add", name, model=p["model"], via="ipp-usb")
+            await run_in_threadpool(_created, app.state.sessionmaker, name, model=p["model"], via="ipp-usb")
         else:
             notes.append({"kind": "refused", "model": p["model"] or p["uri"]})
     if not settings.usb_direct:
@@ -351,7 +399,7 @@ async def _create_new(app, notes: list[dict]) -> int:
             taken.add(ordering.key(name))
             created += 1
             log.info("new USB printer %r (no IPP-over-USB): queue %s created with %s", model, name, ppd)
-            await run_in_threadpool(_audit, app.state.sessionmaker, "printer.auto_add", name, model=model, via="usb", driver=ppd)
+            await run_in_threadpool(_created, app.state.sessionmaker, name, model=model, via="usb", driver=ppd)
         else:
             notes.append({"kind": "refused", "model": model})
     return created
@@ -400,7 +448,7 @@ async def run_once(app) -> dict:
                 if await delete_queue(app, q["name"]):
                     def gone(name=q["name"]):
                         with sm() as db:
-                            forget_queue(db, name)
+                            forget_queue(db, name, "removed_offline")
                             record(db, None, "printer.auto_remove", "printer", None, actor_name="system", printer=name,
                                    hours=settings.offline_remove_hours)
                             db.commit()

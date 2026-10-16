@@ -7,6 +7,8 @@ WORKDIR /src
 COPY pyproject.toml LICENSE NOTICE ./
 COPY app ./app
 RUN pip install --no-cache-dir . && cd / && rm -rf /src
+# the documentation shown in the portal (/admin/docs), kept outside /src because that folder is deleted above
+COPY docs /opt/printminder/docs
 USER gateway
 ENV CUPSPL_HOST=0.0.0.0 CUPSPL_PORT=8631 \
     CUPSPL_CUPS_URL=unix:///run/cups/cups.sock \

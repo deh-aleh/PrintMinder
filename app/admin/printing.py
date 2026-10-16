@@ -7,6 +7,7 @@ checks as an IPP job: quota (atomic), audit, identity `gw:<user>`.
 import hmac
 import logging
 import struct
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 import httpx
@@ -19,7 +20,7 @@ from app.config import settings
 from app.cups_client import list_queues
 from app.db.models import User
 from app.ipp import codec
-from app.policy import audit, control, ordering, pages as pages_mod
+from app.policy import audit, control, ordering, permissions, pages as pages_mod
 from app.i18n import _
 
 log = logging.getLogger("app.print")
@@ -66,11 +67,16 @@ async def print_form(request: Request, user: User = Depends(current_user)):
         blocked = {n for n, c in control.controls(db).items() if c.blocked}
     every = [q for q in await list_queues(request.app) if q["name"].lower() not in blocked]  # blocked = not offered
     pos = await run_in_threadpool(ordering.positions, request.app.state.sessionmaker, user.id)  # their own order, if they set one
-    queues = ordering.arrange([q for q in every if q.get("online", True)], pos)
-    offline = [q["name"] for q in every if not q.get("online", True)]  # the device does not answer: do not offer it
+    perms = await run_in_threadpool(permissions.load, request.app.state.sessionmaker, user)
+    allowed = permissions.allowed_queues(perms, every)  # a printer the account may not use is not offered at all
+    queues = ordering.arrange([q for q in allowed if q.get("online", True)], pos)
+    offline = [q["name"] for q in allowed if not q.get("online", True)]  # the device does not answer: do not offer it
+    outside = perms.window if perms.window is not None and not permissions.in_window(perms.window, datetime.now(timezone.utc), _tz()) else None
     return render(request, "print.html", user, queues=queues, offline=offline, max_mb=settings.web_upload_mb,
-                  comment_max=COMMENT_MAX, queues_js={q["name"]: {"media": q.get("media", []), "media_default": q.get("media_default", ""), "color": bool(q.get("color"))} for q in queues},
-                  max_copies=settings.web_max_copies)
+                  comment_max=COMMENT_MAX, max_copies=settings.web_max_copies, perms=perms,
+                  forbidden_all=bool(every) and not allowed, outside_hours=permissions.describe_window(outside) if outside else "",
+                  queues_js={q["name"]: {"media": q.get("media", []), "media_default": q.get("media_default", ""), "color": bool(q.get("color")),
+                                         "duplex": bool(q.get("duplex"))} for q in queues})
 
 
 @router.post("/print")
@@ -134,6 +140,9 @@ async def print_submit(request: Request, user: User = Depends(current_user)):
     color = str(form.get("color", ""))
     if color not in ("", "color", "monochrome"):
         raise HTTPException(400, "invalid colour mode")
+    sides = str(form.get("sides", ""))
+    if sides not in ("", "one-sided", "two-sided-long-edge", "two-sided-short-edge"):
+        raise HTTPException(400, "invalid sides")
     try:
         ranges = pages_mod.parse_ranges(str(form.get("pages", "")))
     except ValueError as exc:
@@ -170,12 +179,25 @@ async def print_submit(request: Request, user: User = Depends(current_user)):
         opts["orientation"] = orientation
     if color:
         opts["color"] = color
+    if sides:
+        opts["sides"] = sides
     if ranges:
         opts["page_ranges"] = str(form.get("pages", "")).strip()[:100]
     if counted:
         opts["pages_counted"] = pages
-    decision, log_id = await run_in_threadpool(_reserve, sm, user, queue, title, opts, pages)
+    # the same decision the IPP gateway takes (printer, hours, colour, sides); the form already hides what is not allowed
+    perms = await run_in_threadpool(permissions.load, sm, user)
+    perm = permissions.decide(perms, queue, {"color": queue_info.get("color"), "duplex": queue_info.get("duplex")},
+                              {k: v for k, v in (("print-color-mode", color), ("sides", sides)) if v},
+                              settings.permission_mode, audit.now_utc(), _tz()) if perms.restricted else None
+    if perm is not None and perm.changed:
+        opts["adjusted"] = list(perm.changed)
+    decision, log_id = await run_in_threadpool(_reserve, sm, user, queue, title, opts, pages, perm)
     if not decision.allowed:
+        if perm is not None and not perm.allowed and decision.reason == perm.reason:
+            await run_in_threadpool(permissions.notify_refused, sm, user.id, queue, perm)
+            flash(request, decision.text(), "err")  # not a quota matter either: stay on the print page
+            return back("/me/print")
         if decision.reason in (control.BLOCKED_REASON, control.MAINTENANCE_REASON):
             flash(request, decision.text(), "err")  # not a quota matter: stay on the print page
             return back("/me/print")
@@ -194,6 +216,13 @@ async def print_submit(request: Request, user: User = Depends(current_user)):
         job_attrs.append(codec.Attr("orientation-requested", [codec.Val(codec.TAG_ENUM, 3 if ipp_orientation == "portrait" else 4)]))
     if color:
         job_attrs.append(codec.Attr("print-color-mode", [codec.Val(codec.TAG_KEYWORD, color)]))
+    if sides:
+        job_attrs.append(codec.Attr("sides", [codec.Val(codec.TAG_KEYWORD, sides)]))
+    if perm is not None:  # colour / sides corrected by the permissions replace what the form asked for
+        job_attrs = [a for a in job_attrs if a.name not in perm.set_attrs]
+        job_attrs += [codec.Attr(n, [codec.Val(codec.TAG_KEYWORD, v)]) for n, v in perm.set_attrs.items()]
+        if perm.changed:
+            await run_in_threadpool(permissions.notify_adjusted, sm, user.id, queue, perm)
     if ranges:
         job_attrs.append(codec.Attr("page-ranges", [codec.Val(codec.TAG_RANGE, struct.pack(">ii", lo, hi or 2147483647))
                                                     for lo, hi in ranges]))
@@ -222,9 +251,9 @@ async def print_submit(request: Request, user: User = Depends(current_user)):
     return back("/me/print")
 
 
-def _reserve(sm, user, queue, title, options, pages=None):
+def _reserve(sm, user, queue, title, options, pages=None, deny=None):
     with sm() as session:
-        return audit.reserve(session, user, queue, title, options, _tz(), pages)
+        return audit.reserve(session, user, queue, title, options, _tz(), pages, deny=deny)
 
 
 def _finalize(sm, log_id, ok, job_id, reason):

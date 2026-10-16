@@ -2,13 +2,15 @@
 
 import importlib.util
 import re
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 from sqlalchemy import select
 
 from app import i18n
-from app.db.models import User
+from app.db.models import PermissionGrant, SubjectType, User
+from app.policy import permissions
 from tests.conftest import csrf_of_page, make_user, portal_login
 
 GOOD = "correct horse battery"
@@ -105,9 +107,10 @@ def test_every_language_loads_from_its_po_file():
 
 # ---------------------------------------------------------------- every page, every language
 
-PAGES = ["/admin/jobs", "/admin/users", "/admin/groups", "/admin/groups/new", "/admin/requests", "/admin/grants", "/admin/actions",
+PAGES = ["/admin/jobs", "/admin/users", "/admin/groups", "/admin/groups/new", "/admin/requests", "/admin/actions",
          "/admin/backups", "/admin/archive", "/admin/users/{ann}/edit", "/admin/users/{ann}/keys", "/admin/users/{ann}/delete",
-         "/me", "/me/keys", "/me/settings", "/me/print", "/me/scan", "/me/request/quota", "/me/request/group"]
+         "/me", "/me/keys", "/me/settings", "/me/print", "/me/scan", "/me/request/quota", "/me/request/group",
+         "/me/request/permission"]
 
 
 @pytest.mark.parametrize("code", sorted(i18n.LANGUAGES))
@@ -116,9 +119,12 @@ async def test_every_page_renders_in_every_language(portal, code):
     from app.db.models import Group
 
     ann = make_user(portal.sm, "ann", password=GOOD, group="staff")
-    make_user(portal.sm, "boss", password=GOOD, admin=True)
+    boss = make_user(portal.sm, "boss", password=GOOD, admin=True)
     with portal.sm() as s:
         s.add(Group(name="power", requestable=True))
+        permissions.set_rule(s, SubjectType.user, boss, color=False, one_sided=False, hours_mode="window",
+                             hours_days="01234", hours_start=480, hours_end=1020)   # something to ask for on /me/request/permission
+        s.add(PermissionGrant(user_id=ann, perm="color", valid_from=datetime.now(timezone.utc), valid_until=datetime.now(timezone.utc) + timedelta(days=9)))
         s.commit()
     await portal_login(portal, "boss", GOOD)
     for path in PAGES:

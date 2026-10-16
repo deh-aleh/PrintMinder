@@ -13,7 +13,7 @@ cosa puoi fare per ridurre i dati che il server conserva.
 | **Nome del file** stampato o scansionato | **Cifrato** nel database, nell'archivio audit (i file `.jsonl.gz`) e quindi anche nei backup |
 | Password degli account locali | Solo l'impronta (hash argon2): la password non si può ricavare |
 | Chiavi di stampa | Solo l'impronta (sha256) |
-| Nome utente, gruppi, nomi delle stampanti, registro delle azioni degli amministratori, motivi delle richieste di quota, indirizzi IP | **In chiaro** nel database |
+| Nome utente, gruppi, nomi delle stampanti, registro delle azioni degli amministratori, motivi delle richieste (quota, gruppo, permesso) e note delle concessioni, permessi e orari consentiti, indirizzi IP | **In chiaro** nel database |
 | Quantità (pagine, data, stato di ogni stampa) | In chiaro: servono alle quote |
 | Il database come file | Non cifrato: chi copia il file legge tutto tranne i nomi dei file |
 | I backup | Cifrati solo se scegli la cifratura nel menu *Backup* (consigliata) |
@@ -56,7 +56,8 @@ I nomi sono cifrati con una chiave ricavata da `CUPSPL_SECRET_KEY` (in `.env`, c
 > (le sessioni si azzerano e tutti rifanno il login). Ripristinando la vecchia chiave i nomi tornano leggibili.
 
 - I backup **cifrati** includono `.env`, quindi anche la chiave; quelli non cifrati no (e senza la chiave i nomi che contengono non si leggono: è voluto).
-- Se la chiave è vuota il gateway non cifra niente (e avvisa nel log), perché una chiave diversa a ogni avvio renderebbe i nomi illeggibili al riavvio dopo.
+- Se la chiave è vuota il gateway non cifra niente (e avvisa nel log e nella campanella), perché una chiave diversa a ogni avvio renderebbe i nomi illeggibili al riavvio dopo.
+- **Tieni una copia della chiave fuori dal server** (un password manager): dopo il primo avvio l'amministratore del primo avvio trova un promemoria nella campanella, una volta sola. Se il gateway parte con una chiave diversa da quella dell'avvio precedente, lo dice nella campanella con il numero di nomi che non si leggono più ([backup.md](backup.md#salva-la-chiave-segreta)).
 - Se prima avevi dei nomi in chiaro, al primo avvio con la chiave il gateway li cifra da solo, a pezzi, senza fermarsi.
 
 **La ricerca per nome file** nell'audit guarda nelle ultime 5.000 azioni che rispettano gli altri filtri (i nomi sono cifrati: per cercare si aprono uno a uno). La

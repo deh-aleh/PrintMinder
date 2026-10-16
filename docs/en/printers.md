@@ -10,6 +10,8 @@ recorded. Everything is read live and best effort: a printer that does not offer
 - State and queue of every CUPS queue; for a device that does not answer, **NOT REACHABLE** (and it disappears from the
   print form and from the mDNS announcement). Detection can lag by ~30 s. For network queues it is a TCP probe (it can
   not know that paper ran out); queues on `usb:` / `file:` are assumed present.
+- Beside "n in queue", the **…** button shows the address of the queue (`ipps://<server>/printers/<name>`) with a copy button: the
+  one to type when adding the printer by hand on a computer. The server part is the address the portal was opened with.
 - **Ink** left (levels and colours from CUPS).
 - **Printer counters** (lifetime): total pages, black and white, colour, single/double-sided sheets, jams, pick failures —
   read from HP's embedded web service (`/DevMgmt/ProductUsageDyn.xml`). Other brands show only IPP data.
@@ -73,14 +75,36 @@ A printer moves only inside its group: physical printers stay above the virtual 
 is fixed; a printer connected later goes after the ones you already placed (in its group). Moves are written to the administrators'
 audit (`printer.move`). A printer you never moved follows the default order described below.
 
-**Renaming a queue.** The pencil button opens a dialog with the queue name (the last part of the address, `…/printers/<name>`; letters,
-digits and `. _ @ + -`). CUPS can not rename a queue, so the gateway creates the new one on the same device — same driver (IPP printers:
+**Renaming a queue.** The pencil button opens a dialog with an empty field for the new name (the current name is shown in grey as a
+placeholder). The name is the last part of the address, `…/printers/<name>`: letters, digits and `. _ @ + -`. CUPS can not rename a queue, so the gateway creates the new one on the same device — same driver (IPP printers:
 driverless; USB: the driver CUPS has for it; virtual: CUPS-PDF), same description and location — and only then removes the old one; if
 anything fails the old queue stays. Block, hide-from-mDNS, maintenance-print settings, the countdown and the places in the lists follow the
 queue; the audit keeps the old name for what already happened. Clicking *Rename* asks for confirmation and warns that **computers and
 phones set up by hand with the old address will stop printing** until they are set up again. A queue with jobs waiting, a name already
 in use, or a queue whose driver the gateway can not know (for example a `socket://` queue) is refused. Options set by hand in CUPS
-(default paper, …) are not carried over. Logged as `printer.rename`.
+(default paper, …) are not carried over. The printers allowed to groups and users ([quotas.md](quotas.md#5-advanced-permissions)), the
+permissions granted for that printer and the requests for it still waiting follow the new name.
+Logged as `printer.rename`.
+
+**Names used before.** The gateway remembers the names that queues had: a queue that was deleted from the Printers page, a USB queue
+that was removed because its device stayed away, and the old name of a queue that was renamed (names found in the audit before this
+feature are included). In the rename dialog:
+
+- **While you type**, if a name used before starts with the letters typed so far, the rest of it appears in grey inside the field, like
+  the suggestion of a search engine. It is only a reminder: the whole name must still be typed, and the grey part disappears as soon as
+  no past name starts that way.
+- **Under the field** a line says: "Used before: no queue has had this name since …" for a name of the past; "A queue with this name
+  already exists" for a name in use (the *Rename* button is then disabled); "That is already its name" for the current name (disabled
+  too); a warning for characters that are not allowed.
+- **Names used before (n)**, a menu that opens like *Advanced permissions*, lists them, most recent first (at most 20, names of existing
+  queues left out), each with the day and how it went: deleted, removed automatically, renamed. Clicking a name writes it in the field.
+
+A name stops being "used before" when a queue takes it again, by renaming or because a new queue is created with it.
+
+The use: a printer breaks, its queue is removed, a replacement arrives with another name. Rename the replacement to the **old name**.
+Computers and phones that were set up by hand with the old address print again, with the same keys, and the permissions that listed
+that name apply to it again. The limit: a computer set up with a driver specific to the old model may need to be set up again if the new
+model is different. Computers that use the printer as driverless (IPP Everywhere) do not.
 
 CUPS does not say when a queue was created, so the gateway notes the **first time it sees** each queue (it looks every
 minute, so a printer that was connected and never opened in any page is still registered within a minute). Queues that

@@ -24,12 +24,13 @@ browser ───────https───────────▶     │  
 
 - **Accounts**: local (argon2id) and/or RADIUS; personal, revocable **print keys** so a domain password is never stored on a PC or phone.
 - **Quotas**: jobs and pages per week or month, per group with per-user overrides; users ask for more, administrators approve.
+- **Permissions**: colour, one-sided printing, which printers and at what hours, per group with per-user overrides; users ask for what they lack, for good or until a date.
 - **Printing**: IPP/IPPS for computers, **print from the browser** for any phone, LAN announcement (AirPrint/Mopria).
 - **Scanning**: eSCL through the gateway and from the portal, together with printing on the same USB device.
 - **Audit**: who printed/scanned what (real pages), a separate log of administrative actions, kept forever with verified compressed archives.
 - **Printers**: status, ink and counters, block/hide, test printers, periodic maintenance print and test print for physical printers.
 - **Backups**: scheduled per administrator, encrypted with a recovery key, restorable from the command line.
-- **Portal in 5 languages**: English, Italian, Spanish, Russian, Simplified Chinese; chosen per user.
+- **Portal in 5 languages**: English, Italian, Spanish, Russian, Simplified Chinese; chosen per user. The documentation (English and Italian) is readable inside the portal by administrators.
 
 ## Features and status
 
@@ -47,20 +48,21 @@ browser ───────https───────────▶     │  
 | **Policy** | Users and groups; job and page limits per week/month; per-user overrides | ✅ |
 | | Exceptions: user requests, administrator approval, temporary or permanent grants; group change on request | ✅ |
 | | Pages counted before printing for PDF, images, text and PostScript | ✅ soft limit for other files |
-| | Limits per feature (colour, duplex, paper size) or per printer; allowed hours | ⬜ |
+| | Limits per feature (colour, duplex) or per printer; allowed hours | 🟡 not yet tested on real printers |
 | **Scanning** | eSCL through the gateway (same keys, audit, together with printing) and scanning from the portal | ✅ |
 | | Native eSCL clients that can authenticate (field test) | ⬜ |
 | **Audit** | Print/scan audit with real pages; separate log of administrative actions | ✅ |
 | | Unlimited retention with verified compressed archives; CSV export, filters, archive viewer and download | ✅ |
+| | Usage report: top users in a period, optional detail per printer, groups left out, page / CSV / PDF | ✅ |
 | | File names encrypted in the database; button to stop saving them; optional erasing after some days | ✅ |
 | | syslog/SIEM export; anonymisation | ⬜ |
-| **Portal** | Admin portal (audit, users, groups, requests, grants, actions, printers, backups, archive) and user area (consumption, keys, requests, print, scan) | ✅ |
+| **Portal** | Admin portal (audit, users, groups, requests with grants, actions, printers, backups, archive) and user area (consumption, keys, requests, print, scan); the documentation is built in for administrators (English and Italian) | ✅ |
 | | Settings: password, theme, language, refresh; phone-friendly layout; copy buttons | ✅ |
 | | Printers page: status, ink, lifetime counters (HP), firmware, scanner; block, hide, test printers; gateway maintenance mode | ✅ |
 | | Periodic maintenance print and test print with statistics (physical printers); ordering physical first, movable with up/down arrows (own order per administrator); queues can be renamed; IPP-USB / USB badges | ✅ |
 | | Portal in English, Italian, Spanish, Russian, Chinese | ✅ Spanish/Russian/Chinese need native review |
 | | Notifications (email/webhook) for pending requests; usage reports | ⬜ |
-| | Permission requests (colour, duplex, scanning…) as these features appear | ⬜ |
+| | Permission requests (colour, one-sided, printers, hours) | ✅ |
 | **Operations** | Docker stack (ipp-usb + CUPS + gateway + mDNS), nothing installed on the host | ✅ |
 | | Scheduled backups per administrator (folder, hour, rotation, passphrase/recovery-key encryption), restore from CLI | ✅ |
 | | Database migrations (Alembic), health check, logs, admin CLI | ✅ |
@@ -68,8 +70,7 @@ browser ───────https───────────▶     │  
 | | Update button in the portal (optional `updater` container, needs the Docker socket) | 🟡 only tested with simulations |
 | | Backups on a network disk or USB disk: marker file against an unmounted disk (on by default), a notice in the bell when a backup fails, time limit for a disk that stops answering | ✅ tested with an SMB share |
 | | TLS certificate: notices (expired, announced address missing, optional expiry warning) and `scripts/cert-sync.sh` to copy a renewed certificate from Nginx Proxy Manager or certbot | 🟡 script tested with simulations, not yet with a real Nginx Proxy Manager |
-| | Bell with notices for administrators; `/healthz` shows only the status unless you ask for more | ✅ |
-| | High availability, Prometheus metrics, direct remote backup targets (SSH/S3) | ⬜ |
+| | Bell with notices for administrators (one bell, their own notices first); printer problems (jam, paper, ink) for administrators and for the users waiting; users are told when their group, rights, quota or request change; a one-time reminder to save `CUPSPL_SECRET_KEY` and a notice if it changes; `/healthz` shows only the status unless you ask for more | ✅ |
 
 ## Limits
 

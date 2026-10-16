@@ -25,7 +25,7 @@ from app.db.models import JobKind, JobLog, JobState, User
 from app.ipp import codec
 from app import i18n
 from app.i18n import N_, _, ngettext
-from app.policy import control, discovery, keepalive, ordering, testpage
+from app.policy import control, discovery, keepalive, ordering, permissions, testpage
 
 log = logging.getLogger("app.printers")
 router = APIRouter(prefix="/admin")
@@ -36,7 +36,7 @@ _CUPS_ATTRS = ["printer-name", "printer-info", "printer-state", "printer-state-r
 CUPS_ADMIN = "root"  # CUPS' SystemGroup: it trusts this name on its private socket, and only the gateway reaches the socket
 DEBUG_PPD = "lsb/usr/cups-pdf/CUPS-PDF_noopt.ppd"
 DEBUG_RE = re.compile(r"^debugprinter(\d+)$")
-NAME_RE = re.compile(r"^[A-Za-z0-9._@+-]{1,127}$")
+NAME_RE = permissions.NAME_RE
 STATES = {3: N_("idle"), 4: N_("printing"), 5: N_("stopped")}  # shown through _(): the cached data stays language-neutral
 LEDM_USAGE = {"TotalImpressions": N_("Pages printed (total)"), "MonochromeImpressions": N_("of which black and white"),
               "ColorImpressions": N_("of which in colour"), "SimplexSheets": N_("Single-sided sheets"),
@@ -212,6 +212,7 @@ async def _cups_admin(request: Request, req: codec.IppMessage) -> bool:
         return False
     request.app.state.printers_cache = None
     request.app.state.queues_cache = None
+    request.app.state.queue_caps_cache = None
     return ok
 
 
@@ -239,6 +240,7 @@ async def debug_create(request: Request, admin: User = Depends(current_admin)):
     if ok:
         def note():
             with request.app.state.sessionmaker() as db:
+                discovery.took_name(db, name)
                 record(db, db.get(User, admin.id), "printer.debug_create", "printer", None, printer=name)
                 db.commit()
         await run_in_threadpool(note)
@@ -267,7 +269,7 @@ async def printer_delete(request: Request, name: str, admin: User = Depends(curr
     if ok:
         def note():
             with request.app.state.sessionmaker() as db:
-                discovery.forget_queue(db, name)
+                discovery.forget_queue(db, name, "deleted")
                 record(db, db.get(User, admin.id), "printer.delete", "printer", None, printer=name)
                 db.commit()
         await run_in_threadpool(note)
@@ -301,7 +303,8 @@ async def printer_move(request: Request, name: str, direction: str = Form(...), 
 async def printer_rename(request: Request, name: str, new_name: str = Form(...), admin: User = Depends(current_admin)):
     """Give a queue another name. CUPS can not rename a queue, so the gateway makes the new one on the same device (same
     driver, same description) and only then removes the old one. What the gateway keeps under the name (block, maintenance
-    print, places in the lists) follows. Devices that were set up by hand with the old address stop printing."""
+    print, places in the lists, the printers allowed to groups and users) follows. Devices that were set up by hand with the
+    old address stop printing, unless a printer is later given that old name again (see `discovery.former_names`)."""
     new_name = new_name.strip()
     if not NAME_RE.match(name):
         raise HTTPException(404)
@@ -342,7 +345,10 @@ async def printer_rename(request: Request, name: str, new_name: str = Form(...),
     def move():
         with request.app.state.sessionmaker() as db:
             ordering.rename(db, name, new_name)
-            record(db, db.get(User, admin.id), "printer.rename", "printer", None, printer=name, new_name=new_name)
+            lists = permissions.rename_printer(db, name, new_name)  # the printer lists of groups and users follow the queue
+            discovery.note_former(db, name, "renamed")
+            discovery.took_name(db, new_name)
+            record(db, db.get(User, admin.id), "printer.rename", "printer", None, printer=name, new_name=new_name, permission_lists=lists)
             db.commit()
     await run_in_threadpool(move)
     request.app.state.printers_cache = request.app.state.queues_cache = None
@@ -518,8 +524,11 @@ async def printers(request: Request, admin: User = Depends(current_admin), db: S
 
     devices = await _devices(request, admin)
     controls, ka = await run_in_threadpool(switches)
-    return render(request, "printers.html", admin, devices=devices, states=STATES, controls=controls, key=control.key,
+    # the address computers use for a queue: the one this page was opened with (same server, same port as the portal)
+    ipp_base = f"{settings.public_scheme or 'ipps'}://{request.headers.get('host', 'localhost')}"
+    return render(request, "printers.html", admin, devices=devices, states=STATES, controls=controls, key=control.key, ipp_base=ipp_base,
                   keepalive=ka, next_due=keepalive.next_due, describe=keepalive.describe, split=keepalive.split,
                   presets=keepalive.PRESETS, now=datetime.now(timezone.utc), is_usb=discovery.is_usb_queue, transport=discovery.transport,
+                  former=discovery.former_names(db, [q["name"] for d in devices for q in d["queues"]]),
                   offline_since=await run_in_threadpool(discovery.offline_since, request.app.state.sessionmaker),
                   remove_after=discovery.remove_after(), refresh_seconds=settings.printers_refresh_seconds, remove_hours="%g" % settings.offline_remove_hours, notes=[_discovery_note(n) for n in getattr(request.app.state, "discovery", {}).get("notes", [])])

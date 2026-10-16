@@ -2,12 +2,19 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db.models import Group, User
 
 
 def find_user(session: Session, username: str) -> User | None:
     """Usernames are unique across providers, so the name alone identifies the person."""
     return session.scalars(select(User).where(User.username == username)).first()
+
+
+def is_emergency(user: User) -> bool:
+    """The built-in administrator (CUPSPL_BOOTSTRAP_ADMIN_USERNAME, a local account): it can not be disabled, demoted or
+    deleted, and permissions do not limit it, so a wrong setting can never lock everybody out."""
+    return user.username == settings.bootstrap_admin_username and user.provider == "local"
 
 
 def default_group_id(session: Session, name: str) -> int:
@@ -40,7 +47,8 @@ def delete_user(session: Session, user: User) -> dict:
     user's name (user_name) and just lose the link to the deleted row, so the audit still says who printed what."""
     from sqlalchemy import update
 
-    from app.db.models import AdminAudit, BackupTarget, JobLog, PolicyRule, PrintKey, PrinterOrder, QuotaGrant, QuotaRequest, SubjectType
+    from app.db.models import (AdminAudit, BackupTarget, JobLog, PermissionGrant, PermissionRule, PolicyRule, PrintKey, PrinterOrder,
+                               QuotaGrant, QuotaRequest, SubjectType)
 
     uid, name = user.id, user.username
     session.execute(update(JobLog).where(JobLog.user_id == uid, JobLog.user_name.is_(None)).values(user_name=name))
@@ -50,10 +58,14 @@ def delete_user(session: Session, user: User) -> dict:
     session.execute(update(QuotaRequest).where(QuotaRequest.decided_by == uid).values(decided_by=None))
     session.execute(update(QuotaGrant).where(QuotaGrant.granted_by == uid).values(granted_by=None))
     session.execute(update(QuotaGrant).where(QuotaGrant.revoked_by == uid).values(revoked_by=None))
+    session.execute(update(PermissionGrant).where(PermissionGrant.granted_by == uid).values(granted_by=None))
+    session.execute(update(PermissionGrant).where(PermissionGrant.revoked_by == uid).values(revoked_by=None))
     session.query(PrinterOrder).filter(PrinterOrder.user_id == uid).delete()
     keys = session.query(PrintKey).filter(PrintKey.user_id == uid).delete()
     grants = session.query(QuotaGrant).filter(QuotaGrant.user_id == uid).delete()
     requests = session.query(QuotaRequest).filter(QuotaRequest.user_id == uid).delete()
     rules = session.query(PolicyRule).filter(PolicyRule.subject_type == SubjectType.user, PolicyRule.subject_id == uid).delete()
+    session.query(PermissionGrant).filter(PermissionGrant.user_id == uid).delete()
+    session.query(PermissionRule).filter(PermissionRule.subject_type == SubjectType.user, PermissionRule.subject_id == uid).delete()
     session.delete(user)
     return {"username": name, "jobs_kept": jobs, "keys": keys, "grants": grants, "requests": requests, "rules": rules}

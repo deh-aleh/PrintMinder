@@ -37,7 +37,13 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 - A `Create-Job` with no document frees its quota only when CUPS cancels it (default 3 h).
 - Page counting applies only when a pages limit exists and the document is readable.
 - If RADIUS tells `Mario` from `mario`, for the gateway they are one person (same quota).
-- Limits per feature (colour, duplex, paper size, per printer) do not exist yet.
+- Limits for paper size do not exist. Colour, one-sided, printers and hours do ([quotas.md](quotas.md#5-advanced-permissions)), with these limits:
+  - **Forced black and white may not work** with some printers and drivers, above all with images a phone has already turned into colour pixels (iPhone / AirPrint). For a guarantee use `CUPSPL_PERMISSION_MODE=refuse`. Double-sided uses the standard `sides` attribute and is more reliable, as long as the queue declares its duplex unit.
+  - With `refuse`, Windows and Android often refuse many jobs, because they send one-sided or colour in every job. The default `adjust` avoids it.
+  - The network announcement (mDNS) is the same for everybody: printers a person may not use are still visible to them, and the job is refused. The printer list the gateway gives after the login hides them.
+  - The hours are checked when the job is sent, not while it prints. There is one window (days + two times) per group or user.
+  - Scanning is not limited. The emergency administrator is exempt from the permissions (not from the quotas).
+  - A permission asked for is granted for good or until a date, not for a number of prints or hours of use.
 
 ## 3. Clients
 
@@ -69,7 +75,7 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 
 - Built-in backups: SQLite only; CUPS queues not included (they are in `scripts/backup.sh`); configuration files are restored by hand;
   no direct remote destinations; the passphrase can not be recovered. `scripts/backup.sh restore` is tested by hand only.
-- The login lock-out is in memory and resets at restart.
+- The login lock-out survives a restart: failed logins of the last 5 minutes are kept in `data/login-lockout.json` (user names and addresses with the times, no passwords). If the file can not be written the lock-out works in memory only and the log says so.
 - The audit and the database are not encrypted, except the file names (see §1 and [data-protection.md](data-protection.md)).
 
 ## 6. Languages

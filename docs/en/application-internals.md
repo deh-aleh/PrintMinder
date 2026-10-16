@@ -22,7 +22,7 @@ app/            the application (Python package)
   locales/      translations (.po) for it, es, ru, zh
   migrations/   Alembic revisions
   policy/       quotas, grants, page counting, controls, keep-alive, ordering
-  certwatch.py  cli.py  config.py  crypto_fields.py  cups_client.py  escl.py  i18n.py  main.py  mdns.py  notices.py  titles.py  updates.py
+  certwatch.py  cli.py  config.py  crypto_fields.py  cups_client.py  escl.py  i18n.py  keywatch.py  main.py  mdns.py  notices.py  printerwatch.py  secretcheck.py  titles.py  updates.py
 deploy/         installation on the host without docker (systemd)
 docker/         container definitions (stack/ is the production one)
 docs/           this documentation (en/ and it/)
@@ -62,16 +62,16 @@ The file is made from `docker/env.example` (by `scripts/docker-init.sh`, in plai
 
 ### 2.2 Part B of `.env` (`CUPSPL_*` settings)
 
-The commented reference is part B of [`docker/env.example`](../../docker/env.example) (plain English comments) and the
+The full reference, one variable at a time with what it does and when to change it, is [configuration.md](configuration.md). The commented reference is part B of [`docker/env.example`](../../docker/env.example) (plain English comments) and the
 authoritative list is `app/config.py`. Summary:
 
 | Group | Variables |
 |---|---|
-| **Secret** | `CUPSPL_SECRET_KEY` — signs session cookies and authenticates gateway→mdns. Unset = random at each start (sessions lost on restart, mdns channel unprotected). Changing it only logs everybody out. |
+| **Secret** | `CUPSPL_SECRET_KEY` — signs session cookies and authenticates gateway→mdns. Also the key that encrypts the file names in the audit. Unset = random at each start (sessions lost on restart, mdns channel unprotected) and file names stored without encryption. **Changing or losing it makes the file names already saved unreadable** (`[encrypted]`) and logs everybody out; an unencrypted backup does not contain it. The gateway warns in the bell (see `secretcheck.py`). |
 | **RADIUS** (optional) | `RADIUS_HOST`, `RADIUS_PORT` (1812), `RADIUS_SECRET`, `RADIUS_TIMEOUT` (5), `AUTH_CACHE_SECONDS` (60). Both host and secret empty = local accounts only; only one filled = refuses to start. |
 | **Print authentication** | `IPP_AUTH` (`keys` \| `keys+radius`), `KEY_TTL_DAYS_RADIUS` (90, longest), `KEY_TTL_DAYS_LOCAL` (730, longest), `KEY_ONCE_HOURS` (24), `KEY_ONCE_GRACE_SECONDS` (120), `KEY_HISTORY_DAYS` (14), `KEY_EXPIRY_WARN_ENABLED` (false), `KEY_EXPIRY_WARN_DAYS` (7), `AUTO_CREATE_USERS` (true), `DEFAULT_GROUP` (default), `CUPS_USER_PREFIX` (`gw:`), `ANONYMOUS_DISCOVERY` (true) |
 | **First run** | `BOOTSTRAP_ADMIN` (true), `BOOTSTRAP_ADMIN_USERNAME` (`cups_orchestrator`) |
-| **Requests** | `MAX_OPEN_REQUESTS` (3), `REQUEST_TTL_DAYS` (14) |
+| **Requests** | `MAX_OPEN_REQUESTS` (3), `REQUEST_TTL_DAYS` (14), `REQUEST_REASON_REQUIRED` (false) |
 | **Audit** | `AUDIT_MAX_MB` (50), `AUDIT_ARCHIVE_DIR` (`/data/audit-archive`), `AUDIT_CHECK_INTERVAL` (3600) |
 | **Backup** (general) | `BACKUP_ENABLED` (false), `BACKUP_DIR` (`general`), `BACKUP_HOUR` (3), `BACKUP_KEEP_DAILY/WEEKLY/MONTHLY` (7/4/12), `BACKUP_RECIPIENT` (recovery key; empty = unencrypted, no secrets in the file), `BACKUP_ROOT` (`/backups`), `BACKUP_CONFIG_DIR` (`/config`) |
 | **Printers page** | `PRINTERS_REFRESH_SECONDS` (15; 0 or invalid = 15; 5–3600) |
@@ -91,7 +91,7 @@ authoritative list is `app/config.py`. Summary:
 | `app/main.py` | Builds the FastAPI app: HTTP client towards CUPS (unix socket), database, auth providers, middleware (sessions, language), routers, `/healthz`, and starts the background tasks. |
 | `app/cli.py` | The `cups-policy-admin` command: `set-admin-password`, `group-limit`, `user-limit`, `set-group`, `make-admin`, `jobs`, `audit-archive`, `backup-key`, `backup-run`, `backup-verify`, `backup-restore`. |
 | `app/config.py` | `Settings` (pydantic-settings): every `CUPSPL_*` variable with its default and validation. |
-| `app/cups_client.py` | The gateway's own conversation with CUPS: lists queues (state, colour, media, online/offline, virtual flag) in the display order. |
+| `app/cups_client.py` | The gateway's own conversation with CUPS: lists queues (state, colour, media, online/offline, virtual flag) in the display order; `queue_caps()` asks one queue whether it has colour and a duplex unit (cached 60 s) for the permission checks. |
 | `app/mdns.py` | Separate process (`python -m app.mdns`): announces queues as `_ipps._tcp` (+ AirPrint subtype) and scanners as `_uscans._tcp`. |
 | `app/escl.py` | Scanning: eSCL proxy for native clients (`/eSCL/...`) and the portal scan page (`/me/scan`); discovers scanners at run time. |
 | `app/i18n.py` | Translation engine: language negotiation, `_()`, plurals, middleware. See [languages.md](languages.md). |
@@ -101,7 +101,7 @@ authoritative list is `app/config.py`. Summary:
 | File | Role |
 |---|---|
 | `codec.py` | Lossless IPP (RFC 8010) parser/serializer, nested collections included. `decode_head` reads only the header so documents stream without entering memory. |
-| `gateway.py` | The reverse proxy: HTTPS check, capability queries, authentication, operation filter, identity override, quota reservation, streaming to CUPS, recording the outcome. |
+| `gateway.py` | The reverse proxy: HTTPS check, capability queries, authentication, operation filter, identity override, permissions (colour, sides, printer, hours: refuses or rewrites `print-color-mode` / `sides` before CUPS, filters the printer lists), quota reservation, streaming to CUPS, recording the outcome. |
 | `rewrite.py` | Rewrites internal CUPS URIs in responses so clients keep talking to the gateway; declares `uri-authentication-supported=basic` so Mopria sends credentials. |
 
 ### 3.3 `app/auth/` — who you are
@@ -109,13 +109,13 @@ authoritative list is `app/config.py`. Summary:
 | File | Role |
 |---|---|
 | `service.py` | Decides who may log in where: `portal_login` (any enabled user; the row decides local vs. delegated) and `print_login` (a print key; RADIUS password only in `keys+radius`). |
-| `users.py` | Find/create users, default group, deletion (history kept). |
+| `users.py` | Find/create users, default group, `is_emergency()`, deletion (history kept). |
 | `groups.py` | The two system groups `default` and `administrator`. |
 | `bootstrap.py` | Creates `cups_orchestrator` without a password and prints the one-time `FIRST RUN` code. |
 | `passwords.py` | argon2id hashing and the password rules (min. 12 characters, not equal to the user name). |
 | `keys.py` | Print keys: creation with a chosen or single-use life, sha256 hash, states, verification, switching off, extending, tidying. |
 | `radius.py` | RADIUS provider (pyrad). `base.py`: the provider interface. `cache.py`: short cache of successful logins. |
-| `throttle.py` | Login lock-out (in memory; resets on restart). |
+| `throttle.py` | Login lock-out; kept in `/data/login-lockout.json`, so a restart does not reset it. |
 | `dictionary` | RADIUS attribute dictionary needed by pyrad. |
 
 ### 3.4 `app/policy/` — quotas and controls
@@ -123,8 +123,9 @@ authoritative list is `app/config.py`. Summary:
 | File | Role |
 |---|---|
 | `engine.py` | Windows (weekly/monthly in the configured time zone, DST-safe), effective rules, usage, grants summed to limits, `check_job` → `Decision` (English `reason` for audit/IPP, `text()` localized for the portal). |
-| `audit.py` | `reserve()` (atomic, under lock) and `finalize()` of a job; attaches the document to a `Create-Job` job. |
-| `grants.py` | Quota/group requests, approval (idempotent), direct grants, revocation, expiry of old requests. |
+| `audit.py` | `reserve()` (atomic, under lock; with `deny=` it records a refusal decided elsewhere, such as a permission, without looking at the quota) and `finalize()` of a job; attaches the document to a `Create-Job` job. |
+| `permissions.py` | Advanced permissions: the rule of a group or user (`permission_rule`), `effective()` (group, then user, field by field; the emergency administrator is exempt), hours (`in_window`), and `decide()`, the pure function that says if a job is allowed, refused or corrected. It also adds the active `permission_grant` rows of the user, renames printers inside the lists, tells people when a temporary permission ended (`notify_expired`) and writes the user's notices. |
+| `grants.py` | Quota, group and permission requests, approval (idempotent; a permission request makes a `permission_grant`), direct grants, revocation, expiry of old requests, and the deletion of ended grants of both kinds. |
 | `rules.py` | Create/replace/remove limits for a user or group (shared by CLI and portal). |
 | `pages.py` | Counts pages before printing (PDF, JPEG/PNG/GIF, URF, PostScript, text), parses page ranges, and turns the pages of a PDF to landscape (`landscape_pdf`). |
 | `reconcile.py` | Reconciler loop with CUPS (real pages, canceled jobs, orphan reservations). |
@@ -132,7 +133,7 @@ authoritative list is `app/config.py`. Summary:
 | `keepalive.py` | Periodic maintenance print: settings, scheduler, test print. |
 | `testpage.py` | Builds the PDFs the gateway prints itself (no dependency). |
 | `ordering.py` | List order: physical first, then virtual; each by first-seen time. |
-| `discovery.py` | Finds new USB printers (ipp-usb first, CUPS usb backend + driver second), creates their queues, tracks unreachable USB queues and removes them after `OFFLINE_REMOVE_HOURS`. |
+| `discovery.py` | Finds new USB printers (ipp-usb first, CUPS usb backend + driver second), creates their queues, tracks unreachable USB queues and removes them after `OFFLINE_REMOVE_HOURS`; remembers the names of removed and renamed queues (`printer_former`) for the rename dialog. |
 
 ### 3.5 `app/admin/` — the portal
 
@@ -140,17 +141,19 @@ authoritative list is `app/config.py`. Summary:
 |---|---|
 | `static/` | The icon: `icon.svg` (browser tab: ink tile with a light ring, readable on any tab colour), `icon-dark.svg` / `icon-light.svg` (ink tile for light backgrounds, paper tile for dark ones; the portal header picks one by theme), `favicon.ico`, `apple-touch-icon.png`, `icon-512.png`. Served without login at `/admin/static/`; `/favicon.ico` redirects there. |
 | `routes.py` | Login/logout, first-run setup, audit list and CSV export, job cancel (`/admin/…`). |
-| `accounts.py` | Users, groups, limits, user keys, admin-action log (`/admin/users`, `/groups`, `/actions`). |
-| `requests.py` | Pending requests, approval/rejection, direct grants (`/admin/requests`, `/grants`). |
+| `accounts.py` | Users, groups, limits, advanced permissions (the form block and its checks), user keys, admin-action log (`/admin/users`, `/groups`, `/actions`). |
+| `requests.py` | One page for requests and grants: pending requests, approval/rejection, active grants, direct grants, history, deleting ended grants (`/admin/requests`). |
+| `reports.py` | Usage report: top users in a period, page / CSV / PDF (`/admin/report`). |
+| `docs.py` | The documentation for administrators: shows the Markdown files of `docs/` as pages (`/admin/docs`), in English or Italian. Only names found in the folder are served; raw HTML in the files is shown as text; links between pages are rewritten, links to source files go to GitHub at the tag of the running version. The folder is `/opt/printminder/docs` in the image, `$PREFIX/docs` in the host install, `docs/` in a source tree. |
 | `printers.py` | Printers overview, counters, test printers, keep-alive and test print (`/admin/printers`). |
 | `controls.py` | Maintenance mode, block / hide a printer, `/mdns/policy` feed for the announcer. |
 | `backups.py` | Backup targets (`/admin/backups`). |
 | `audit_archive.py` | List/read/download/verify archives (`/admin/archive`). |
 | `audit_view.py` | How one audit row is displayed (clipped text, device, print specs). |
 | `me.py` | User area: consumption, keys, password, settings (theme, language, refresh), requests (`/me`). |
-| `printing.py` | Print from the browser (`/me/print`): checks, quota, options, landscape handling, Print-Job to CUPS. |
+| `printing.py` | Print from the browser (`/me/print`): checks, quota, options, landscape handling, permissions (same `decide()` as the gateway), Print-Job to CUPS. |
 | `common.py` | Shared pieces: templates, session and CSRF dependencies, flash messages, redirects, helpers. |
-| `templates/*.html` | Jinja pages: `base.html` (layout, menu, theme), `macros.html`, one template per page. |
+| `templates/*.html` | Jinja pages: `base.html` (layout, menu, theme), `macros.html`, one template per page (`docs.html` shows the documentation). |
 
 ### 3.6 Other packages
 
@@ -162,9 +165,12 @@ authoritative list is `app/config.py`. Summary:
 | `app/backup/crypto.py` | Recovery-key encryption (X25519 + HKDF + AES-256-GCM; private key wrapped by scrypt of the passphrase). |
 | `app/backup/service.py` | `backup_target` bookkeeping and the 60 s scheduler. |
 | `app/db/models.py` | All SQLAlchemy models. `session.py`: engine and sessions (SQLite WAL). `migrate.py`: runs Alembic from inside the app. |
-| `app/notices.py`, `app/admin/notices.py` | The bell: notices for administrators with a limit on how often the same one is reported (interval by `CUPSPL_LOG_LEVEL`), table `notice`. |
+| `app/notices.py`, `app/admin/notices.py` | The bell: notices for administrators with a limit on how often the same one is reported (interval by `CUPSPL_LOG_LEVEL`), and notices for one user; table `notice`. |
+| `app/secretcheck.py` | At every start: notice when `CUPSPL_SECRET_KEY` is missing or has changed (with how many file names it locked), and the one-time reminder to save it. What was already said is kept in `gateway_setting`, never the key itself. |
+| `app/printerwatch.py` | Every minute: paper jam, paper out, ink out/low on the physical printers, as notices for administrators and for the users waiting. |
+| `app/keywatch.py` | Every hour: forgets old print keys, if turned on warns of keys about to expire, and tells people whose temporary permission ended. |
 | `app/updates.py`, `app/admin/updates.py` | Daily check for a newer release (note for administrators) and the portal button that hands an update to the `updater` container through files in `/data/update` (the gateway never touches Docker). |
-| `app/migrations/` | `env.py` and the revisions `0001`…`0013` (schema history). |
+| `app/migrations/` | `env.py` and the revisions `0001`…`0016` (schema history; `0015` adds `permission_rule` and `printer_former`, `0016` adds `permission_grant`). |
 | `app/locales/` | `messages.pot` (template) and `<lang>/messages.po` (it, es, ru, zh). |
 
 ## 4. Scripts
@@ -202,6 +208,7 @@ authoritative list is `app/config.py`. Summary:
 |---|---|
 | change how a quota is computed | `app/policy/engine.py`, `app/policy/audit.py` |
 | allow/forbid an IPP operation | `app/ipp/gateway.py` |
+| change what colour / one-sided / printer / hours permissions do | `app/policy/permissions.py` (`decide()`), then where it is applied: `app/ipp/gateway.py` and `app/admin/printing.py` |
 | add a portal page | a router in `app/admin/`, a template in `app/admin/templates/`, a menu entry in `base.html` |
 | add a setting | `app/config.py`, then `docker/env.example` (part B, with its explanation and the same default value: a test checks it) and [this page](#22-part-b-of-env-cupspl_-settings) |
 | change the database | `app/db/models.py` **and** a new Alembic revision (a test checks they match) |

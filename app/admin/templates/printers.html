@@ -43,13 +43,31 @@
     <p class="muted">{{ _("The name of the queue is the last part of the printer address (…/printers/<b>name</b>). Letters, digits and . _ @ + - only.") }}</p>
     <p class="pill blocked" style="display:block;border-radius:8px;padding:8px 12px">{{ _("Computers and phones where the printer was set up by hand with the old address will stop printing until they are set up again. Block, maintenance print and the places in the lists follow the queue; the audit keeps the old name for what already happened.") }}</p>
     {% for q in d.queues %}
-    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/rename" class="row" style="margin-top:8px"
+    <form method="post" action="/admin/printers/{{ q.name|urlencode }}/rename" class="rnform" style="margin-top:8px"
           onsubmit="return confirm({{ _t('Rename %(printer)s? Computers and phones where it was set up by hand with the old address will stop printing until they are set up again.', printer=q.name)|tojson|forceescape }})">
       <input type="hidden" name="csrf_token" value="{{ csrf }}">
-      <input name="new_name" value="{{ q.name }}" required maxlength="127" pattern="[A-Za-z0-9._@+\-]{1,127}" class="mono" style="flex:1;min-width:160px" aria-label="{{ _('New name of %(printer)s', printer=q.name) }}">
-      <button>{{ _("Rename") }}</button>
+      <label class="muted" for="rn-{{ loop.index }}-{{ q.name }}">{{ _("New name for %(printer)s", printer=q.name) }}</label>
+      <div class="row">
+        <span class="ghostin"><span class="ghost mono" aria-hidden="true"></span><input id="rn-{{ loop.index }}-{{ q.name }}" name="new_name" value="" placeholder="{{ q.name }}" required maxlength="127" pattern="[A-Za-z0-9._@+\-]{1,127}" class="mono" autocomplete="off" autocapitalize="off" spellcheck="false"{{ " autofocus" if loop.first }}></span>
+        <button>{{ _("Rename") }}</button>
+      </div>
+      <div class="rnhint" aria-live="polite"></div>
     </form>
     {% endfor %}
+    {% if former %}
+    <details class="adv">
+      <summary>{{ _("Names used before") }} ({{ former|length }}) <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <div class="advbody">
+        <ul class="formerlist">
+          {% for f in former %}{% set day = f.removed_at|localtime('%Y-%m-%d') %}
+          <li><button type="button" class="sec former mono" data-name="{{ f.display }}" title="{{ _('Write this name in the field') }}">{{ f.display }}</button>
+            <span class="muted">{% if f.reason == 'renamed' %}{{ _("renamed on %(date)s", date=day) }}{% elif f.reason == 'removed_offline' %}{{ _("removed automatically on %(date)s", date=day) }}{% else %}{{ _("deleted on %(date)s", date=day) }}{% endif %}</span></li>
+          {% endfor %}
+        </ul>
+        <p class="muted" style="margin-bottom:0">{{ _("A new printer that takes the name of a removed one prints again for the computers and phones set up with the old address, and the permissions given to that name apply to it again. A computer set up with the driver of the old model may need to be set up again if the new model is different.") }}</p>
+      </div>
+    </details>
+    {% endif %}
   </dialog>
   {% if ka and ka.enabled %}<div class="muted" style="margin:-4px 0 8px">{{ _("Periodic print active: %(every)s, %(mode)s", every=describe(ka.interval_hours), mode=_('in colour') if ka.color and q0.color else _('in black and white')) }}
     {%- if next_due(ka) %} · {{ _("next %(when)s", when=next_due(ka)|localtime('%Y-%m-%d %H:%M')) }}{% endif %}
@@ -82,13 +100,13 @@
       {% else %}<p class="muted">{{ _("This printer does not print in colour: the page will be black and white.") }}</p>{% endif %}
       <p class="muted">{{ _("Between 1 hour and 90 days. “Save” records the settings without turning the program on or off: the switch at the top decides that.") }}
         {% if ka %}{{ _("Last change: %(who)s, %(when)s.", who=ka.updated_by or '—', when=ka.updated_at|localtime('%Y-%m-%d %H:%M')) }}{% if ka.last_ok_at %} {{ _("Last page printed: %(when)s.", when=ka.last_ok_at|localtime('%Y-%m-%d %H:%M')) }}{% endif %}{% endif %}</p>
-      <div class="row" style="justify-content:flex-end"><button>{{ _("Save") }}</button></div>
+      <div class="actions"><button>{{ _("Save") }}</button></div>
     </form>
   </dialog>
   <dialog id="tp-{{ loop.index }}">
     <h3 style="margin-top:0">{{ _("Test print on %(printer)s", printer=q0.name) }}</h3>
     <p class="muted">{{ _("Prints a page with all the statistics you see here: state, ink, counters, data from the gateway and device details.") }}{% if not d.online %} <b style="color:var(--err)">{{ _("The printer does not answer.") }}</b>{% endif %}</p>
-    <form method="post" action="/admin/printers/{{ q0.name|urlencode }}/testprint" class="row" style="justify-content:flex-end">
+    <form method="post" action="/admin/printers/{{ q0.name|urlencode }}/testprint" class="actions">
       <input type="hidden" name="csrf_token" value="{{ csrf }}">
       <button type="submit" formmethod="dialog" formnovalidate class="sec">{{ _("Cancel") }}</button>
       <button name="mode" value="mono" {{ 'disabled' if not q0.online }}>{{ _("Print black and white") }}</button>
@@ -103,6 +121,7 @@
     {% else %}<span class="pill blocked" title="{{ _('The device does not answer on the network: cable unplugged or printer off? The queue still exists in CUPS') }}">{{ _("NOT REACHABLE") }}</span>{% endif %}
     {% if not q.accepting %}<span class="pill s-failed">{{ _("not accepting jobs") }}</span>{% endif %}
     <span class="muted">{{ _("%(n)s in queue", n=q.queued) }}</span>
+    <button type="button" class="dots qaddr" data-url="{{ ipp_base }}/printers/{{ q.name }}" data-queue="{{ q.name }}" title="{{ _('Address of the queue') }}" aria-label="{{ _('Address of %(printer)s', printer=q.name) }}">…</button>
     {% if q.online %}{% for r in q.reasons %}<span class="pill s-pending">{{ r }}</span>{% endfor %}{% endif %}
     {% if q.message and q.online %}<span class="muted">{{ q.message }}</span>{% endif %}
   </div>
@@ -183,6 +202,27 @@
   </div>
 </div>
 {% else %}<div class="card"><p class="muted">{{ _("CUPS does not answer or has no queues configured.") }}</p></div>{% endfor %}
+{% from "macros.html" import copybox %}
+<dialog id="qaddr-dlg" class="wide">
+  <div class="dlghead">
+    <h3>{{ _("Address of the queue") }}</h3>
+    <form method="dialog" class="x"><button class="sec" aria-label="{{ _('Close') }}" title="{{ _('Close') }}"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round"><path d="M5 5l14 14M19 5L5 19"/></svg></button></form>
+  </div>
+  <div class="qname mono" id="qaddr-name"></div>
+  <p class="muted" style="margin:0">{{ _("The address to add the printer by hand on a computer. When it asks, the user enters their user name and a print key.") }}</p>
+  <div class="dlgfield">{{ _("Address") }}</div>
+  {{ copybox("", cls="secret", style="font-size:15px") }}
+  <form method="dialog" class="actions"><button class="sec">{{ _("Close") }}</button></form>
+</dialog>
+<script>
+  // names for the rename hints: the queues there are now, and the ones removed (with the day)
+  var QUEUE_NAMES = {{ devices|map(attribute='queues')|sum(start=[])|map(attribute='name')|map('lower')|list|tojson }};
+  var FORMER = [{% for f in former %}[{{ f.display|tojson }}, {{ f.removed_at|localtime('%Y-%m-%d')|tojson }}]{% if not loop.last %}, {% endif %}{% endfor %}];  // most recent first
+  var T_FORMER = {{ _t("Used before: no queue has had this name since %(date)s. Computers set up with this address will print again.", date="DATE")|tojson }};
+  var T_TAKEN = {{ _t("A queue with this name already exists.")|tojson }};
+  var T_SAME = {{ _t("That is already its name.")|tojson }};
+  var T_BAD = {{ _t("Letters, digits and . _ @ + - only.")|tojson }};
+</script>
 <script>
 (function () {
   var els = document.querySelectorAll('.countdown');
@@ -198,8 +238,41 @@
   tick(); setInterval(tick, 1000);
 })();
 document.addEventListener('click', function (e) {
+  var qa = e.target.closest && e.target.closest('button.qaddr');  // "..." next to a queue: its address, ready to copy
+  if (qa) { var dlg = document.getElementById('qaddr-dlg'); dlg.querySelector('[data-copy]').textContent = qa.dataset.url; dlg.querySelector('#qaddr-name').textContent = qa.dataset.queue; dlg.showModal(); return; }
+  var n = e.target.closest && e.target.closest('button.former');  // a name used before: written in the field last used in that dialog
+  if (n) {
+    var dlg = n.closest('dialog'), r = dlg.rnField || dlg.querySelector('input[name=new_name]');
+    r.value = n.dataset.name; renameHint(r); r.focus(); return;
+  }
   var b = e.target.closest && e.target.closest('button.chip'); if (!b) return;
   var f = b.closest('form'); f.elements.amount.value = b.dataset.amount; f.elements.unit.value = b.dataset.unit;
+});
+function renameHint(input) {
+  // While a new name is typed: the rest of a name used before that starts the same way appears in grey inside the field
+  // (only a reminder: the whole name must still be typed), and the line under it says if the name is one of the past (and
+  // since when) or the name of a queue that exists. A name that exists, or the current one, can not be sent.
+  var form = input.form, hint = form.querySelector('.rnhint'), ghost = form.querySelector('.ghost'), button = form.querySelector('button');
+  var typed = input.value.trim(), v = typed.toLowerCase(), own = input.placeholder.toLowerCase();
+  var past = FORMER.filter(function (f) { return f[0].toLowerCase() === v; })[0];
+  var bad = typed && !/^[A-Za-z0-9._@+\-]{1,127}$/.test(typed), taken = v !== own && QUEUE_NAMES.indexOf(v) >= 0;
+  hint.className = 'rnhint' + (bad || taken ? ' err' : ' muted');
+  hint.textContent = bad ? T_BAD : v === own ? T_SAME : taken ? T_TAKEN : past ? T_FORMER.replace('DATE', past[1]) : '';
+  button.disabled = !typed || bad || taken || v === own;
+  var guess = v && !bad && input.value === typed && FORMER.filter(function (f) {
+    var l = f[0].toLowerCase(); return l.length > v.length && l.indexOf(v) === 0; })[0];
+  ghost.textContent = '';
+  if (guess && input.scrollWidth <= input.clientWidth) {
+    var hidden = document.createElement('span'); hidden.className = 'typed'; hidden.textContent = input.value;
+    ghost.appendChild(hidden); ghost.appendChild(document.createTextNode(guess[0].slice(typed.length)));
+  }
+}
+document.querySelectorAll('form.rnform input[name=new_name]').forEach(renameHint);
+document.addEventListener('input', function (e) {
+  if (e.target.matches && e.target.matches('form.rnform input[name=new_name]')) renameHint(e.target);
+});
+document.addEventListener('focusin', function (e) {
+  if (e.target.matches && e.target.matches('form.rnform input[name=new_name]')) e.target.closest('dialog').rnField = e.target;
 });
 </script>
 {% endblock %}

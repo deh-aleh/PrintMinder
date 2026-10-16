@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 08:23+0200\n"
+"POT-Creation-Date: 2026-10-16 13:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -121,32 +121,32 @@ msgstr "已拒绝"
 msgid "expired"
 msgstr "已过期"
 
-#: app/admin/templates/jobs.html:95 app/i18n.py:165
+#: app/admin/templates/jobs.html:96 app/i18n.py:165
 msgid "canceled"
 msgstr "已取消"
 
-#: app/admin/templates/jobs.html:91 app/i18n.py:166
+#: app/admin/templates/jobs.html:92 app/i18n.py:166
 msgid "accepted"
 msgstr "已接受"
 
-#: app/admin/templates/jobs.html:93 app/i18n.py:166
+#: app/admin/templates/jobs.html:94 app/i18n.py:166
 msgid "denied"
 msgstr "已拒绝"
 
-#: app/admin/templates/jobs.html:92 app/i18n.py:166
+#: app/admin/templates/jobs.html:93 app/i18n.py:166
 msgid "completed"
 msgstr "已完成"
 
-#: app/admin/templates/jobs.html:94 app/i18n.py:166
+#: app/admin/templates/jobs.html:95 app/i18n.py:166
 msgid "failed"
 msgstr "失败"
 
-#: app/admin/templates/jobs.html:96 app/i18n.py:166
+#: app/admin/templates/jobs.html:97 app/i18n.py:166
 msgid "held"
 msgstr "已挂起"
 
 #: app/admin/templates/keys.html:19 app/admin/templates/printers.html:30
-#: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:15
+#: app/admin/templates/user_edit.html:17 app/admin/templates/users.html:15
 #: app/i18n.py:167
 msgid "active"
 msgstr "有效"
@@ -159,22 +159,26 @@ msgstr "已撤销"
 msgid "ended"
 msgstr "已结束"
 
-#: app/admin/templates/requests.html:19 app/i18n.py:167
+#: app/admin/templates/requests.html:21 app/admin/templates/requests.html:86
+#: app/admin/templates/requests.html:197 app/i18n.py:167
 msgid "temporary"
 msgstr "临时"
 
-#: app/admin/accounts.py:70 app/admin/me.py:44
-#: app/admin/templates/grants.html:24 app/admin/templates/requests.html:12
-#: app/admin/templates/requests.html:19 app/i18n.py:167
+#: app/admin/accounts.py:167 app/admin/me.py:44 app/admin/templates/me.html:36
+#: app/admin/templates/requests.html:12 app/admin/templates/requests.html:22
+#: app/admin/templates/requests.html:28 app/admin/templates/requests.html:86
+#: app/admin/templates/requests.html:108 app/admin/templates/requests.html:119
+#: app/admin/templates/requests.html:197 app/admin/templates/user_edit.html:29
+#: app/i18n.py:167
 msgid "permanent"
 msgstr "永久"
 
-#: app/admin/templates/grants.html:22 app/admin/templates/me.html:12
+#: app/admin/templates/me.html:12 app/admin/templates/requests.html:106
 #: app/i18n.py:168
 msgid "jobs"
 msgstr "作业"
 
-#: app/admin/templates/grants.html:22 app/admin/templates/me.html:12
+#: app/admin/templates/me.html:12 app/admin/templates/requests.html:106
 #: app/i18n.py:168
 msgid "pages"
 msgstr "页"
@@ -182,7 +186,7 @@ msgstr "页"
 #: app/admin/templates/backup_edit.html:17 app/admin/templates/backups.html:89
 #: app/admin/templates/group_edit.html:13 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:14 app/admin/templates/request_quota.html:14
-#: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:19
+#: app/admin/templates/user_edit.html:23 app/admin/templates/users.html:19
 #: app/i18n.py:168
 msgid "weekly"
 msgstr "每周"
@@ -190,7 +194,7 @@ msgstr "每周"
 #: app/admin/templates/backup_edit.html:18 app/admin/templates/backups.html:90
 #: app/admin/templates/group_edit.html:13 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:14 app/admin/templates/request_quota.html:14
-#: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:19
+#: app/admin/templates/user_edit.html:23 app/admin/templates/users.html:19
 #: app/i18n.py:168
 msgid "monthly"
 msgstr "每月"
@@ -211,217 +215,274 @@ msgstr "缺失"
 msgid "modified"
 msgstr "已修改"
 
-#: app/admin/accounts.py:37
+#: app/admin/accounts.py:42
 #, python-format
 msgid "%(used)s/%(limit)s %(metric)s (%(period)s)"
 msgstr "%(used)s/%(limit)s %(metric)s（%(period)s）"
 
-#: app/admin/accounts.py:49
+#: app/admin/accounts.py:54
 msgid "You cannot disable or demote yourself"
 msgstr "您不能停用或降级自己"
 
-#: app/admin/accounts.py:51
+#: app/admin/accounts.py:56
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be disabled or demoted"
 msgstr "%(user)s 是应急管理员：不能被停用或降级"
 
-#: app/admin/accounts.py:53 app/admin/accounts.py:280
+#: app/admin/accounts.py:58 app/admin/accounts.py:413
 msgid "That is the last administrator"
 msgstr "这是最后一位管理员"
 
-#: app/admin/accounts.py:69
+#: app/admin/accounts.py:71 app/admin/accounts.py:80 app/admin/accounts.py:98
+msgid "Invalid permission value"
+msgstr "权限值无效"
+
+#: app/admin/accounts.py:89
+#, python-format
+msgid "Invalid printer name %(name)s"
+msgstr "打印机名称无效：%(name)s"
+
+#: app/admin/accounts.py:93
+msgid "Choose at least one printer, or choose “all printers”"
+msgstr "请至少选择一台打印机，或选择“所有打印机”"
+
+#: app/admin/accounts.py:95
+#, python-format
+msgid "Too many printers in the list (at most %(max)s)"
+msgstr "列表中的打印机太多（最多 %(max)s 台）"
+
+#: app/admin/accounts.py:104
+msgid "Choose at least one day of the week for the hours"
+msgstr "请至少选择一个星期几作为时段"
+
+#: app/admin/accounts.py:108
+msgid "Enter the hours as HH:MM, for example 08:00 and 17:30"
+msgstr "请按 HH:MM 填写时间，例如 08:00 和 17:30"
+
+#: app/admin/accounts.py:110
+msgid "The start and the end of the hours must be different"
+msgstr "时段的开始和结束时间必须不同"
+
+#: app/admin/accounts.py:146 app/admin/accounts.py:147
+#: app/admin/templates/_perm_fields.html:20
+#: app/admin/templates/_perm_fields.html:24 app/admin/templates/me.html:29
+#: app/admin/templates/me.html:30
+msgid "allowed"
+msgstr "允许"
+
+#: app/admin/accounts.py:146 app/admin/accounts.py:147
+#: app/admin/templates/_perm_fields.html:20
+#: app/admin/templates/_perm_fields.html:24
+msgid "not allowed"
+msgstr "不允许"
+
+#: app/admin/accounts.py:148 app/admin/templates/_perm_fields.html:28
+msgctxt "printers"
+msgid "all"
+msgstr "全部"
+
+#: app/admin/accounts.py:148 app/admin/templates/backup_edit.html:19
+msgid "none"
+msgstr "无"
+
+#: app/admin/accounts.py:149 app/admin/templates/_perm_fields.html:39
+#: app/admin/templates/me.html:32
+msgid "any time"
+msgstr "任何时间"
+
+#: app/admin/accounts.py:166
 msgid "limit inherited from the group"
 msgstr "限额继承自群组"
 
-#: app/admin/accounts.py:70
+#: app/admin/accounts.py:167
 #, python-format
 msgid "temporary, expires on %(date)s"
 msgstr "临时，%(date)s 到期"
 
-#: app/admin/accounts.py:134 app/admin/accounts.py:167
-#: app/admin/accounts.py:200
+#: app/admin/accounts.py:232 app/admin/accounts.py:265
+#: app/admin/accounts.py:305
 msgid "Unknown group"
 msgstr "未知群组"
 
-#: app/admin/accounts.py:135
+#: app/admin/accounts.py:233
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: tick the administrator box instead"
 msgstr "群组“%(group)s”仅限管理员：请改为勾选“管理员”选项"
 
-#: app/admin/accounts.py:136
+#: app/admin/accounts.py:234
 msgid "Invalid username (letters, digits, dot, dash, underscore; max 63)"
 msgstr "用户名无效（字母、数字、点、连字符、下划线；最多 63 个字符）"
 
-#: app/admin/accounts.py:137 app/admin/accounts.py:173
+#: app/admin/accounts.py:235 app/admin/accounts.py:271
 #, python-format
 msgid "User %(name)s already exists"
 msgstr "用户 %(name)s 已存在"
 
-#: app/admin/accounts.py:153 app/admin/accounts.py:181
+#: app/admin/accounts.py:251 app/admin/accounts.py:279
 #, python-format
 msgid "User %(name)s created"
 msgstr "已创建用户 %(name)s"
 
-#: app/admin/accounts.py:153 app/admin/accounts.py:254
-#: app/admin/accounts.py:319
+#: app/admin/accounts.py:251 app/admin/accounts.py:367
+#: app/admin/accounts.py:452
 msgid "Temporary password"
 msgstr "临时密码"
 
-#: app/admin/accounts.py:154
+#: app/admin/accounts.py:252
 msgid "Give it to the user over a safe channel. They must choose their own at first login."
 msgstr "请通过安全渠道交给用户。用户首次登录时必须设置自己的密码。"
 
-#: app/admin/accounts.py:165
+#: app/admin/accounts.py:263
 msgid "RADIUS is not configured: create a local user instead"
 msgstr "尚未配置 RADIUS：请改为创建本地用户"
 
-#: app/admin/accounts.py:169
+#: app/admin/accounts.py:267
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: make them administrator from their page"
 msgstr "群组“%(group)s”仅限管理员：请在其页面中将其设为管理员"
 
-#: app/admin/accounts.py:171
+#: app/admin/accounts.py:269
 msgid "Invalid username"
 msgstr "用户名无效"
 
-#: app/admin/accounts.py:204
+#: app/admin/accounts.py:309
 msgid "Unknown or unavailable login method"
 msgstr "未知或不可用的登录方式"
 
-#: app/admin/accounts.py:212
+#: app/admin/accounts.py:317
 #, python-format
 msgid "%(user)s is the emergency administrator: it must stay a local account"
 msgstr "%(user)s 是应急管理员：必须保持为本地账户"
 
-#: app/admin/accounts.py:228
+#: app/admin/accounts.py:333
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators"
 msgstr "群组“%(group)s”仅限管理员"
 
-#: app/admin/accounts.py:231
+#: app/admin/accounts.py:336
 #, python-format
 msgid "Administrators stay in \"%(group)s\": remove the admin right first"
 msgstr "管理员必须留在“%(group)s”中：请先取消其管理员权限"
 
-#: app/admin/accounts.py:253
+#: app/admin/accounts.py:366
 #, python-format
 msgid "%(user)s is now a local account"
 msgstr "%(user)s 现在是本地账户"
 
-#: app/admin/accounts.py:255
+#: app/admin/accounts.py:368
 msgid "The user must choose their own at the next login. Their print keys keep working."
 msgstr "用户下次登录时必须设置自己的密码。其打印密钥仍然有效。"
 
-#: app/admin/accounts.py:257 app/admin/accounts.py:531
+#: app/admin/accounts.py:370 app/admin/accounts.py:683
 #, python-format
 msgid "Saved %(name)s"
 msgstr "已保存 %(name)s"
 
-#: app/admin/accounts.py:276
+#: app/admin/accounts.py:409
 msgid "You cannot delete yourself"
 msgstr "您不能删除自己"
 
-#: app/admin/accounts.py:278
+#: app/admin/accounts.py:411
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be deleted"
 msgstr "%(user)s 是应急管理员：不能被删除"
 
-#: app/admin/accounts.py:292
+#: app/admin/accounts.py:425
 msgid "The name you typed does not match: nothing was deleted"
 msgstr "输入的名称不匹配：未删除任何内容"
 
-#: app/admin/accounts.py:300
+#: app/admin/accounts.py:433
 #, python-format
 msgid "Account %(name)s deleted (%(n)s print record(s) kept in the audit)"
 msgstr "已删除账户 %(name)s（审计中保留了 %(n)s 条打印记录）"
 
-#: app/admin/accounts.py:311
+#: app/admin/accounts.py:444
 msgid "That account signs in through RADIUS: its password is managed there"
 msgstr "该账户通过 RADIUS 登录：其密码在 RADIUS 中管理"
 
-#: app/admin/accounts.py:318
+#: app/admin/accounts.py:451
 #, python-format
 msgid "New password for %(user)s"
 msgstr "%(user)s 的新密码"
 
-#: app/admin/accounts.py:320
+#: app/admin/accounts.py:453
 msgid "The user must choose a new one at the next login. Their print keys keep working."
 msgstr "用户下次登录时必须设置新密码。其打印密钥仍然有效。"
 
-#: app/admin/accounts.py:335
+#: app/admin/accounts.py:468
 #, python-format
 msgid "%(n)s key(s) of %(user)s revoked"
 msgstr "已撤销 %(user)s 的 %(n)s 个密钥"
 
-#: app/admin/accounts.py:360 app/admin/me.py:126
+#: app/admin/accounts.py:493 app/admin/me.py:145
 #, python-format
 msgid "Key %(label)s revoked"
 msgstr "已撤销密钥 %(label)s"
 
-#: app/admin/accounts.py:387
+#: app/admin/accounts.py:520
 #, python-format
 msgid "Key %(label)s switched off: its expiry date keeps running"
 msgstr "密钥 %(label)s 已停用：其到期日期仍在继续计算"
 
-#: app/admin/accounts.py:399
+#: app/admin/accounts.py:532
 #, python-format
 msgid "Key %(label)s switched on"
 msgstr "密钥 %(label)s 已重新启用"
 
-#: app/admin/accounts.py:411 app/auth/keys.py:182
+#: app/admin/accounts.py:544 app/auth/keys.py:182
 msgid "choose one of the validity periods in the list"
 msgstr "请从列表中选择一个有效期"
 
-#: app/admin/accounts.py:419
+#: app/admin/accounts.py:552
 #, python-format
 msgid "Key %(label)s now expires on %(date)s"
 msgstr "密钥 %(label)s 现在的到期日期为 %(date)s"
 
-#: app/admin/accounts.py:421
+#: app/admin/accounts.py:554
 msgid "This key can not be extended"
 msgstr "此密钥无法延期"
 
-#: app/admin/accounts.py:429
+#: app/admin/accounts.py:562
 #, python-format
 msgid "The group “%(name)s” has %(n)s user: it will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgid_plural "The group “%(name)s” has %(n)s users: they will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgstr[0] "群组“%(name)s”有 %(n)s 个用户：他们将被移到默认群组“%(group)s”（沿用该群组的限额）。要删除该群组吗？"
 
-#: app/admin/accounts.py:432
+#: app/admin/accounts.py:565
 #, python-format
 msgid "Delete the group “%(name)s”? It has no users."
 msgstr "要删除群组“%(name)s”吗？它没有用户。"
 
-#: app/admin/accounts.py:480 app/admin/accounts.py:517
+#: app/admin/accounts.py:620 app/admin/accounts.py:665
 msgid "Invalid group name"
 msgstr "群组名称无效"
 
-#: app/admin/accounts.py:482 app/admin/accounts.py:520
+#: app/admin/accounts.py:622 app/admin/accounts.py:668
 #, python-format
 msgid "Group %(name)s already exists"
 msgstr "群组 %(name)s 已存在"
 
-#: app/admin/accounts.py:493
+#: app/admin/accounts.py:636
 #, python-format
 msgid "Group %(name)s created"
 msgstr "已创建群组 %(name)s"
 
-#: app/admin/accounts.py:514
+#: app/admin/accounts.py:662
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be renamed"
 msgstr "“%(name)s”是系统群组：不能重命名"
 
-#: app/admin/accounts.py:542
+#: app/admin/accounts.py:694
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be deleted"
 msgstr "“%(name)s”是系统群组：不能删除"
 
-#: app/admin/accounts.py:556
+#: app/admin/accounts.py:712
 #, python-format
 msgid "Group %(name)s deleted"
 msgstr "已删除群组 %(name)s"
 
-#: app/admin/accounts.py:556
+#: app/admin/accounts.py:712
 #, python-format
 msgid "; %(n)s user(s) moved to %(group)s"
 msgstr "；%(n)s 个用户已移到 %(group)s"
@@ -434,14 +495,14 @@ msgstr "磁盘上缺少该归档文件"
 msgid "integrity OK (sha256 matches)"
 msgstr "完整性正常（sha256 匹配）"
 
-#: app/admin/audit_view.py:12 app/admin/printers.py:471
-#: app/admin/printers.py:505 app/admin/templates/print.html:40
-#: app/policy/keepalive.py:130
+#: app/admin/audit_view.py:12 app/admin/audit_view.py:16
+#: app/admin/printers.py:477 app/admin/printers.py:511
+#: app/admin/templates/print.html:43 app/policy/keepalive.py:130
 msgid "colour"
 msgstr "彩色"
 
 #: app/admin/audit_view.py:12 app/admin/audit_view.py:13
-#: app/admin/printers.py:471 app/admin/printers.py:505
+#: app/admin/printers.py:477 app/admin/printers.py:511
 #: app/policy/keepalive.py:130
 msgid "black and white"
 msgstr "黑白"
@@ -454,7 +515,7 @@ msgstr "自动"
 msgid "automatic (black and white)"
 msgstr "自动（黑白）"
 
-#: app/admin/audit_view.py:14 app/admin/audit_view.py:34
+#: app/admin/audit_view.py:14 app/admin/audit_view.py:35
 msgid "normal"
 msgstr "普通"
 
@@ -475,69 +536,78 @@ msgid "eSCL client"
 msgstr "eSCL 客户端"
 
 #: app/admin/audit_view.py:16
+msgid "one-sided"
+msgstr "单面"
+
+#: app/admin/audit_view.py:17
 msgid "portrait"
 msgstr "纵向"
 
-#: app/admin/audit_view.py:16
+#: app/admin/audit_view.py:17
 msgid "landscape"
 msgstr "横向"
 
-#: app/admin/audit_view.py:33 app/admin/templates/print.html:49
+#: app/admin/audit_view.py:34 app/admin/templates/_perm_fields.html:19
+#: app/admin/templates/me.html:29 app/admin/templates/print.html:52
 #: app/admin/templates/scan.html:37
 msgid "Colour"
 msgstr "颜色"
 
-#: app/admin/audit_view.py:33
+#: app/admin/audit_view.py:34
 msgid "printer default"
 msgstr "打印机默认"
 
-#: app/admin/audit_view.py:34
+#: app/admin/audit_view.py:35 app/admin/templates/print.html:53
 msgid "Sides"
 msgstr "单双面"
 
-#: app/admin/audit_view.py:39 app/admin/templates/jobs.html:24
+#: app/admin/audit_view.py:40 app/admin/templates/jobs.html:24
 #: app/admin/templates/scan.html:34
 msgid "File name"
 msgstr "文件名"
 
-#: app/admin/audit_view.py:41
+#: app/admin/audit_view.py:42
 msgid "Document name"
 msgstr "文档名称"
 
-#: app/admin/audit_view.py:43 app/admin/templates/print.html:45
+#: app/admin/audit_view.py:44 app/admin/templates/print.html:48
 msgid "Comment"
 msgstr "备注"
 
-#: app/admin/audit_view.py:45 app/admin/templates/scan.html:35
+#: app/admin/audit_view.py:46 app/admin/templates/scan.html:35
 msgid "Format"
 msgstr "格式"
 
-#: app/admin/audit_view.py:47 app/admin/templates/backup_edit.html:15
-#: app/admin/templates/backups.html:87 app/admin/templates/print.html:51
+#: app/admin/audit_view.py:48 app/admin/templates/backup_edit.html:15
+#: app/admin/templates/backups.html:87 app/admin/templates/print.html:55
 msgid "Copies"
 msgstr "副本"
 
-#: app/admin/audit_view.py:49
+#: app/admin/audit_view.py:50
 msgid "Paper"
 msgstr "纸张"
 
-#: app/admin/audit_view.py:51 app/admin/templates/print.html:48
+#: app/admin/audit_view.py:52 app/admin/templates/print.html:51
 msgid "Orientation"
 msgstr "方向"
 
-#: app/admin/audit_view.py:53
+#: app/admin/audit_view.py:54
 msgid "Pages chosen"
 msgstr "所选页面"
 
-#: app/admin/audit_view.py:55
+#: app/admin/audit_view.py:56
 msgid "Pages counted"
 msgstr "统计页数"
 
-#: app/admin/audit_view.py:56
+#: app/admin/audit_view.py:58
+msgid "Corrected by the permissions"
+msgstr "已按权限更正"
+
+#: app/admin/audit_view.py:59
 msgid "Sent from"
 msgstr "来源"
 
-#: app/admin/audit_view.py:56
+#: app/admin/audit_view.py:59
 msgid "IPP client"
 msgstr "IPP 客户端"
 
@@ -613,12 +683,12 @@ msgstr "备份失败：%(message)s"
 msgid "Backup “%(name)s” deleted. The files already written in the folder stay where they are"
 msgstr "已删除备份“%(name)s”。文件夹中已写入的文件会保留在原处"
 
-#: app/admin/common.py:151
+#: app/admin/common.py:142
 #, python-format
 msgid "invalid limit %(value)s"
 msgstr "限额无效：%(value)s"
 
-#: app/admin/common.py:154
+#: app/admin/common.py:145
 #, python-format
 msgid "limit too large (max %(max)s)"
 msgstr "限额过大（最大 %(max)s）"
@@ -667,94 +737,117 @@ msgstr "深色"
 msgid "until the end of the period"
 msgstr "至周期结束"
 
-#: app/admin/me.py:46 app/admin/requests.py:36
+#: app/admin/me.py:49 app/admin/requests.py:42
 #, python-format
 msgid "move to group %(name)s"
 msgstr "转入群组 %(name)s"
 
-#: app/admin/me.py:83 app/admin/templates/keys.html:13
-#: app/admin/templates/notices.html:17 app/admin/templates/notices.html:19
+#: app/admin/me.py:102 app/admin/templates/keys.html:13
+#: app/admin/templates/notices.html:24 app/admin/templates/notices.html:26
 msgid "never"
 msgstr "从不"
 
-#: app/admin/me.py:92
+#: app/admin/me.py:111
 msgid "New print key"
 msgstr "新的打印密钥"
 
-#: app/admin/me.py:92
+#: app/admin/me.py:111
 msgid "Print key"
 msgstr "打印密钥"
 
-#: app/admin/me.py:94
+#: app/admin/me.py:113
 #, python-format
 msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It expires on %(date)s and works only for printing. If you lose it or lose the device, revoke it here and create another."
 msgstr "仅在此时显示。当电脑或手机要求登录打印机时，请将其用作密码；用户名为 %(user)s。它将于 %(date)s 到期，只能用于打印。如果丢失密钥或设备，请在此处撤销并重新创建。"
 
-#: app/admin/me.py:98
+#: app/admin/me.py:117
 #, python-format
 msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It works for ONE print only, and only until %(date)s if nobody uses it. Create another one for the next print."
 msgstr "仅显示这一次。当电脑或手机要求登录打印机时，将它用作密码；用户名是 %(user)s。它只能打印一次，若无人使用，则仅在 %(date)s 之前有效。下次打印请再创建一个。"
 
-#: app/admin/me.py:116
+#: app/admin/me.py:135
 #, python-format
 msgid "%(n)s key(s) revoked"
 msgstr "已撤销 %(n)s 个密钥"
 
-#: app/admin/me.py:139
+#: app/admin/me.py:158
 msgid "Your password is managed by RADIUS, not here"
 msgstr "您的密码由 RADIUS 管理，不能在此处修改"
 
-#: app/admin/me.py:158
+#: app/admin/me.py:177
 msgid "Theme saved"
 msgstr "主题已保存"
 
-#: app/admin/me.py:172
+#: app/admin/me.py:191
 msgid "Language saved"
 msgstr "语言已保存"
 
-#: app/admin/me.py:185
+#: app/admin/me.py:204
 #, python-format
 msgid "Enter 0 (off) or a number of seconds between %(min)s and %(max)s"
 msgstr "请输入 0（关闭）或 %(min)s 到 %(max)s 之间的秒数"
 
-#: app/admin/me.py:189
+#: app/admin/me.py:208
 msgid "Automatic refresh off"
 msgstr "自动刷新已关闭"
 
-#: app/admin/me.py:190 app/admin/templates/autorefresh.html:5
+#: app/admin/me.py:209 app/admin/templates/autorefresh.html:5
 #, python-format
 msgid "Automatic refresh every %(n)s seconds"
 msgstr "每 %(n)s 秒自动刷新"
 
-#: app/admin/me.py:202
+#: app/admin/me.py:221
 msgid "Too many attempts, retry later"
 msgstr "尝试次数过多，请稍后再试"
 
-#: app/admin/me.py:206
+#: app/admin/me.py:225
 msgid "The current password is wrong"
 msgstr "当前密码错误"
 
-#: app/admin/me.py:208
+#: app/admin/me.py:227
 msgid "the two new passwords differ"
 msgstr "两次输入的新密码不一致"
 
-#: app/admin/me.py:209
+#: app/admin/me.py:228
 msgid "the new password must differ from the current one"
 msgstr "新密码必须与当前密码不同"
 
-#: app/admin/me.py:221
+#: app/admin/me.py:240
 msgid "Password changed"
 msgstr "密码已修改"
 
-#: app/admin/me.py:243 app/admin/me.py:263
+#: app/admin/me.py:262 app/admin/me.py:282 app/admin/me.py:321
 msgid "Request sent: an administrator will answer it"
 msgstr "申请已提交：管理员会予以答复"
 
-#: app/admin/me.py:274
+#: app/admin/me.py:300 app/admin/templates/requests.html:116
+#: app/policy/permissions.py:251
+msgid "colour printing"
+msgstr "彩色打印"
+
+#: app/admin/me.py:300 app/admin/templates/requests.html:116
+#: app/policy/permissions.py:251
+msgid "one-sided printing"
+msgstr "单面打印"
+
+#: app/admin/me.py:301 app/admin/templates/requests.html:117
+#: app/policy/permissions.py:251
+msgid "printing outside the hours"
+msgstr "在允许时段之外打印"
+
+#: app/admin/me.py:301 app/admin/templates/requests.html:117
+msgid "a printer"
+msgstr "一台打印机"
+
+#: app/admin/me.py:316
+msgid "that printer does not exist"
+msgstr "没有这台打印机"
+
+#: app/admin/me.py:332
 msgid "Request canceled"
 msgstr "申请已取消"
 
-#: app/admin/me_notices.py:45 app/admin/notices.py:59
+#: app/admin/me_notices.py:47 app/admin/notices.py:63
 #, python-format
 msgid "%(n)s notices dismissed"
 msgstr "已忽略 %(n)s 条通知"
@@ -821,332 +914,367 @@ msgstr "进纸失败次数"
 msgid "Ink used (total)"
 msgstr "已用墨水（总计）"
 
-#: app/admin/printers.py:224 app/admin/printers.py:314
+#: app/admin/printers.py:225 app/admin/printers.py:317
 #: app/policy/keepalive.py:119
 msgid "CUPS does not answer"
 msgstr "CUPS 没有响应"
 
-#: app/admin/printers.py:245
+#: app/admin/printers.py:247
 #, python-format
 msgid "Test printer %(name)s created: it writes PDFs, it uses no paper"
 msgstr "已创建测试打印机 %(name)s：它写入 PDF，不消耗纸张"
 
-#: app/admin/printers.py:245 app/admin/printers.py:274
-#: app/admin/printers.py:335 app/admin/printers.py:339
+#: app/admin/printers.py:247 app/admin/printers.py:276
+#: app/admin/printers.py:338 app/admin/printers.py:342
 msgid "CUPS did not accept the request"
 msgstr "CUPS 没有接受该请求"
 
-#: app/admin/printers.py:260 app/admin/printers.py:288
-#: app/admin/printers.py:318 app/admin/printers.py:398
+#: app/admin/printers.py:262 app/admin/printers.py:290
+#: app/admin/printers.py:321 app/admin/printers.py:404
 #, python-format
 msgid "%(name)s: printer not found"
 msgstr "%(name)s：找不到打印机"
 
-#: app/admin/printers.py:263
+#: app/admin/printers.py:265
 #, python-format
 msgid "%(name)s answers: only virtual printers and printers that do not answer can be deleted from here"
 msgstr "%(name)s 有响应：此处只能删除虚拟打印机和无响应的打印机"
 
-#: app/admin/printers.py:274
+#: app/admin/printers.py:276
 #, python-format
 msgid "%(name)s deleted"
 msgstr "已删除 %(name)s"
 
-#: app/admin/printers.py:309
+#: app/admin/printers.py:312
 msgid "Queue names use letters, digits and . _ @ + - only (max 127)"
 msgstr "队列名称只能使用字母、数字和 . _ @ + -（最多 127 个字符）"
 
-#: app/admin/printers.py:321
+#: app/admin/printers.py:324
 msgid "That is already its name"
 msgstr "这已经是它的名称"
 
-#: app/admin/printers.py:324
+#: app/admin/printers.py:327
 #, python-format
 msgid "A queue called %(name)s already exists"
 msgstr "已存在名为 %(name)s 的队列"
 
-#: app/admin/printers.py:327
+#: app/admin/printers.py:330
 #, python-format
 msgid "%(name)s has jobs waiting: rename it when the queue is empty"
 msgstr "%(name)s 中有等待的作业：请在队列清空后再重命名"
 
-#: app/admin/printers.py:331
+#: app/admin/printers.py:334
 #, python-format
 msgid "%(name)s can not be renamed: its driver is not known to the gateway"
 msgstr "无法重命名 %(name)s：网关不知道它的驱动程序"
 
-#: app/admin/printers.py:349
+#: app/admin/printers.py:355
 #, python-format
 msgid "%(old)s is now called %(new)s. Computers and phones set up by hand with the old address must be set up again."
 msgstr "%(old)s 现在名为 %(new)s。使用旧地址手动配置的电脑和手机需要重新配置。"
 
-#: app/admin/printers.py:358
+#: app/admin/printers.py:364
 #, python-format
 msgid "%(n)s new printer added"
 msgid_plural "%(n)s new printers added"
 msgstr[0] "已添加 %(n)s 台新打印机"
 
-#: app/admin/printers.py:362
+#: app/admin/printers.py:368
 msgid "No new printer found"
 msgstr "未发现新打印机"
 
-#: app/admin/printers.py:368
+#: app/admin/printers.py:374
 #, python-format
 msgid "USB printer %(model)s found, but CUPS has no driver for it: it can not be added"
 msgstr "发现 USB 打印机 %(model)s，但 CUPS 没有它的驱动程序：无法添加"
 
-#: app/admin/printers.py:369
+#: app/admin/printers.py:375
 #, python-format
 msgid "CUPS did not accept the new printer %(model)s"
 msgstr "CUPS 未接受新打印机 %(model)s"
 
-#: app/admin/printers.py:395
+#: app/admin/printers.py:401
 #, python-format
 msgid "%(name)s is a virtual printer: maintenance is only for physical ones"
 msgstr "%(name)s 是虚拟打印机：维护功能仅适用于实体打印机"
 
-#: app/admin/printers.py:422 app/admin/printers.py:498
+#: app/admin/printers.py:428 app/admin/printers.py:504
 #, python-format
 msgid "%(name)s does not print in colour"
 msgstr "%(name)s 不支持彩色打印"
 
-#: app/admin/printers.py:431
+#: app/admin/printers.py:437
 #, python-format
 msgid "%(name)s: periodic print %(every)s, %(mode)s. The settings are saved; turn it on or off with the switch"
 msgstr "%(name)s：定期打印%(every)s，%(mode)s。设置已保存；请用开关启用或停用"
 
-#: app/admin/printers.py:432 app/admin/templates/printers.html:54
+#: app/admin/printers.py:438 app/admin/templates/printers.html:72
 msgid "in colour"
 msgstr "彩色"
 
-#: app/admin/printers.py:432 app/admin/templates/printers.html:54
+#: app/admin/printers.py:438 app/admin/templates/printers.html:72
 msgid "in black and white"
 msgstr "黑白"
 
-#: app/admin/printers.py:451
+#: app/admin/printers.py:457
 #, python-format
 msgid "%(name)s: periodic print turned on (%(every)s)"
 msgstr "%(name)s：已启用定期打印（%(every)s）"
 
-#: app/admin/printers.py:451
+#: app/admin/printers.py:457
 #, python-format
 msgid "%(name)s: periodic print turned off"
 msgstr "%(name)s：已停用定期打印"
 
-#: app/admin/printers.py:461 app/admin/templates/printers.html:103
+#: app/admin/printers.py:467 app/admin/templates/printers.html:121
 msgid "NOT REACHABLE"
 msgstr "无法连接"
 
-#: app/admin/printers.py:461 app/admin/templates/printers.html:105
+#: app/admin/printers.py:467 app/admin/templates/printers.html:123
 #, python-format
 msgid "%(n)s in queue"
 msgstr "队列中 %(n)s 个"
 
-#: app/admin/printers.py:462 app/admin/templates/printers.html:104
+#: app/admin/printers.py:468 app/admin/templates/printers.html:122
 msgid "not accepting jobs"
 msgstr "不接受作业"
 
-#: app/admin/printers.py:463
+#: app/admin/printers.py:469
 #, python-format
 msgid "%(jobs)s jobs, %(pages)s pages, last %(when)s"
 msgstr "%(jobs)s 个作业，%(pages)s 页，最近 %(when)s"
 
-#: app/admin/printers.py:466 app/admin/templates/printers.html:157
+#: app/admin/printers.py:472 app/admin/templates/printers.html:176
 msgid "scans"
 msgstr "扫描"
 
-#: app/admin/printers.py:466
+#: app/admin/printers.py:472
 #, python-format
 msgid "%(n)s, last %(when)s"
 msgstr "%(n)s 次，最近 %(when)s"
 
-#: app/admin/printers.py:467 app/admin/templates/printers.html:167
+#: app/admin/printers.py:473 app/admin/templates/printers.html:186
 #, python-format
 msgid "%(n)s pages/min"
 msgstr "%(n)s 页/分钟"
 
-#: app/admin/printers.py:467 app/admin/templates/printers.html:167
+#: app/admin/printers.py:473 app/admin/templates/printers.html:186
 #, python-format
 msgid "colour %(n)s"
 msgstr "彩色 %(n)s"
 
-#: app/admin/printers.py:470
+#: app/admin/printers.py:476
 #, python-format
 msgid "Test print · %(title)s"
 msgstr "测试打印 · %(title)s"
 
-#: app/admin/printers.py:471
+#: app/admin/printers.py:477
 #, python-format
 msgid "queue %(name)s · %(when)s · %(mode)s"
 msgstr "队列 %(name)s · %(when)s · %(mode)s"
 
-#: app/admin/printers.py:472 app/admin/templates/printers.html:140
+#: app/admin/printers.py:478 app/admin/templates/printers.html:159
 msgid "Ink left"
 msgstr "剩余墨水"
 
-#: app/admin/printers.py:473 app/admin/printers.py:479
+#: app/admin/printers.py:479 app/admin/printers.py:485
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/grants.html:8 app/admin/templates/jobs.html:34
-#: app/admin/templates/jobs.html:56 app/admin/templates/keys.html:8
-#: app/admin/templates/keys.html:15 app/admin/templates/me.html:47
-#: app/admin/templates/printers.html:176 app/admin/templates/requests.html:37
-#: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:9
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:57
+#: app/admin/templates/keys.html:8 app/admin/templates/keys.html:15
+#: app/admin/templates/me.html:62 app/admin/templates/printers.html:195
+#: app/admin/templates/requests.html:181 app/admin/templates/requests.html:194
+#: app/admin/templates/user_edit.html:17 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:15
 msgid "State"
 msgstr "状态"
 
-#: app/admin/printers.py:473 app/admin/templates/printers.html:148
+#: app/admin/printers.py:479 app/admin/templates/printers.html:167
 msgid "Printer counters"
 msgstr "打印机计数器"
 
-#: app/admin/printers.py:474 app/admin/templates/printers.html:153
+#: app/admin/printers.py:480 app/admin/templates/printers.html:172
 msgid "From the gateway"
 msgstr "来自网关"
 
-#: app/admin/printers.py:475 app/admin/templates/actions.html:11
+#: app/admin/printers.py:481 app/admin/templates/actions.html:11
 #: app/admin/templates/archive_view.html:15
-#: app/admin/templates/printers.html:162
+#: app/admin/templates/printers.html:181
 msgid "Details"
 msgstr "详情"
 
-#: app/admin/printers.py:475 app/admin/templates/printers.html:164
+#: app/admin/printers.py:481 app/admin/templates/printers.html:183
 msgid "Serial number"
 msgstr "序列号"
 
-#: app/admin/printers.py:475 app/admin/templates/printers.html:166
+#: app/admin/printers.py:481 app/admin/templates/printers.html:185
 msgid "Model"
 msgstr "型号"
 
-#: app/admin/printers.py:476 app/admin/templates/printers.html:167
+#: app/admin/printers.py:482 app/admin/templates/printers.html:186
 msgid "Speed"
 msgstr "速度"
 
-#: app/admin/printers.py:476 app/admin/templates/printers.html:168
+#: app/admin/printers.py:482 app/admin/templates/printers.html:187
 msgid "Paper ready"
 msgstr "已装纸张"
 
-#: app/admin/printers.py:477 app/admin/templates/printers.html:169
+#: app/admin/printers.py:483 app/admin/templates/printers.html:188
 msgid "Location"
 msgstr "位置"
 
-#: app/admin/printers.py:477 app/admin/templates/printers.html:170
+#: app/admin/printers.py:483 app/admin/templates/printers.html:189
 msgid "Connection"
 msgstr "连接"
 
-#: app/admin/printers.py:478
+#: app/admin/printers.py:484
 msgid "Alerts"
 msgstr "警告"
 
-#: app/admin/printers.py:479 app/admin/templates/printers.html:175
+#: app/admin/printers.py:485 app/admin/templates/printers.html:194
 #: app/admin/templates/scan.html:32
 msgid "Scanner"
 msgstr "扫描仪"
 
-#: app/admin/printers.py:479 app/admin/templates/printers.html:177
+#: app/admin/printers.py:485 app/admin/templates/printers.html:196
 msgid "Feeder"
 msgstr "进纸器"
 
-#: app/admin/printers.py:480 app/admin/templates/printers.html:178
+#: app/admin/printers.py:486 app/admin/templates/printers.html:197
 msgid "Resolutions"
 msgstr "分辨率"
 
-#: app/admin/printers.py:481 app/admin/templates/printers.html:179
+#: app/admin/printers.py:487 app/admin/templates/printers.html:198
 msgid "Formats"
 msgstr "格式"
 
-#: app/admin/printers.py:495
+#: app/admin/printers.py:501
 #, python-format
 msgid "%(name)s does not answer (off or unplugged?): nothing to print"
 msgstr "%(name)s 没有响应（已关闭或被拔掉？）：没有可打印的内容"
 
-#: app/admin/printers.py:505
+#: app/admin/printers.py:511
 #, python-format
 msgid "Test print sent to %(name)s (%(mode)s)"
 msgstr "已向 %(name)s 发送测试打印（%(mode)s）"
 
-#: app/admin/printing.py:84 app/admin/printing.py:97
+#: app/admin/printing.py:90 app/admin/printing.py:103
 #, python-format
 msgid "The file is larger than %(mb)s MB"
 msgstr "文件超过 %(mb)s MB"
 
-#: app/admin/printing.py:93
+#: app/admin/printing.py:99
 msgid "Choose a file to print"
 msgstr "请选择要打印的文件"
 
-#: app/admin/printing.py:100
+#: app/admin/printing.py:106
 msgid "The file is empty"
 msgstr "文件为空"
 
-#: app/admin/printing.py:104
+#: app/admin/printing.py:110
 msgid "Unsupported file: PDF, JPEG, PNG, GIF or plain text only"
 msgstr "不支持的文件：仅支持 PDF、JPEG、PNG、GIF 或纯文本"
 
-#: app/admin/printing.py:110
+#: app/admin/printing.py:116
 #, python-format
 msgid "%(printer)s does not answer (off or unplugged?): choose another one or try again later"
 msgstr "%(printer)s 没有响应（已关闭或被拔掉？）：请选择另一台打印机或稍后再试"
 
-#: app/admin/printing.py:113
+#: app/admin/printing.py:119
 msgid "Choose a printer from the list"
 msgstr "请从列表中选择打印机"
 
-#: app/admin/printing.py:117
+#: app/admin/printing.py:123
 #, python-format
 msgid "Copies must be between 1 and %(max)s"
 msgstr "份数必须在 1 到 %(max)s 之间"
 
-#: app/admin/printing.py:123
+#: app/admin/printing.py:129
 #, python-format
 msgid "The comment can be at most %(n)s characters long"
 msgstr "备注最多 %(n)s 个字符"
 
-#: app/admin/printing.py:129
+#: app/admin/printing.py:135
 msgid "Paper size not available on this printer"
 msgstr "此打印机不支持该纸张尺寸"
 
-#: app/admin/printing.py:146
+#: app/admin/printing.py:155
 msgid "Landscape is available for PDF files and images, not for text files"
 msgstr "横向仅适用于 PDF 文件和图片,不适用于文本文件"
 
-#: app/admin/printing.py:152
+#: app/admin/printing.py:161
 msgid "This PDF can not be turned to landscape (protected or damaged): choose automatic orientation"
 msgstr "此 PDF 无法设为横向(受保护或已损坏):请选择自动方向"
 
-#: app/admin/printing.py:182
+#: app/admin/printing.py:204
 #, python-format
 msgid "%(reason)s. You can ask for more quota below."
 msgstr "%(reason)s。您可以在下方申请更多配额。"
 
-#: app/admin/printing.py:219
+#: app/admin/printing.py:248
 #, python-format
 msgid "Sent to %(printer)s: %(title)s"
 msgstr "已发送到 %(printer)s：%(title)s"
 
-#: app/admin/printing.py:219
+#: app/admin/printing.py:248
 #, python-format
 msgid " — %(n)s page(s)"
 msgstr " — %(n)s 页"
 
-#: app/admin/printing.py:221
+#: app/admin/printing.py:250
 msgid "The print server did not accept the file. Try another format (PDF works best)."
 msgstr "打印服务器没有接受该文件。请尝试其他格式（PDF 效果最好）。"
 
-#: app/admin/requests.py:68
+#: app/admin/reports.py:146
+msgid "The dates must look like 2026-10-31"
+msgstr "日期格式应为 2026-10-31"
+
+#: app/admin/reports.py:149
+msgid "The end of the period is before its start"
+msgstr "结束日期早于开始日期"
+
+#: app/admin/reports.py:154
+#, python-format
+msgid "The number of users must be between 1 and %(max)s"
+msgstr "用户数量必须在 1 到 %(max)s 之间"
+
+#: app/admin/requests.py:53
+msgid "choose the last day the permission is valid"
+msgstr "请选择权限有效的最后一天"
+
+#: app/admin/requests.py:136
 msgid "Approved"
 msgstr "已批准"
 
-#: app/admin/requests.py:81
+#: app/admin/requests.py:153
 msgid "Rejected"
 msgstr "已拒绝"
 
-#: app/admin/requests.py:114
+#: app/admin/requests.py:170
+msgid "unknown user"
+msgstr "未知用户"
+
+#: app/admin/requests.py:185 app/policy/grants.py:273
+msgid "invalid grant"
+msgstr "额度授予无效"
+
+#: app/admin/requests.py:186
 #, python-format
 msgid "Grant created for %(user)s"
 msgstr "已为 %(user)s 创建额度授予"
 
-#: app/admin/requests.py:127
+#: app/admin/requests.py:202 app/admin/requests.py:218
 msgid "Grant revoked"
 msgstr "已撤销额度授予"
+
+#: app/admin/requests.py:229
+#, python-format
+msgid "%(n)s ended grant deleted"
+msgid_plural "%(n)s ended grants deleted"
+msgstr[0] "已删除 %(n)s 条已结束的额度授予"
+
+#: app/admin/requests.py:229
+msgid "No ended grants to delete"
+msgstr "没有可删除的已结束额度授予"
 
 #: app/admin/routes.py:52
 msgid "Too many failed attempts, retry later"
@@ -1212,6 +1340,309 @@ msgstr "无法把更新交给更新程序:%(error)s"
 msgid "Update to %(version)s requested. The gateway restarts in a minute or two; this page shows the result."
 msgstr "已请求更新到 %(version)s。网关将在一两分钟内重启;本页会显示结果。"
 
+#: app/admin/templates/_own_notices.html:3
+#: app/admin/templates/_own_notices.html:6 app/admin/templates/actions.html:11
+#: app/admin/templates/archive_view.html:11
+#: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:39
+#: app/admin/templates/me.html:62 app/admin/templates/requests.html:7
+#: app/admin/templates/requests.html:181
+msgid "When"
+msgstr "时间"
+
+#: app/admin/templates/_own_notices.html:3
+#: app/admin/templates/_own_notices.html:7 app/admin/templates/notices.html:16
+#: app/admin/templates/notices.html:20
+msgid "What happened"
+msgstr "发生了什么"
+
+#: app/admin/templates/_own_notices.html:9
+#, python-format
+msgid "An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it."
+msgstr "管理员撤销了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它已失效：如有需要，请在个人资料中创建新的。"
+
+#: app/admin/templates/_own_notices.html:11
+#, python-format
+msgid "An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them."
+msgstr "管理员已撤销你的所有打印密钥（%(n)s 个）。它们不再有效：如需使用，请在个人资料中创建新的密钥。"
+
+#: app/admin/templates/_own_notices.html:13
+#, python-format
+msgid "An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change."
+msgstr "管理员停用了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它暂时无法使用，到期日期不变。"
+
+#: app/admin/templates/_own_notices.html:15
+#, python-format
+msgid "An administrator switched your print key “%(label)s” (starts with %(prefix)s) back on. It works again."
+msgstr "管理员重新启用了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它又可以使用了。"
+
+#: app/admin/templates/_own_notices.html:17
+#, python-format
+msgid "An administrator extended your print key “%(label)s” (starts with %(prefix)s). It now expires on %(date)s."
+msgstr "管理员延长了你的打印密钥“%(label)s”（以 %(prefix)s 开头）的有效期。现在它的到期日期为 %(date)s。"
+
+#: app/admin/templates/_own_notices.html:19
+#, python-format
+msgid "Your print key “%(label)s” (starts with %(prefix)s) expires on %(date)s. Create a new one before then and set it up on your devices."
+msgstr "你的打印密钥“%(label)s”（以 %(prefix)s 开头）将于 %(date)s 到期。请在此之前创建新的密钥，并在你的设备上设置好。"
+
+#: app/admin/templates/_own_notices.html:21
+#, python-format
+msgid "An administrator moved you from the group “%(old)s” to the group “%(new)s”. Your limits are now those of the new group."
+msgstr "管理员已将您从“%(old)s”组移到“%(new)s”组。您现在适用新组的限额。"
+
+#: app/admin/templates/_own_notices.html:23
+msgid "An administrator made you an administrator. You can now manage users, groups and printers: the menu at the top has the new pages."
+msgstr "管理员已将您设为管理员。您现在可以管理用户、组和打印机：顶部菜单中有新的页面。"
+
+#: app/admin/templates/_own_notices.html:25
+#, python-format
+msgid "An administrator removed your administrator rights. You are now in the group “%(group)s”."
+msgstr "管理员已取消您的管理员权限。您现在属于“%(group)s”组。"
+
+#: app/admin/templates/_own_notices.html:27
+#, python-format
+msgid "An administrator gave you a permission: %(what)s, %(when)s."
+msgstr "管理员授予了你一项权限：%(what)s，%(when)s。"
+
+#: app/admin/templates/_own_notices.html:27
+#: app/admin/templates/_own_notices.html:38
+#, python-format
+msgid "until the end of %(date)s"
+msgstr "到 %(date)s 结束"
+
+#: app/admin/templates/_own_notices.html:27
+#: app/admin/templates/_own_notices.html:38
+msgid "with no end date"
+msgstr "无截止日期"
+
+#: app/admin/templates/_own_notices.html:27
+#: app/admin/templates/_own_notices.html:33
+#: app/admin/templates/_own_notices.html:39
+#: app/admin/templates/_own_notices.html:41
+#, python-format
+msgid "Note: %(note)s"
+msgstr "备注：%(note)s"
+
+#: app/admin/templates/_own_notices.html:29
+#, python-format
+msgid "An administrator withdrew the permission you had been given: %(what)s."
+msgstr "管理员收回了授予你的权限：%(what)s。"
+
+#: app/admin/templates/_own_notices.html:31
+#, python-format
+msgid "The permission you had been given has ended: %(what)s. You can ask for it again from your profile."
+msgstr "授予你的权限已结束：%(what)s。你可以在个人资料页再次申请。"
+
+#: app/admin/templates/_own_notices.html:33
+#, python-format
+msgid "An administrator gave you extra quota: %(amount)s %(metric)s, %(scope)s."
+msgstr "管理员给了您额外配额：%(amount)s %(metric)s，%(scope)s。"
+
+#: app/admin/templates/_own_notices.html:35
+#, python-format
+msgid "An administrator withdrew your extra quota of %(amount)s %(metric)s."
+msgstr "管理员已收回您的额外配额：%(amount)s %(metric)s。"
+
+#: app/admin/templates/_own_notices.html:37
+#, python-format
+msgid "Your request to change group was approved: you are now in the group “%(group)s”."
+msgstr "您更换组的申请已获批准：您现在属于“%(group)s”组。"
+
+#: app/admin/templates/_own_notices.html:38
+#, python-format
+msgid "Your request for a permission was approved: %(what)s, %(when)s."
+msgstr "你的权限申请已获批准：%(what)s，%(when)s。"
+
+#: app/admin/templates/_own_notices.html:39
+#, python-format
+msgid "Your request for more quota was approved: %(amount)s %(metric)s, %(scope)s."
+msgstr "您增加配额的申请已获批准：%(amount)s %(metric)s，%(scope)s。"
+
+#: app/admin/templates/_own_notices.html:41
+#, python-format
+msgid "Your request for a permission was rejected: %(what)s."
+msgstr "你的权限申请被拒绝：%(what)s。"
+
+#: app/admin/templates/_own_notices.html:41
+msgid "Your request was rejected."
+msgstr "您的申请被拒绝。"
+
+#: app/admin/templates/_own_notices.html:44
+#, python-format
+msgid "The printer “%(printer)s” has a paper jam, and your print is waiting. Somebody has to clear it; the print will go on by itself."
+msgstr "打印机“%(printer)s”卡纸，您的打印正在等待。需要有人清除卡纸，之后打印会自动继续。"
+
+#: app/admin/templates/_own_notices.html:45
+#, python-format
+msgid "The printer “%(printer)s” is out of paper (or the tray is empty), and your print is waiting. When paper is loaded the print will go on by itself."
+msgstr "打印机“%(printer)s”缺纸（或纸盒为空），您的打印正在等待。装入纸张后打印会自动继续。"
+
+#: app/admin/templates/_own_notices.html:46
+#, python-format
+msgid "The printer “%(printer)s” is out of ink or toner, and your print may not come out right or may stop. Tell whoever looks after the printer."
+msgstr "打印机“%(printer)s”墨水或墨粉已用完，您的打印可能效果不佳或中断。请告知负责打印机的人。"
+
+#: app/admin/templates/_own_notices.html:47
+#, python-format
+msgid "The printer “%(printer)s” reports a problem, and your print is waiting."
+msgstr "打印机“%(printer)s”报告了问题，您的打印正在等待。"
+
+#: app/admin/templates/_own_notices.html:49
+msgid "An administrator changed what you may print (colour, one-sided prints, printers or hours). Your profile shows your permissions."
+msgstr "管理员更改了你可以打印的内容（彩色、单面打印、打印机或时段）。你的个人资料页会显示你的权限。"
+
+#: app/admin/templates/_own_notices.html:52
+#, python-format
+msgid "Your print to “%(printer)s” was refused: your account is not allowed to use that printer. Your profile shows the printers you can use."
+msgstr "你在“%(printer)s”上的打印被拒绝：你的账户不能使用该打印机。你的个人资料页会显示你可以使用的打印机。"
+
+#: app/admin/templates/_own_notices.html:53
+#, python-format
+msgid "Your print to “%(printer)s” was refused: printing is allowed only %(window)s."
+msgstr "你在“%(printer)s”上的打印被拒绝：只允许在 %(window)s 打印。"
+
+#: app/admin/templates/_own_notices.html:53
+#, python-format
+msgid "Your print to “%(printer)s” was refused: printing is not allowed at this hour."
+msgstr "你在“%(printer)s”上的打印被拒绝：此时段不允许打印。"
+
+#: app/admin/templates/_own_notices.html:54
+#, python-format
+msgid "Your print to “%(printer)s” was refused: colour printing is not allowed for your account. Choose black and white in the print window and send it again."
+msgstr "你在“%(printer)s”上的打印被拒绝：你的账户不允许彩色打印。请在打印窗口中选择黑白，然后重新发送。"
+
+#: app/admin/templates/_own_notices.html:55
+#, python-format
+msgid "Your print to “%(printer)s” was refused: one-sided printing is not allowed for your account. Choose double-sided in the print window and send it again."
+msgstr "你在“%(printer)s”上的打印被拒绝：你的账户不允许单面打印。请在打印窗口中选择双面，然后重新发送。"
+
+#: app/admin/templates/_own_notices.html:56
+#, python-format
+msgid "Your print to “%(printer)s” was refused."
+msgstr "你在“%(printer)s”上的打印被拒绝。"
+
+#: app/admin/templates/_own_notices.html:59
+#, python-format
+msgid "Your print to “%(printer)s” was made in black and white: colour printing is not allowed for your account."
+msgstr "你在“%(printer)s”上的打印已改为黑白：你的账户不允许彩色打印。"
+
+#: app/admin/templates/_own_notices.html:59
+#, python-format
+msgid "Your print to “%(printer)s” was made double-sided: one-sided printing is not allowed for your account."
+msgstr "你在“%(printer)s”上的打印已改为双面：你的账户不允许单面打印。"
+
+#: app/admin/templates/_own_notices.html:61 app/admin/templates/notices.html:44
+msgid "<b>Save the secret key in a safe place.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> in the <span class=\"mono\">.env</span> file encrypts the file names kept in the audit and signs the portal sessions. A backup without encryption does not contain it: if the server breaks and you restore the backup with a new key, the names stay unreadable (<span class=\"mono\">[encrypted]</span>) for good. Copy the line from <span class=\"mono\">.env</span> into a password manager, or make encrypted backups (they include <span class=\"mono\">.env</span>)."
+msgstr "<b>请把密钥保存在安全的地方。</b><span class=\"mono\">.env</span> 文件中的 <span class=\"mono\">CUPSPL_SECRET_KEY</span> 用于加密审计中保存的文件名并签名门户会话。未加密的备份不包含它：如果服务器损坏而你用新密钥恢复备份，文件名将永远无法读取（<span class=\"mono\">[encrypted]</span>）。请把 <span class=\"mono\">.env</span> 中的这一行复制到密码管理器，或使用加密备份（其中包含 <span class=\"mono\">.env</span>）。"
+
+#: app/admin/templates/_own_notices.html:64
+msgid "dismissed"
+msgstr "已忽略"
+
+#: app/admin/templates/_own_notices.html:65 app/admin/templates/notices.html:53
+msgid "Dismiss"
+msgstr "忽略"
+
+#: app/admin/templates/_own_notices.html:69 app/admin/templates/notices.html:57
+msgid "No notices."
+msgstr "没有通知。"
+
+#: app/admin/templates/_own_notices.html:72 app/admin/templates/notices.html:60
+msgid "Dismiss all"
+msgstr "全部忽略"
+
+#: app/admin/templates/_perm_fields.html:11
+msgid "Advanced permissions"
+msgstr "高级权限"
+
+#: app/admin/templates/_perm_fields.html:14
+msgid "All permissions, can not be limited."
+msgstr "拥有全部权限，无法被限制。"
+
+#: app/admin/templates/_perm_fields.html:14
+msgid "This is the emergency administrator: colour, one-sided prints, every printer and every hour are always allowed. The quotas above still apply."
+msgstr "这是紧急管理员：彩色、单面打印、所有打印机和所有时段始终允许。上面的配额仍然有效。"
+
+#: app/admin/templates/_perm_fields.html:15
+msgid "Besides the quotas: what this user may print, and when. “As the group” follows the group's values. Scanning is not limited."
+msgstr "除配额外：该用户可以打印什么、何时可以打印。“与组相同”表示沿用组的设置。扫描不受限制。"
+
+#: app/admin/templates/_perm_fields.html:16
+msgid "Besides the quotas: what the members of this group may print, and when. A user can have values of their own. Scanning is not limited."
+msgstr "除配额外：该组成员可以打印什么、何时可以打印。用户可以有自己的设置。扫描不受限制。"
+
+#: app/admin/templates/_perm_fields.html:19
+msgid "Without it the prints come out in black and white."
+msgstr "没有此权限时，打印件为黑白。"
+
+#: app/admin/templates/_perm_fields.html:20
+#: app/admin/templates/_perm_fields.html:24
+#: app/admin/templates/_perm_fields.html:28
+#: app/admin/templates/_perm_fields.html:39
+#, python-format
+msgid "as the group (%(value)s)"
+msgstr "与组相同（%(value)s）"
+
+#: app/admin/templates/_perm_fields.html:23 app/admin/templates/me.html:30
+#: app/admin/templates/print.html:53
+msgid "One-sided"
+msgstr "单面打印"
+
+#: app/admin/templates/_perm_fields.html:23
+msgid "Without it the prints come out double-sided, on the printers that can."
+msgstr "没有此权限时，支持双面的打印机会以双面打印。"
+
+#: app/admin/templates/_perm_fields.html:27 app/admin/templates/me.html:31
+#: app/admin/templates/printers.html:2 app/admin/templates/printers.html:4
+msgid "Printers"
+msgstr "打印机"
+
+#: app/admin/templates/_perm_fields.html:27
+msgid "A printer added later is not allowed to someone with a list until you add it here."
+msgstr "之后新增的打印机不会允许给设置了列表的人，除非你在这里把它加进去。"
+
+#: app/admin/templates/_perm_fields.html:28
+msgctxt "printers"
+msgid "only some"
+msgstr "仅部分"
+
+#: app/admin/templates/_perm_fields.html:31
+msgid "not present"
+msgstr "当前不存在"
+
+#: app/admin/templates/_perm_fields.html:32
+msgid "No printer found right now."
+msgstr "目前没有找到打印机。"
+
+#: app/admin/templates/_perm_fields.html:34
+msgid "Tap the printers this account may use."
+msgstr "点选此账户可以使用的打印机。"
+
+#: app/admin/templates/_perm_fields.html:38 app/admin/templates/me.html:32
+msgid "Hours"
+msgstr "时段"
+
+#: app/admin/templates/_perm_fields.html:38
+msgid "Checked when the job is sent, in the gateway's time zone."
+msgstr "在提交作业时检查，使用网关的时区。"
+
+#: app/admin/templates/_perm_fields.html:39
+msgid "some hours"
+msgstr "仅限部分时段"
+
+#: app/admin/templates/_perm_fields.html:45
+msgid "from"
+msgstr "从"
+
+#: app/admin/templates/_perm_fields.html:46
+msgid "to"
+msgstr "到"
+
+#: app/admin/templates/_perm_fields.html:48
+msgid "An end earlier than the start goes past midnight (22:00 to 06:00): it belongs to the day it starts. The end time itself is not included."
+msgstr "结束早于开始时会跨过午夜（22:00 到 06:00），属于开始的那一天。结束时刻本身不包含在内。"
+
 #: app/admin/templates/_pwfield.html:4
 msgid "Show password"
 msgstr "显示密码"
@@ -1244,21 +1675,12 @@ msgstr "操作（如 user.update）"
 msgid "Filter"
 msgstr "筛选"
 
-#: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:11
-#: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:38
-#: app/admin/templates/me.html:47 app/admin/templates/me_notices.html:9
-#: app/admin/templates/me_notices.html:12 app/admin/templates/requests.html:7
-#: app/admin/templates/requests.html:37
-msgid "When"
-msgstr "时间"
-
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:15
 msgid "Who"
 msgstr "操作人"
 
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:15
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:49
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:50
 msgid "Action"
 msgstr "操作"
 
@@ -1271,18 +1693,18 @@ msgid "No actions."
 msgstr "没有操作记录。"
 
 #: app/admin/templates/actions.html:20 app/admin/templates/archive_view.html:22
-#: app/admin/templates/jobs.html:82
+#: app/admin/templates/jobs.html:83
 msgid "Previous"
 msgstr "上一页"
 
 #: app/admin/templates/actions.html:21 app/admin/templates/archive_view.html:23
-#: app/admin/templates/jobs.html:83
+#: app/admin/templates/jobs.html:84
 #, python-format
 msgid "Page %(page)s / %(pages)s"
 msgstr "第 %(page)s / %(pages)s 页"
 
 #: app/admin/templates/actions.html:22 app/admin/templates/archive_view.html:24
-#: app/admin/templates/jobs.html:84
+#: app/admin/templates/jobs.html:85
 msgid "Next"
 msgstr "下一页"
 
@@ -1312,7 +1734,7 @@ msgid "Current size of the active tables:"
 msgstr "活动数据表当前大小："
 
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:58
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:59
 msgid "File"
 msgstr "文件"
 
@@ -1323,7 +1745,7 @@ msgstr "内容"
 #: app/admin/templates/archive.html:14 app/admin/templates/group_edit.html:13
 #: app/admin/templates/groups.html:8 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:10 app/admin/templates/me.html:14
-#: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:9
+#: app/admin/templates/user_edit.html:23 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:19
 msgid "Period"
 msgstr "周期"
@@ -1395,28 +1817,31 @@ msgstr "搜索"
 msgid "%(n)s results"
 msgstr "%(n)s 条结果"
 
-#: app/admin/templates/archive_view.html:11 app/admin/templates/grants.html:8
-#: app/admin/templates/jobs.html:23 app/admin/templates/jobs.html:34
-#: app/admin/templates/jobs.html:39 app/admin/templates/login.html:8
-#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:37
-#: app/admin/templates/settings.html:6 app/admin/templates/users.html:9
-#: app/admin/templates/users.html:12
+#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:23
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:40
+#: app/admin/templates/login.html:8 app/admin/templates/report.html:35
+#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:83
+#: app/admin/templates/requests.html:98 app/admin/templates/requests.html:181
+#: app/admin/templates/requests.html:194 app/admin/templates/settings.html:7
+#: app/admin/templates/users.html:9 app/admin/templates/users.html:12
 msgid "User"
 msgstr "用户"
 
 #: app/admin/templates/archive_view.html:11
+#: app/admin/templates/request_permission.html:17
+#: app/admin/templates/requests.html:118
 msgid "Printer"
 msgstr "打印机"
 
-#: app/admin/templates/archive_view.html:11 app/admin/templates/print.html:50
-#: app/admin/templates/printers.html:155
+#: app/admin/templates/archive_view.html:11 app/admin/templates/print.html:54
+#: app/admin/templates/printers.html:174 app/admin/templates/report.html:35
 #: app/admin/templates/request_quota.html:14 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:18
 msgid "Pages"
 msgstr "页数"
 
-#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:34
-#: app/admin/templates/jobs.html:68
+#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:35
+#: app/admin/templates/jobs.html:69
 msgid "Notes"
 msgstr "备注"
 
@@ -1483,10 +1908,6 @@ msgid "Encryption"
 msgstr "加密"
 
 #: app/admin/templates/backup_edit.html:19
-msgid "none"
-msgstr "无"
-
-#: app/admin/templates/backup_edit.html:19
 msgid "passphrase"
 msgstr "口令短语"
 
@@ -1499,20 +1920,21 @@ msgid "it cannot be changed from here, so you never lose the ability to open the
 msgstr "无法在此处更改，以免丢失打开备份的能力：请用所需的加密方式新建一个备份。"
 
 #: app/admin/templates/backup_edit.html:22
-#: app/admin/templates/group_edit.html:16 app/admin/templates/printers.html:85
-#: app/admin/templates/settings.html:12 app/admin/templates/settings.html:22
-#: app/admin/templates/settings.html:31 app/admin/templates/user_edit.html:27
+#: app/admin/templates/group_edit.html:17 app/admin/templates/printers.html:103
+#: app/admin/templates/settings.html:13 app/admin/templates/settings.html:23
+#: app/admin/templates/settings.html:32 app/admin/templates/user_edit.html:32
 msgid "Save"
 msgstr "保存"
 
 #: app/admin/templates/backup_edit.html:22
-#: app/admin/templates/group_edit.html:16 app/admin/templates/jobs.html:76
-#: app/admin/templates/me.html:52 app/admin/templates/print.html:57
-#: app/admin/templates/printers.html:93
+#: app/admin/templates/group_edit.html:17 app/admin/templates/jobs.html:77
+#: app/admin/templates/me.html:67 app/admin/templates/print.html:61
+#: app/admin/templates/printers.html:111
 #: app/admin/templates/request_group.html:15
+#: app/admin/templates/request_permission.html:24
 #: app/admin/templates/request_quota.html:25
 #: app/admin/templates/user_delete.html:11
-#: app/admin/templates/user_edit.html:27
+#: app/admin/templates/user_edit.html:32
 msgid "Cancel"
 msgstr "取消"
 
@@ -1580,7 +2002,7 @@ msgstr "已安装版本:%(v)s"
 msgid "new version %(v)s available"
 msgstr "有新版本 %(v)s"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:216
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:271
 msgid "Release notes"
 msgstr "发行说明"
 
@@ -1726,7 +2148,7 @@ msgid "Delete this scheduled backup? The files already written stay in the folde
 msgstr "要删除这个计划备份吗？已写入的文件会保留在文件夹中。"
 
 #: app/admin/templates/backups.html:68 app/admin/templates/groups.html:20
-#: app/admin/templates/printers.html:124
+#: app/admin/templates/printers.html:143
 msgid "Delete"
 msgstr "删除"
 
@@ -1810,78 +2232,78 @@ msgstr "不加密时，文件中包含数据库（用户、已打印文件的名
 msgid "Create backup"
 msgstr "创建备份"
 
-#: app/admin/templates/base.html:164 app/admin/templates/settings.html:2
-#: app/admin/templates/settings.html:5
+#: app/admin/templates/base.html:217 app/admin/templates/settings.html:2
+#: app/admin/templates/settings.html:6
 msgid "Settings"
 msgstr "设置"
 
-#: app/admin/templates/base.html:172
+#: app/admin/templates/base.html:225
 msgctxt "menu"
 msgid "Audit"
 msgstr "审计"
 
-#: app/admin/templates/base.html:173
+#: app/admin/templates/base.html:226
 msgctxt "menu"
 msgid "Users"
 msgstr "用户"
 
-#: app/admin/templates/base.html:174
+#: app/admin/templates/base.html:227
 msgctxt "menu"
 msgid "Groups"
 msgstr "群组"
 
-#: app/admin/templates/base.html:175
+#: app/admin/templates/base.html:228
 msgctxt "menu"
 msgid "Requests"
 msgstr "申请"
 
-#: app/admin/templates/base.html:176
-msgctxt "menu"
-msgid "Grants"
-msgstr "额度"
-
-#: app/admin/templates/base.html:177
+#: app/admin/templates/base.html:229
 msgctxt "menu"
 msgid "Actions"
 msgstr "操作"
 
-#: app/admin/templates/base.html:178
+#: app/admin/templates/base.html:230
 msgctxt "menu"
 msgid "Printers"
 msgstr "打印机"
 
-#: app/admin/templates/base.html:179
+#: app/admin/templates/base.html:231
 msgctxt "menu"
 msgid "Backup"
 msgstr "备份"
 
-#: app/admin/templates/base.html:180
+#: app/admin/templates/base.html:232
 msgctxt "menu"
 msgid "Archive"
 msgstr "归档"
 
-#: app/admin/templates/base.html:183
+#: app/admin/templates/base.html:235
 msgctxt "menu"
 msgid "Profile"
 msgstr "资料"
 
-#: app/admin/templates/base.html:184
+#: app/admin/templates/base.html:236
 msgctxt "menu"
 msgid "Print"
 msgstr "打印"
 
-#: app/admin/templates/base.html:185
+#: app/admin/templates/base.html:237
 msgctxt "menu"
 msgid "Scan"
 msgstr "扫描"
 
-#: app/admin/templates/base.html:190 app/admin/templates/base.html:196
+#: app/admin/templates/base.html:242 app/admin/templates/base.html:248
 #: app/admin/templates/me_notices.html:2 app/admin/templates/me_notices.html:5
-#: app/admin/templates/notices.html:2 app/admin/templates/notices.html:5
+#: app/admin/templates/notices.html:2 app/admin/templates/notices.html:12
 msgid "Notices"
 msgstr "通知"
 
-#: app/admin/templates/base.html:200
+#: app/admin/templates/base.html:252 app/admin/templates/docs.html:2
+#: app/admin/templates/docs.html:30 app/admin/templates/docs.html:45
+msgid "Documentation"
+msgstr "文档"
+
+#: app/admin/templates/base.html:255
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -1891,124 +2313,70 @@ msgstr ""
 "\n"
 "打印机将从网络（mDNS）中消失，除管理员外，所有用户都无法打印或扫描。"
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:258
 msgid "LEAVE MAINTENANCE"
 msgstr "退出维护模式"
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:258
 msgid "PUT IN MAINTENANCE"
 msgstr "进入维护模式"
 
-#: app/admin/templates/base.html:204
+#: app/admin/templates/base.html:259
 msgid "Turn the gateway back on"
 msgstr "恢复网关"
 
-#: app/admin/templates/base.html:204
+#: app/admin/templates/base.html:259
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "除管理员外，停止所有人的打印和扫描，并在网络中隐藏打印机"
 
-#: app/admin/templates/base.html:210
+#: app/admin/templates/base.html:265
 msgid "Log out"
 msgstr "退出登录"
 
-#: app/admin/templates/base.html:215
+#: app/admin/templates/base.html:270
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "网关维护中"
 
-#: app/admin/templates/base.html:215
+#: app/admin/templates/base.html:270
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "用户的打印和扫描已停止；管理员仍可使用"
 
-#: app/admin/templates/base.html:215
+#: app/admin/templates/base.html:270
 msgid "printing and scanning are temporarily suspended"
 msgstr "打印和扫描已暂时停用"
 
-#: app/admin/templates/base.html:216
+#: app/admin/templates/base.html:271
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "有新版本可用:%(new)s(已安装:%(old)s)。"
 
-#: app/admin/templates/base.html:216
+#: app/admin/templates/base.html:271
 msgid "To update, run on the server:"
 msgstr "要更新,请在服务器上运行:"
 
-#: app/admin/templates/base.html:254
+#: app/admin/templates/base.html:309
 msgid "Copied"
 msgstr "已复制"
 
-#: app/admin/templates/base.html:254 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:309 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "复制"
 
-#: app/admin/templates/grants.html:2
-msgid "Grants"
-msgstr "额度授予"
+#: app/admin/templates/docs.html:31
+msgid "The documentation is not installed on this server."
+msgstr "此服务器上未安装文档。"
 
-#: app/admin/templates/grants.html:5
-msgid "Quota grants"
-msgstr "配额授予"
+#: app/admin/templates/docs.html:32
+msgid "It is the docs folder of PrintMinder: the standard image and the host install both include it. You can also read it on GitHub:"
+msgstr "这是 PrintMinder 的 docs 文件夹：标准镜像和主机安装都包含它。你也可以在 GitHub 上阅读："
 
-#: app/admin/templates/grants.html:6
-msgid "Quota added on top of the limit. The print history is never modified. Temporary ones end with the period of the user's limit."
-msgstr "在限额之外增加的配额。打印历史绝不会被修改。临时授予的额度随用户限额周期结束而失效。"
+#: app/admin/templates/docs.html:36
+msgid "Documentation index"
+msgstr "文档目录"
 
-#: app/admin/templates/grants.html:8 app/admin/templates/me.html:10
-#: app/admin/templates/me.html:12 app/admin/templates/me.html:47
-#: app/admin/templates/request_quota.html:11
-msgid "What"
-msgstr "内容"
-
-#: app/admin/templates/grants.html:8
-msgid "Type"
-msgstr "类型"
-
-#: app/admin/templates/grants.html:8
-msgid "From"
-msgstr "起始"
-
-#: app/admin/templates/grants.html:8
-msgid "Until"
-msgstr "截止"
-
-#: app/admin/templates/grants.html:8 app/admin/templates/requests.html:37
-msgid "By"
-msgstr "操作人"
-
-#: app/admin/templates/grants.html:11
-msgid "no expiry"
-msgstr "无期限"
-
-#: app/admin/templates/grants.html:13
-msgid "Revoke this grant?"
-msgstr "要撤销此额度授予吗？"
-
-#: app/admin/templates/grants.html:13 app/admin/templates/keys.html:33
-msgid "Revoke"
-msgstr "撤销"
-
-#: app/admin/templates/grants.html:14
-msgid "No grants."
-msgstr "没有额度授予。"
-
-#: app/admin/templates/grants.html:18
-msgid "Grant quota without a request"
-msgstr "无需申请直接授予配额"
-
-#: app/admin/templates/grants.html:23
-msgid "amount"
-msgstr "数量"
-
-#: app/admin/templates/grants.html:24 app/admin/templates/requests.html:12
-msgid "temporary (until the end of the period)"
-msgstr "临时（至周期结束）"
-
-#: app/admin/templates/grants.html:25
-msgid "note"
-msgstr "备注"
-
-#: app/admin/templates/grants.html:26
-msgid "Grant"
-msgstr "授予"
+#: app/admin/templates/docs.html:38
+msgid "Language of the documentation"
+msgstr "文档语言"
 
 #: app/admin/templates/group_edit.html:2
 msgid "Edit group"
@@ -2033,7 +2401,7 @@ msgid "Only administrators belong here."
 msgstr "此群组仅包含管理员。"
 
 #: app/admin/templates/group_edit.html:11 app/admin/templates/groups.html:8
-#: app/admin/templates/groups.html:13 app/admin/templates/user_edit.html:20
+#: app/admin/templates/groups.html:13 app/admin/templates/user_edit.html:19
 msgid "Job limit"
 msgstr "作业限额"
 
@@ -2044,7 +2412,7 @@ msgid "unlimited"
 msgstr "不限"
 
 #: app/admin/templates/group_edit.html:12 app/admin/templates/groups.html:8
-#: app/admin/templates/groups.html:14 app/admin/templates/user_edit.html:22
+#: app/admin/templates/groups.html:14 app/admin/templates/user_edit.html:21
 msgid "Page limit"
 msgstr "页数限额"
 
@@ -2057,15 +2425,15 @@ msgstr "可申请"
 msgid "users can ask to be moved to this group"
 msgstr "用户可以申请转入此群组"
 
-#: app/admin/templates/group_edit.html:16
+#: app/admin/templates/group_edit.html:17
 msgid "Create group"
 msgstr "创建群组"
 
-#: app/admin/templates/group_edit.html:20
+#: app/admin/templates/group_edit.html:21
 msgid "Delete group"
 msgstr "删除群组"
 
-#: app/admin/templates/group_edit.html:22
+#: app/admin/templates/group_edit.html:23
 #, python-format
 msgid "Delete %(name)s"
 msgstr "删除 %(name)s"
@@ -2079,8 +2447,8 @@ msgid "Read-only values: use <b>Edit</b> to change them. Empty limit = no limit.
 msgstr "此处为只读：要修改请点击<b>编辑</b>。限额留空 = 不限制。被拒绝、失败或在打印前被取消的作业不计入。页数限额是软限制：超出限额的那个作业仍会被打印。"
 
 #: app/admin/templates/groups.html:8 app/admin/templates/groups.html:11
-#: app/admin/templates/user_edit.html:13 app/admin/templates/users.html:9
-#: app/admin/templates/users.html:14
+#: app/admin/templates/report.html:35 app/admin/templates/user_edit.html:12
+#: app/admin/templates/users.html:9 app/admin/templates/users.html:14
 msgid "Group"
 msgstr "群组"
 
@@ -2163,147 +2531,153 @@ msgstr "所有状态"
 msgid "Export CSV"
 msgstr "导出 CSV"
 
-#: app/admin/templates/jobs.html:32
+#: app/admin/templates/jobs.html:31 app/admin/templates/report.html:2
+msgid "Report"
+msgstr "报表"
+
+#: app/admin/templates/jobs.html:33
 #, python-format
 msgid "The search by file name looks in the latest %(n)s actions that match the other filters."
 msgstr "按文件名搜索只查看符合其他筛选条件的最近 %(n)s 条操作。"
 
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:37
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:38
 msgid "No."
 msgstr "编号"
 
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:48
-#: app/admin/templates/me.html:35
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:49
+#: app/admin/templates/me.html:50
 msgid "Device"
 msgstr "设备"
 
-#: app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:35
 msgid "What the states mean"
 msgstr "各状态的含义"
 
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:57
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:58
 msgid "Pg."
 msgstr "页"
 
-#: app/admin/templates/jobs.html:40
+#: app/admin/templates/jobs.html:41
 msgid "Where the scan came from"
 msgstr "扫描来自哪里"
 
-#: app/admin/templates/jobs.html:42
+#: app/admin/templates/jobs.html:43
 #, python-format
 msgid "Scan without sign-in · no. %(id)s"
 msgstr "未登录的扫描 · 编号 %(id)s"
 
-#: app/admin/templates/jobs.html:43
+#: app/admin/templates/jobs.html:44
 #, python-format
 msgid "Whoever scanned did not sign in: they are recorded as “%(name)s”. This is all that is known about them."
 msgstr "扫描者没有登录：记录为“%(name)s”。以下就是已知的全部信息。"
 
-#: app/admin/templates/jobs.html:44
+#: app/admin/templates/jobs.html:45
 msgid "IP address"
 msgstr "IP 地址"
 
-#: app/admin/templates/jobs.html:45
+#: app/admin/templates/jobs.html:46
 msgid "Host name"
 msgstr "主机名"
 
-#: app/admin/templates/jobs.html:45
+#: app/admin/templates/jobs.html:46
 msgid "not available (no name registered in the DNS)"
 msgstr "不可用（DNS 中没有注册名称）"
 
-#: app/admin/templates/jobs.html:46 app/admin/templates/jobs.html:54
-#: app/admin/templates/jobs.html:66 app/admin/templates/jobs.html:72
-#: app/admin/templates/jobs.html:98 app/admin/templates/printers.html:41
-#: app/admin/templates/printers.html:66
+#: app/admin/templates/jobs.html:47 app/admin/templates/jobs.html:55
+#: app/admin/templates/jobs.html:67 app/admin/templates/jobs.html:73
+#: app/admin/templates/jobs.html:99 app/admin/templates/printers.html:41
+#: app/admin/templates/printers.html:84 app/admin/templates/printers.html:209
+#: app/admin/templates/printers.html:215 app/admin/templates/requests.html:47
+#: app/admin/templates/requests.html:51
 msgid "Close"
 msgstr "关闭"
 
-#: app/admin/templates/jobs.html:49 app/admin/templates/scan.html:18
+#: app/admin/templates/jobs.html:50 app/admin/templates/scan.html:18
 msgid "scan"
 msgstr "扫描"
 
-#: app/admin/templates/jobs.html:49
+#: app/admin/templates/jobs.html:50
 msgid "Scanned with the automatic document feeder (ADF)"
 msgstr "使用自动进纸器（ADF）扫描"
 
-#: app/admin/templates/jobs.html:49
+#: app/admin/templates/jobs.html:50
 msgid "print"
 msgstr "打印"
 
-#: app/admin/templates/jobs.html:50
+#: app/admin/templates/jobs.html:51
 msgid "Specifications of this print"
 msgstr "此次打印的详细参数"
 
-#: app/admin/templates/jobs.html:52
+#: app/admin/templates/jobs.html:53
 #, python-format
 msgid "Print specifications · no. %(id)s"
 msgstr "打印参数 · 编号 %(id)s"
 
-#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:61
-#: app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:61 app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:63
 msgid "Show all"
 msgstr "显示全部"
 
-#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:61
+#: app/admin/templates/jobs.html:61 app/admin/templates/jobs.html:62
 msgid "Show the complete information of the file"
 msgstr "显示文件的完整信息"
 
-#: app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:63
 msgid "Show the complete comment"
 msgstr "显示完整备注"
 
-#: app/admin/templates/jobs.html:64
+#: app/admin/templates/jobs.html:65
 #, python-format
 msgid "File · no. %(id)s"
 msgstr "文件 · 编号 %(id)s"
 
-#: app/admin/templates/jobs.html:68
+#: app/admin/templates/jobs.html:69
 msgid "Show and copy the whole note"
 msgstr "显示并复制完整备注"
 
-#: app/admin/templates/jobs.html:70
+#: app/admin/templates/jobs.html:71
 #, python-format
 msgid "Note · no. %(id)s"
 msgstr "备注 · 编号 %(id)s"
 
-#: app/admin/templates/jobs.html:75
+#: app/admin/templates/jobs.html:76
 msgid "Cancel this queued job?"
 msgstr "要取消这个排队中的作业吗？"
 
-#: app/admin/templates/jobs.html:78
+#: app/admin/templates/jobs.html:79
 msgid "No jobs."
 msgstr "没有作业。"
 
-#: app/admin/templates/jobs.html:89
+#: app/admin/templates/jobs.html:90
 msgid "States of a print or scan"
 msgstr "打印或扫描的状态"
 
-#: app/admin/templates/jobs.html:91
+#: app/admin/templates/jobs.html:92
 msgid "<b>Accepted.</b> It passed the checks (identity, quota, blocks, maintenance) and was handed to CUPS or the scanner: it is printing, queued or in progress. It already counts toward the quota."
 msgstr "<b>已接受。</b>已通过检查（身份、配额、封锁、维护），并交给 CUPS 或扫描仪：正在打印、排队或进行中。已计入配额。"
 
-#: app/admin/templates/jobs.html:92
+#: app/admin/templates/jobs.html:93
 msgid "<b>Completed.</b> Print finished (CUPS confirms it) or scan delivered. The real pages replace the estimate made before printing."
 msgstr "<b>已完成。</b>打印结束（CUPS 已确认）或扫描已交付。实际页数会取代打印前的估算值。"
 
-#: app/admin/templates/jobs.html:93
+#: app/admin/templates/jobs.html:94
 msgid "<b>Denied.</b> The gateway refused it and nothing started: quota used up, printer blocked, gateway in maintenance, invalid file… The reason is in the Notes column. It does not count toward the quota."
 msgstr "<b>已拒绝。</b>网关拒绝了该请求，没有任何内容开始执行：配额用完、打印机被封锁、网关处于维护模式、文件无效等。原因见“备注”列。不计入配额。"
 
-#: app/admin/templates/jobs.html:94
+#: app/admin/templates/jobs.html:95
 msgid "<b>Failed.</b> It had been accepted but the printer or scanner could not carry it out (CUPS reported an error, the device did not answer). It does not count toward the quota."
 msgstr "<b>失败。</b>已被接受，但打印机或扫描仪未能执行（CUPS 报错，或设备没有响应）。不计入配额。"
 
-#: app/admin/templates/jobs.html:95
+#: app/admin/templates/jobs.html:96
 msgid "<b>Canceled.</b> Stopped before printing, by the user, by an administrator (“Cancel”) or by the scanning program. The quota is freed."
 msgstr "<b>已取消。</b>在打印前被用户、管理员（“取消”）或扫描程序终止。配额已释放。"
 
-#: app/admin/templates/jobs.html:96
+#: app/admin/templates/jobs.html:97
 msgid "<b>On hold.</b> CUPS is holding it (queue paused or waiting for someone to act). Until it restarts it counts toward the quota."
 msgstr "<b>挂起。</b>CUPS 暂时保留该作业（队列已暂停或在等待人工处理）。在恢复之前仍计入配额。"
 
 #: app/admin/templates/keys.html:2 app/admin/templates/keys.html:5
-#: app/admin/templates/user_edit.html:32
+#: app/admin/templates/user_edit.html:37
 msgid "Print keys"
 msgstr "打印密钥"
 
@@ -2379,6 +2753,10 @@ msgstr "延期"
 msgid "Revoke the key “%(label)s”?"
 msgstr "要撤销密钥“%(label)s”吗？"
 
+#: app/admin/templates/keys.html:33 app/admin/templates/requests.html:91
+msgid "Revoke"
+msgstr "撤销"
+
 #: app/admin/templates/keys.html:36
 msgid "No keys."
 msgstr "没有密钥。"
@@ -2425,7 +2803,7 @@ msgstr "返回用户"
 msgid "Login"
 msgstr "登录"
 
-#: app/admin/templates/login.html:9 app/admin/templates/settings.html:46
+#: app/admin/templates/login.html:9 app/admin/templates/settings.html:47
 msgid "Password"
 msgstr "密码"
 
@@ -2468,15 +2846,15 @@ msgstr "群组：<b>%(group)s</b>"
 msgid "no group"
 msgstr "无群组"
 
-#: app/admin/templates/me.html:6 app/admin/templates/settings.html:6
+#: app/admin/templates/me.html:6 app/admin/templates/settings.html:7
 msgid "Sign-in"
 msgstr "登录方式"
 
-#: app/admin/templates/me.html:6 app/admin/templates/settings.html:6
+#: app/admin/templates/me.html:6 app/admin/templates/settings.html:7
 msgid "local account"
 msgstr "本地账户"
 
-#: app/admin/templates/me.html:6 app/admin/templates/settings.html:6
+#: app/admin/templates/me.html:6 app/admin/templates/settings.html:7
 #, python-format
 msgid "RADIUS (%(provider)s)"
 msgstr "RADIUS（%(provider)s）"
@@ -2488,6 +2866,14 @@ msgstr "设置"
 #: app/admin/templates/me.html:8
 msgid "My usage"
 msgstr "我的用量"
+
+#: app/admin/templates/me.html:10 app/admin/templates/me.html:12
+#: app/admin/templates/me.html:62
+#: app/admin/templates/request_permission.html:11
+#: app/admin/templates/request_quota.html:11
+#: app/admin/templates/requests.html:83 app/admin/templates/requests.html:194
+msgid "What"
+msgstr "内容"
 
 #: app/admin/templates/me.html:10 app/admin/templates/me.html:12
 msgid "Used"
@@ -2529,215 +2915,258 @@ msgid "Ask to change group"
 msgstr "申请更换群组"
 
 #: app/admin/templates/me.html:26
+msgid "Your permissions"
+msgstr "你的权限"
+
+#: app/admin/templates/me.html:27
+msgid "This account has all permissions and they can not be limited."
+msgstr "此账户拥有全部权限，且无法被限制。"
+
+#: app/admin/templates/me.html:29
+msgid "not allowed: prints are made in black and white"
+msgstr "不允许：打印件为黑白"
+
+#: app/admin/templates/me.html:29 app/admin/templates/me.html:30
+#: app/admin/templates/me.html:32
+msgid "request waiting"
+msgstr "申请待处理"
+
+#: app/admin/templates/me.html:29 app/admin/templates/me.html:30
+#: app/admin/templates/me.html:32
+msgid "Ask"
+msgstr "申请"
+
+#: app/admin/templates/me.html:30
+msgid "not allowed: prints are made double-sided"
+msgstr "不允许：打印件为双面"
+
+#: app/admin/templates/me.html:31 app/admin/templates/report.html:11
+msgid "all"
+msgstr "全部"
+
+#: app/admin/templates/me.html:31
+msgid "none at the moment"
+msgstr "目前没有"
+
+#: app/admin/templates/me.html:31
+msgid "Ask for another printer"
+msgstr "申请其他打印机"
+
+#: app/admin/templates/me.html:32
+msgid "not now"
+msgstr "现在不在此时段"
+
+#: app/admin/templates/me.html:35
+msgid "Granted to you after a request:"
+msgstr "申请后授予你的权限："
+
+#: app/admin/templates/me.html:36 app/admin/templates/user_edit.html:29
+#, python-format
+msgid "until %(date)s"
+msgstr "至 %(date)s"
+
+#: app/admin/templates/me.html:41
 msgid "My print keys"
 msgstr "我的打印密钥"
 
-#: app/admin/templates/me.html:27
+#: app/admin/templates/me.html:42
 #, python-format
 msgid "Instead of the domain password, on the computer or phone you use a personal <b>key</b> (user name <b>%(user)s</b>, server <b>%(server)s</b>). It only works for printing and you can revoke it whenever you want."
 msgstr "在电脑或手机上使用个人<b>密钥</b>代替域密码（用户名 <b>%(user)s</b>，服务器 <b>%(server)s</b>）。它只能用于打印，您可以随时撤销。"
 
-#: app/admin/templates/me.html:28
+#: app/admin/templates/me.html:43
 msgid "The domain password is <b>not</b> accepted for printing."
 msgstr "打印时<b>不</b>接受域密码。"
 
-#: app/admin/templates/me.html:29
+#: app/admin/templates/me.html:44
 #, python-format
 msgid "Active keys: <b>%(n)s</b>"
 msgstr "有效密钥：<b>%(n)s</b>"
 
-#: app/admin/templates/me.html:29
+#: app/admin/templates/me.html:44
 msgid "Manage keys"
 msgstr "管理密钥"
 
-#: app/admin/templates/me.html:33
+#: app/admin/templates/me.html:48
 msgid "How to connect a device"
 msgstr "如何连接设备"
 
-#: app/admin/templates/me.html:35
+#: app/admin/templates/me.html:50
 msgid "What to do"
 msgstr "操作方法"
 
-#: app/admin/templates/me.html:36
+#: app/admin/templates/me.html:51
 msgid "Phone or tablet"
 msgstr "手机或平板"
 
-#: app/admin/templates/me.html:36
+#: app/admin/templates/me.html:51
 msgid "The easiest way: <a href=\"/me/print\">Print a file</a> (PDF, photo, text) and <a href=\"/me/scan\">Scan</a>, without installing or configuring anything. Alternatively on Android: <b>Mopria Print Service</b>, which shows the printers and asks for the name and key."
 msgstr "最简单的方式：<a href=\"/me/print\">打印文件</a>（PDF、照片、文本）和<a href=\"/me/scan\">扫描</a>，无需安装或配置任何东西。在 Android 上也可使用 <b>Mopria Print Service</b>，它会显示打印机并要求输入用户名和密钥。"
 
-#: app/admin/templates/me.html:37
+#: app/admin/templates/me.html:52
 msgid "Create a key above: the next page shows the ready-made command (user name and key included), to paste just once."
 msgstr "先在上方创建密钥：下一页会给出现成的命令（已包含用户名和密钥），只需粘贴一次。"
 
-#: app/admin/templates/me.html:38
+#: app/admin/templates/me.html:53
 msgid "Or <span class=\"mono\">scripts/add-printer-linux.sh</span> from the project."
 msgstr "或者使用项目中的 <span class=\"mono\">scripts/add-printer-linux.sh</span>。"
 
-#: app/admin/templates/me.html:39
+#: app/admin/templates/me.html:54
 #, python-format
 msgid "Add a network printer with the address <span class=\"mono\">ipps://%(server)s/printers/&lt;name&gt;</span>; when it asks for the user name and password enter <b>%(user)s</b> and the key, and choose \"remember\"."
 msgstr "使用地址 <span class=\"mono\">ipps://%(server)s/printers/&lt;名称&gt;</span> 添加网络打印机；提示输入用户名和密码时，输入 <b>%(user)s</b> 和密钥，并选择“记住”。"
 
-#: app/admin/templates/me.html:39
+#: app/admin/templates/me.html:54
 msgid "Not yet tried on these systems."
 msgstr "尚未在这些系统上测试过。"
 
-#: app/admin/templates/me.html:41
+#: app/admin/templates/me.html:56
 msgid "Available printers:"
 msgstr "可用的打印机："
 
-#: app/admin/templates/me.html:45
+#: app/admin/templates/me.html:60
 msgid "My requests"
 msgstr "我的申请"
 
-#: app/admin/templates/me.html:47 app/admin/templates/request_group.html:13
+#: app/admin/templates/me.html:62 app/admin/templates/request_group.html:13
+#: app/admin/templates/request_permission.html:22
 #: app/admin/templates/request_quota.html:23
-#: app/admin/templates/requests.html:7
+#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:46
 msgid "Reason"
 msgstr "原因"
 
-#: app/admin/templates/me.html:47
+#: app/admin/templates/me.html:62
 msgid "Answer"
 msgstr "答复"
 
-#: app/admin/templates/me.html:54
+#: app/admin/templates/me.html:69
 msgid "No requests."
 msgstr "没有申请。"
 
 #: app/admin/templates/me_notices.html:6
-msgid "What the administrators did that concerns you, for example with your print keys."
-msgstr "管理员所做的与你有关的操作，例如对你的打印密钥所做的操作。"
+msgid "What concerns you: what the administrators did with your account (keys, group, quota, requests) and problems of the printer your print is waiting for."
+msgstr "与您有关的事项：管理员对您账户的操作（密钥、组、配额、申请），以及您的打印所在打印机的问题。"
 
-#: app/admin/templates/me_notices.html:9 app/admin/templates/me_notices.html:13
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:13
-msgid "What happened"
-msgstr "发生了什么"
-
-#: app/admin/templates/me_notices.html:15
-#, python-format
-msgid "An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it."
-msgstr "管理员撤销了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它已失效：如有需要，请在个人资料中创建新的。"
-
-#: app/admin/templates/me_notices.html:17
-#, python-format
-msgid "An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them."
-msgstr "管理员已撤销你的所有打印密钥（%(n)s 个）。它们不再有效：如需使用，请在个人资料中创建新的密钥。"
-
-#: app/admin/templates/me_notices.html:19
-#, python-format
-msgid "An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change."
-msgstr "管理员停用了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它暂时无法使用，到期日期不变。"
-
-#: app/admin/templates/me_notices.html:21
-#, python-format
-msgid "An administrator switched your print key “%(label)s” (starts with %(prefix)s) back on. It works again."
-msgstr "管理员重新启用了你的打印密钥“%(label)s”（以 %(prefix)s 开头）。它又可以使用了。"
-
-#: app/admin/templates/me_notices.html:23
-#, python-format
-msgid "An administrator extended your print key “%(label)s” (starts with %(prefix)s). It now expires on %(date)s."
-msgstr "管理员延长了你的打印密钥“%(label)s”（以 %(prefix)s 开头）的有效期。现在它的到期日期为 %(date)s。"
-
-#: app/admin/templates/me_notices.html:25
-#, python-format
-msgid "Your print key “%(label)s” (starts with %(prefix)s) expires on %(date)s. Create a new one before then and set it up on your devices."
-msgstr "你的打印密钥“%(label)s”（以 %(prefix)s 开头）将于 %(date)s 到期。请在此之前创建新的密钥，并在你的设备上设置好。"
-
-#: app/admin/templates/me_notices.html:28
-msgid "dismissed"
-msgstr "已忽略"
-
-#: app/admin/templates/me_notices.html:29 app/admin/templates/notices.html:34
-msgid "Dismiss"
-msgstr "忽略"
-
-#: app/admin/templates/me_notices.html:33 app/admin/templates/notices.html:38
-msgid "No notices."
-msgstr "没有通知。"
-
-#: app/admin/templates/me_notices.html:36 app/admin/templates/notices.html:41
-msgid "Dismiss all"
-msgstr "全部忽略"
-
-#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+#: app/admin/templates/me_notices.html:9 app/admin/templates/notices.html:62
 msgid "Hide dismissed"
 msgstr "隐藏已忽略"
 
-#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+#: app/admin/templates/me_notices.html:9 app/admin/templates/notices.html:62
 msgid "Show dismissed too"
 msgstr "同时显示已忽略"
 
 #: app/admin/templates/notices.html:6
+msgid "For you"
+msgstr "给您"
+
+#: app/admin/templates/notices.html:7
+msgid "What concerns your own account: print keys, group, quota, requests."
+msgstr "与您自己账户有关的事项：打印密钥、组、配额、申请。"
+
+#: app/admin/templates/notices.html:13
 #, python-format
 msgid "Things the gateway noticed that administrators should know about. The same notice from the same source is reported again only after a while (now: every %(when)s), and repeats in between are counted."
 msgstr "网关注意到、管理员应当知道的事项。来自同一来源的同一通知只会隔一段时间再报告一次(现在:每 %(when)s),期间的重复会被计数。"
 
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:12
+#: app/admin/templates/notices.html:16 app/admin/templates/notices.html:19
 msgid "Last time"
 msgstr "最近一次"
 
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:32
+#: app/admin/templates/notices.html:16 app/admin/templates/notices.html:51
 msgid "Times"
 msgstr "次数"
 
-#: app/admin/templates/notices.html:12
+#: app/admin/templates/notices.html:19
 #, python-format
 msgid "first: %(t)s"
 msgstr "首次:%(t)s"
 
-#: app/admin/templates/notices.html:15
+#: app/admin/templates/notices.html:22
 #, python-format
 msgid "A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">.env</span> and run <span class=\"mono\">docker compose up -d</span>."
 msgstr "来自 <span class=\"mono\">%(ip)s</span> 的无用户名和密码的扫描请求已被拒绝,因为免登录扫描处于关闭状态。如果您的扫描应用无法发送凭据,请在 <span class=\"mono\">.env</span> 中设置 <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> 并运行 <span class=\"mono\">docker compose up -d</span>。"
 
-#: app/admin/templates/notices.html:17
+#: app/admin/templates/notices.html:24
 #, python-format
 msgid "<b>Backup not done: the destination folder can not be reached.</b> The latest backup of “%(name)s” was not saved, because the network disk or USB disk does not seem to be connected. Nothing was written. Check that it is switched on and mounted, then press “Run now”. Last successful backup: %(last)s."
 msgstr "<b>备份未完成：无法访问目标文件夹。</b>“%(name)s”的最新备份没有保存，因为网络磁盘或 USB 磁盘似乎没有连接。没有写入任何文件。请检查它是否已开机并已挂载，然后点击“立即运行”。上次成功的备份：%(last)s。"
 
-#: app/admin/templates/notices.html:19
+#: app/admin/templates/notices.html:26
 #, python-format
 msgid "<b>Backup failed.</b> The latest backup of “%(name)s” was not saved. Reason: %(error)s. Last successful backup: %(last)s."
 msgstr "<b>备份失败。</b>“%(name)s”的最新备份没有保存。原因：%(error)s。上次成功的备份：%(last)s。"
 
-#: app/admin/templates/notices.html:21
+#: app/admin/templates/notices.html:28
 #, python-format
 msgid "<b>The certificate could not be updated.</b> The last run of <span class=\"mono\">scripts/cert-sync.sh</span> (%(when)s) failed: %(message)s. The certificate in use is the old one. Run the script by hand to see the error, and check the cron job."
 msgstr "<b>无法更新证书。</b><span class=\"mono\">scripts/cert-sync.sh</span> 最近一次运行（%(when)s）失败：%(message)s。当前使用的仍是旧证书。请手动运行脚本查看错误，并检查 cron 任务。"
 
-#: app/admin/templates/notices.html:23
+#: app/admin/templates/notices.html:30
 #, python-format
 msgid "<b>The TLS certificate has expired</b> (on %(date)s). Phones and computers refuse to connect to the gateway until a valid one is in <span class=\"mono\">config/tls</span> and the gateway has been restarted."
 msgstr "<b>TLS 证书已过期</b>（%(date)s）。在 <span class=\"mono\">config/tls</span> 中放入有效证书并重启网关之前，手机和电脑将拒绝连接网关。"
 
-#: app/admin/templates/notices.html:25
+#: app/admin/templates/notices.html:32
 #, python-format
 msgid "<b>The TLS certificate expires on %(date)s.</b> The last synchronisation worked, so the source has not renewed it yet: check the program that renews it (for example Nginx Proxy Manager)."
 msgstr "<b>TLS 证书将于 %(date)s 到期。</b>上次同步成功，说明来源尚未续期：请检查负责续期的程序（例如 Nginx Proxy Manager）。"
 
-#: app/admin/templates/notices.html:26
+#: app/admin/templates/notices.html:33
 #, python-format
 msgid "<b>The TLS certificate expires on %(date)s.</b> The last synchronisation failed: see the other notice about the certificate."
 msgstr "<b>TLS 证书将于 %(date)s 到期。</b>上次同步失败：请查看另一条关于证书的通知。"
 
-#: app/admin/templates/notices.html:27
+#: app/admin/templates/notices.html:34
 #, python-format
 msgid "<b>The TLS certificate expires on %(date)s.</b> Renew it and put the new files in <span class=\"mono\">config/tls</span>, then restart the gateway."
 msgstr "<b>TLS 证书将于 %(date)s 到期。</b>请续期，把新文件放进 <span class=\"mono\">config/tls</span>，然后重启网关。"
 
-#: app/admin/templates/notices.html:29
+#: app/admin/templates/notices.html:36
 #, python-format
 msgid "<b>The announced address is not in the TLS certificate.</b> The gateway announces itself on the network as <span class=\"mono\">%(names)s</span> at <span class=\"mono\">%(addresses)s</span>, and the certificate covers none of them: phones and computers that find the printers this way will show a certificate error. Make the certificate list the address (or give the machine a fixed address and a name that the certificate covers)."
 msgstr "<b>公告的地址不在 TLS 证书中。</b>网关在网络上以 <span class=\"mono\">%(names)s</span> 公告自己，地址为 <span class=\"mono\">%(addresses)s</span>，而证书没有涵盖其中任何一个：以这种方式找到打印机的手机和电脑会显示证书错误。请让证书包含该地址（或给机器设置固定地址和证书涵盖的名称）。"
 
-#: app/admin/templates/notices.html:33
+#: app/admin/templates/notices.html:38
+#, python-format
+msgid "<b>Paper jam</b> on the printer “%(printer)s”. Jobs wait until somebody clears it."
+msgstr "打印机“%(printer)s”<b>卡纸</b>。在有人清除之前，作业会一直等待。"
+
+#: app/admin/templates/notices.html:39
+#, python-format
+msgid "<b>Out of paper</b> (or empty tray) on the printer “%(printer)s”. Jobs wait until paper is loaded."
+msgstr "打印机“%(printer)s”<b>缺纸</b>（或纸盒为空）。装入纸张之前，作业会一直等待。"
+
+#: app/admin/templates/notices.html:40
+#, python-format
+msgid "<b>Ink or toner is out</b> on the printer “%(printer)s”: %(what)s."
+msgstr "打印机“%(printer)s”<b>墨水或墨粉已用完</b>：%(what)s。"
+
+#: app/admin/templates/notices.html:41
+#, python-format
+msgid "<b>Ink or toner is running low</b> on the printer “%(printer)s”: %(what)s."
+msgstr "打印机“%(printer)s”<b>墨水或墨粉不足</b>：%(what)s。"
+
+#: app/admin/templates/notices.html:42
+#, python-format
+msgid "<b>Problem</b> on the printer “%(printer)s”: %(what)s."
+msgstr "打印机“%(printer)s”<b>出现问题</b>：%(what)s。"
+
+#: app/admin/templates/notices.html:46
+#, python-format
+msgid "<b>The secret key has changed</b> since the previous start (<span class=\"mono\">CUPSPL_SECRET_KEY</span> in <span class=\"mono\">.env</span>). %(count)s file names in the audit were encrypted with the old key and now show as <span class=\"mono\">[encrypted]</span>. If the change was not wanted (for example a restore with a new <span class=\"mono\">.env</span>), put the old key back and restart: the names become readable again."
+msgstr "<b>密钥自上次启动以来已更改</b>（<span class=\"mono\">.env</span> 中的 <span class=\"mono\">CUPSPL_SECRET_KEY</span>）。审计中有 %(count)s 个文件名是用旧密钥加密的，现在显示为 <span class=\"mono\">[encrypted]</span>。如果这不是有意的更改（例如用新的 <span class=\"mono\">.env</span> 进行了恢复），请恢复旧密钥并重启：文件名将重新可读。"
+
+#: app/admin/templates/notices.html:48
+msgid "<b>No secret key is set.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> is empty in <span class=\"mono\">.env</span>: the file names in the audit are stored without encryption and everybody has to sign in again after every restart. Set a long random value (for example the output of <span class=\"mono\">openssl rand -base64 48</span>), run <span class=\"mono\">docker compose up -d</span> and save the key in a safe place."
+msgstr "<b>未设置密钥。</b><span class=\"mono\">.env</span> 中的 <span class=\"mono\">CUPSPL_SECRET_KEY</span> 为空：审计中的文件名未加密保存，且每次重启后所有人都必须重新登录。请设置一个较长的随机值（例如 <span class=\"mono\">openssl rand -base64 48</span> 的输出），运行 <span class=\"mono\">docker compose up -d</span>，并把密钥保存在安全的地方。"
+
+#: app/admin/templates/notices.html:52
 #, python-format
 msgid "dismissed by %(who)s"
 msgstr "由 %(who)s 忽略"
 
 #: app/admin/templates/password.html:2 app/admin/templates/password.html:7
-#: app/admin/templates/settings.html:37 app/admin/templates/settings.html:42
+#: app/admin/templates/settings.html:38 app/admin/templates/settings.html:43
 msgid "Change password"
 msgstr "修改密码"
 
@@ -2761,118 +3190,132 @@ msgstr "再次输入新密码"
 msgid "Change"
 msgstr "修改"
 
-#: app/admin/templates/print.html:2 app/admin/templates/print.html:57
+#: app/admin/templates/print.html:2 app/admin/templates/print.html:61
 msgid "Print"
 msgstr "打印"
 
 #: app/admin/templates/print.html:20
 #, python-format
+msgid "You can print %(window)s. Printing now is not possible."
+msgstr "你可以在 %(window)s 打印。现在无法打印。"
+
+#: app/admin/templates/print.html:21
+#, python-format
 msgid "Not reachable right now: %(printers)s."
 msgstr "当前无法连接：%(printers)s。"
 
-#: app/admin/templates/print.html:22
+#: app/admin/templates/print.html:23
+msgid "Your account is not allowed to use any of the printers. Your profile shows what you may print on."
+msgstr "你的账户不能使用任何一台打印机。你的个人资料页会显示你可以使用哪些打印机。"
+
+#: app/admin/templates/print.html:25
 msgid "No printer available at the moment. Try again shortly or tell an administrator."
 msgstr "目前没有可用的打印机。请稍后再试，或通知管理员。"
 
-#: app/admin/templates/print.html:26
+#: app/admin/templates/print.html:29
 msgid "Choose the file"
 msgstr "选择文件"
 
-#: app/admin/templates/print.html:29
+#: app/admin/templates/print.html:32
 msgid "Tap to choose a file"
 msgstr "点击选择文件"
 
-#: app/admin/templates/print.html:30
+#: app/admin/templates/print.html:33
 #, python-format
 msgid "or drag it here · PDF, photo (JPEG, PNG, GIF) or text · at most %(mb)s MB"
 msgstr "或拖放到此处 · PDF、照片（JPEG、PNG、GIF）或文本 · 最大 %(mb)s MB"
 
-#: app/admin/templates/print.html:33
+#: app/admin/templates/print.html:36
 msgid "Choose the printer"
 msgstr "选择打印机"
 
-#: app/admin/templates/print.html:38
+#: app/admin/templates/print.html:41
 #, python-format
 msgid "Test printer (%(name)s)"
 msgstr "测试打印机（%(name)s）"
 
-#: app/admin/templates/print.html:40
+#: app/admin/templates/print.html:43
 msgid "double-sided"
 msgstr "双面"
 
-#: app/admin/templates/print.html:43
+#: app/admin/templates/print.html:46
 msgid "Print options"
 msgstr "打印选项"
 
-#: app/admin/templates/print.html:45
+#: app/admin/templates/print.html:48
 #, python-format
 msgid "What it contains (optional, max %(n)s characters)"
 msgstr "内容说明（可选，最多 %(n)s 个字符）"
 
-#: app/admin/templates/print.html:46
+#: app/admin/templates/print.html:49
 msgid "It stays in the print log, under the file name."
 msgstr "会保留在打印记录中，显示在文件名下方。"
 
-#: app/admin/templates/print.html:47
+#: app/admin/templates/print.html:50
 msgid "Paper size"
 msgstr "纸张尺寸"
 
-#: app/admin/templates/print.html:48
+#: app/admin/templates/print.html:51
 msgid "Automatic"
 msgstr "自动"
 
-#: app/admin/templates/print.html:48
+#: app/admin/templates/print.html:51
 msgid "Portrait"
 msgstr "纵向"
 
-#: app/admin/templates/print.html:48
+#: app/admin/templates/print.html:51
 msgid "Landscape"
 msgstr "横向"
 
-#: app/admin/templates/print.html:49 app/admin/templates/print.html:69
+#: app/admin/templates/print.html:52 app/admin/templates/print.html:53
+#: app/admin/templates/print.html:73
 msgid "Printer default"
 msgstr "打印机默认"
 
-#: app/admin/templates/print.html:49 app/admin/templates/scan.html:37
+#: app/admin/templates/print.html:52 app/admin/templates/scan.html:37
 msgid "In colour"
 msgstr "彩色"
 
-#: app/admin/templates/print.html:49 app/admin/templates/scan.html:37
+#: app/admin/templates/print.html:52 app/admin/templates/scan.html:37
 msgid "Black and white"
 msgstr "黑白"
 
-#: app/admin/templates/print.html:50
+#: app/admin/templates/print.html:53
+msgid "Double-sided, long edge"
+msgstr "双面，长边翻转"
+
+#: app/admin/templates/print.html:53
+msgid "Double-sided, short edge"
+msgstr "双面，短边翻转"
+
+#: app/admin/templates/print.html:54
 msgid "All — or 1,5 or 2-4"
 msgstr "全部 — 或 1,5 或 2-4"
 
-#: app/admin/templates/print.html:51
+#: app/admin/templates/print.html:55
 msgid "fewer"
 msgstr "减少"
 
-#: app/admin/templates/print.html:53
+#: app/admin/templates/print.html:57
 msgid "more"
 msgstr "增加"
 
-#: app/admin/templates/print.html:54
+#: app/admin/templates/print.html:58
 #, python-format
 msgid "at most %(n)s"
 msgstr "最多 %(n)s"
 
-#: app/admin/templates/print.html:58
+#: app/admin/templates/print.html:62
 msgid "It counts as a normal print: same limits and same log. The pages are counted before printing."
 msgstr "按普通打印计算：限额和记录均相同。打印前会先统计页数。"
 
-#: app/admin/templates/print.html:71
+#: app/admin/templates/print.html:75
 msgid "(default)"
 msgstr "（默认）"
 
-#: app/admin/templates/print.html:86
+#: app/admin/templates/print.html:97
 msgid "Sending…"
 msgstr "正在发送…"
-
-#: app/admin/templates/printers.html:2 app/admin/templates/printers.html:4
-msgid "Printers"
-msgstr "打印机"
 
 #: app/admin/templates/printers.html:4
 msgid "data read from the printers; physical ones first, in your own order"
@@ -2975,12 +3418,12 @@ msgstr "%(printer)s 的定期打印"
 msgid "Test print with the printer statistics"
 msgstr "打印带有打印机统计信息的测试页"
 
-#: app/admin/templates/printers.html:33 app/admin/templates/printers.html:89
+#: app/admin/templates/printers.html:33 app/admin/templates/printers.html:107
 #, python-format
 msgid "Test print on %(printer)s"
 msgstr "在 %(printer)s 上测试打印"
 
-#: app/admin/templates/printers.html:41 app/admin/templates/printers.html:66
+#: app/admin/templates/printers.html:41 app/admin/templates/printers.html:84
 msgid "Close (changes nothing)"
 msgstr "关闭（不做任何更改）"
 
@@ -2999,229 +3442,364 @@ msgstr "重命名 %(printer)s？使用旧地址手动配置过它的电脑和手
 
 #: app/admin/templates/printers.html:49
 #, python-format
-msgid "New name of %(printer)s"
+msgid "New name for %(printer)s"
 msgstr "%(printer)s 的新名称"
 
-#: app/admin/templates/printers.html:50
+#: app/admin/templates/printers.html:52
 msgid "Rename"
 msgstr "重命名"
 
-#: app/admin/templates/printers.html:54
+#: app/admin/templates/printers.html:59
+msgid "Names used before"
+msgstr "以前用过的名称"
+
+#: app/admin/templates/printers.html:63
+msgid "Write this name in the field"
+msgstr "将此名称填入输入框"
+
+#: app/admin/templates/printers.html:64
+#, python-format
+msgid "renamed on %(date)s"
+msgstr "于 %(date)s 重命名"
+
+#: app/admin/templates/printers.html:64
+#, python-format
+msgid "removed automatically on %(date)s"
+msgstr "于 %(date)s 自动删除"
+
+#: app/admin/templates/printers.html:64
+#, python-format
+msgid "deleted on %(date)s"
+msgstr "于 %(date)s 删除"
+
+#: app/admin/templates/printers.html:67
+msgid "A new printer that takes the name of a removed one prints again for the computers and phones set up with the old address, and the permissions given to that name apply to it again. A computer set up with the driver of the old model may need to be set up again if the new model is different."
+msgstr "新打印机沿用已移除打印机的名称后，按旧地址设置的电脑和手机就能再次打印，赋予该名称的权限也会重新生效。如果新机型不同，按旧机型驱动设置的电脑可能需要重新设置。"
+
+#: app/admin/templates/printers.html:72
 #, python-format
 msgid "Periodic print active: %(every)s, %(mode)s"
 msgstr "定期打印已启用：%(every)s，%(mode)s"
 
-#: app/admin/templates/printers.html:55
+#: app/admin/templates/printers.html:73
 #, python-format
 msgid "next %(when)s"
 msgstr "下次：%(when)s"
 
-#: app/admin/templates/printers.html:56
+#: app/admin/templates/printers.html:74
 #, python-format
 msgid "last attempt failed: %(error)s"
 msgstr "最近一次尝试失败：%(error)s"
 
-#: app/admin/templates/printers.html:57
+#: app/admin/templates/printers.html:75
 msgid "printer not reachable: I will retry as soon as it answers"
 msgstr "打印机无法连接：一旦响应就会重试"
 
-#: app/admin/templates/printers.html:61
+#: app/admin/templates/printers.html:79
 msgid "Periodic print"
 msgstr "定期打印"
 
-#: app/admin/templates/printers.html:64
+#: app/admin/templates/printers.html:82
 msgid "Turn on the periodic print"
 msgstr "启用定期打印"
 
-#: app/admin/templates/printers.html:64
+#: app/admin/templates/printers.html:82
 msgid "On: click to turn off"
 msgstr "已开启：点击关闭"
 
-#: app/admin/templates/printers.html:64
+#: app/admin/templates/printers.html:82
 msgid "Off: click to turn on"
 msgstr "已关闭：点击开启"
 
-#: app/admin/templates/printers.html:68
+#: app/admin/templates/printers.html:86
 #, python-format
 msgid "A printer left idle for a long time dries its ink or sticks its rollers. With the periodic print the gateway sends <b class=\"mono\">%(printer)s</b> a maintenance page at regular intervals. It applies to all administrators."
 msgstr "打印机长时间闲置会导致墨水变干或进纸辊粘连。启用定期打印后，网关会按固定间隔向 <b class=\"mono\">%(printer)s</b> 发送一页维护页。该设置对所有管理员生效。"
 
-#: app/admin/templates/printers.html:72
+#: app/admin/templates/printers.html:90
 msgid "Every"
 msgstr "每隔"
 
-#: app/admin/templates/printers.html:74 app/policy/keepalive.py:132
+#: app/admin/templates/printers.html:92 app/policy/keepalive.py:132
 msgid "Interval"
 msgstr "间隔"
 
-#: app/admin/templates/printers.html:75
+#: app/admin/templates/printers.html:93
 msgid "Unit"
 msgstr "单位"
 
-#: app/admin/templates/printers.html:75
+#: app/admin/templates/printers.html:93
 msgid "days"
 msgstr "天"
 
-#: app/admin/templates/printers.html:75
+#: app/admin/templates/printers.html:93
 msgid "hours"
 msgstr "小时"
 
-#: app/admin/templates/printers.html:81
+#: app/admin/templates/printers.html:99
 msgid "Print in colour (uses a little of every ink: keeps the colour heads working too)"
 msgstr "彩色打印（会消耗少量各色墨水：同时保持彩色打印头正常工作）"
 
-#: app/admin/templates/printers.html:82
+#: app/admin/templates/printers.html:100
 msgid "This printer does not print in colour: the page will be black and white."
 msgstr "这台打印机不支持彩色打印：该页将为黑白。"
 
-#: app/admin/templates/printers.html:83
+#: app/admin/templates/printers.html:101
 msgid "Between 1 hour and 90 days. “Save” records the settings without turning the program on or off: the switch at the top decides that."
 msgstr "范围为 1 小时到 90 天。“保存”只会记录参数，不会启用或停用该计划：这由顶部的开关决定。"
 
-#: app/admin/templates/printers.html:84
+#: app/admin/templates/printers.html:102
 #, python-format
 msgid "Last change: %(who)s, %(when)s."
 msgstr "最近修改：%(who)s，%(when)s。"
 
-#: app/admin/templates/printers.html:84
+#: app/admin/templates/printers.html:102
 #, python-format
 msgid "Last page printed: %(when)s."
 msgstr "最近打印的页面：%(when)s。"
 
-#: app/admin/templates/printers.html:90
+#: app/admin/templates/printers.html:108
 msgid "Prints a page with all the statistics you see here: state, ink, counters, data from the gateway and device details."
 msgstr "打印一页，包含您在此处看到的所有统计信息：状态、墨水、计数器、网关数据和设备详情。"
 
-#: app/admin/templates/printers.html:90
+#: app/admin/templates/printers.html:108
 msgid "The printer does not answer."
 msgstr "打印机没有响应。"
 
-#: app/admin/templates/printers.html:94
+#: app/admin/templates/printers.html:112
 msgid "Print black and white"
 msgstr "黑白打印"
 
-#: app/admin/templates/printers.html:95
+#: app/admin/templates/printers.html:113
 msgid "This printer does not print in colour"
 msgstr "这台打印机不支持彩色打印"
 
-#: app/admin/templates/printers.html:95
+#: app/admin/templates/printers.html:113
 msgid "Print in colour"
 msgstr "彩色打印"
 
-#: app/admin/templates/printers.html:103
+#: app/admin/templates/printers.html:121
 msgid "The device does not answer on the network: cable unplugged or printer off? The queue still exists in CUPS"
 msgstr "设备在网络上没有响应：线缆被拔掉或打印机已关闭？CUPS 中的队列仍然存在"
 
-#: app/admin/templates/printers.html:111
+#: app/admin/templates/printers.html:124 app/admin/templates/printers.html:208
+msgid "Address of the queue"
+msgstr "队列地址"
+
+#: app/admin/templates/printers.html:124
+#, python-format
+msgid "Address of %(printer)s"
+msgstr "%(printer)s 的地址"
+
+#: app/admin/templates/printers.html:130
 msgid "Applies to all users, also to the accounts of the administrator group"
 msgstr "对所有用户生效，包括 administrator 群组的账户"
 
-#: app/admin/templates/printers.html:111
+#: app/admin/templates/printers.html:130
 msgid "BLOCKED FOR EVERYONE · admins included"
 msgstr "对所有人封锁 · 包括管理员"
 
-#: app/admin/templates/printers.html:112
+#: app/admin/templates/printers.html:131
 msgid "It is not announced on the network: still usable by whoever knows it"
 msgstr "不会在网络中公布：知道它的人仍然可以使用"
 
-#: app/admin/templates/printers.html:112
+#: app/admin/templates/printers.html:131
 msgid "hidden from the network (mDNS)"
 msgstr "已从网络隐藏（mDNS）"
 
-#: app/admin/templates/printers.html:114
+#: app/admin/templates/printers.html:133
 #, python-format
 msgid "Block %(printer)s for EVERYONE, administrators included?"
 msgstr "要对所有人（包括管理员）封锁 %(printer)s 吗？"
 
-#: app/admin/templates/printers.html:116
+#: app/admin/templates/printers.html:135
 msgid "If blocked nobody can print, not even the admins"
 msgstr "封锁后任何人都无法打印，包括管理员"
 
-#: app/admin/templates/printers.html:116
+#: app/admin/templates/printers.html:135
 msgid "Unblock use"
 msgstr "解除封锁"
 
-#: app/admin/templates/printers.html:116
+#: app/admin/templates/printers.html:135
 msgid "Block use"
 msgstr "封锁使用"
 
-#: app/admin/templates/printers.html:120
+#: app/admin/templates/printers.html:139
 msgid "Removes (or restores) the printer from the automatic announcement on the network"
 msgstr "将打印机从网络自动公布中移除（或重新加入）"
 
-#: app/admin/templates/printers.html:120
+#: app/admin/templates/printers.html:139
 msgid "Show on mDNS"
 msgstr "在 mDNS 中显示"
 
-#: app/admin/templates/printers.html:120
+#: app/admin/templates/printers.html:139
 msgid "Hide from mDNS"
 msgstr "从 mDNS 隐藏"
 
-#: app/admin/templates/printers.html:123
+#: app/admin/templates/printers.html:142
 #, python-format
 msgid "Delete the virtual printer %(printer)s? The PDFs already produced stay where they are."
 msgstr "要删除虚拟打印机 %(printer)s 吗？已生成的 PDF 会保留在原处。"
 
-#: app/admin/templates/printers.html:124
+#: app/admin/templates/printers.html:143
 msgid "Only virtual printers can be deleted"
 msgstr "只能删除虚拟打印机"
 
-#: app/admin/templates/printers.html:127
+#: app/admin/templates/printers.html:146
 #, python-format
 msgid "Delete the queue %(printer)s? The printer does not answer. Its settings (block, maintenance print) are forgotten; if it comes back it is added again as a new printer."
 msgstr "删除队列 %(printer)s？该打印机没有响应。其设置（禁用、维护打印）将被忘记；如果它重新连接，会作为新打印机再次添加。"
 
-#: app/admin/templates/printers.html:128
+#: app/admin/templates/printers.html:147
 msgid "The printer does not answer: remove its queue now"
 msgstr "打印机没有响应：立即移除其队列"
 
-#: app/admin/templates/printers.html:128
+#: app/admin/templates/printers.html:147
 msgid "Delete queue"
 msgstr "删除队列"
 
-#: app/admin/templates/printers.html:134
+#: app/admin/templates/printers.html:153
 msgid "The device does not answer (cable unplugged? printer off?): ink and counters are not shown because they would be stale data."
 msgstr "设备没有响应（线缆被拔掉？打印机已关闭？）：因数据已过期，不显示墨水和计数器。"
 
-#: app/admin/templates/printers.html:136
+#: app/admin/templates/printers.html:155
 #, python-format
 msgid "The queue %(name)s will be removed automatically in %(time)s (%(when)s) unless the printer comes back."
 msgstr "如果打印机未恢复，队列 %(name)s 将在 %(time)s 后（%(when)s）自动移除。"
 
-#: app/admin/templates/printers.html:142
+#: app/admin/templates/printers.html:161
 msgid "almost empty"
 msgstr "即将用完"
 
-#: app/admin/templates/printers.html:150
+#: app/admin/templates/printers.html:169
 msgid "Since the printer was born, including prints made without going through the gateway."
 msgstr "自打印机出厂起累计，包括未经过网关的打印。"
 
-#: app/admin/templates/printers.html:155
+#: app/admin/templates/printers.html:174
 msgid "Queue"
 msgstr "队列"
 
-#: app/admin/templates/printers.html:155
+#: app/admin/templates/printers.html:174 app/admin/templates/report.html:35
 #: app/admin/templates/request_quota.html:14 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:17
 msgid "Jobs"
 msgstr "作业"
 
-#: app/admin/templates/printers.html:155
+#: app/admin/templates/printers.html:174
 msgid "Last"
 msgstr "最近"
 
-#: app/admin/templates/printers.html:159
+#: app/admin/templates/printers.html:178
 msgid "Only what went through the gateway (pages counted on successful jobs)."
 msgstr "仅包含经过网关的内容（按成功作业统计页数）。"
 
-#: app/admin/templates/printers.html:172
+#: app/admin/templates/printers.html:191
 #, python-format
 msgid "Alerts: %(list)s"
 msgstr "警告：%(list)s"
 
-#: app/admin/templates/printers.html:185
+#: app/admin/templates/printers.html:204
 msgid "CUPS does not answer or has no queues configured."
 msgstr "CUPS 没有响应，或没有配置任何队列。"
+
+#: app/admin/templates/printers.html:212
+msgid "The address to add the printer by hand on a computer. When it asks, the user enters their user name and a print key."
+msgstr "在电脑上手动添加打印机时使用的地址。系统询问时，用户输入自己的用户名和打印密钥。"
+
+#: app/admin/templates/printers.html:213
+msgid "Address"
+msgstr "地址"
+
+#: app/admin/templates/printers.html:221
+#, python-format
+msgid "Used before: no queue has had this name since %(date)s. Computers set up with this address will print again."
+msgstr "以前用过：自 %(date)s 起没有队列使用此名称。使用此地址设置的电脑将能再次打印。"
+
+#: app/admin/templates/printers.html:222
+msgid "A queue with this name already exists."
+msgstr "已存在同名队列。"
+
+#: app/admin/templates/printers.html:223
+msgid "That is already its name."
+msgstr "这已经是它的名称。"
+
+#: app/admin/templates/printers.html:224
+msgid "Letters, digits and . _ @ + - only."
+msgstr "只能使用字母、数字和 . _ @ + -"
+
+#: app/admin/templates/report.html:5
+msgid "Usage report"
+msgstr "使用情况报表"
+
+#: app/admin/templates/report.html:6
+msgid "Who printed most in a period. It counts the prints that used paper (completed, waiting or running); scans are not included. Prints that were already moved to the compressed archive are not in the report."
+msgstr "统计某段时间内打印最多的人。计入用掉纸张的打印（已完成、等待中或进行中）；不含扫描。已移入压缩归档的打印不在报表中。"
+
+#: app/admin/templates/report.html:9 app/admin/templates/requests.html:83
+#: app/admin/templates/requests.html:194
+msgid "From"
+msgstr "起始"
+
+#: app/admin/templates/report.html:10
+msgid "To (included)"
+msgstr "到（含）"
+
+#: app/admin/templates/report.html:11
+msgid "Show the first … users"
+msgstr "显示前 … 位用户"
+
+#: app/admin/templates/report.html:13
+msgid "Detailed report: also how many prints each user made on each printer"
+msgstr "详细报表：同时列出每位用户在每台打印机上的打印数"
+
+#: app/admin/templates/report.html:16
+msgid "Leave out these groups"
+msgstr "排除这些组"
+
+#: app/admin/templates/report.html:21
+msgid "Show"
+msgstr "显示"
+
+#: app/admin/templates/report.html:22
+msgid "Download CSV"
+msgstr "下载 CSV"
+
+#: app/admin/templates/report.html:23
+msgid "Download PDF"
+msgstr "下载 PDF"
+
+#: app/admin/templates/report.html:25
+msgid "The PDF is in English and can only show Western letters (other characters appear as ?): the CSV has every name as it is."
+msgstr "PDF 为英文，只能显示西文字母（其他字符显示为 ?）：CSV 中保留每个名字的原样。"
+
+#: app/admin/templates/report.html:30
+msgid "The period reaches back before the oldest row of the active audit: older prints are in the archive and are not counted here."
+msgstr "该时间段早于当前审计中最早的记录：更早的打印在归档中，此处不计入。"
+
+#: app/admin/templates/report.html:31
+#, python-format
+msgid "%(n)s user"
+msgid_plural "%(n)s users"
+msgstr[0] "%(n)s 位用户"
+
+#: app/admin/templates/report.html:31
+#, python-format
+msgid "%(jobs)s jobs"
+msgstr "%(jobs)s 个作业"
+
+#: app/admin/templates/report.html:31
+#, python-format
+msgid "%(pages)s pages"
+msgstr "%(pages)s 页"
+
+#: app/admin/templates/report.html:32
+#, python-format
+msgid "only the first %(top)s are listed"
+msgstr "仅列出前 %(top)s 位"
+
+#: app/admin/templates/report.html:41
+msgid "No prints in this period."
+msgstr "该时间段内没有打印。"
 
 #: app/admin/templates/request_group.html:2
 msgid "Group change"
@@ -3236,14 +3814,43 @@ msgstr "您当前所在群组：<b>%(group)s</b>。群组决定您的限额。"
 msgid "No group is available for this request."
 msgstr "没有可用于此申请的群组。"
 
+#: app/admin/templates/request_group.html:13
+#: app/admin/templates/request_permission.html:22
+#: app/admin/templates/request_quota.html:23
+msgid "optional"
+msgstr "可选"
+
 #: app/admin/templates/request_group.html:14
 msgid "Why do you need to change group?"
 msgstr "您为什么需要更换群组？"
 
 #: app/admin/templates/request_group.html:15
+#: app/admin/templates/request_permission.html:24
 #: app/admin/templates/request_quota.html:25
 msgid "Send the request"
 msgstr "提交申请"
+
+#: app/admin/templates/request_permission.html:2
+#: app/admin/templates/request_permission.html:5
+msgid "Ask for a permission"
+msgstr "申请权限"
+
+#: app/admin/templates/request_permission.html:7
+msgid "There is nothing to ask for: you already have every permission, or you are waiting for the answer to what you asked."
+msgstr "没有可申请的内容：你已拥有所有权限，或正在等待已提交申请的答复。"
+
+#: app/admin/templates/request_permission.html:10
+#, python-format
+msgid "You can have at most %(n)s open requests. An administrator will review it and choose whether it lasts for good or until a date."
+msgstr "你最多可以有 %(n)s 个未处理的申请。管理员会审核，并决定永久有效还是到某个日期为止。"
+
+#: app/admin/templates/request_permission.html:19
+msgid "Only needed when you ask for a printer."
+msgstr "仅在申请打印机时需要。"
+
+#: app/admin/templates/request_permission.html:23
+msgid "Why do you need it? (e.g. printing the posters for the fair in colour)"
+msgstr "为什么需要？（例如：为展会彩色打印海报）"
 
 #: app/admin/templates/request_quota.html:7
 msgid "No limit applies to you: there is nothing to ask for."
@@ -3287,7 +3894,7 @@ msgstr "申请"
 msgid "Pending requests"
 msgstr "待处理申请"
 
-#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:37
+#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:181
 msgid "Request"
 msgstr "申请"
 
@@ -3300,41 +3907,164 @@ msgstr "处理"
 msgid "expires on %(date)s"
 msgstr "%(date)s 到期"
 
-#: app/admin/templates/requests.html:18
+#: app/admin/templates/requests.html:12 app/admin/templates/requests.html:108
+msgid "temporary (until the end of the period)"
+msgstr "临时（至周期结束）"
+
+#: app/admin/templates/requests.html:13
+msgid "Show the reason"
+msgstr "显示理由"
+
+#: app/admin/templates/requests.html:13
+#, python-format
+msgid "Show the reason of %(user)s"
+msgstr "显示 %(user)s 的理由"
+
+#: app/admin/templates/requests.html:19
+msgid "Amount"
+msgstr "数量"
+
+#: app/admin/templates/requests.html:19
 msgid "amount (you can change it)"
 msgstr "数量（可修改）"
 
-#: app/admin/templates/requests.html:21
-msgid "note (optional)"
-msgstr "备注（可选）"
+#: app/admin/templates/requests.html:20 app/admin/templates/requests.html:27
+msgid "Duration"
+msgstr "期限"
 
-#: app/admin/templates/requests.html:22
+#: app/admin/templates/requests.html:29 app/admin/templates/requests.html:119
+msgid "until the end of…"
+msgstr "到…结束"
+
+#: app/admin/templates/requests.html:31 app/admin/templates/requests.html:120
+msgid "last day the permission is valid"
+msgstr "权限有效的最后一天"
+
+#: app/admin/templates/requests.html:34
+msgid "Note for the user (optional)"
+msgstr "给用户的备注（可选）"
+
+#: app/admin/templates/requests.html:36
 msgid "Approve"
 msgstr "批准"
 
-#: app/admin/templates/requests.html:26
-msgid "reason for the refusal"
-msgstr "拒绝原因"
-
-#: app/admin/templates/requests.html:27
+#: app/admin/templates/requests.html:37
 msgid "Reject"
 msgstr "拒绝"
 
-#: app/admin/templates/requests.html:31
+#: app/admin/templates/requests.html:42
 msgid "No pending requests."
 msgstr "没有待处理的申请。"
 
-#: app/admin/templates/requests.html:35
+#: app/admin/templates/requests.html:80
+msgid "Active grants"
+msgstr "有效的额度授予"
+
+#: app/admin/templates/requests.html:81
+msgid "Quota added on top of the limit, and permissions (colour, one-sided, a printer, any hours) added on top of what the group allows. The print history is never modified. Temporary quota ends with the period of the user's limit."
+msgstr "在限额之外增加的额度，以及在所属组允许范围之外增加的权限（彩色、单面、某台打印机、任意时段）。打印历史不会被修改。临时额度随用户限额的周期结束。"
+
+#: app/admin/templates/requests.html:83 app/admin/templates/requests.html:194
+msgid "Type"
+msgstr "类型"
+
+#: app/admin/templates/requests.html:83 app/admin/templates/requests.html:194
+msgid "Until"
+msgstr "截止"
+
+#: app/admin/templates/requests.html:83 app/admin/templates/requests.html:181
+#: app/admin/templates/requests.html:194
+msgid "By"
+msgstr "操作人"
+
+#: app/admin/templates/requests.html:87 app/admin/templates/requests.html:89
+#: app/admin/templates/requests.html:198 app/admin/templates/requests.html:200
+msgid "no expiry"
+msgstr "无期限"
+
+#: app/admin/templates/requests.html:91
+msgid "Revoke this grant?"
+msgstr "要撤销此额度授予吗？"
+
+#: app/admin/templates/requests.html:92 app/admin/templates/requests.html:202
+msgid "No grants."
+msgstr "没有额度授予。"
+
+#: app/admin/templates/requests.html:95
+msgid "Grant without a request"
+msgstr "无需申请直接授予"
+
+#: app/admin/templates/requests.html:99
+msgid "What to grant"
+msgstr "授予什么"
+
+#: app/admin/templates/requests.html:100
+msgid "quota"
+msgstr "额度"
+
+#: app/admin/templates/requests.html:100
+msgid "a permission"
+msgstr "一项权限"
+
+#: app/admin/templates/requests.html:103
+msgid "Quota"
+msgstr "配额"
+
+#: app/admin/templates/requests.html:104
+msgid "This user has no quota limit (unlimited): there is nothing to add."
+msgstr "该用户没有配额限制（不限量）：无需添加。"
+
+#: app/admin/templates/requests.html:107
+msgid "amount"
+msgstr "数量"
+
+#: app/admin/templates/requests.html:112
+msgid "Permission"
+msgstr "权限"
+
+#: app/admin/templates/requests.html:113
+msgid "This user already has every permission: there is nothing to grant."
+msgstr "该用户已拥有所有权限：没有可授予的内容。"
+
+#: app/admin/templates/requests.html:124
+msgid "note"
+msgstr "备注"
+
+#: app/admin/templates/requests.html:125
+msgid "Grant"
+msgstr "授予"
+
+#: app/admin/templates/requests.html:178
+msgid "History"
+msgstr "历史"
+
+#: app/admin/templates/requests.html:178
+msgid "(decisions and grants that no longer count)"
+msgstr "（已不再生效的决定和额度授予）"
+
+#: app/admin/templates/requests.html:179
 msgid "Latest decisions"
 msgstr "最近的处理结果"
 
-#: app/admin/templates/requests.html:37
+#: app/admin/templates/requests.html:181
 msgid "Note"
 msgstr "备注"
 
-#: app/admin/templates/requests.html:42
+#: app/admin/templates/requests.html:186
 msgid "None yet."
 msgstr "暂无。"
+
+#: app/admin/templates/requests.html:189
+msgid "Ended and revoked grants"
+msgstr "已结束和已撤销的额度授予"
+
+#: app/admin/templates/requests.html:190
+msgid "Delete every ended or revoked grant? Active grants are not touched; the administrators' log keeps the history."
+msgstr "删除所有已结束或已撤销的额度授予？有效的不受影响；管理员日志会保留历史记录。"
+
+#: app/admin/templates/requests.html:191
+msgid "Delete ended grants"
+msgstr "删除已结束的额度授予"
 
 #: app/admin/templates/scan.html:5
 msgid "The folder chooser opens when you press \"Scan\"."
@@ -3509,55 +4239,55 @@ msgstr "更喜欢用终端？"
 msgid "I copied the value, continue"
 msgstr "我已复制该值，继续"
 
-#: app/admin/templates/settings.html:9
+#: app/admin/templates/settings.html:10
 msgid "Appearance"
 msgstr "外观"
 
-#: app/admin/templates/settings.html:11
+#: app/admin/templates/settings.html:12
 msgid "Theme"
 msgstr "主题"
 
-#: app/admin/templates/settings.html:16 app/admin/templates/settings.html:18
+#: app/admin/templates/settings.html:17 app/admin/templates/settings.html:19
 msgid "Language"
 msgstr "语言"
 
-#: app/admin/templates/settings.html:19
+#: app/admin/templates/settings.html:20
 msgid "Automatic (as the browser)"
 msgstr "自动（跟随浏览器）"
 
-#: app/admin/templates/settings.html:27
+#: app/admin/templates/settings.html:28
 msgid "Audit: automatic refresh"
 msgstr "审计：自动刷新"
 
-#: app/admin/templates/settings.html:28
+#: app/admin/templates/settings.html:29
 msgid "How many seconds between the automatic reloads of the Audit page while its switch is on (it does not reload while you type in the filters or have a popup open). With 0 the switch starts off, and uses 30 seconds when you turn it on."
 msgstr "审计页面的开关开启时，两次自动重新加载之间相隔多少秒（在筛选框中输入或打开弹窗时不会重新加载）。设为 0 时开关默认关闭，开启后使用 30 秒。"
 
-#: app/admin/templates/settings.html:30
+#: app/admin/templates/settings.html:31
 msgid "Seconds"
 msgstr "秒"
 
-#: app/admin/templates/settings.html:30
+#: app/admin/templates/settings.html:31
 msgid "seconds"
 msgstr "秒"
 
-#: app/admin/templates/settings.html:39
+#: app/admin/templates/settings.html:40
 msgid "current password"
 msgstr "当前密码"
 
-#: app/admin/templates/settings.html:40
+#: app/admin/templates/settings.html:41
 msgid "new password (min. 12)"
 msgstr "新密码（至少 12 位）"
 
-#: app/admin/templates/settings.html:41
+#: app/admin/templates/settings.html:42
 msgid "repeat the new one"
 msgstr "再次输入新密码"
 
-#: app/admin/templates/settings.html:43
+#: app/admin/templates/settings.html:44
 msgid "Other sessions open with this account will be closed. Print keys stay valid."
 msgstr "使用此账户打开的其他会话将被关闭。打印密钥仍然有效。"
 
-#: app/admin/templates/settings.html:46
+#: app/admin/templates/settings.html:47
 msgid "Your password is managed by the RADIUS server: it cannot be changed here."
 msgstr "您的密码由 RADIUS 服务器管理，无法在此处修改。"
 
@@ -3644,63 +4374,66 @@ msgid "%(provider)s (password on the server)"
 msgstr "%(provider)s（密码保存在服务器上）"
 
 #: app/admin/templates/user_edit.html:11
-#, python-format
-msgid "%(provider)s (not available)"
-msgstr "%(provider)s（不可用）"
+msgid "Shown for information: the way this account signs in is set when it is created."
+msgstr "仅供参考：此账户的登录方式在创建时确定。"
 
-#: app/admin/templates/user_edit.html:12
-msgid "From RADIUS to local generates a temporary password; from local to RADIUS deletes the password stored here."
-msgstr "从 RADIUS 改为本地会生成临时密码；从本地改为 RADIUS 会删除此处保存的密码。"
-
-#: app/admin/templates/user_edit.html:17
+#: app/admin/templates/user_edit.html:16
 #, python-format
 msgid "“%(group)s” is reserved for administrators: it changes by itself with the flag below."
 msgstr "“%(group)s”为管理员专用：会随下面的选项自动变化。"
 
-#: app/admin/templates/user_edit.html:19
+#: app/admin/templates/user_edit.html:18
 msgid "Administrator"
 msgstr "管理员"
 
-#: app/admin/templates/user_edit.html:19
+#: app/admin/templates/user_edit.html:18
 msgid "can use the administration panel"
 msgstr "可以使用管理面板"
 
-#: app/admin/templates/user_edit.html:20 app/admin/templates/user_edit.html:22
+#: app/admin/templates/user_edit.html:19 app/admin/templates/user_edit.html:21
 msgid "inherit"
 msgstr "继承"
 
-#: app/admin/templates/user_edit.html:21 app/admin/templates/user_edit.html:23
+#: app/admin/templates/user_edit.html:20 app/admin/templates/user_edit.html:22
 msgid "empty = inherit from the group"
 msgstr "留空 = 继承群组设置"
 
-#: app/admin/templates/user_edit.html:21 app/admin/templates/user_edit.html:23
+#: app/admin/templates/user_edit.html:20 app/admin/templates/user_edit.html:22
 #, python-format
 msgid "<span class=\"extra\">+%(n)s</span> granted"
 msgstr "已授予 <span class=\"extra\">+%(n)s</span>"
 
-#: app/admin/templates/user_edit.html:25 app/admin/templates/users.html:9
+#: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:20
 msgid "Usage"
 msgstr "用量"
 
-#: app/admin/templates/user_edit.html:25
+#: app/admin/templates/user_edit.html:24
 msgid "no limit"
 msgstr "无限制"
 
+#: app/admin/templates/user_edit.html:28
+msgid "Permissions granted after a request or directly:"
+msgstr "经申请或直接授予的权限："
+
 #: app/admin/templates/user_edit.html:30
+msgid "manage"
+msgstr "管理"
+
+#: app/admin/templates/user_edit.html:35
 msgid "Other actions"
 msgstr "其他操作"
 
-#: app/admin/templates/user_edit.html:34
+#: app/admin/templates/user_edit.html:39
 #, python-format
 msgid "Generate a new temporary password for %(user)s?"
 msgstr "要为 %(user)s 生成新的临时密码吗？"
 
-#: app/admin/templates/user_edit.html:35
+#: app/admin/templates/user_edit.html:40
 msgid "Reset password"
 msgstr "重置密码"
 
-#: app/admin/templates/user_edit.html:37
+#: app/admin/templates/user_edit.html:42
 msgid "Delete account…"
 msgstr "删除账户…"
 
@@ -3928,81 +4661,98 @@ msgstr "将超出%(period)s页数限额（已用 %(used)s，此文档 %(pages)s�
 msgid "%(period)s %(noun)s limit reached (%(used)s/%(limit)s)"
 msgstr "已达到%(period)s%(noun)s限额（%(used)s/%(limit)s）"
 
-#: app/policy/grants.py:45
+#: app/policy/grants.py:51
 msgid "The reason is required"
 msgstr "必须填写原因"
 
-#: app/policy/grants.py:47
+#: app/policy/grants.py:53
 #, python-format
 msgid "The reason is too long (max %(max)s characters)"
 msgstr "原因过长（最多 %(max)s 个字符）"
 
-#: app/policy/grants.py:48
+#: app/policy/grants.py:54
 #, python-format
 msgid "The note is too long (max %(max)s characters)"
 msgstr "备注过长（最多 %(max)s 个字符）"
 
-#: app/policy/grants.py:76
+#: app/policy/grants.py:82
 msgid "account disabled"
 msgstr "账户已停用"
 
-#: app/policy/grants.py:78
+#: app/policy/grants.py:84
 #, python-format
 msgid "you already have %(n)s open requests: wait for an answer or cancel one"
 msgstr "您已有 %(n)s 个未处理的申请：请等待答复或取消其中一个"
 
-#: app/policy/grants.py:92
+#: app/policy/grants.py:98 app/policy/grants.py:121
 msgid "invalid request"
 msgstr "申请无效"
 
-#: app/policy/grants.py:94 app/policy/grants.py:166 app/policy/grants.py:207
+#: app/policy/grants.py:100 app/policy/grants.py:229 app/policy/grants.py:275
 #, python-format
 msgid "the amount must be between 1 and %(max)s"
 msgstr "数量必须在 1 到 %(max)s 之间"
 
-#: app/policy/grants.py:96
+#: app/policy/grants.py:102
 #, python-format
 msgid "no %(metric)s limit applies to you, there is nothing to ask for"
 msgstr "您没有%(metric)s限额：无需申请"
 
-#: app/policy/grants.py:105
+#: app/policy/grants.py:111
 msgid "that group can not be requested"
 msgstr "无法申请该群组"
 
-#: app/policy/grants.py:107
+#: app/policy/grants.py:113
 msgid "you are already in that group"
 msgstr "您已在该群组中"
 
-#: app/policy/grants.py:114
+#: app/policy/grants.py:126
+msgid "invalid printer name"
+msgstr "打印机名称无效"
+
+#: app/policy/grants.py:137
+msgid "you already have this permission"
+msgstr "你已拥有此权限"
+
+#: app/policy/grants.py:142
+msgid "you already asked for this: wait for the answer"
+msgstr "你已申请过：请等待答复"
+
+#: app/policy/grants.py:148
 msgid "not your request"
 msgstr "这不是您的申请"
 
-#: app/policy/grants.py:120 app/policy/grants.py:159 app/policy/grants.py:194
+#: app/policy/grants.py:154 app/policy/grants.py:222 app/policy/grants.py:262
 msgid "the request was already decided"
 msgstr "该申请已处理"
 
-#: app/policy/grants.py:135
+#: app/policy/grants.py:169
 #, python-format
 msgid "no %(metric)s limit applies to %(user)s any more: nothing to extend"
 msgstr "%(user)s 不再有%(metric)s限额：无需增加"
 
-#: app/policy/grants.py:150
+#: app/policy/grants.py:197
+msgid "the end date must be in the future"
+msgstr "截止日期必须在将来"
+
+#: app/policy/grants.py:213
 msgid "the user is disabled"
 msgstr "用户已停用"
 
-#: app/policy/grants.py:153
+#: app/policy/grants.py:216
 msgid "the request has expired"
 msgstr "申请已过期"
 
-#: app/policy/grants.py:175
+#: app/policy/grants.py:243
 msgid "the requested group no longer exists"
 msgstr "所申请的群组已不存在"
 
-#: app/policy/grants.py:205
-msgid "invalid grant"
-msgstr "额度授予无效"
+#: app/policy/grants.py:289
+#, python-format
+msgid "%(user)s already has this permission"
+msgstr "%(user)s 已拥有此权限"
 
-#: app/policy/grants.py:221
+#: app/policy/grants.py:304 app/policy/grants.py:315
 msgid "the grant was already revoked"
 msgstr "该额度授予已被撤销"
 
@@ -4100,6 +4850,57 @@ msgstr "页面范围过多"
 msgid "The document has only %(n)s page"
 msgid_plural "The document has only %(n)s pages"
 msgstr[0] "文档只有 %(n)s 页"
+
+#: app/policy/permissions.py:43
+msgid "Mon"
+msgstr "周一"
+
+#: app/policy/permissions.py:43
+msgid "Tue"
+msgstr "周二"
+
+#: app/policy/permissions.py:43
+msgid "Wed"
+msgstr "周三"
+
+#: app/policy/permissions.py:43
+msgid "Thu"
+msgstr "周四"
+
+#: app/policy/permissions.py:43
+msgid "Fri"
+msgstr "周五"
+
+#: app/policy/permissions.py:43
+msgid "Sat"
+msgstr "周六"
+
+#: app/policy/permissions.py:43
+msgid "Sun"
+msgstr "周日"
+
+#: app/policy/permissions.py:250
+#, python-format
+msgid "printer %(printer)s"
+msgstr "打印机 %(printer)s"
+
+#: app/policy/permissions.py:365
+#, python-format
+msgid "printing on %(printer)s is not allowed for this account"
+msgstr "此账户不允许在 %(printer)s 上打印"
+
+#: app/policy/permissions.py:369
+#, python-format
+msgid "printing is allowed only %(window)s"
+msgstr "只允许在 %(window)s 打印"
+
+#: app/policy/permissions.py:376
+msgid "colour printing is not allowed for this account"
+msgstr "此账户不允许彩色打印"
+
+#: app/policy/permissions.py:388
+msgid "one-sided printing is not allowed for this account"
+msgstr "此账户不允许单面打印"
 
 #: app/policy/rules.py:19
 #, python-format

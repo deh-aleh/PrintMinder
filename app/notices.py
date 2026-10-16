@@ -108,20 +108,42 @@ def pending(kind: str, key: str) -> int:
 MAX_OPEN_PER_USER = 100
 
 
-def notify_user(sm, user_id: int, kind: str, detail: dict | None = None) -> None:
+def notify_user(sm, user_id: int, kind: str, detail: dict | None = None, key: str | None = None) -> None:
     """A notice for one user (their own bell). Every event is written, no rate limit: these are things an administrator
-    just did to the user's keys. The list per user is capped, the oldest open ones are closed first."""
+    just did to the user's account. The list per user is capped, the oldest open ones are closed first.
+    `key`: what the notice is about (default: the key prefix of the detail), used to find it again."""
     when = datetime.now(timezone.utc)
     with sm() as db:
         open_rows = list(db.scalars(select(Notice).where(Notice.user_id == user_id, Notice.dismissed_at.is_(None))
                                     .order_by(Notice.id)))
         for old in open_rows[:max(0, len(open_rows) - MAX_OPEN_PER_USER + 1)]:
             old.dismissed_at, old.dismissed_by = when, "system"
-        db.add(Notice(kind=kind, key=str((detail or {}).get("prefix", ""))[:128], user_id=user_id, first_at=when, last_at=when,
+        db.add(Notice(kind=kind, key=(key if key is not None else str((detail or {}).get("prefix", "")))[:128], user_id=user_id, first_at=when, last_at=when,
                       count=1, detail_json=detail))
         for old in db.scalars(select(Notice).where(Notice.dismissed_at < when - KEEP_DISMISSED)):
             db.delete(old)
         db.commit()
+
+
+def notify_user_once(sm, user_id: int, kind: str, key: str, detail: dict | None = None) -> bool:
+    """Like notify_user, but not again while an open notice of this kind and subject exists. True when one was written."""
+    with sm() as db:
+        if db.scalar(select(func.count(Notice.id)).where(Notice.user_id == user_id, Notice.kind == kind, Notice.key == key[:128],
+                                                         Notice.dismissed_at.is_(None))):
+            return False
+    notify_user(sm, user_id, kind, detail, key=key)
+    return True
+
+
+def resolve_users(sm, kind: str, key: str) -> int:
+    """Close the personal notices of this kind and subject (the problem they told about is gone). Returns how many."""
+    with sm() as db:
+        rows = list(db.scalars(select(Notice).where(Notice.user_id.is_not(None), Notice.kind == kind, Notice.key == key[:128],
+                                                    Notice.dismissed_at.is_(None))))
+        for row in rows:
+            row.dismissed_at, row.dismissed_by = datetime.now(timezone.utc), "system"
+        db.commit()
+    return len(rows)
 
 
 def unseen_count(sm, user_id: int, own: bool = False) -> int:

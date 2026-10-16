@@ -1,23 +1,29 @@
-"""Requests for more quota / another group, and the grants that approvals produce.
+"""Requests for more quota / another group / a permission, and the grants that approvals produce.
 
 A grant ADDS to the user's limit; it never edits job_log. Temporary grants end with the period of the rule that
 limits the user (decided by the admin in the database, never by the user); permanent ones apply to every
 following period until revoked.
+
+A permission grant (colour, one-sided, one more printer, any hours) is a different thing: it ends on a date the
+administrator chooses (the end of that day in the portal's time zone) or never. `permissions.effective` adds the
+ones that are active to what the user's group and own rule give.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from app.i18n import _
 from app.audit.adminlog import record
 from app.config import settings
 from app.db.models import (
-    Group, Metric, QuotaGrant, QuotaRequest, RequestKind, RequestScope, RequestStatus, Resource, User,
+    Group, Metric, PermissionGrant, QuotaGrant, QuotaRequest, RequestKind, RequestScope, RequestStatus, Resource, User,
 )
+from app.policy import permissions
 from app.policy.engine import active_grants, effective_rules, usage, window_end
+from app.policy.ordering import key as queue_key
 
 MAX_AMOUNT = 100_000
 MAX_TEXT = 500
@@ -96,7 +102,7 @@ def create_quota_request(session: Session, user: User, metric: str, amount: int,
         raise RequestError(_("no %(metric)s limit applies to you, there is nothing to ask for", metric=_(m.value)))
     # NB: the period is deliberately not a parameter. It comes from the rule the admin set.
     return _new_request(session, user, RequestKind.quota, sc, {"metric": m.value, "amount": amount},
-                        _clean(reason, "reason"), now)
+                        _clean(reason, "reason", settings.request_reason_required), now)
 
 
 def create_group_request(session: Session, user: User, target_group_id: int, reason: str, now: datetime) -> QuotaRequest:
@@ -106,7 +112,35 @@ def create_group_request(session: Session, user: User, target_group_id: int, rea
     if user.group_id == group.id:
         raise RequestError(_("you are already in that group"))
     return _new_request(session, user, RequestKind.group_change, None, {"target_group_id": group.id},
-                        _clean(reason, "reason"), now)
+                        _clean(reason, "reason", settings.request_reason_required), now)
+
+
+def _permission_params(perm: str, printer: str | None) -> tuple[str, str | None]:
+    """Check what a permission is about and return it in its stored form (`printer` lower-case, and only for "printer")."""
+    if perm not in permissions.GRANTABLE:
+        raise RequestError(_("invalid request"))
+    if perm != "printer":
+        return perm, None
+    name = (printer or "").strip()
+    if not permissions.NAME_RE.match(name):
+        raise RequestError(_("invalid printer name"))
+    return perm, queue_key(name)
+
+
+def create_permission_request(session: Session, user: User, perm: str, printer: str | None, reason: str,
+                              now: datetime) -> QuotaRequest:
+    """The user asks for colour, one-sided printing, one more printer or printing at any hour. Refused when they have it
+    already, or have asked for the same and wait for the answer."""
+    perm, printer = _permission_params(perm, printer)
+    reason = _clean(reason, "reason", settings.request_reason_required)
+    if permissions.has_permission(permissions.effective(session, user, now), perm, printer):
+        raise RequestError(_("you already have this permission"))
+    waiting = session.scalars(select(QuotaRequest).where(
+        QuotaRequest.user_id == user.id, QuotaRequest.kind == RequestKind.permission,
+        QuotaRequest.status == RequestStatus.pending, QuotaRequest.expires_at > now))
+    if any((r.params_json or {}).get("perm") == perm and (r.params_json or {}).get("printer") == printer for r in waiting):
+        raise RequestError(_("you already asked for this: wait for the answer"))
+    return _new_request(session, user, RequestKind.permission, None, {"perm": perm, "printer": printer}, reason, now)
 
 
 def cancel_request(session: Session, req: QuotaRequest, user: User, now: datetime) -> None:
@@ -140,10 +174,39 @@ def _make_grant(session: Session, user: User, metric: Metric, amount: int, scope
     return grant
 
 
+def end_of_day(day: date, tz: ZoneInfo) -> datetime:
+    """The moment the given date is over in `tz` (UTC), so "until 2026-11-30" includes the whole of the 30th."""
+    return datetime.combine(day + timedelta(days=1), time.min, tzinfo=tz).astimezone(timezone.utc)
+
+
+def last_day(valid_until: datetime | None, tz: ZoneInfo) -> str | None:
+    """The date to show for the end of a permission grant, 'YYYY-MM-DD': it is valid through the whole of that day.
+    None = no end."""
+    if valid_until is None:
+        return None
+    return (_aware(valid_until).astimezone(tz) - timedelta(seconds=1)).date().isoformat()
+
+
+def _make_permission_grant(session: Session, user: User, perm: str, printer: str | None, until: date | None, admin: User,
+                           now: datetime, tz: ZoneInfo, request_id: int | None, note: str | None) -> PermissionGrant:
+    perm, printer = _permission_params(perm, printer)
+    end = None
+    if until is not None:
+        end = end_of_day(until, tz)
+        if end <= now:
+            raise RequestError(_("the end date must be in the future"))
+    grant = PermissionGrant(user_id=user.id, perm=perm, printer=printer, valid_from=now, valid_until=end,
+                            request_id=request_id, granted_by=admin.id, note=note, created_at=now)
+    session.add(grant)
+    return grant
+
+
 def approve_request(session: Session, req: QuotaRequest, admin: User, now: datetime, tz: ZoneInfo,
-                    amount: int | None = None, scope: str | None = None, note: str = "") -> QuotaGrant | None:
+                    amount: int | None = None, scope: str | None = None, note: str = "",
+                    until: date | None = None) -> QuotaGrant | PermissionGrant | None:
     """Idempotent: the status flip is a single conditional UPDATE, so a double click or two admins at once
-    grant once. The admin may change amount and scope of a quota request before approving."""
+    grant once. The admin may change amount and scope of a quota request before approving. `until`: for a permission
+    request, the last day it is valid (None = permanent)."""
     note = _clean(note, "note", required=False)
     user = session.get(User, req.user_id)
     if user is None or not user.enabled:
@@ -169,6 +232,11 @@ def approve_request(session: Session, req: QuotaRequest, admin: User, now: datet
             record(session, admin, "request.approve", "quota_request", req.id, user=user.username, kind="quota",
                    metric=metric.value, amount=amt, scope=sc.value, requested_amount=req.params_json["amount"],
                    requested_scope=req.scope.value)
+        elif req.kind is RequestKind.permission:
+            grant = _make_permission_grant(session, user, req.params_json["perm"], req.params_json.get("printer"), until,
+                                           admin, now, tz, req.id, note or None)
+            record(session, admin, "request.approve", "quota_request", req.id, user=user.username, kind="permission",
+                   perm=grant.perm, printer=grant.printer, until=until.isoformat() if until else None)
         else:
             group = session.get(Group, req.params_json["target_group_id"])
             if group is None:
@@ -213,6 +281,32 @@ def create_grant(session: Session, admin: User, user: User, metric: str, amount:
     return grant
 
 
+def create_permission_grant(session: Session, admin: User, user: User, perm: str, printer: str | None, until: date | None,
+                            note: str, now: datetime, tz: ZoneInfo) -> PermissionGrant:
+    """A permission the admin hands out without a request. `until`: the last day it is valid (None = permanent)."""
+    perm, printer = _permission_params(perm, printer)
+    if permissions.has_permission(permissions.effective(session, user, now), perm, printer):
+        raise RequestError(_("%(user)s already has this permission", user=user.username))
+    grant = _make_permission_grant(session, user, perm, printer, until, admin, now, tz, None,
+                                   _clean(note, "note", required=False) or None)
+    session.flush()
+    record(session, admin, "grant.create", "permission_grant", grant.id, user=user.username, perm=grant.perm,
+           printer=grant.printer, until=until.isoformat() if until else None)
+    session.commit()
+    return grant
+
+
+def revoke_permission_grant(session: Session, grant: PermissionGrant, admin: User, now: datetime) -> None:
+    done = session.execute(_update(PermissionGrant).where(PermissionGrant.id == grant.id, PermissionGrant.revoked_at.is_(None))
+                           .values(revoked_at=now, revoked_by=admin.id))
+    if done.rowcount != 1:
+        session.rollback()
+        raise RequestError(_("the grant was already revoked"))
+    record(session, admin, "grant.revoke", "permission_grant", grant.id, user_id=grant.user_id, perm=grant.perm,
+           printer=grant.printer)
+    session.commit()
+
+
 def revoke_grant(session: Session, grant: QuotaGrant, admin: User, now: datetime) -> None:
     done = session.execute(_update(QuotaGrant).where(QuotaGrant.id == grant.id, QuotaGrant.revoked_at.is_(None))
                            .values(revoked_at=now, revoked_by=admin.id))
@@ -221,3 +315,19 @@ def revoke_grant(session: Session, grant: QuotaGrant, admin: User, now: datetime
         raise RequestError(_("the grant was already revoked"))
     record(session, admin, "grant.revoke", "quota_grant", grant.id, user_id=grant.user_id, metric=grant.metric.value)
     session.commit()
+
+
+def purge_ended(session: Session, admin: User, now: datetime) -> int:
+    """Delete the grants that count no more (quota and permission): revoked, or whose end has passed. Active ones are
+    never touched. Recorded in the administrators' log (with how many of each kind), which keeps the history of every
+    grant anyway. Returns the total."""
+    quota = session.execute(delete(QuotaGrant).where(
+        QuotaGrant.revoked_at.is_not(None) | (QuotaGrant.valid_until.is_not(None) & (QuotaGrant.valid_until <= now)),
+    ).execution_options(synchronize_session=False)).rowcount
+    perm = session.execute(delete(PermissionGrant).where(
+        PermissionGrant.revoked_at.is_not(None) | (PermissionGrant.valid_until.is_not(None) & (PermissionGrant.valid_until <= now)),
+    ).execution_options(synchronize_session=False)).rowcount
+    if quota or perm:
+        record(session, admin, "grant.purge", "quota_grant", None, count=quota + perm, quota=quota, permission=perm)
+    session.commit()
+    return quota + perm

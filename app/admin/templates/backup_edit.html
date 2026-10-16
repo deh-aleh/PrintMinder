@@ -19,6 +19,6 @@
     <dt>{{ _("Encryption") }}</dt><dd>{{ {'none': _('none'), 'passphrase': _('passphrase'), 'key': _('recovery key')}[t.mode] }}
       <div class="muted">{{ _("it cannot be changed from here, so you never lose the ability to open the copies: create a new backup with the encryption you want.") }}</div></dd>
   </dl>
-  <div class="row" style="margin-top:12px"><button>{{ _("Save") }}</button><a class="btn sec" href="/admin/backups">{{ _("Cancel") }}</a></div>
+  <div class="actions"><button>{{ _("Save") }}</button><a class="btn sec" href="/admin/backups">{{ _("Cancel") }}</a></div>
 </form>
 {% endblock %}

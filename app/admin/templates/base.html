@@ -32,8 +32,8 @@
   .hactions { display:flex; align-items:center; gap:8px } .hactions form { margin:0 }
   .iconbtn { width:40px; height:40px; padding:0; display:inline-flex; align-items:center; justify-content:center }
   .iconbtn svg { width:20px; height:20px }
-  a.bell { position:relative; color:var(--muted); text-decoration:none; border:1px solid var(--line); border-radius:6px }
-  a.bell:hover, a.bell.on { color:var(--orange); background:var(--bg) }
+  a.bell, a.helpbtn { position:relative; color:var(--muted); text-decoration:none; border:1px solid var(--line); border-radius:6px }
+  a.bell:hover, a.bell.on, a.helpbtn:hover, a.helpbtn.on { color:var(--orange); background:var(--bg) }
   a.bell .belln { position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:#b42318; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center }
   nav { display:flex; flex-wrap:wrap; gap:2px }
   nav a { color:var(--muted); text-decoration:none; padding:6px 10px; border-radius:6px; white-space:nowrap }
@@ -47,6 +47,9 @@
   .who { color:var(--muted); text-decoration:none; padding:6px 10px; border-radius:6px; border:1px solid var(--line) }
   .who.on { background:var(--bg) }
   main { max-width:1200px; margin:0 auto; padding:16px }
+  /* narrow pages (settings): centred; on a computer a little bigger text */
+  .narrow { max-width:680px; margin:0 auto }
+  @media (min-width:701px) { .narrow { font-size:15.5px } .narrow h1 { font-size:20px } .narrow h2 { font-size:16.5px } }
   a { color:var(--accent) }
   .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:16px; overflow-x:auto }
   h1 { font-size:18px; margin:0 0 12px } h2 { font-size:15px; margin:14px 0 8px } .card > h2:first-child { margin-top:0 }
@@ -60,7 +63,9 @@
   button.danger, .btn.danger { background:transparent; color:var(--err); border-color:var(--err) }
   button.danger:hover, .btn.danger:hover { background:var(--err); color:var(--card); border-color:var(--err) }  /* colours swap on hover */
   button:disabled { opacity:.5; cursor:not-allowed }
-  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+  .row { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center }
+  /* the buttons that finish a form (save, cancel, send…): a clear gap between them and from the fields above */
+  .actions { display:flex; flex-wrap:wrap; gap:12px 16px; align-items:center; margin-top:18px } .actions form { margin:0 }
   .flash { padding:8px 12px; border-radius:6px; margin-bottom:12px; border:1px solid var(--line); background:var(--card) }
   .flash.ok { color:var(--ok) } .flash.err { color:var(--err) }
   .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; border:1px solid var(--line) }
@@ -107,7 +112,10 @@
   button.switch i { width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .15s } button.switch.on { background:var(--ok); border-color:var(--ok) } button.switch.on i { transform:translateX(18px) }
   .dlghead .x button { min-height:0; padding:2px 9px }
   label.check { display:flex; gap:8px; align-items:flex-start; margin:6px 0 }
-  dialog { border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--fg); width:min(560px,92vw); padding:16px 18px }
+  dialog { border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--fg); width:min(560px,92vw); padding:20px 22px }
+  dialog.wide { width:min(700px,94vw) } dialog .dlghead { margin-bottom:12px } dialog .actions { justify-content:flex-end }
+  dialog .dlgfield { margin:14px 0 6px; color:var(--muted); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.03em }
+  dialog .qname { display:inline-block; margin:0 0 10px; padding:3px 12px; border:1px solid var(--line); border-radius:99px; background:var(--bg) }
   dialog::backdrop { background:rgba(0,0,0,.45) }
   dialog .kv { margin:8px 0 14px } dialog .kv dd { overflow-wrap:anywhere }
   .wrap { overflow-wrap:anywhere; word-break:break-word }
@@ -126,6 +134,45 @@
   button.info-lg { background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:50%; width:28px; height:28px; padding:0; min-height:0; font-size:17px; line-height:1; vertical-align:middle }
   .states dt { font-weight:700 } .states dd { margin:0 0 8px }
   .kv { display:grid; grid-template-columns:max-content 1fr; gap:4px 16px } .kv dt { color:var(--muted) } .kv dd { margin:0 }
+  /* advanced permissions: a block that opens and closes, its title looks like a button and its arrow turns when open */
+  details.adv { margin-top:14px }
+  details.adv > summary { list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid var(--line); border-radius:6px; font-weight:600; user-select:none }
+  details.adv > summary::-webkit-details-marker { display:none }
+  details.adv > summary:hover { border-color:var(--accent) }
+  details.adv > summary svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transition:transform .15s }
+  details.adv[open] > summary svg { transform:rotate(180deg) }
+  details.adv .advbody { margin-top:10px; padding:12px; border:1px solid var(--line); border-radius:8px }
+  details.adv fieldset { border:0; padding:0; margin:0; min-width:0 }
+  details.adv fieldset:disabled { opacity:.55 }
+  details.adv [hidden] { display:none !important }
+  .ghostin { position:relative; flex:1; min-width:160px; display:flex }  /* a field with the rest of a suggestion in grey inside it */
+  .ghostin input { flex:1; min-width:0 }
+  .ghostin .ghost { position:absolute; inset:0; padding:0 9px; display:flex; align-items:center; white-space:pre; overflow:hidden; color:var(--muted); opacity:.7; pointer-events:none }
+  .ghostin .ghost .typed { visibility:hidden }
+  .rnhint { margin:4px 0 0; min-height:1.2em } .rnhint.err { color:var(--err) }
+  ul.formerlist { list-style:none; margin:0; padding:0 } ul.formerlist li { padding:3px 0 }
+  /* one row per permission: name and hint on the left, the choice on the right (stacked on phones) */
+  .permrow { display:grid; grid-template-columns:minmax(140px,200px) 1fr; gap:6px 16px; padding:12px 0; border-top:1px solid var(--line) }
+  .permrow:first-of-type { border-top:0 }
+  .permhead { font-weight:600 } .permhead small { display:block; font-weight:400; color:var(--muted); font-size:12px; margin-top:2px }
+  .permsub { grid-column:2; display:flex; flex-direction:column; gap:8px; padding:10px 12px; background:var(--bg); border-radius:8px }
+  /* segmented control: radio inputs drawn as one row of buttons */
+  .seg { display:inline-flex; flex-wrap:wrap; align-self:start; justify-self:start; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--card) }
+  .seg label { position:relative; margin:0 } .seg label + label { border-left:1px solid var(--line) }
+  .seg input, .chip input { position:absolute; opacity:0; width:1px; height:1px; margin:0; pointer-events:none }
+  .seg span { display:block; padding:6px 12px; cursor:pointer; white-space:nowrap }
+  .seg span:hover { background:var(--bg) }
+  .seg input:checked + span { background:var(--accent); color:#fff }
+  .seg input:focus-visible + span, .chip input:focus-visible + span { outline:2px solid var(--accent); outline-offset:-2px }
+  /* chips: checkboxes drawn as pills (printers, days) */
+  .chips { display:flex; flex-wrap:wrap; gap:6px }
+  .chip { position:relative; margin:0 }
+  .chip > span { display:inline-flex; align-items:center; gap:4px; padding:5px 12px; border:1px solid var(--line); border-radius:99px; cursor:pointer; background:var(--card) }
+  .chip > span:hover { border-color:var(--accent) }
+  .chip input:checked + span { background:var(--accent); border-color:var(--accent); color:#fff }
+  .chip input:checked + span::before { content:"✓" }
+  .chip i { font-style:normal; opacity:.8 }
+  .times { display:flex; flex-wrap:wrap; gap:8px 16px } .times label { display:inline-flex; align-items:center; gap:6px }
   /* tables marked .stack-md become stacked cards already below 1000px (too many columns for a tablet) */
   @media (max-width:1000px) {
     table.stack-md, table.stack-md tbody, table.stack-md tr, table.stack-md td { display:block; width:100% }
@@ -147,7 +194,8 @@
     .sg { display:block; width:100% }
     button.dots { min-height:30px; padding:0 9px } .copybox > .copy { min-height:0; width:36px; height:36px; padding:0 } .iconbtn { width:42px; height:42px; min-height:42px }
     input[type=text], input[type=password], input[type=number], select { width:100%; min-width:0 }
-    .row > * { flex:1 1 auto } .row form { flex:1 1 auto } .row button { width:100% }
+    .row { gap:12px } .row > * { flex:1 1 auto } .row form { flex:1 1 auto } .row button { width:100% }
+    .actions { gap:12px } .actions > *, .actions form { flex:1 1 100% } .actions button, .actions .btn { width:100%; text-align:center } dialog { padding:16px 16px }
     table.stack, table.stack tbody, table.stack tr, table.stack td { display:block; width:100% }
     table.stack thead, table.stack tr:first-child:has(th) { display:none }
     table.stack tr { border:1px solid var(--line); border-radius:8px; margin-bottom:10px; padding:4px 0 }
@@ -155,6 +203,11 @@
     table.stack td[data-l]::before { content:attr(data-l); color:var(--muted); font-size:12px; text-transform:uppercase; flex:0 0 38% }
     table.stack td > * { max-width:60% }
     .kv { grid-template-columns:1fr } .kv dt { margin-top:6px }
+    details.adv > summary { width:100%; justify-content:space-between; box-sizing:border-box } details.adv .advbody { padding:10px }
+    .permrow { grid-template-columns:1fr } .permsub { grid-column:1 }
+    .seg { display:flex; flex-direction:column; width:100% } .seg label + label { border-left:0; border-top:1px solid var(--line) }
+    .seg span { padding:10px 12px; white-space:normal }
+    .chip > span { padding:8px 14px } .times input[type=time] { width:auto }
   }
 </style>
 </head>
@@ -173,7 +226,6 @@
     <a href="/admin/users" class="{{ 'on' if p.startswith('/admin/users') }}">{{ _p("menu", "Users") }}</a>
     <a href="/admin/groups" class="{{ 'on' if p.startswith('/admin/groups') }}">{{ _p("menu", "Groups") }}</a>
     <a href="/admin/requests" class="{{ 'on' if p.startswith('/admin/requests') }}">{{ _p("menu", "Requests") }}{% if pending_requests %} <span class="badge">{{ pending_requests }}</span>{% endif %}</a>
-    <a href="/admin/grants" class="{{ 'on' if p.startswith('/admin/grants') }}">{{ _p("menu", "Grants") }}</a>
     <a href="/admin/actions" class="{{ 'on' if p.startswith('/admin/actions') }}">{{ _p("menu", "Actions") }}</a>
     <a href="/admin/printers" class="{{ 'on' if p.startswith('/admin/printers') }}">{{ _p("menu", "Printers") }}</a>
     <a href="/admin/backups" class="{{ 'on' if p.startswith('/admin/backups') }}">{{ _p("menu", "Backup") }}</a>
@@ -186,7 +238,7 @@
   </nav>
   <span class="spacer"></span>
   <div class="hactions">
-  {% if own_open or not me.is_admin %}
+  {% if not me.is_admin %}
   <a class="bell iconbtn {{ 'on' if request.url.path.startswith('/me/notices') }}" href="/me/notices" aria-label="{{ _t('Notices') }}" title="{{ _t('Notices') }}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg>
     {% if own_unseen %}<span class="belln">{{ own_unseen if own_unseen < 100 else '99+' }}</span>{% endif %}
@@ -195,7 +247,10 @@
   {% if me.is_admin %}
   <a class="bell iconbtn {{ 'on' if request.url.path.startswith('/admin/notices') }}" href="/admin/notices" aria-label="{{ _t('Notices') }}" title="{{ _t('Notices') }}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg>
-    {% if notices_unseen %}<span class="belln">{{ notices_unseen if notices_unseen < 100 else '99+' }}</span>{% endif %}
+    {% set bell_n = notices_unseen + own_unseen %}{% if bell_n %}<span class="belln">{{ bell_n if bell_n < 100 else '99+' }}</span>{% endif %}
+  </a>
+  <a class="helpbtn iconbtn {{ 'on' if request.url.path.startswith('/admin/docs') }}" href="/admin/docs" aria-label="{{ _t('Documentation') }}" title="{{ _t('Documentation') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.6-2.4 2.1-2.4 3.5"/><path d="M12 17.2h.01"/></svg>
   </a>
   <form method="post" action="/admin/maintenance" {% if not maintenance %}onsubmit="return confirm({{ _t('Put the WHOLE gateway in maintenance?\n\nThe printers disappear from the network (mDNS) and no user will be able to print or scan: only administrators.')|tojson|forceescape }})"{% endif %}>
     <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="next" value="{{ request.url.path }}">

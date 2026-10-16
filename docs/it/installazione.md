@@ -80,7 +80,7 @@ I valori predefiniti sono ragionevoli; le impostazioni che toccherai più spesso
 | `CUPSPL_UPDATE_CHECK` | `false` ferma la domanda giornaliera a GitHub su una versione più nuova |
 | `CUPSPL_ESCL_ANONYMOUS` | `true` accetta le scansioni dalle app che non sanno inviare una password (vedi [scansione.md](scansione.md)) |
 
-Il file è interamente commentato. Dopo ogni modifica: `docker compose up -d`.
+Il file è interamente commentato. Ogni variabile, con il suo valore predefinito e quando cambiarla, è in [configurazione.md](configurazione.md). Dopo ogni modifica: `docker compose up -d`.
 
 Se il valore ha spazi, `$` o `#`, mettilo tra apici singoli, per esempio `CUPSPL_RADIUS_SECRET='il$mio #secret'`: senza apici compose legge il `$` come l'inizio di una variabile.
 

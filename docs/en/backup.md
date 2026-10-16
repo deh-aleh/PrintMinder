@@ -82,6 +82,22 @@ block flagged); the private half is kept **wrapped** by scrypt of the passphrase
 *file + passphrase* are enough. The gateway never stores the passphrase: **without it the copies can not be opened**, not even by
 another administrator. The passphrase is never written to the audit. A new encrypted file is re-read with the key just used.
 
+### Save the secret key
+
+`CUPSPL_SECRET_KEY` in `.env` encrypts the file names kept in the audit ([data-protection.md](data-protection.md)). A backup
+**without encryption does not contain it**, on purpose (it holds no secrets). So if the server breaks, you restore an
+unencrypted backup on a new machine and `scripts/docker-init.sh` creates a **new** key, the database comes back whole (users,
+quotas, pages, dates, printers) but the file names stay `[encrypted]` for good.
+
+- Copy the `CUPSPL_SECRET_KEY=...` line of `.env` into a password manager or another safe place, **once**, after installing.
+- Or make encrypted backups: they include `.env`, so the key travels with the database.
+- When you move to another machine, copy `.env` too (`scripts/backup.sh` does).
+
+The gateway helps: after the first start the first-run administrator (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`) finds a reminder in their
+own bell, once (if that account does not exist, every administrator sees it). If the gateway later starts with a different key, the
+bell says so and tells how many names can no longer be read; putting the old key back in `.env` and restarting makes them readable
+again.
+
 ## 2. Restore
 
 ```sh

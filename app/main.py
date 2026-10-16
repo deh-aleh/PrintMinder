@@ -19,9 +19,11 @@ from app.admin.backups import router as backups_router
 from app.admin.notices import router as notices_router
 from app.admin.updates import router as update_router
 from app.admin.controls import router as controls_router
+from app.admin.docs import router as docs_router
 from app.admin.me import router as me_router
 from app.admin.me_notices import router as me_notices_router
 from app.admin.printing import router as print_router
+from app.admin.reports import router as reports_router
 from app.admin.requests import router as requests_router
 from app.admin.routes import router as admin_router
 from app.audit.archive import repair, run_archiver
@@ -33,6 +35,8 @@ from app.backup.core import app_version
 from app.backup.service import run_scheduler as run_backups
 from app.certwatch import run_checker as run_cert_check
 from app.keywatch import run_keys
+from app import secretcheck
+from app.printerwatch import run_printerwatch
 from app.titles import run_titles
 from app.updates import run_checker as run_update_check
 from app.auth.throttle import Throttle
@@ -65,11 +69,12 @@ async def lifespan(app: FastAPI):
         RadiusProvider(settings.radius_host, settings.radius_port, settings.radius_secret, settings.radius_timeout),
         settings.auth_cache_seconds,
     ) if settings.radius_enabled else None
-    app.state.throttle = Throttle(limit=5, window=300)
+    app.state.throttle = Throttle(limit=5, window=300, path=settings.lockout_file or None)
     app.state.upstream = make_upstream()
     app.state.scan = make_scan_client()
     app.state.setup_code = await run_in_threadpool(ensure_orchestrator, SessionLocal)
     await run_in_threadpool(ensure_system_groups, SessionLocal)
+    await run_in_threadpool(secretcheck.run, SessionLocal)
     try:
         await run_in_threadpool(repair, SessionLocal, Path(settings.audit_archive_dir))
     except OSError:
@@ -82,10 +87,12 @@ async def lifespan(app: FastAPI):
              asyncio.create_task(run_titles(app)),
              asyncio.create_task(run_keys(app)),
              asyncio.create_task(run_cert_check(app)),
+             asyncio.create_task(run_printerwatch(app)),
              asyncio.create_task(discovery.run_scheduler(app))]
     yield
     for t in tasks:
         t.cancel()
+    app.state.throttle.save(force=True)
     await app.state.upstream.aclose()
     if app.state.scan is not None:
         await app.state.scan.aclose()
@@ -164,6 +171,8 @@ app.include_router(admin_router)
 app.include_router(accounts_router)
 app.include_router(printers_router)
 app.include_router(requests_router)
+app.include_router(reports_router)
+app.include_router(docs_router)
 app.include_router(archive_router)
 app.include_router(backups_router)
 app.include_router(update_router)

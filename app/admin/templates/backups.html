@@ -105,7 +105,7 @@
       <div class="muted">{{ _('created on the server with <span class="mono">docker compose exec -it gateway cups-policy-admin backup-key</span>: the passphrase never goes through the portal') }}</div></dd></dl>
   </div>
   <div id="m-none" hidden><p class="s-failed">{{ _("Without encryption the file contains the database (users, names of printed files). That is why the secrets are <b>not</b> saved: the TLS key, <span class=\"mono\">SECRET_KEY</span> and the RADIUS secret must be kept separately.") }}</p></div>
-  <div class="row" style="margin-top:12px"><button>{{ _("Create backup") }}</button></div>
+  <div class="actions"><button>{{ _("Create backup") }}</button></div>
 </form>
 <script>
 function bk(){var m=document.querySelector('input[name=mode]:checked').value;

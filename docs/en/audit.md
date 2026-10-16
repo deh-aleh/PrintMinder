@@ -35,6 +35,14 @@ The *Cancel* button stops a queued job (the owner's identity is used).
 
 Scans without credentials (anonymous eSCL) show the caller's IP and host name in the information column.
 
+### Usage report
+
+*Report* (button next to *Export CSV* in `/admin/jobs`, page `/admin/report`) ranks the users by pages printed in a period. You choose the dates (default: the last 30 days),
+how many users to list, the groups to **leave out** (by the group each user has now; a deleted account has none and is always counted), and **Detailed report**, which adds the prints per
+printer for each user. It can be shown in the page or downloaded as **CSV** or **PDF**. Only prints count (completed, waiting or running); failed and cancelled ones and scans do not.
+Rows already moved to a compressed archive are not read: the page warns when the period reaches back that far. The PDF is in English and uses the standard fonts, so names with
+Cyrillic or Chinese letters show as `?` there; the CSV keeps them.
+
 ## 2. Reconciliation with CUPS
 
 Every 30 s the **reconciler** reads CUPS: a finished job becomes `completed` with its real pages; one canceled before printing

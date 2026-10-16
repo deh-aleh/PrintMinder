@@ -21,6 +21,11 @@ senza installare nulla). Entrambi passano dalle stesse quote, audit e identità 
   Le foto le ruota CUPS. I file di testo semplice non si possono ruotare (il portale lo dice e non stampa nulla).
 - Le pagine contate per il limite sono quelle scelte × copie; un intervallo oltre la fine del documento è rifiutato prima di riservare quota.
 - Una stampante che non risponde non viene offerta; nemmeno una bloccata. L'ordine dell'elenco è descritto in [stampanti.md](stampanti.md).
+- **Permessi** ([quote.md](quote.md#5-permessi-avanzati)). Compaiono solo le stampanti che l'utente può usare. La scelta del colore è
+  nascosta senza il permesso colore. Una **scelta fronte-retro** (predefinito della stampante / solo fronte / lato lungo / lato corto) compare
+  quando la stampante ha l'unità fronte-retro e l'utente può stampare solo fronte; chi non può, stampa in fronte-retro (lato lungo). Il modulo
+  chiede una scelta, ma decide il server con le stesse regole del gateway IPP, quindi un modulo modificato a mano ottiene lo stesso risultato.
+  Fuori dagli orari consentiti un avviso in cima dice quando si può stampare, e un lavoro inviato lo stesso viene rifiutato.
 
 ## 2. Stampare con l'indirizzo IPP
 
@@ -91,6 +96,15 @@ Il servizio `mdns` annuncia ogni coda come `_ipps._tcp` con il sottotipo `_unive
 (Android risolve per multicast solo quei nomi) e il suo indirizzo deve stare nel certificato TLS. Le stampanti bloccate-nascoste, i
 dispositivi irraggiungibili e la modalità manutenzione ritirano l'annuncio. Gli scanner sono annunciati come `_uscans._tcp`
 ([scansione.md](scansione.md)).
+
+### Permessi e IPP
+
+Per `Print-Job`, `Create-Job` e `Validate-Job` il gateway applica i permessi dell'utente (colore, solo fronte, stampanti, orari) dopo il
+controllo della stampante bloccata e prima della quota. Per correggere un lavoro riscrive `print-color-mode` e `sides` nella richiesta
+prima che vada a CUPS, e toglie le opzioni in stile PPD `ColorModel`, `ColorMode` e `Duplex`. `Validate-Job` non fallisce per colore o lati
+in modalità `adjust`. `CUPS-Get-Printers` e `CUPS-Get-Classes` lasciano fuori le stampanti che un utente limitato non può usare. Un telefono
+o un computer che ha trovato la stampante con l'annuncio in rete la vede comunque, perché l'annuncio è uguale per tutti; il lavoro viene
+rifiutato. Dettagli e avvertenze: [quote.md](quote.md#5-permessi-avanzati).
 
 ## 5. Job rifiutati, annullamento e stati
 

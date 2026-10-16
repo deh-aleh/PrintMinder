@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -13,6 +15,9 @@ class Settings(BaseSettings):
     # How often the same notice (same kind, same source) is reported again, in seconds. 0 = decided by log_level:
     # DEBUG 1 minute, INFO 1 day, WARNING 3 days, ERROR/CRITICAL 7 days (see app/notices.py)
     notice_interval: int = 0
+    # a paper jam, no paper or no ink/toner is always reported to the administrators (the bell); with this on, the people who
+    # have a print waiting on that printer are told too, in their own bell
+    printer_alerts_users: bool = True
     host: str = "0.0.0.0"
     port: int = 8631
     tls_certfile: str | None = None
@@ -67,8 +72,18 @@ class Settings(BaseSettings):
     web_upload_mb: int = 25
     web_max_copies: int = 20
 
+    # failed logins are kept in this file, so a restart does not end a lock-out ("" = memory only, as before)
+    lockout_file: str = "/data/login-lockout.json"
+
+    # What happens when a client explicitly asks for colour or a one-sided print that the user's permissions do not allow:
+    # "adjust" = the job is printed in black and white / double-sided and the user is told in their bell,
+    # "refuse" = the job is refused. Printers and allowed hours always refuse. See docs/en/quotas.md ("Advanced permissions").
+    permission_mode: Literal["adjust", "refuse"] = "adjust"
+
     max_open_requests: int = 3
     request_ttl_days: int = 14
+    # true = a request (quota, permission, group) can not be sent without a reason; false = the reason is optional
+    request_reason_required: bool = False
 
     # audit: kept forever; when the active table outgrows this it is archived (compressed) to the folder below
     audit_max_mb: int = 50

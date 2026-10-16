@@ -67,6 +67,9 @@ domain password: they use a **personal print key**.
   (new expiry = now + the chosen duration, within the account's maximum; the time left is **not** added: a key that expires in 2 months, extended by "1 year", expires in 1 year, not in 1 year and 2 months) or **revoke it**. Every action goes to the audit (`key.disable`,
   `key.enable`, `key.extend`, `key.revoke`) and **the user finds it in their notices** (the bell, `/me/notices`), with a fixed text and without the
   administrator's name. When an administrator acts on their own key there is no notice.
+- Besides the keys, the user finds in their notices (same bell) when an administrator **changes their group** (also when a group is deleted and its members move
+  to `default`), **makes them administrator or removes the right**, **gives or withdraws extra quota**, or when a **request is approved or rejected** (with the note,
+  if there is one). Nothing is said about changes you make to yourself, and changing the limits of a group does not send notices. The command line (`set-group`) sends none either.
 - **Revoked** and **expired** keys disappear from the list `CUPSPL_KEY_HISTORY_DAYS` days later (14; 0 = they stay for ever). While they are there,
   the list says when they will go.
 - Optional, off by default: `CUPSPL_KEY_EXPIRY_WARN_ENABLED=true` warns the user in the bell `CUPSPL_KEY_EXPIRY_WARN_DAYS` days (7) before the
@@ -89,11 +92,12 @@ temporarily.
 
 ## 7. Deleting a user
 
-Removes the account, keys, requests, grants and personal limits, but **not the history**: audit rows keep the user name and
+Removes the account, keys, requests, grants (quota and permission), personal limits and personal permissions, but **not the history**: audit rows keep the user name and
 only lose the link to the user id; administrative audit rows already store the actor's name. The administrator types the user
 name to confirm.
 
-## 8. Changing the source of an account
+## 8. The source of an account
 
-From the user's edit page: local → RADIUS erases the stored password; RADIUS → local generates a temporary password shown once.
-The emergency account stays local.
+The user's edit page shows where the account signs in (local or RADIUS) as plain text: it can not be changed from the portal. To
+move someone from one source to the other, delete the account and create it again on the other side (the print history keeps
+the user name).

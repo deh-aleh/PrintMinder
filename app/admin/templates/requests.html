@@ -10,28 +10,172 @@
       <td class="nowrap">{{ r.created_at|localtime('%Y-%m-%d %H:%M') }}<div class="muted">{{ _("expires on %(date)s", date=r.expires_at|localtime('%Y-%m-%d')) }}</div></td>
       <td><b>{{ p.user }}</b></td>
       <td>{{ p.text }}{% if r.kind.value == 'quota' %}<div class="muted">{{ _('temporary (until the end of the period)') if p.scope == 'temporary' else _('permanent') }}</div>{% endif %}</td>
-      <td>{{ r.reason }}</td>
+      <td>{% if r.reason %}<button type="button" class="dots showreason" data-user="{{ p.user }}" data-what="{{ p.text }}" data-reason="{{ r.reason }}" title="{{ _('Show the reason') }}" aria-label="{{ _('Show the reason of %(user)s', user=p.user) }}">…</button>{% endif %}</td>
       <td>
-        <form method="post" action="/admin/requests/{{ r.id }}/approve" class="row">
+        <form method="post" action="/admin/requests/{{ r.id }}/approve" class="decide">
           <input type="hidden" name="csrf_token" value="{{ csrf }}">
           {% if r.kind.value == 'quota' %}
-          <input type="number" name="amount" min="1" value="{{ p.amount }}" title="{{ _('amount (you can change it)') }}">
-          <select name="scope"><option value="temporary" {{ 'selected' if p.scope == 'temporary' }}>{{ _("temporary") }}</option><option value="permanent" {{ 'selected' if p.scope == 'permanent' }}>{{ _("permanent") }}</option></select>
+          <div class="dline">
+            <label class="amt">{{ _("Amount") }} <input type="number" name="amount" min="1" value="{{ p.amount }}" required title="{{ _('amount (you can change it)') }}"></label>
+            <div class="seg" role="group" aria-label="{{ _('Duration') }}">
+              <label><input type="radio" name="scope" value="temporary" {{ 'checked' if p.scope == 'temporary' }}><span>{{ _("temporary") }}</span></label>
+              <label><input type="radio" name="scope" value="permanent" {{ 'checked' if p.scope == 'permanent' }}><span>{{ _("permanent") }}</span></label>
+            </div>
+          </div>
+          {% elif r.kind.value == 'permission' %}
+          <div class="dline">
+            <div class="seg" role="group" aria-label="{{ _('Duration') }}">
+              <label><input type="radio" name="duration" value="permanent" checked><span>{{ _("permanent") }}</span></label>
+              <label><input type="radio" name="duration" value="until"><span>{{ _("until the end of…") }}</span></label>
+            </div>
+            <input type="date" name="until" class="untilbox" min="{{ today }}" title="{{ _('last day the permission is valid') }}" aria-label="{{ _('last day the permission is valid') }}">
+          </div>
           {% endif %}
-          <input type="text" name="note" placeholder="{{ _('note (optional)') }}" maxlength="500">
-          <button>{{ _("Approve") }}</button>
-        </form>
-        <form method="post" action="/admin/requests/{{ r.id }}/reject" class="row" style="margin-top:6px">
-          <input type="hidden" name="csrf_token" value="{{ csrf }}">
-          <input type="text" name="note" placeholder="{{ _('reason for the refusal') }}" maxlength="500">
-          <button class="danger">{{ _("Reject") }}</button>
+          <input type="text" name="note" placeholder="{{ _('Note for the user (optional)') }}" maxlength="500" aria-label="{{ _('Note for the user (optional)') }}">
+          <div class="dline dbuttons">
+            <button>{{ _("Approve") }}</button>
+            <button class="danger" formaction="/admin/requests/{{ r.id }}/reject" formnovalidate>{{ _("Reject") }}</button>
+          </div>
         </form>
       </td>
     </tr>
     {% else %}<tr><td colspan="5" class="muted">{{ _("No pending requests.") }}</td></tr>{% endfor %}
   </table>
+  <dialog id="reason-dlg">
+    <div class="dlghead">
+      <h3>{{ _("Reason") }}</h3>
+      <form method="dialog" class="x"><button class="sec" aria-label="{{ _('Close') }}" title="{{ _('Close') }}"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round"><path d="M5 5l14 14M19 5L5 19"/></svg></button></form>
+    </div>
+    <div class="qname" id="reason-who"></div>
+    <div class="secret reasontext" id="reason-text"></div>
+    <form method="dialog" class="actions"><button class="sec">{{ _("Close") }}</button></form>
+  </dialog>
+  <style>
+    .decide { display:flex; flex-direction:column; gap:10px; min-width:270px }
+    .decide .dline { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center }
+    .decide .amt { display:inline-flex; align-items:center; gap:8px }
+    .decide input[type=text] { width:100% }
+    .decide .untilbox { display:none }
+    .decide:has(input[name=duration][value=until]:checked) .untilbox { display:block }
+    .reasontext { font:inherit; white-space:pre-wrap; overflow-wrap:anywhere; user-select:text; max-height:50vh; overflow:auto }
+    @media (max-width:700px) { .decide { min-width:0 } .decide .dbuttons > * { flex:1 1 100% } .decide .seg { width:100% } .decide .seg label { flex:1 } .decide .seg span { text-align:center; white-space:normal } }
+  </style>
+  <script>
+    // "…" in the Reason column: the whole reason in a window (empty column = the user wrote none)
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('button.showreason'); if (!b) return;
+      document.getElementById('reason-who').textContent = b.dataset.user + ' · ' + b.dataset.what;
+      document.getElementById('reason-text').textContent = b.dataset.reason;
+      document.getElementById('reason-dlg').showModal();
+    });
+    // the date field appears (in CSS) only for "until the end of…"; it is required only then
+    document.addEventListener('change', function (e) {
+      var f = e.target.closest && e.target.closest('form.decide'); if (!f || !f.elements.until) return;
+      f.elements.until.required = f.elements.duration.value === 'until';
+    });
+  </script>
 </div>
-<div class="card">
+
+<div class="card" id="grants">
+  <h2>{{ _("Active grants") }} <span class="muted">({{ active|length }})</span></h2>
+  <p class="muted">{{ _("Quota added on top of the limit, and permissions (colour, one-sided, a printer, any hours) added on top of what the group allows. The print history is never modified. Temporary quota ends with the period of the user's limit.") }}</p>
+  <table class="stack">
+    <tr><th>{{ _("User") }}</th><th>{{ _("What") }}</th><th>{{ _("Type") }}</th><th>{{ _("From") }}</th><th>{{ _("Until") }}</th><th>{{ _("By") }}</th><th></th></tr>
+    {% for x in active %}{% set g = x.g %}
+    <tr><td><b>{{ x.user }}</b></td>
+      {% if x.kind == 'permission' %}<td>+ {{ x.what }}</td><td>{{ _('temporary') if g.valid_until else _('permanent') }}</td>
+      <td class="nowrap">{{ g.valid_from|localtime('%Y-%m-%d %H:%M') }}</td><td class="nowrap">{{ x.last_day or _('no expiry') }}</td>
+      {% else %}<td>+{{ g.amount }} {{ _(g.metric.value) }}</td><td>{{ _(g.scope.value) }}</td>
+      <td class="nowrap">{{ g.valid_from|localtime('%Y-%m-%d %H:%M') }}</td><td class="nowrap">{{ g.valid_until|localtime('%Y-%m-%d %H:%M') if g.valid_until else _('no expiry') }}</td>{% endif %}
+      <td>{{ x.by or '' }}<div class="muted">{{ g.note or '' }}</div></td>
+      <td><form method="post" action="/admin/{{ 'permission-grants' if x.kind == 'permission' else 'grants' }}/{{ g.id }}/revoke" onsubmit="return confirm({{ _t('Revoke this grant?')|tojson|forceescape }})"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger">{{ _("Revoke") }}</button></form></td></tr>
+    {% else %}<tr><td colspan="7" class="muted">{{ _("No grants.") }}</td></tr>{% endfor %}
+  </table>
+  <form method="post" action="/admin/grants" style="margin-top:14px" id="grantform">
+    <h2>{{ _("Grant without a request") }}</h2>
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="row">
+      <select name="username" required title="{{ _('User') }}">{% for n in usernames %}<option>{{ n }}</option>{% endfor %}</select>
+      <select name="kind" title="{{ _('What to grant') }}">
+        <option value="quota">{{ _("quota") }}</option><option value="permission">{{ _("a permission") }}</option></select>
+    </div>
+    <div class="grantpart" data-kind="quota">
+      <div class="grantlabel">{{ _("Quota") }}</div>
+      <p class="muted" id="grant-no-quota" hidden>{{ _("This user has no quota limit (unlimited): there is nothing to add.") }}</p>
+      <div class="row" id="grant-quota">
+        <select name="metric"><option value="jobs">{{ _("jobs") }}</option><option value="pages">{{ _("pages") }}</option></select>
+        <input type="number" name="amount" min="1" placeholder="{{ _('amount') }}">
+        <select name="scope"><option value="temporary">{{ _("temporary (until the end of the period)") }}</option><option value="permanent">{{ _("permanent") }}</option></select>
+      </div>
+    </div>
+    <div class="grantpart" data-kind="permission">
+      <div class="grantlabel">{{ _("Permission") }}</div>
+      <p class="muted" id="grant-has-all" hidden>{{ _("This user already has every permission: there is nothing to grant.") }}</p>
+      <div class="row" id="grant-perm">
+        <select name="perm">
+          <option value="color">{{ _("colour printing") }}</option><option value="one_sided">{{ _("one-sided printing") }}</option>
+          <option value="hours">{{ _("printing outside the hours") }}</option><option value="printer">{{ _("a printer") }}</option></select>
+        <select name="printer" title="{{ _('Printer') }}">{% for q in queues %}<option>{{ q }}</option>{% endfor %}</select>
+        <select name="duration"><option value="permanent">{{ _("permanent") }}</option><option value="until">{{ _("until the end of…") }}</option></select>
+        <input type="date" name="until" min="{{ today }}" title="{{ _('last day the permission is valid') }}">
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <input type="text" name="note" placeholder="{{ _('note') }}" maxlength="500">
+      <button id="grant-go">{{ _("Grant") }}</button>
+    </div>
+  </form>
+  <style>
+    #grantform [hidden] { display:none !important }
+    #grantform .grantpart { margin-top:10px } #grantform .grantlabel { font-weight:600; margin-bottom:6px }
+  </style>
+  <script>
+    // Without JavaScript every field is shown and the server reads only those of the chosen kind (and refuses a permission
+    // the user already has). With it, only what the chosen user lacks is offered, asked to the server for that user alone;
+    // if the answer does not come, everything is offered (the server still refuses what the user already has).
+    (function () {
+      var f = document.forms.grantform, known = {}, everything = {
+        perms: Array.prototype.map.call(f.perm.options, function (o) { return o.value; }),
+        metrics: Array.prototype.map.call(f.metric.options, function (o) { return o.value; }),
+        printers: Array.prototype.map.call(f.printer.options, function (o) { return o.value; })};
+      function fill(select, values) {
+        Array.prototype.forEach.call(select.options, function (o) { o.hidden = o.disabled = values.indexOf(o.value) < 0; });
+        if (select.selectedOptions[0] && select.selectedOptions[0].disabled) {
+          var first = Array.prototype.find.call(select.options, function (o) { return !o.disabled; });
+          if (first) select.value = first.value;
+        }
+      }
+      function update() {
+        var kind = f.kind.value, l = known[f.username.value] || everything, none = !l.perms.length, noquota = !l.metrics.length;
+        document.querySelectorAll('#grantform [data-kind]').forEach(function (el) { el.hidden = el.dataset.kind !== kind; });
+        fill(f.perm, l.perms); fill(f.printer, l.printers); fill(f.metric, l.metrics);
+        document.getElementById('grant-has-all').hidden = !none;
+        document.getElementById('grant-perm').hidden = none;
+        f.printer.hidden = f.perm.value !== 'printer';
+        f.until.hidden = f.duration.value !== 'until';
+        document.getElementById('grant-no-quota').hidden = !noquota;
+        document.getElementById('grant-quota').hidden = noquota;
+        f.amount.required = kind === 'quota' && !noquota;
+        document.getElementById('grant-go').disabled = (kind === 'permission' && none) || (kind === 'quota' && noquota);
+      }
+      function ask() {
+        var name = f.username.value;
+        update();
+        if (known[name]) return;
+        fetch('/admin/requests/lacks?username=' + encodeURIComponent(name), {credentials: 'same-origin'})
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (l) { if (l) { known[name] = l; if (f.username.value === name) update(); } })
+          .catch(function () {});
+      }
+      f.username.addEventListener('change', ask);
+      ['kind', 'perm', 'duration'].forEach(function (n) { f[n].addEventListener('change', update); });
+      ask();
+    })();
+  </script>
+</div>
+
+<details class="card">
+  <summary><b>{{ _("History") }}</b> <span class="muted">{{ _("(decisions and grants that no longer count)") }}</span></summary>
   <h2>{{ _("Latest decisions") }}</h2>
   <table class="stack">
     <tr><th>{{ _("When") }}</th><th>{{ _("User") }}</th><th>{{ _("Request") }}</th><th>{{ _("State") }}</th><th>{{ _("By") }}</th><th>{{ _("Note") }}</th></tr>
@@ -41,5 +185,21 @@
       <td><span class="pill s-{{ r.status.value }}">{{ _(r.status.value) }}</span></td><td>{{ p.by or '' }}</td><td class="muted">{{ r.decision_note or '' }}</td></tr>
     {% else %}<tr><td colspan="6" class="muted">{{ _("None yet.") }}</td></tr>{% endfor %}
   </table>
-</div>
+  <div class="cardhead" style="margin-top:14px">
+    <h2>{{ _("Ended and revoked grants") }} <span class="muted">({{ ended|length }})</span></h2>
+    {% if ended %}<form method="post" action="/admin/grants/purge" onsubmit="return confirm({{ _t("Delete every ended or revoked grant? Active grants are not touched; the administrators' log keeps the history.")|tojson|forceescape }})">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="danger">{{ _("Delete ended grants") }}</button></form>{% endif %}
+  </div>
+  <table class="stack">
+    <tr><th>{{ _("User") }}</th><th>{{ _("What") }}</th><th>{{ _("Type") }}</th><th>{{ _("From") }}</th><th>{{ _("Until") }}</th><th>{{ _("State") }}</th><th>{{ _("By") }}</th></tr>
+    {% for x in ended %}{% set g = x.g %}
+    <tr><td><b>{{ x.user }}</b></td>
+      {% if x.kind == 'permission' %}<td>+ {{ x.what }}</td><td>{{ _('temporary') if g.valid_until else _('permanent') }}</td>
+      <td class="nowrap">{{ g.valid_from|localtime('%Y-%m-%d %H:%M') }}</td><td class="nowrap">{{ x.last_day or _('no expiry') }}</td>
+      {% else %}<td>+{{ g.amount }} {{ _(g.metric.value) }}</td><td>{{ _(g.scope.value) }}</td>
+      <td class="nowrap">{{ g.valid_from|localtime('%Y-%m-%d %H:%M') }}</td><td class="nowrap">{{ g.valid_until|localtime('%Y-%m-%d %H:%M') if g.valid_until else _('no expiry') }}</td>{% endif %}
+      <td><span class="pill s-{{ x.state }}">{{ _(x.state) }}</span></td><td>{{ x.by or '' }}<div class="muted">{{ g.note or '' }}</div></td></tr>
+    {% else %}<tr><td colspan="7" class="muted">{{ _("No grants.") }}</td></tr>{% endfor %}
+  </table>
+</details>
 {% endblock %}

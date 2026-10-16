@@ -23,6 +23,21 @@
 </div>
 
 <div class="card">
+  <h2>{{ _("Your permissions") }}</h2>
+  {% if perms.exempt %}<p class="muted">{{ _("This account has all permissions and they can not be limited.") }}</p>{% endif %}
+  <dl class="kv">
+    <dt>{{ _("Colour") }}</dt><dd>{{ _("allowed") if perms.color else _("not allowed: prints are made in black and white") }}{% if not perms.color %} {% if "color" in waiting %}<span class="muted">({{ _("request waiting") }})</span>{% else %}<a href="/me/request/permission?perm=color">{{ _("Ask") }}</a>{% endif %}{% endif %}</dd>
+    <dt>{{ _("One-sided") }}</dt><dd>{{ _("allowed") if perms.one_sided else _("not allowed: prints are made double-sided") }}{% if not perms.one_sided %} {% if "one_sided" in waiting %}<span class="muted">({{ _("request waiting") }})</span>{% else %}<a href="/me/request/permission?perm=one_sided">{{ _("Ask") }}</a>{% endif %}{% endif %}</dd>
+    <dt>{{ _("Printers") }}</dt><dd>{% if perms.printers is none %}{{ _("all") }}{% elif queues %}{% for q in queues %}<span class="mono">{{ q.name }}</span>{% if not loop.last %}, {% endif %}{% endfor %}{% else %}{{ _("none at the moment") }}{% endif %}{% if can_ask_printer %} <a href="/me/request/permission?perm=printer">{{ _("Ask for another printer") }}</a>{% endif %}</dd>
+    <dt>{{ _("Hours") }}</dt><dd>{% if not perm_window %}{{ _("any time") }}{% else %}{{ perm_window }}{% if not in_hours %} <span class="muted">({{ _("not now") }})</span>{% endif %} {% if "hours" in waiting %}<span class="muted">({{ _("request waiting") }})</span>{% else %}<a href="/me/request/permission?perm=hours">{{ _("Ask") }}</a>{% endif %}{% endif %}</dd>
+  </dl>
+  {% if perm_grants %}
+  <p class="muted">{{ _("Granted to you after a request:") }}
+    {% for g in perm_grants %}{{ g.what }} ({{ _("until %(date)s", date=g.until) if g.until else _("permanent") }}){% if not loop.last %}, {% endif %}{% endfor %}</p>
+  {% endif %}
+</div>
+
+<div class="card">
   <h2>{{ _("My print keys") }}</h2>
   <p class="muted">{{ _("Instead of the domain password, on the computer or phone you use a personal <b>key</b> (user name <b>%(user)s</b>, server <b>%(server)s</b>). It only works for printing and you can revoke it whenever you want.", user=me.username, server=server) }}
     {% if ipp_mode == 'keys' %}{{ _("The domain password is <b>not</b> accepted for printing.") }}{% endif %}</p>

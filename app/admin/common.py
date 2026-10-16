@@ -14,6 +14,7 @@ from app import i18n
 from app.backup.core import app_version
 from app.config import settings
 from app.db.models import User
+from app.policy.permissions import describe_grant, describe_hours
 from app.policy.rules import MAX_LIMIT
 
 templates = Jinja2Templates(directory=str(Path(__file__).with_name("templates")))
@@ -38,7 +39,8 @@ def isotime(value: str | None) -> str:
 
 templates.env.filters["localtime"] = localtime
 templates.env.filters["isotime"] = isotime
-templates.env.globals.update(_=i18n.html_gettext, _p=i18n.html_pgettext, _t=i18n.plain_gettext, _js=i18n.raw_gettext, ngettext=i18n.html_ngettext, lang=i18n.current, languages=i18n.LANGUAGES)
+templates.env.globals.update(_=i18n.html_gettext, _p=i18n.html_pgettext, _t=i18n.plain_gettext, _js=i18n.raw_gettext, ngettext=i18n.html_ngettext, lang=i18n.current, languages=i18n.LANGUAGES,
+                            hours_text=describe_hours, perm_text=describe_grant)
 
 
 def get_db(request: Request):
@@ -91,7 +93,6 @@ def render(request: Request, name: str, user: User | None = None, status_code: i
                pending_requests=_pending_requests(request) if user is not None and user.is_admin else 0,
                notices_unseen=_notices_unseen(request, user.id) if user is not None and user.is_admin else 0,
                own_unseen=_notices_unseen(request, user.id, own=True) if user is not None else 0,
-               own_open=_own_notices_open(request, user.id) if user is not None else 0,
                maintenance=_maintenance(request) if user is not None else False,
                update_info=getattr(request.app.state, "update_info", None) if user is not None and user.is_admin else None,
                app_version=app_version())
@@ -115,16 +116,6 @@ def _notices_unseen(request: Request, user_id: int, own: bool = False) -> int:
     from app import notices
 
     return notices.unseen_count(request.app.state.sessionmaker, user_id, own=own)
-
-
-def _own_notices_open(request: Request, user_id: int) -> int:
-    """How many notices addressed to this person are still open (an administrator sees the personal bell only when there are some)."""
-    from sqlalchemy import func, select
-
-    from app.db.models import Notice
-
-    with request.app.state.sessionmaker() as db:
-        return db.scalar(select(func.count(Notice.id)).where(Notice.user_id == user_id, Notice.dismissed_at.is_(None))) or 0
 
 
 def _maintenance(request: Request) -> bool:

@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import time
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 import httpx
 
@@ -24,6 +24,47 @@ MEDIA_LABELS = {
     "iso_b5_176x250mm": "B5", "na_letter_8.5x11in": "Letter", "na_legal_8.5x14in": "Legal",
     "na_executive_7.25x10.5in": "Executive", "na_5x7_5x7in": "13x18 cm (5x7\")", "na_index-4x6_4x6in": "10x15 cm (4x6\")",
 }
+
+
+_CAPS_TTL = 60.0
+_CAPS_MAX = 500  # queue names come from request paths: the cache keeps successes only, and never grows past this
+UNKNOWN_CAPS = {"color": None, "duplex": None}
+
+
+async def queue_caps(app, name: str) -> dict:
+    """What one queue can do, for the permission checks: {"color": bool|None, "duplex": bool|None} (None = CUPS did not
+    say). One Get-Printer-Attributes for this queue only, cached for a minute (list_queues would probe every device on the
+    network). A queue that is not there, or any error, gives "unknown": the caller then acts only on what a client asked."""
+    upstream = getattr(app.state, "upstream", None)
+    if upstream is None or not name:
+        return dict(UNKNOWN_CAPS)
+    key = ordering.key(name)
+    cache = getattr(app.state, "queue_caps_cache", None)
+    if cache is None:
+        cache = app.state.queue_caps_cache = {}
+    hit = cache.get(key)
+    if hit and time.monotonic() - hit[0] < _CAPS_TTL:
+        return dict(hit[1])
+    req = codec.make_request(codec.GET_PRINTER_ATTRIBUTES, 1, printer_uri=f"ipp://localhost/printers/{quote(name, safe='')}",
+                             requesting_user_name="gateway")
+    req.group(codec.TAG_OPERATION).attrs.append(
+        codec.Attr("requested-attributes", [codec.Val(codec.TAG_KEYWORD, a) for a in ("color-supported", "sides-supported")]))
+    try:
+        resp = await upstream.post(f"/printers/{quote(name, safe='')}", content=codec.encode(req),
+                                   headers={"Content-Type": "application/ipp", "Host": "localhost"})
+        msg = codec.decode(resp.content)
+    except (httpx.HTTPError, codec.IppError) as exc:
+        log.warning("could not read the capabilities of queue %s: %s", name, exc)
+        return dict(UNKNOWN_CAPS)
+    g = msg.group(codec.TAG_PRINTER)
+    if msg.code >= 0x100 or g is None:
+        return dict(UNKNOWN_CAPS)
+    caps = {"color": bool(next(iter(_all(g, "color-supported")), False)),
+            "duplex": any(v != "one-sided" for v in _all(g, "sides-supported"))}
+    if len(cache) >= _CAPS_MAX:
+        cache.clear()
+    cache[key] = (time.monotonic(), caps)
+    return dict(caps)
 
 
 _PORTS = {"ipp": 631, "ipps": 631, "http": 80, "https": 443, "socket": 9100, "lpd": 515}

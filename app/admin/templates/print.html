@@ -17,8 +17,11 @@
 </style>
 <form class="card" method="post" action="/me/print" enctype="multipart/form-data" style="max-width:640px;margin-inline:auto" id="pf" data-keep>
   <h1>{{ _("Print a file") }}</h1>
+  {% if outside_hours %}<p class="pill blocked" style="display:block;border-radius:8px;padding:8px 12px">{{ _("You can print %(window)s. Printing now is not possible.", window=outside_hours) }}</p>{% endif %}
   {% if offline %}<p class="muted">{{ _("Not reachable right now: %(printers)s.", printers=offline|join(', ')) }}</p>{% endif %}
-  {% if not queues %}
+  {% if forbidden_all %}
+    <p>{{ _("Your account is not allowed to use any of the printers. Your profile shows what you may print on.") }}</p>
+  {% elif not queues %}
     <p>{{ _("No printer available at the moment. Try again shortly or tell an administrator.") }}</p>
   {% else %}
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
@@ -46,7 +49,8 @@
           <div class="muted">{{ _("It stays in the print log, under the file name.") }}</div></dd>
         <dt>{{ _("Paper size") }}</dt><dd><select name="media" id="media"></select></dd>
         <dt>{{ _("Orientation") }}</dt><dd><select name="orientation"><option value="">{{ _("Automatic") }}</option><option value="portrait">{{ _("Portrait") }}</option><option value="landscape">{{ _("Landscape") }}</option></select></dd>
-        <dt id="colorlbl">{{ _("Colour") }}</dt><dd id="colorrow"><select name="color" id="color"><option value="">{{ _("Printer default") }}</option><option value="color">{{ _("In colour") }}</option><option value="monochrome">{{ _("Black and white") }}</option></select></dd>
+        {% if perms.color %}<dt id="colorlbl">{{ _("Colour") }}</dt><dd id="colorrow"><select name="color" id="color"><option value="">{{ _("Printer default") }}</option><option value="color">{{ _("In colour") }}</option><option value="monochrome">{{ _("Black and white") }}</option></select></dd>{% endif %}
+        {% if perms.one_sided %}<dt id="sideslbl">{{ _("Sides") }}</dt><dd id="sidesrow"><select name="sides"><option value="">{{ _("Printer default") }}</option><option value="one-sided">{{ _("One-sided") }}</option><option value="two-sided-long-edge">{{ _("Double-sided, long edge") }}</option><option value="two-sided-short-edge">{{ _("Double-sided, short edge") }}</option></select></dd>{% endif %}
         <dt>{{ _("Pages") }}</dt><dd><input type="text" name="pages" id="pages" placeholder="{{ _('All — or 1,5 or 2-4') }}" inputmode="text" autocomplete="off" style="width:100%"></dd>
         <dt>{{ _("Copies") }}</dt><dd><div class="copies"><button type="button" class="sec" id="minus" aria-label="{{ _('fewer') }}">−</button>
           <input type="number" name="copies" id="copies" value="1" min="1" max="{{ max_copies }}" inputmode="numeric">
@@ -54,7 +58,7 @@
           <span class="muted">({{ _("at most %(n)s", n=max_copies) }})</span></div></dd>
       </dl></li>
   </ol>
-  <div class="row"><button id="go" style="padding:11px 22px" disabled>{{ _("Print") }}</button><a class="btn sec" href="/me">{{ _("Cancel") }}</a></div>
+  <div class="actions"><button id="go" style="padding:11px 22px" disabled>{{ _("Print") }}</button><a class="btn sec" href="/me">{{ _("Cancel") }}</a></div>
   <p class="muted" style="margin-bottom:0">{{ _("It counts as a normal print: same limits and same log. The pages are counted before printing.") }}</p>
   {% endif %}
 </form>
@@ -71,8 +75,15 @@
       var o = document.createElement('option'); o.value = m.id; o.textContent = m.label + (m.id === q.media_default ? ' ' + {{ _t('(default)')|tojson }} : '');
       media.appendChild(o);
     });
-    document.getElementById('colorrow').style.display = document.getElementById('colorlbl').style.display = q.color ? '' : 'none';
-    if (!q.color) colorSel.value = '';
+    if (colorSel) {
+      document.getElementById('colorrow').style.display = document.getElementById('colorlbl').style.display = q.color ? '' : 'none';
+      if (!q.color) colorSel.value = '';
+    }
+    var sidesSel = document.querySelector('select[name=sides]');
+    if (sidesSel) {  // only a printer with a duplex unit offers the choice
+      document.getElementById('sidesrow').style.display = document.getElementById('sideslbl').style.display = q.duplex ? '' : 'none';
+      if (!q.duplex) sidesSel.value = '';
+    }
   }
   Array.prototype.forEach.call(document.querySelectorAll('input[name=queue]'), function (r) { r.addEventListener('change', opts); });
   opts();

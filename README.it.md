@@ -24,12 +24,13 @@ browser ───────https───────────▶     │  
 
 - **Account**: locali (argon2id) e/o RADIUS; **chiavi di stampa** personali e revocabili, così la password di dominio non resta mai su un PC o un telefono.
 - **Quote**: job e pagine per settimana o mese, per gruppo con override per utente; gli utenti chiedono di più, gli amministratori approvano.
+- **Permessi**: colore, stampa solo fronte, quali stampanti e in quali orari, per gruppo con override per utente; gli utenti chiedono ciò che manca, per sempre o fino a una data.
 - **Stampa**: IPP/IPPS per i computer, **stampa dal browser** per qualunque telefono, annuncio sulla LAN (AirPrint/Mopria).
 - **Scansione**: eSCL attraverso il gateway e dal portale, insieme alla stampa sullo stesso dispositivo USB.
 - **Audit**: chi ha stampato/scansionato cosa (pagine reali), registro separato delle azioni amministrative, conservato per sempre con archivi compressi verificati.
 - **Stampanti**: stato, inchiostro e contatori, blocco/nascondimento, stampanti di prova, stampa periodica di manutenzione e stampa di prova per le fisiche.
 - **Backup**: programmati per amministratore, cifrati con una chiave di recupero, ripristinabili da riga di comando.
-- **Portale in 5 lingue**: inglese, italiano, spagnolo, russo, cinese semplificato; scelta per utente.
+- **Portale in 5 lingue**: inglese, italiano, spagnolo, russo, cinese semplificato; scelta per utente. La documentazione (inglese e italiano) si legge dentro il portale, per gli amministratori.
 
 ## Funzionalità e stato
 
@@ -47,20 +48,21 @@ browser ───────https───────────▶     │  
 | **Policy** | Utenti e gruppi; limiti di job e pagine per settimana/mese; override per utente | ✅ |
 | | Deroghe: richieste degli utenti, approvazione dell'admin, concessioni temporanee o permanenti; cambio gruppo su richiesta | ✅ |
 | | Pagine contate prima di stampare per PDF, immagini, testo e PostScript | ✅ limite morbido per gli altri file |
-| | Limiti per funzionalità (colore, fronte-retro, formato carta) o per stampante; orari consentiti | ⬜ |
+| | Limiti per funzionalità (colore, fronte-retro) o per stampante; orari consentiti | 🟡 non ancora provato su stampanti vere |
 | **Scansione** | eSCL attraverso il gateway (stesse chiavi, audit, insieme alla stampa) e scansione dal portale | ✅ |
 | | Client eSCL nativi che sanno autenticarsi (prova sul campo) | ⬜ |
 | **Audit** | Audit di stampe e scansioni con pagine reali; registro separato delle azioni amministrative | ✅ |
 | | Conservazione illimitata con archivi compressi verificati; esportazione CSV, filtri, consultazione e download degli archivi | ✅ |
+| | Report di utilizzo: utenti che stampano di più in un periodo, dettaglio per stampante, gruppi esclusi, pagina / CSV / PDF | ✅ |
 | | Nomi dei file cifrati nel database; pulsante per smettere di salvarli; cancellazione facoltativa dopo qualche giorno | ✅ |
 | | Esportazione verso syslog/SIEM; anonimizzazione | ⬜ |
-| **Portale** | Portale admin (audit, utenti, gruppi, richieste, concessioni, azioni, stampanti, backup, archivio) e area utente (consumo, chiavi, richieste, stampa, scansione) | ✅ |
+| **Portale** | Portale admin (audit, utenti, gruppi, richieste con concessioni, azioni, stampanti, backup, archivio) e area utente (consumo, chiavi, richieste, stampa, scansione); la documentazione è inclusa per gli amministratori (inglese e italiano) | ✅ |
 | | Impostazioni: password, tema, lingua, aggiornamento; interfaccia adatta al telefono; pulsanti «copia» | ✅ |
 | | Pagina Stampanti: stato, inchiostro, contatori a vita (HP), firmware, scanner; blocco, nascondimento, stampanti di prova; manutenzione del gateway | ✅ |
 | | Stampa periodica di manutenzione e stampa di prova con statistiche (stampanti fisiche); elenco con le fisiche per prime, spostabili con le frecce su/giù (ordine proprio per ogni amministratore); code rinominabili; badge IPP-USB / USB | ✅ |
 | | Portale in inglese, italiano, spagnolo, russo, cinese | ✅ spagnolo/russo/cinese da far rivedere a madrelingua |
 | | Notifiche (email/webhook) per le richieste in attesa; report di utilizzo | ⬜ |
-| | Richieste di permessi (colore, fronte-retro, scansione…) man mano che le funzioni esistono | ⬜ |
+| | Richieste di permessi (colore, solo fronte, stampanti, orari) | ✅ |
 | **Operatività** | Stack docker (ipp-usb + CUPS + gateway + mDNS), nulla installato sull'host | ✅ |
 | | Backup programmati per amministratore (cartella, ora, rotazione, cifratura con passphrase/chiave di recupero), ripristino da CLI | ✅ |
 | | Migrazioni del database (Alembic), health check, log, CLI di amministrazione | ✅ |
@@ -68,8 +70,7 @@ browser ───────https───────────▶     │  
 | | Pulsante Aggiorna nel portale (contenitore facoltativo `updater`, usa il socket di Docker) | 🟡 provato solo con simulazioni |
 | | Backup su disco di rete o USB: file segnaposto contro un disco non montato (attivo di default), avviso nella campanella quando un backup fallisce, limite di tempo per un disco che non risponde | ✅ provato con una condivisione SMB |
 | | Certificato TLS: avvisi (scaduto, indirizzo annunciato mancante, avviso di scadenza facoltativo) e `scripts/cert-sync.sh` per copiare un certificato rinnovato da Nginx Proxy Manager o certbot | 🟡 script provato con simulazioni, non ancora con un vero Nginx Proxy Manager |
-| | Campanella con gli avvisi per gli amministratori; `/healthz` mostra solo lo stato se non chiedi di più | ✅ |
-| | Alta disponibilità, metriche Prometheus, destinazioni di backup remote dirette (SSH/S3) | ⬜ |
+| | Campanella con gli avvisi per gli amministratori (una sola, prima i propri); problemi di stampante (inceppamento, carta, inchiostro) per gli amministratori e per chi aspetta; l'utente è avvisato se cambiano gruppo, diritti, quota o richiesta; promemoria, una volta sola, di salvare `CUPSPL_SECRET_KEY` e avviso se cambia; `/healthz` mostra solo lo stato se non chiedi di più | ✅ |
 
 ## Limiti
 

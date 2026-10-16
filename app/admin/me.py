@@ -22,8 +22,8 @@ from app.auth.throttle import USER_FAILS
 from app import i18n
 from app.config import settings
 from app.i18n import N_, _
-from app.db.models import Group, PrintKey, QuotaRequest, RequestStatus, User
-from app.policy import grants
+from app.db.models import Group, PrintKey, QuotaRequest, RequestKind, RequestStatus, User
+from app.policy import grants, permissions
 
 log = logging.getLogger("app.me")
 THEMES = {"auto": N_("Automatic (as the device)"), "light": N_("Light"), "dark": N_("Dark")}
@@ -42,8 +42,21 @@ def _describe(db: Session, req: QuotaRequest) -> str:
     if req.kind.value == "quota":
         p = req.params_json or {}
         return f"+{p.get('amount')} {_(str(p.get('metric')))} ({_('until the end of the period') if req.scope.value == 'temporary' else _('permanent')})"
+    if req.kind.value == "permission":
+        p = req.params_json or {}
+        return permissions.describe_grant(str(p.get("perm")), p.get("printer"))
     group = db.get(Group, (req.params_json or {}).get("target_group_id"))
     return _("move to group %(name)s", name=group.name if group else "?")
+
+
+def _waiting_permissions(db: Session, user: User, now: datetime) -> set[str]:
+    """The permissions this person asked for and still waits for: "color", "one_sided", "hours", or "printer:<name>"."""
+    out = set()
+    for r in db.scalars(select(QuotaRequest).where(QuotaRequest.user_id == user.id, QuotaRequest.kind == RequestKind.permission,
+                                                   QuotaRequest.status == RequestStatus.pending, QuotaRequest.expires_at > now)):
+        p = r.params_json or {}
+        out.add(f"printer:{p.get('printer')}" if p.get("perm") == "printer" else str(p.get("perm")))
+    return out
 
 
 @router.get("", response_class=HTMLResponse)
@@ -53,14 +66,20 @@ async def me(request: Request, user: User = Depends(current_user), db: Session =
     key_rows = db.scalars(select(PrintKey).where(PrintKey.user_id == user.id).order_by(PrintKey.id.desc())).all()
     reqs = db.scalars(select(QuotaRequest).where(QuotaRequest.user_id == user.id).order_by(QuotaRequest.id.desc())
                       .limit(20)).all()
+    perms = permissions.effective(db, user, now)
+    every_queue = await list_queues(request.app)
+    queues = permissions.allowed_queues(perms, every_queue)  # only what this account may print on
     return render(
-        request, "me.html", user,
+        request, "me.html", user, perms=perms, can_ask_printer=len(queues) < len(every_queue),
+        perm_grants=_grant_lines(permissions.active_grants(db, user, now)), perm_window=permissions.describe_window(perms.window) if perms.window else "",
+        in_hours=permissions.in_window(perms.window, now, _tz()),
+        waiting=_waiting_permissions(db, user, now),
         group=db.get(Group, user.group_id) if user.group_id else None,
         options=grants.quota_options(db, user, now, _tz()),
         active_keys=sum(1 for k in key_rows if keylib.key_is_usable(k, now)),
         requests=[{"r": r, "what": _describe(db, r)} for r in reqs],
         server=request.headers.get("host", ""), ipp_mode=settings.ipp_auth,
-        queues=await list_queues(request.app),
+        queues=queues,
         can_request_group=bool(db.scalars(select(Group).where(Group.requestable, Group.id != (user.group_id or 0))).first()),
     )
 
@@ -87,7 +106,7 @@ async def key_create(request: Request, label: str = Form(""), validity: str = Fo
          "url": f'ipps://{quote(user.username, safe="")}:{plain}@{host}/printers/{q["name"]}',
          "cmd": f'lpadmin -p {q["name"]} -E -v "ipps://{quote(user.username, safe="")}:{plain}@{host}/printers/{q["name"]}" '
                 f'-m everywhere -o auth-info-required=none'}
-        for q in await list_queues(request.app)
+        for q in permissions.allowed_queues(permissions.effective(db, user, _now()), await list_queues(request.app))
     ]
     return render(request, "secret_shown.html", user, title=_("New print key"), what=_("Print key"), secret=plain,
                   commands=commands,
@@ -227,7 +246,7 @@ def password_change(request: Request, current: str = Form(""), new: str = Form("
 @router.get("/request/quota", response_class=HTMLResponse)
 def quota_form(request: Request, user: User = Depends(current_user), db: Session = Depends(get_db)):
     return render(request, "request_quota.html", user, options=grants.quota_options(db, user, _now(), _tz()),
-                  max_open=settings.max_open_requests)
+                  max_open=settings.max_open_requests, reason_required=settings.request_reason_required)
 
 
 @router.post("/request/quota", dependencies=[Depends(verify_csrf)])
@@ -248,7 +267,7 @@ def quota_submit(request: Request, metric: str = Form(""), amount: str = Form(""
 def group_form(request: Request, user: User = Depends(current_user), db: Session = Depends(get_db)):
     options = db.scalars(select(Group).where(Group.requestable, Group.id != (user.group_id or 0))
                          .order_by(Group.name)).all()
-    return render(request, "request_group.html", user, options=options,
+    return render(request, "request_group.html", user, options=options, reason_required=settings.request_reason_required,
                   current=db.get(Group, user.group_id) if user.group_id else None)
 
 
@@ -260,6 +279,45 @@ def group_submit(request: Request, group_id: int = Form(0), reason: str = Form("
     except grants.RequestError as exc:
         flash(request, str(exc), "err")
         return back("/me/request/group")
+    flash(request, _("Request sent: an administrator will answer it"))
+    return back("/me")
+
+
+def _grant_lines(rows) -> list[dict]:
+    """The permissions granted to this person, for the list on their page: what, and the last day (None = permanent)."""
+    return [{"what": permissions.describe_grant(g.perm, g.printer), "until": grants.last_day(g.valid_until, _tz())} for g in rows]
+
+
+@router.get("/request/permission", response_class=HTMLResponse)
+async def permission_form(request: Request, perm: str = "", user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """Only what this person lacks is offered. `perm` (and `printer`) in the address pre-select the choice: the links on /me use them."""
+    perms = permissions.effective(db, user, _now())
+    every_queue = await list_queues(request.app)
+    blocked = [q["name"] for q in every_queue if not permissions.printer_allowed(perms, q["name"])]
+    waiting = _waiting_permissions(db, user, _now())  # already asked: not offered again until the answer comes
+    blocked = [n for n in blocked if f"printer:{n.lower()}" not in waiting]
+    options = [(p, label) for p, label, lacks in (
+        ("color", _("colour printing"), not perms.color), ("one_sided", _("one-sided printing"), not perms.one_sided),
+        ("hours", _("printing outside the hours"), perms.window is not None), ("printer", _("a printer"), bool(blocked)))
+        if lacks and p not in waiting]
+    return render(request, "request_permission.html", user, options=options, blocked=blocked, max_open=settings.max_open_requests,
+                  reason_required=settings.request_reason_required,
+                  chosen=perm if perm in dict(options) else "", chosen_printer=request.query_params.get("printer", ""))
+
+
+@router.post("/request/permission", dependencies=[Depends(verify_csrf)])
+async def permission_submit(request: Request, perm: str = Form(""), printer: str = Form(""), reason: str = Form(""),
+                            user: User = Depends(current_user), db: Session = Depends(get_db)):
+    try:
+        name = None
+        if perm == "printer":  # only a printer that exists: a made-up name would just sit in a request
+            name = next((q["name"] for q in await list_queues(request.app) if q["name"].lower() == printer.strip().lower()), None)
+            if name is None:
+                raise grants.RequestError(_("that printer does not exist"))
+        grants.create_permission_request(db, user, perm, name, reason, _now())
+    except grants.RequestError as exc:
+        flash(request, str(exc), "err")
+        return back("/me/request/permission")
     flash(request, _("Request sent: an administrator will answer it"))
     return back("/me")
 

@@ -8,6 +8,6 @@
     {{ _('If you only want to block access, <a href="%(url)s">disable the account</a> instead of deleting it.', url="/admin/users/%d/edit" % u.id) }}</p>
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
   <p>{{ _("To confirm, type the user name: <b>%(user)s</b>", user=u.username) }}</p>
-  <div class="row"><input type="text" name="confirm_name" autocomplete="off" required placeholder="{{ u.username }}"><button class="danger">{{ _("Delete permanently") }}</button><a class="btn sec" href="/admin/users/{{ u.id }}/edit">{{ _("Cancel") }}</a></div>
+  <div class="row" style="margin-top:12px"><input type="text" name="confirm_name" autocomplete="off" required placeholder="{{ u.username }}"><button class="danger">{{ _("Delete permanently") }}</button><a class="btn sec" href="/admin/users/{{ u.id }}/edit">{{ _("Cancel") }}</a></div>
 </form>
 {% endblock %}

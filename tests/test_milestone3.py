@@ -107,9 +107,10 @@ async def test_list_is_read_only_and_shows_grants_with_a_plus(admin):
 async def test_edit_page_carries_every_field_including_origin_and_delete(admin):
     uid = make_user(admin.sm, "gus", password=GOOD, group="staff")
     page = (await admin.get(f"/admin/users/{uid}/edit")).text
-    for needle in ('name="provider"', 'name="group_id"', 'name="enabled"', 'name="is_admin"', 'name="jobs_limit"',
+    for needle in ('name="group_id"', 'name="enabled"', 'name="is_admin"', 'name="jobs_limit"',
                    'name="pages_limit"', 'name="period"', "Elimina account", f"/admin/users/{uid}/keys"):
         assert needle in page, needle
+    assert 'name="provider"' not in page and "<select name=\"provider\"" not in page   # the origin is only shown, not a field
 
 
 async def test_origin_switch_local_to_radius_drops_the_password_and_back_issues_a_temporary_one(admin):

@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ _("Notices") }}{% endblock %}
 {% block body %}
+{% if own_rows %}
+<div class="card">
+  <h2>{{ _("For you") }}</h2>
+  <p class="muted">{{ _("What concerns your own account: print keys, group, quota, requests.") }}</p>
+  {% include "_own_notices.html" %}
+</div>
+{% endif %}
 <div class="card">
   <h1>{{ _("Notices") }}</h1>
   <p class="muted">{{ _("Things the gateway noticed that administrators should know about. The same notice from the same source is reported again only after a while (now: every %(when)s), and repeats in between are counted.", when=when) }}</p>
@@ -27,6 +34,18 @@
         {% else %}{{ _("<b>The TLS certificate expires on %(date)s.</b> Renew it and put the new files in <span class=\"mono\">config/tls</span>, then restart the gateway.", date=(d.not_after or "")[:10]) }}{% endif %}
         {% elif n.kind == 'cert_name_missing' %}{% set d = n.detail_json or {} %}
         {{ _("<b>The announced address is not in the TLS certificate.</b> The gateway announces itself on the network as <span class=\"mono\">%(names)s</span> at <span class=\"mono\">%(addresses)s</span>, and the certificate covers none of them: phones and computers that find the printers this way will show a certificate error. Make the certificate list the address (or give the machine a fixed address and a name that the certificate covers).", names=(d.get("names") or [])|join(", "), addresses=(d.get("addresses") or [])|join(", ")) }}
+        {% elif n.kind == 'printer_problem' %}{% set d = n.detail_json or {} %}{% set p = d.get("problem") %}
+        {% if p == 'jam' %}{{ _("<b>Paper jam</b> on the printer “%(printer)s”. Jobs wait until somebody clears it.", printer=d.get("printer") or n.key) }}
+        {% elif p == 'paper' %}{{ _("<b>Out of paper</b> (or empty tray) on the printer “%(printer)s”. Jobs wait until paper is loaded.", printer=d.get("printer") or n.key) }}
+        {% elif p == 'ink' %}{{ _("<b>Ink or toner is out</b> on the printer “%(printer)s”: %(what)s.", printer=d.get("printer") or n.key, what=d.get("what") or "?") }}
+        {% elif p == 'ink_low' %}{{ _("<b>Ink or toner is running low</b> on the printer “%(printer)s”: %(what)s.", printer=d.get("printer") or n.key, what=d.get("what") or "?") }}
+        {% else %}{{ _("<b>Problem</b> on the printer “%(printer)s”: %(what)s.", printer=d.get("printer") or n.key, what=d.get("what") or "?") }}{% endif %}
+        {% elif n.kind == 'secret_key_save' %}
+        {{ _("<b>Save the secret key in a safe place.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> in the <span class=\"mono\">.env</span> file encrypts the file names kept in the audit and signs the portal sessions. A backup without encryption does not contain it: if the server breaks and you restore the backup with a new key, the names stay unreadable (<span class=\"mono\">[encrypted]</span>) for good. Copy the line from <span class=\"mono\">.env</span> into a password manager, or make encrypted backups (they include <span class=\"mono\">.env</span>).") }}
+        {% elif n.kind == 'secret_key_changed' %}{% set d = n.detail_json or {} %}
+        {{ _("<b>The secret key has changed</b> since the previous start (<span class=\"mono\">CUPSPL_SECRET_KEY</span> in <span class=\"mono\">.env</span>). %(count)s file names in the audit were encrypted with the old key and now show as <span class=\"mono\">[encrypted]</span>. If the change was not wanted (for example a restore with a new <span class=\"mono\">.env</span>), put the old key back and restart: the names become readable again.", count=d.get("count", "?")) }}
+        {% elif n.kind == 'secret_key_missing' %}
+        {{ _("<b>No secret key is set.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> is empty in <span class=\"mono\">.env</span>: the file names in the audit are stored without encryption and everybody has to sign in again after every restart. Set a long random value (for example the output of <span class=\"mono\">openssl rand -base64 48</span>), run <span class=\"mono\">docker compose up -d</span> and save the key in a safe place.") }}
         {% else %}{{ n.kind }}: {{ n.key }}{% endif %}
       </td>
       <td data-l="{{ _('Times') }}">{{ n.count + r.extra }}</td>

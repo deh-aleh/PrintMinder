@@ -35,6 +35,14 @@ di formule è neutralizzata). Il pulsante *Annulla* ferma un job in coda (si usa
 
 Le scansioni senza credenziali (eSCL anonimo) mostrano IP e nome host di chi chiama nella colonna delle informazioni.
 
+### Report di utilizzo
+
+*Report* (pulsante accanto a *Esporta CSV* in `/admin/jobs`, pagina `/admin/report`) ordina gli utenti per pagine stampate in un periodo. Scegli le date (predefinito: ultimi 30 giorni),
+quanti utenti elencare, i gruppi da **escludere** (secondo il gruppo che ogni utente ha adesso; un account eliminato non ne ha e viene sempre contato) e **Report dettagliato**, che aggiunge
+per ogni utente le stampe per stampante. Si può vedere nella pagina o scaricare in **CSV** o **PDF**. Contano solo le stampe (completate, in attesa o in corso); quelle fallite o annullate e le scansioni no.
+Le righe già spostate in un archivio compresso non vengono lette: la pagina avvisa quando il periodo arriva fin lì. Il PDF è in inglese e usa i font standard, quindi i nomi con
+lettere cirilliche o cinesi vi compaiono come `?`; il CSV li conserva.
+
 ## 2. Allineamento con CUPS
 
 Ogni 30 s il **riconciliatore** legge CUPS: un job finito diventa `completed` con le sue pagine reali; uno annullato prima di stampare

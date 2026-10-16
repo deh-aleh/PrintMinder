@@ -37,7 +37,13 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 - Un `Create-Job` senza documento libera la quota solo quando CUPS lo annulla (di default 3 h).
 - Il conteggio delle pagine vale solo se esiste un limite di pagine e il documento è leggibile.
 - Se RADIUS distingue `Mario` da `mario`, per il gateway sono la stessa persona (stessa quota).
-- I limiti per funzionalità (colore, fronte-retro, formato carta, per stampante) non esistono ancora.
+- I limiti per il formato carta non esistono. Colore, solo fronte, stampanti e orari ci sono ([quote.md](quote.md#5-permessi-avanzati)), con questi limiti:
+  - **Il bianco e nero forzato può non funzionare** con alcune stampanti e alcuni driver, soprattutto con le immagini che il telefono ha già trasformato in pixel a colori (iPhone / AirPrint). Per una garanzia usa `CUPSPL_PERMISSION_MODE=refuse`. Il fronte-retro usa l'attributo standard `sides` ed è più affidabile, purché la coda dichiari la sua unità fronte-retro.
+  - Con `refuse`, Windows e Android spesso rifiutano molti lavori, perché mandano solo fronte o colore in ogni lavoro. Il predefinito `adjust` lo evita.
+  - L'annuncio in rete (mDNS) è uguale per tutti: le stampanti che una persona non può usare si vedono comunque, e il lavoro viene rifiutato. L'elenco delle stampanti che il gateway dà dopo l'accesso le nasconde.
+  - Gli orari si controllano quando il lavoro viene inviato, non mentre stampa. C'è una sola fascia (giorni + due ore) per gruppo o utente.
+  - La scansione non è limitata. L'amministratore di emergenza è esente dai permessi (non dalle quote).
+  - Un permesso chiesto viene concesso per sempre o fino a una data, non per un numero di stampe o di ore d'uso.
 
 ## 3. Client
 
@@ -69,7 +75,7 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 
 - Backup integrati: solo SQLite; code CUPS non incluse (sono in `scripts/backup.sh`); i file di configurazione si ripristinano a mano;
   nessuna destinazione remota diretta; la passphrase non è recuperabile. `scripts/backup.sh restore` è provato solo a mano.
-- Il blocco dei login è in memoria e si azzera al riavvio.
+- Il blocco dei login sopravvive al riavvio: i login falliti degli ultimi 5 minuti sono tenuti in `data/login-lockout.json` (nomi utente e indirizzi con gli orari, nessuna password). Se il file non si può scrivere il blocco resta solo in memoria e il log lo dice.
 - L'audit e il database non sono cifrati, salvo i nomi dei file (vedi §1 e [protezione-dati.md](protezione-dati.md)).
 
 ## 6. Lingue

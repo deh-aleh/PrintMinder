@@ -59,6 +59,8 @@ Deliberate differences from a "classic" design:
 | Print backend | **CUPS 2.4** | Dependency, unmodified; filters and drivers already exist |
 | USB bridge | **ipp-usb** | Exposes the USB printer as IPP/eSCL |
 | Page counting | **pypdf** (+ image headers, URF, PostScript) | The page limit must hold for a 200-page file too |
+| Documentation in the portal | **markdown-it-py** | Renders the Markdown pages of `docs/` with raw HTML switched off; the files stay readable on GitHub as they are |
+| Usage report PDF | **reportlab** | Tables with page breaks and repeated header, no browser or external program needed |
 | Backups | **cryptography** (X25519, HKDF, AES-256-GCM, scrypt) | Encrypted with a recovery key, passphrase never stored |
 | LAN announcement | **python-zeroconf** (`mdns` service, host network) | Multicast does not cross docker's bridge network |
 | Containers | **Docker Compose** | Nothing installed on the host; reproducible tests |
@@ -126,7 +128,8 @@ Tables (Alembic applies migrations at start; a test fails if a model changes wit
 | `policy_rule` | Limit for a user or group: resource (print/scan), metric (**jobs** or **pages**), amount, period (weekly / monthly) |
 | `job_log` | Audit of prints and scans: user, device, file name, outcome, pages, reason, options |
 | `print_key` | Personal print keys (hash only), expiry, revocation, last use |
-| `quota_request`, `quota_grant` | Requests from users and the grants that approvals produce |
+| `quota_request`, `quota_grant` | Requests from users (quota, group, permission) and the quota grants that approvals produce |
+| `permission_rule`, `permission_grant` | Colour / one-sided / printers / hours of a group or user, and the permissions added to one user after a request (permanent or until a date) |
 | `admin_audit` | Who did what in the portal |
 | `audit_archive` | Registry of compressed audit files (path, range, rows, sha256) |
 | `printer_control` | Per-queue block and mDNS hiding |

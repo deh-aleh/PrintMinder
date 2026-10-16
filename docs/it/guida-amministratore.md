@@ -9,8 +9,7 @@ Per chi gestisce l'installazione. Il portale è su `https://<server>:8631/admin`
 | **Audit** | `/admin/jobs` | Chi ha stampato o scansionato cosa; filtri, CSV, annullare job in coda → [audit.md](audit.md) |
 | **Utenti** | `/admin/users` | Crea utenti locali o RADIUS, modifica, reimposta la password, revoca le chiavi, elimina |
 | **Gruppi** | `/admin/groups` | Crea, rinomina, limiti, "richiedibile", elimina |
-| **Richieste** | `/admin/requests` | Approva, modifica o rifiuta le richieste di quota e di gruppo (contatore = in attesa) → [quote.md](quote.md) |
-| **Concessioni** | `/admin/grants` | Dai o revochi quota extra direttamente |
+| **Richieste** | `/admin/requests` | Approva, modifica o rifiuta le richieste di quota, di gruppo e di permesso (contatore = in attesa); concessioni attive, quota extra o permesso dati o revocati direttamente, storico → [quote.md](quote.md) |
 | **Azioni** | `/admin/actions` | Chi ha fatto cosa nel portale |
 | **Stampanti** | `/admin/printers` | Stato, inchiostro, contatori; blocco, nascondimento, rinomina, sposta su/giù (il tuo ordine), stampanti di prova, stampa periodica e di prova → [stampanti.md](stampanti.md) |
 | **Backup** | `/admin/backups` | I tuoi backup programmati → [backup.md](backup.md) |
@@ -18,6 +17,7 @@ Per chi gestisce l'installazione. Il portale è su `https://<server>:8631/admin`
 | **Stampa / Scansiona / Profilo** | `/me…` | Le stesse pagine degli utenti → [guida-utente.md](guida-utente.md) |
 | **Logo, nome e (utente)** | `/me/settings` | Il blocco in alto a sinistra apre le impostazioni: tema, lingua, aggiornamento |
 | **Campanella** (solo amministratori) | `/admin/notices` | Cose che il gateway ha notato (il numero indica quelle aperte), vedi «Avvisi» sotto |
+| **?** (solo amministratori) | `/admin/docs` | Questa documentazione, in italiano o inglese (selettore in cima a ogni pagina) |
 | **Manutenzione** (chiave inglese rossa) | — | Ferma stampa e scansione per tutti tranne gli amministratori |
 | **Porta con freccia** | — | Esci |
 
@@ -32,7 +32,7 @@ Per chi gestisce l'installazione. Il portale è su `https://<server>:8631/admin`
 ## 2. Utenti
 
 L'elenco è in sola lettura: limite proprio o ereditato (in corsivo), concessioni attive come `+N` colorato, consumo e chiavi attive.
-**Modifica** apre la pagina con tutti i campi, **origine** compresa (locale ↔ RADIUS), ed **Elimina** (scrivi il nome per confermare).
+**Modifica** apre la pagina con tutti i campi, che mostra l'**origine** dell'account (locale o RADIUS, solo informativa), ed **Elimina** (scrivi il nome per confermare).
 
 - Crea **locale**: si mostra una password temporanea una volta; l'utente la cambia al primo accesso.
 - Crea **RADIUS**: scegli il gruppo; la persona entra con la password d'ufficio.
@@ -49,10 +49,25 @@ Un gruppo ha dei limiti (job / pagine, settimanali / mensili) e un flag **richie
 non si eliminano; eliminare un altro gruppo sposta i suoi utenti in `default`. I limiti personali si impostano nella pagina di modifica
 dell'utente. Dettagli in [quote.md](quote.md).
 
+**Permessi avanzati.** In fondo alla pagina del gruppo e a quella dell'utente, il pulsante **Permessi avanzati** apre colore, stampa solo
+fronte, quali stampanti, e quali giorni e orari. Il campo di un utente è "come il gruppo" oppure ha un valore proprio. L'amministratore di
+emergenza è esente e nella sua pagina il blocco è spento. `CUPSPL_PERMISSION_MODE` decide se un client che chiede in modo esplicito il
+colore o una stampa solo fronte non consentiti viene corretto (`adjust`, predefinito) o rifiutato (`refuse`). Leggi le note in
+[quote.md](quote.md#5-permessi-avanzati) prima di scegliere: con `refuse` molti lavori da Windows e Android vengono rifiutati. All'utente
+arriva un avviso nella campanella quando cambi i suoi permessi propri, e quando un suo lavoro viene rifiutato o corretto.
+
 ## 4. Richieste e concessioni
 
-Esamina le richieste (modifica quantità o tipo prima di approvare, aggiungi una nota). L'approvazione è idempotente. In **Concessioni**
-vedi quelle attive e le revochi; puoi crearne una direttamente con un motivo. Tutto viene registrato.
+È tutto in una pagina, *Richieste*, divisa in tre parti:
+
+- **Richieste in attesa**: modifica quantità o tipo prima di approvare, aggiungi una sola nota (l'utente la vede, sia che approvi sia che rifiuti). Una richiesta di permesso (colore, solo fronte, una stampante, fuori orario) si approva *permanente* oppure *fino alla fine del* giorno che scegli. L'approvazione è idempotente.
+- **Concessioni attive**: la quota extra e i permessi che contano adesso; li revochi, o ne dai uno direttamente con una nota (nel modulo scegli *quota* o *un permesso*).
+- **Storico** (chiuso finché non lo apri): le ultime decisioni e le concessioni che non contano più (finite o revocate).
+  *Elimina le concessioni scadute* le toglie dall'elenco; quelle attive non vengono toccate, e il registro degli amministratori
+  (*Azioni*) conserva chi ha concesso cosa e chi le ha eliminate. Toglie anche le concessioni di permesso finite.
+  Altri dettagli in [quote.md](quote.md#chiedere-un-permesso).
+
+Tutto viene registrato.
 
 ## 5. Stampanti
 
@@ -97,6 +112,18 @@ I tipi di avviso:
 | Aggiornamento del certificato fallito | L'ultima esecuzione di `scripts/cert-sync.sh` è fallita | l'esecuzione successiva riesce |
 | Indirizzo annunciato non nel certificato | I telefoni che trovano da soli le stampanti mostreranno un errore di certificato | il certificato elenca l'indirizzo |
 | Certificato in scadenza | Solo se l'hai acceso (`CUPSPL_CERT_EXPIRY_WARN_ENABLED`) | il certificato è rinnovato |
+| Carta inceppata / Carta finita | Una stampante fisica lo segnala (controllo ogni minuto, confermato due volte di fila) | la stampante smette di segnalarlo |
+| Inchiostro o toner finito / in esaurimento | Finito: il livello è 0 o lo dice la stampante. In esaurimento: solo il livello sotto la soglia «basso» della stampante | la stampante smette di segnalarlo |
+| Salva la chiave segreta | Una volta, dopo il primo avvio: copia `CUPSPL_SECRET_KEY` da `.env` in un posto sicuro. Arriva all'amministratore del primo avvio (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`) nella sua campanella, o a tutti gli amministratori se quell'account non esiste. Non torna a un riavvio; torna una volta se la chiave cambia | mai (chiudilo tu) |
+| La chiave segreta è cambiata | `CUPSPL_SECRET_KEY` non è quella dell'avvio precedente; dice quanti nomi di file non si leggono più | mai (chiudilo tu) |
+| Nessuna chiave segreta | `CUPSPL_SECRET_KEY` è vuota: i nomi dei file non sono cifrati e dopo un riavvio tutti rifanno il login | la chiave viene impostata |
+
+**Problemi di stampante e utenti.** Gli avvisi sulle stampanti qui sopra sono sempre per gli amministratori. Con `CUPSPL_PRINTER_ALERTS_USERS=true` (predefinito) chi ha una
+stampa in attesa su quella stampante riceve un avviso anche nella propria campanella (inceppamento, carta e inchiostro finiti; non «in esaurimento»), una volta per problema e solo
+lui, non tutti. Si chiude da solo quando la stampante torna a posto. Con `false` vengono avvisati solo gli amministratori.
+
+**Una sola campanella.** Un amministratore ha una sola campanella: `/admin/notices` mostra prima gli avvisi sul proprio account («Per te»: chiavi, gruppo, quota, richieste)
+e poi quelli del gateway, e il numero rosso somma entrambi. `/me/notices` manda gli amministratori lì.
 
 Perché un client che riprova 100 volte non riempia l'elenco, lo stesso avviso dalla stessa fonte viene scritto di nuovo solo dopo un
 intervallo; le ripetizioni nel frattempo vengono contate. L'intervallo dipende da `CUPSPL_LOG_LEVEL` e lo stesso testo viene scritto

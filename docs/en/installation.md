@@ -81,7 +81,7 @@ Defaults are sensible; the settings you will most often touch:
 | `CUPSPL_UPDATE_CHECK` | `false` stops the daily question to GitHub about a newer version |
 | `CUPSPL_ESCL_ANONYMOUS` | `true` accepts scans from apps that cannot send a password (see [scanning.md](scanning.md)) |
 
-The file is fully commented. After any change: `docker compose up -d`.
+The file is fully commented. Every variable, with its default and when to change it, is in [configuration.md](configuration.md). After any change: `docker compose up -d`.
 
 ### 3.3 The compose variables (part A of `.env`)
 

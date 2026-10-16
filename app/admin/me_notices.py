@@ -16,12 +16,14 @@ router = APIRouter(prefix="/me/notices")
 
 @router.get("", response_class=HTMLResponse)
 def listing(request: Request, all: int = 0, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    if user.is_admin:   # administrators have one bell: their own notices are at the top of the administrators' page
+        return back("/admin/notices" + ("?all=1" if all else ""))
     q = select(Notice).where(Notice.user_id == user.id).order_by(Notice.last_at.desc())
     if not all:
         q = q.where(Notice.dismissed_at.is_(None))
     user.own_notices_seen_at = datetime.now(timezone.utc)   # opening the list is what "seeing" them means
     db.commit()
-    return render(request, "me_notices.html", user, rows=list(db.scalars(q.limit(200))), show_all=bool(all))
+    return render(request, "me_notices.html", user, own_rows=list(db.scalars(q.limit(200))), show_all=bool(all))
 
 
 @router.post("/{nid}/dismiss", dependencies=[Depends(verify_csrf)])

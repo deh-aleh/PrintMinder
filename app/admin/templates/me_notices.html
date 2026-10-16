@@ -3,38 +3,9 @@
 {% block body %}
 <div class="card">
   <h1>{{ _("Notices") }}</h1>
-  <p class="muted">{{ _("What the administrators did that concerns you, for example with your print keys.") }}</p>
-  {% if rows %}
-  <table class="stack">
-    <tr><th>{{ _("When") }}</th><th>{{ _("What happened") }}</th><th></th></tr>
-    {% for n in rows %}{% set d = n.detail_json or {} %}
-    <tr {% if n.dismissed_at %}class="muted"{% endif %}>
-      <td data-l="{{ _('When') }}">{{ n.last_at|localtime }}</td>
-      <td data-l="{{ _('What happened') }}">
-        {% if n.kind == 'key_revoked' %}
-        {{ _("An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it.", label=d.get("label", "?"), prefix=d.get("prefix", "?")) }}
-        {% elif n.kind == 'key_revoked_many' %}
-        {{ _("An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them.", n=d.get("count", "?")) }}
-        {% elif n.kind == 'key_disabled' %}
-        {{ _("An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change.", label=d.get("label", "?"), prefix=d.get("prefix", "?")) }}
-        {% elif n.kind == 'key_enabled' %}
-        {{ _("An administrator switched your print key “%(label)s” (starts with %(prefix)s) back on. It works again.", label=d.get("label", "?"), prefix=d.get("prefix", "?")) }}
-        {% elif n.kind == 'key_extended' %}
-        {{ _("An administrator extended your print key “%(label)s” (starts with %(prefix)s). It now expires on %(date)s.", label=d.get("label", "?"), prefix=d.get("prefix", "?"), date=(d.get("until") or "")[:10]) }}
-        {% elif n.kind == 'key_expiring' %}
-        {{ _("Your print key “%(label)s” (starts with %(prefix)s) expires on %(date)s. Create a new one before then and set it up on your devices.", label=d.get("label", "?"), prefix=d.get("prefix", "?"), date=(d.get("until") or "")[:10]) }}
-        {% else %}{{ n.kind }}{% endif %}
-      </td>
-      <td>{% if n.dismissed_at %}<span class="muted">{{ _("dismissed") }}</span>
-        {% else %}<form method="post" action="/me/notices/{{ n.id }}/dismiss"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _("Dismiss") }}</button></form>{% endif %}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% else %}<p>{{ _("No notices.") }}</p>{% endif %}
+  <p class="muted">{{ _("What concerns you: what the administrators did with your account (keys, group, quota, requests) and problems of the printer your print is waiting for.") }}</p>
+  {% include "_own_notices.html" %}
   <div class="row" style="margin-top:12px">
-    {% if rows|selectattr('dismissed_at', 'none')|list %}
-    <form method="post" action="/me/notices/dismiss-all"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="sec">{{ _("Dismiss all") }}</button></form>
-    {% endif %}
     <a class="btn sec" href="/me/notices{{ '' if show_all else '?all=1' }}">{{ _("Hide dismissed") if show_all else _("Show dismissed too") }}</a>
   </div>
 </div>

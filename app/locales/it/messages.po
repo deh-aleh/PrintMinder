@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cups-policy-gateway VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 08:23+0200\n"
+"POT-Creation-Date: 2026-10-16 13:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
@@ -121,32 +121,32 @@ msgstr "rifiutata"
 msgid "expired"
 msgstr "scaduta"
 
-#: app/admin/templates/jobs.html:95 app/i18n.py:165
+#: app/admin/templates/jobs.html:96 app/i18n.py:165
 msgid "canceled"
 msgstr "annullato"
 
-#: app/admin/templates/jobs.html:91 app/i18n.py:166
+#: app/admin/templates/jobs.html:92 app/i18n.py:166
 msgid "accepted"
 msgstr "accettato"
 
-#: app/admin/templates/jobs.html:93 app/i18n.py:166
+#: app/admin/templates/jobs.html:94 app/i18n.py:166
 msgid "denied"
 msgstr "negato"
 
-#: app/admin/templates/jobs.html:92 app/i18n.py:166
+#: app/admin/templates/jobs.html:93 app/i18n.py:166
 msgid "completed"
 msgstr "completato"
 
-#: app/admin/templates/jobs.html:94 app/i18n.py:166
+#: app/admin/templates/jobs.html:95 app/i18n.py:166
 msgid "failed"
 msgstr "fallito"
 
-#: app/admin/templates/jobs.html:96 app/i18n.py:166
+#: app/admin/templates/jobs.html:97 app/i18n.py:166
 msgid "held"
 msgstr "in attesa"
 
 #: app/admin/templates/keys.html:19 app/admin/templates/printers.html:30
-#: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:15
+#: app/admin/templates/user_edit.html:17 app/admin/templates/users.html:15
 #: app/i18n.py:167
 msgid "active"
 msgstr "attiva"
@@ -159,22 +159,26 @@ msgstr "revocata"
 msgid "ended"
 msgstr "terminata"
 
-#: app/admin/templates/requests.html:19 app/i18n.py:167
+#: app/admin/templates/requests.html:21 app/admin/templates/requests.html:86
+#: app/admin/templates/requests.html:197 app/i18n.py:167
 msgid "temporary"
 msgstr "temporanea"
 
-#: app/admin/accounts.py:70 app/admin/me.py:44
-#: app/admin/templates/grants.html:24 app/admin/templates/requests.html:12
-#: app/admin/templates/requests.html:19 app/i18n.py:167
+#: app/admin/accounts.py:167 app/admin/me.py:44 app/admin/templates/me.html:36
+#: app/admin/templates/requests.html:12 app/admin/templates/requests.html:22
+#: app/admin/templates/requests.html:28 app/admin/templates/requests.html:86
+#: app/admin/templates/requests.html:108 app/admin/templates/requests.html:119
+#: app/admin/templates/requests.html:197 app/admin/templates/user_edit.html:29
+#: app/i18n.py:167
 msgid "permanent"
 msgstr "permanente"
 
-#: app/admin/templates/grants.html:22 app/admin/templates/me.html:12
+#: app/admin/templates/me.html:12 app/admin/templates/requests.html:106
 #: app/i18n.py:168
 msgid "jobs"
 msgstr "job"
 
-#: app/admin/templates/grants.html:22 app/admin/templates/me.html:12
+#: app/admin/templates/me.html:12 app/admin/templates/requests.html:106
 #: app/i18n.py:168
 msgid "pages"
 msgstr "pagine"
@@ -182,7 +186,7 @@ msgstr "pagine"
 #: app/admin/templates/backup_edit.html:17 app/admin/templates/backups.html:89
 #: app/admin/templates/group_edit.html:13 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:14 app/admin/templates/request_quota.html:14
-#: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:19
+#: app/admin/templates/user_edit.html:23 app/admin/templates/users.html:19
 #: app/i18n.py:168
 msgid "weekly"
 msgstr "settimanale"
@@ -190,7 +194,7 @@ msgstr "settimanale"
 #: app/admin/templates/backup_edit.html:18 app/admin/templates/backups.html:90
 #: app/admin/templates/group_edit.html:13 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:14 app/admin/templates/request_quota.html:14
-#: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:19
+#: app/admin/templates/user_edit.html:23 app/admin/templates/users.html:19
 #: app/i18n.py:168
 msgid "monthly"
 msgstr "mensile"
@@ -211,218 +215,275 @@ msgstr "mancante"
 msgid "modified"
 msgstr "modificato"
 
-#: app/admin/accounts.py:37
+#: app/admin/accounts.py:42
 #, python-format
 msgid "%(used)s/%(limit)s %(metric)s (%(period)s)"
 msgstr "%(used)s/%(limit)s %(metric)s (%(period)s)"
 
-#: app/admin/accounts.py:49
+#: app/admin/accounts.py:54
 msgid "You cannot disable or demote yourself"
 msgstr "Non puoi disattivare o declassare te stesso"
 
-#: app/admin/accounts.py:51
+#: app/admin/accounts.py:56
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be disabled or demoted"
 msgstr "%(user)s è l'amministratore di emergenza: non può essere disattivato né declassato"
 
-#: app/admin/accounts.py:53 app/admin/accounts.py:280
+#: app/admin/accounts.py:58 app/admin/accounts.py:413
 msgid "That is the last administrator"
 msgstr "È l'ultimo amministratore"
 
-#: app/admin/accounts.py:69
+#: app/admin/accounts.py:71 app/admin/accounts.py:80 app/admin/accounts.py:98
+msgid "Invalid permission value"
+msgstr "Valore del permesso non valido"
+
+#: app/admin/accounts.py:89
+#, python-format
+msgid "Invalid printer name %(name)s"
+msgstr "Nome di stampante non valido: %(name)s"
+
+#: app/admin/accounts.py:93
+msgid "Choose at least one printer, or choose “all printers”"
+msgstr "Scegli almeno una stampante, oppure scegli “tutte le stampanti”"
+
+#: app/admin/accounts.py:95
+#, python-format
+msgid "Too many printers in the list (at most %(max)s)"
+msgstr "Troppe stampanti nell'elenco (al massimo %(max)s)"
+
+#: app/admin/accounts.py:104
+msgid "Choose at least one day of the week for the hours"
+msgstr "Scegli almeno un giorno della settimana per gli orari"
+
+#: app/admin/accounts.py:108
+msgid "Enter the hours as HH:MM, for example 08:00 and 17:30"
+msgstr "Scrivi gli orari come HH:MM, per esempio 08:00 e 17:30"
+
+#: app/admin/accounts.py:110
+msgid "The start and the end of the hours must be different"
+msgstr "L'inizio e la fine della fascia oraria devono essere diversi"
+
+#: app/admin/accounts.py:146 app/admin/accounts.py:147
+#: app/admin/templates/_perm_fields.html:20
+#: app/admin/templates/_perm_fields.html:24 app/admin/templates/me.html:29
+#: app/admin/templates/me.html:30
+msgid "allowed"
+msgstr "consentito"
+
+#: app/admin/accounts.py:146 app/admin/accounts.py:147
+#: app/admin/templates/_perm_fields.html:20
+#: app/admin/templates/_perm_fields.html:24
+msgid "not allowed"
+msgstr "non consentito"
+
+#: app/admin/accounts.py:148 app/admin/templates/_perm_fields.html:28
+msgctxt "printers"
+msgid "all"
+msgstr "tutte"
+
+#: app/admin/accounts.py:148 app/admin/templates/backup_edit.html:19
+msgid "none"
+msgstr "nessuna"
+
+#: app/admin/accounts.py:149 app/admin/templates/_perm_fields.html:39
+#: app/admin/templates/me.html:32
+msgid "any time"
+msgstr "sempre"
+
+#: app/admin/accounts.py:166
 msgid "limit inherited from the group"
 msgstr "limite ereditato dal gruppo"
 
-#: app/admin/accounts.py:70
+#: app/admin/accounts.py:167
 #, python-format
 msgid "temporary, expires on %(date)s"
 msgstr "temporanea, scade il %(date)s"
 
-#: app/admin/accounts.py:134 app/admin/accounts.py:167
-#: app/admin/accounts.py:200
+#: app/admin/accounts.py:232 app/admin/accounts.py:265
+#: app/admin/accounts.py:305
 msgid "Unknown group"
 msgstr "Gruppo sconosciuto"
 
-#: app/admin/accounts.py:135
+#: app/admin/accounts.py:233
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: tick the administrator box instead"
 msgstr "Il gruppo \"%(group)s\" è solo per gli amministratori: spunta invece la casella amministratore"
 
-#: app/admin/accounts.py:136
+#: app/admin/accounts.py:234
 msgid "Invalid username (letters, digits, dot, dash, underscore; max 63)"
 msgstr "Nome utente non valido (lettere, cifre, punto, trattino, trattino basso; max 63)"
 
-#: app/admin/accounts.py:137 app/admin/accounts.py:173
+#: app/admin/accounts.py:235 app/admin/accounts.py:271
 #, python-format
 msgid "User %(name)s already exists"
 msgstr "L'utente %(name)s esiste già"
 
-#: app/admin/accounts.py:153 app/admin/accounts.py:181
+#: app/admin/accounts.py:251 app/admin/accounts.py:279
 #, python-format
 msgid "User %(name)s created"
 msgstr "Utente %(name)s creato"
 
-#: app/admin/accounts.py:153 app/admin/accounts.py:254
-#: app/admin/accounts.py:319
+#: app/admin/accounts.py:251 app/admin/accounts.py:367
+#: app/admin/accounts.py:452
 msgid "Temporary password"
 msgstr "Password temporanea"
 
-#: app/admin/accounts.py:154
+#: app/admin/accounts.py:252
 msgid "Give it to the user over a safe channel. They must choose their own at first login."
 msgstr "Daglielo tramite un canale sicuro. Dovrà sceglierne una propria al primo accesso."
 
-#: app/admin/accounts.py:165
+#: app/admin/accounts.py:263
 msgid "RADIUS is not configured: create a local user instead"
 msgstr "RADIUS non è configurato: crea invece un utente locale"
 
-#: app/admin/accounts.py:169
+#: app/admin/accounts.py:267
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators: make them administrator from their page"
 msgstr "Il gruppo \"%(group)s\" è solo per gli amministratori: rendilo amministratore dalla sua pagina"
 
-#: app/admin/accounts.py:171
+#: app/admin/accounts.py:269
 msgid "Invalid username"
 msgstr "Nome utente non valido"
 
-#: app/admin/accounts.py:204
+#: app/admin/accounts.py:309
 msgid "Unknown or unavailable login method"
 msgstr "Metodo di accesso sconosciuto o non disponibile"
 
-#: app/admin/accounts.py:212
+#: app/admin/accounts.py:317
 #, python-format
 msgid "%(user)s is the emergency administrator: it must stay a local account"
 msgstr "%(user)s è l'amministratore di emergenza: deve restare un account locale"
 
-#: app/admin/accounts.py:228
+#: app/admin/accounts.py:333
 #, python-format
 msgid "Group \"%(group)s\" is only for administrators"
 msgstr "Il gruppo \"%(group)s\" è solo per gli amministratori"
 
-#: app/admin/accounts.py:231
+#: app/admin/accounts.py:336
 #, python-format
 msgid "Administrators stay in \"%(group)s\": remove the admin right first"
 msgstr "Gli amministratori restano in \"%(group)s\": togli prima il diritto di amministratore"
 
-#: app/admin/accounts.py:253
+#: app/admin/accounts.py:366
 #, python-format
 msgid "%(user)s is now a local account"
 msgstr "%(user)s ora è un account locale"
 
-#: app/admin/accounts.py:255
+#: app/admin/accounts.py:368
 msgid "The user must choose their own at the next login. Their print keys keep working."
 msgstr "L'utente dovrà sceglierne una propria al prossimo accesso. Le sue chiavi di stampa continuano a funzionare."
 
-#: app/admin/accounts.py:257 app/admin/accounts.py:531
+#: app/admin/accounts.py:370 app/admin/accounts.py:683
 #, python-format
 msgid "Saved %(name)s"
 msgstr "Salvato %(name)s"
 
-#: app/admin/accounts.py:276
+#: app/admin/accounts.py:409
 msgid "You cannot delete yourself"
 msgstr "Non puoi eliminare te stesso"
 
-#: app/admin/accounts.py:278
+#: app/admin/accounts.py:411
 #, python-format
 msgid "%(user)s is the emergency administrator: it can not be deleted"
 msgstr "%(user)s è l'amministratore di emergenza: non può essere eliminato"
 
-#: app/admin/accounts.py:292
+#: app/admin/accounts.py:425
 msgid "The name you typed does not match: nothing was deleted"
 msgstr "Il nome scritto non corrisponde: non è stato eliminato nulla"
 
-#: app/admin/accounts.py:300
+#: app/admin/accounts.py:433
 #, python-format
 msgid "Account %(name)s deleted (%(n)s print record(s) kept in the audit)"
 msgstr "Account %(name)s eliminato (%(n)s registrazioni di stampa conservate nell'audit)"
 
-#: app/admin/accounts.py:311
+#: app/admin/accounts.py:444
 msgid "That account signs in through RADIUS: its password is managed there"
 msgstr "Quell'account accede tramite RADIUS: la sua password si gestisce lì"
 
-#: app/admin/accounts.py:318
+#: app/admin/accounts.py:451
 #, python-format
 msgid "New password for %(user)s"
 msgstr "Nuova password per %(user)s"
 
-#: app/admin/accounts.py:320
+#: app/admin/accounts.py:453
 msgid "The user must choose a new one at the next login. Their print keys keep working."
 msgstr "L'utente dovrà sceglierne una nuova al prossimo accesso. Le sue chiavi di stampa continuano a funzionare."
 
-#: app/admin/accounts.py:335
+#: app/admin/accounts.py:468
 #, python-format
 msgid "%(n)s key(s) of %(user)s revoked"
 msgstr "%(n)s chiavi di %(user)s revocate"
 
-#: app/admin/accounts.py:360 app/admin/me.py:126
+#: app/admin/accounts.py:493 app/admin/me.py:145
 #, python-format
 msgid "Key %(label)s revoked"
 msgstr "Chiave %(label)s revocata"
 
-#: app/admin/accounts.py:387
+#: app/admin/accounts.py:520
 #, python-format
 msgid "Key %(label)s switched off: its expiry date keeps running"
 msgstr "Chiave %(label)s disattivata: la data di scadenza continua a scorrere"
 
-#: app/admin/accounts.py:399
+#: app/admin/accounts.py:532
 #, python-format
 msgid "Key %(label)s switched on"
 msgstr "Chiave %(label)s riattivata"
 
-#: app/admin/accounts.py:411 app/auth/keys.py:182
+#: app/admin/accounts.py:544 app/auth/keys.py:182
 msgid "choose one of the validity periods in the list"
 msgstr "scegli uno dei periodi di validità dell'elenco"
 
-#: app/admin/accounts.py:419
+#: app/admin/accounts.py:552
 #, python-format
 msgid "Key %(label)s now expires on %(date)s"
 msgstr "La chiave %(label)s ora scade il %(date)s"
 
-#: app/admin/accounts.py:421
+#: app/admin/accounts.py:554
 msgid "This key can not be extended"
 msgstr "Questa chiave non si può prolungare"
 
-#: app/admin/accounts.py:429
+#: app/admin/accounts.py:562
 #, python-format
 msgid "The group “%(name)s” has %(n)s user: it will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgid_plural "The group “%(name)s” has %(n)s users: they will be moved to the default group “%(group)s” (with that group's limits). Delete the group?"
 msgstr[0] "Il gruppo «%(name)s» ha %(n)s utente: verrà spostato nel gruppo di default «%(group)s» (con i limiti di quel gruppo). Eliminare il gruppo?"
 msgstr[1] "Il gruppo «%(name)s» ha %(n)s utenti: verranno spostati nel gruppo di default «%(group)s» (con i limiti di quel gruppo). Eliminare il gruppo?"
 
-#: app/admin/accounts.py:432
+#: app/admin/accounts.py:565
 #, python-format
 msgid "Delete the group “%(name)s”? It has no users."
 msgstr "Eliminare il gruppo «%(name)s»? Non ha utenti."
 
-#: app/admin/accounts.py:480 app/admin/accounts.py:517
+#: app/admin/accounts.py:620 app/admin/accounts.py:665
 msgid "Invalid group name"
 msgstr "Nome del gruppo non valido"
 
-#: app/admin/accounts.py:482 app/admin/accounts.py:520
+#: app/admin/accounts.py:622 app/admin/accounts.py:668
 #, python-format
 msgid "Group %(name)s already exists"
 msgstr "Il gruppo %(name)s esiste già"
 
-#: app/admin/accounts.py:493
+#: app/admin/accounts.py:636
 #, python-format
 msgid "Group %(name)s created"
 msgstr "Gruppo %(name)s creato"
 
-#: app/admin/accounts.py:514
+#: app/admin/accounts.py:662
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be renamed"
 msgstr "\"%(name)s\" è un gruppo di sistema: non si può rinominare"
 
-#: app/admin/accounts.py:542
+#: app/admin/accounts.py:694
 #, python-format
 msgid "\"%(name)s\" is a system group: it can not be deleted"
 msgstr "\"%(name)s\" è un gruppo di sistema: non si può eliminare"
 
-#: app/admin/accounts.py:556
+#: app/admin/accounts.py:712
 #, python-format
 msgid "Group %(name)s deleted"
 msgstr "Gruppo %(name)s eliminato"
 
-#: app/admin/accounts.py:556
+#: app/admin/accounts.py:712
 #, python-format
 msgid "; %(n)s user(s) moved to %(group)s"
 msgstr "; %(n)s utenti spostati in %(group)s"
@@ -435,14 +496,14 @@ msgstr "Il file dell'archivio manca sul disco"
 msgid "integrity OK (sha256 matches)"
 msgstr "integrità OK (lo sha256 corrisponde)"
 
-#: app/admin/audit_view.py:12 app/admin/printers.py:471
-#: app/admin/printers.py:505 app/admin/templates/print.html:40
-#: app/policy/keepalive.py:130
+#: app/admin/audit_view.py:12 app/admin/audit_view.py:16
+#: app/admin/printers.py:477 app/admin/printers.py:511
+#: app/admin/templates/print.html:43 app/policy/keepalive.py:130
 msgid "colour"
 msgstr "colore"
 
 #: app/admin/audit_view.py:12 app/admin/audit_view.py:13
-#: app/admin/printers.py:471 app/admin/printers.py:505
+#: app/admin/printers.py:477 app/admin/printers.py:511
 #: app/policy/keepalive.py:130
 msgid "black and white"
 msgstr "bianco e nero"
@@ -455,7 +516,7 @@ msgstr "automatico"
 msgid "automatic (black and white)"
 msgstr "automatico (bianco e nero)"
 
-#: app/admin/audit_view.py:14 app/admin/audit_view.py:34
+#: app/admin/audit_view.py:14 app/admin/audit_view.py:35
 msgid "normal"
 msgstr "normale"
 
@@ -476,69 +537,78 @@ msgid "eSCL client"
 msgstr "client eSCL"
 
 #: app/admin/audit_view.py:16
+msgid "one-sided"
+msgstr "solo fronte"
+
+#: app/admin/audit_view.py:17
 msgid "portrait"
 msgstr "verticale"
 
-#: app/admin/audit_view.py:16
+#: app/admin/audit_view.py:17
 msgid "landscape"
 msgstr "orizzontale"
 
-#: app/admin/audit_view.py:33 app/admin/templates/print.html:49
+#: app/admin/audit_view.py:34 app/admin/templates/_perm_fields.html:19
+#: app/admin/templates/me.html:29 app/admin/templates/print.html:52
 #: app/admin/templates/scan.html:37
 msgid "Colour"
 msgstr "Colore"
 
-#: app/admin/audit_view.py:33
+#: app/admin/audit_view.py:34
 msgid "printer default"
 msgstr "predefinito della stampante"
 
-#: app/admin/audit_view.py:34
+#: app/admin/audit_view.py:35 app/admin/templates/print.html:53
 msgid "Sides"
 msgstr "Facciate"
 
-#: app/admin/audit_view.py:39 app/admin/templates/jobs.html:24
+#: app/admin/audit_view.py:40 app/admin/templates/jobs.html:24
 #: app/admin/templates/scan.html:34
 msgid "File name"
 msgstr "Nome file"
 
-#: app/admin/audit_view.py:41
+#: app/admin/audit_view.py:42
 msgid "Document name"
 msgstr "Nome documento"
 
-#: app/admin/audit_view.py:43 app/admin/templates/print.html:45
+#: app/admin/audit_view.py:44 app/admin/templates/print.html:48
 msgid "Comment"
 msgstr "Commento"
 
-#: app/admin/audit_view.py:45 app/admin/templates/scan.html:35
+#: app/admin/audit_view.py:46 app/admin/templates/scan.html:35
 msgid "Format"
 msgstr "Formato"
 
-#: app/admin/audit_view.py:47 app/admin/templates/backup_edit.html:15
-#: app/admin/templates/backups.html:87 app/admin/templates/print.html:51
+#: app/admin/audit_view.py:48 app/admin/templates/backup_edit.html:15
+#: app/admin/templates/backups.html:87 app/admin/templates/print.html:55
 msgid "Copies"
 msgstr "Copie"
 
-#: app/admin/audit_view.py:49
+#: app/admin/audit_view.py:50
 msgid "Paper"
 msgstr "Carta"
 
-#: app/admin/audit_view.py:51 app/admin/templates/print.html:48
+#: app/admin/audit_view.py:52 app/admin/templates/print.html:51
 msgid "Orientation"
 msgstr "Orientamento"
 
-#: app/admin/audit_view.py:53
+#: app/admin/audit_view.py:54
 msgid "Pages chosen"
 msgstr "Pagine scelte"
 
-#: app/admin/audit_view.py:55
+#: app/admin/audit_view.py:56
 msgid "Pages counted"
 msgstr "Pagine contate"
 
-#: app/admin/audit_view.py:56
+#: app/admin/audit_view.py:58
+msgid "Corrected by the permissions"
+msgstr "Corretto dai permessi"
+
+#: app/admin/audit_view.py:59
 msgid "Sent from"
 msgstr "Inviato da"
 
-#: app/admin/audit_view.py:56
+#: app/admin/audit_view.py:59
 msgid "IPP client"
 msgstr "client IPP"
 
@@ -614,12 +684,12 @@ msgstr "Backup NON riuscito: %(message)s"
 msgid "Backup “%(name)s” deleted. The files already written in the folder stay where they are"
 msgstr "Backup «%(name)s» eliminato. I file già scritti nella cartella restano dove sono"
 
-#: app/admin/common.py:151
+#: app/admin/common.py:142
 #, python-format
 msgid "invalid limit %(value)s"
 msgstr "limite non valido %(value)s"
 
-#: app/admin/common.py:154
+#: app/admin/common.py:145
 #, python-format
 msgid "limit too large (max %(max)s)"
 msgstr "limite troppo grande (max %(max)s)"
@@ -668,94 +738,117 @@ msgstr "Scuro"
 msgid "until the end of the period"
 msgstr "fino a fine periodo"
 
-#: app/admin/me.py:46 app/admin/requests.py:36
+#: app/admin/me.py:49 app/admin/requests.py:42
 #, python-format
 msgid "move to group %(name)s"
 msgstr "passa al gruppo %(name)s"
 
-#: app/admin/me.py:83 app/admin/templates/keys.html:13
-#: app/admin/templates/notices.html:17 app/admin/templates/notices.html:19
+#: app/admin/me.py:102 app/admin/templates/keys.html:13
+#: app/admin/templates/notices.html:24 app/admin/templates/notices.html:26
 msgid "never"
 msgstr "mai"
 
-#: app/admin/me.py:92
+#: app/admin/me.py:111
 msgid "New print key"
 msgstr "Nuova chiave di stampa"
 
-#: app/admin/me.py:92
+#: app/admin/me.py:111
 msgid "Print key"
 msgstr "Chiave di stampa"
 
-#: app/admin/me.py:94
+#: app/admin/me.py:113
 #, python-format
 msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It expires on %(date)s and works only for printing. If you lose it or lose the device, revoke it here and create another."
 msgstr "Mostrata solo ora. Usala come PASSWORD quando il computer o il telefono chiede di accedere alla stampante; il nome utente è %(user)s. Scade il %(date)s e vale solo per stampare. Se la perdi o perdi il dispositivo, revocala da qui e creane un'altra."
 
-#: app/admin/me.py:98
+#: app/admin/me.py:117
 #, python-format
 msgid "Shown only now. Use it as the PASSWORD when your computer or phone asks to sign in to the printer; the user name is %(user)s. It works for ONE print only, and only until %(date)s if nobody uses it. Create another one for the next print."
 msgstr "Mostrata solo adesso. Usala come PASSWORD quando il computer o il telefono chiede di accedere alla stampante; il nome utente è %(user)s. Vale per UNA SOLA stampa, e solo fino al %(date)s se nessuno la usa. Per la stampa successiva creane un'altra."
 
-#: app/admin/me.py:116
+#: app/admin/me.py:135
 #, python-format
 msgid "%(n)s key(s) revoked"
 msgstr "%(n)s chiavi revocate"
 
-#: app/admin/me.py:139
+#: app/admin/me.py:158
 msgid "Your password is managed by RADIUS, not here"
 msgstr "La tua password è gestita da RADIUS, non da qui"
 
-#: app/admin/me.py:158
+#: app/admin/me.py:177
 msgid "Theme saved"
 msgstr "Tema salvato"
 
-#: app/admin/me.py:172
+#: app/admin/me.py:191
 msgid "Language saved"
 msgstr "Lingua salvata"
 
-#: app/admin/me.py:185
+#: app/admin/me.py:204
 #, python-format
 msgid "Enter 0 (off) or a number of seconds between %(min)s and %(max)s"
 msgstr "Inserisci 0 (disattivato) oppure un numero di secondi tra %(min)s e %(max)s"
 
-#: app/admin/me.py:189
+#: app/admin/me.py:208
 msgid "Automatic refresh off"
 msgstr "Aggiornamento automatico disattivato"
 
-#: app/admin/me.py:190 app/admin/templates/autorefresh.html:5
+#: app/admin/me.py:209 app/admin/templates/autorefresh.html:5
 #, python-format
 msgid "Automatic refresh every %(n)s seconds"
 msgstr "Aggiornamento automatico ogni %(n)s secondi"
 
-#: app/admin/me.py:202
+#: app/admin/me.py:221
 msgid "Too many attempts, retry later"
 msgstr "Troppi tentativi, riprova più tardi"
 
-#: app/admin/me.py:206
+#: app/admin/me.py:225
 msgid "The current password is wrong"
 msgstr "La password attuale è errata"
 
-#: app/admin/me.py:208
+#: app/admin/me.py:227
 msgid "the two new passwords differ"
 msgstr "le due nuove password sono diverse"
 
-#: app/admin/me.py:209
+#: app/admin/me.py:228
 msgid "the new password must differ from the current one"
 msgstr "la nuova password deve essere diversa da quella attuale"
 
-#: app/admin/me.py:221
+#: app/admin/me.py:240
 msgid "Password changed"
 msgstr "Password cambiata"
 
-#: app/admin/me.py:243 app/admin/me.py:263
+#: app/admin/me.py:262 app/admin/me.py:282 app/admin/me.py:321
 msgid "Request sent: an administrator will answer it"
 msgstr "Richiesta inviata: un amministratore risponderà"
 
-#: app/admin/me.py:274
+#: app/admin/me.py:300 app/admin/templates/requests.html:116
+#: app/policy/permissions.py:251
+msgid "colour printing"
+msgstr "stampa a colori"
+
+#: app/admin/me.py:300 app/admin/templates/requests.html:116
+#: app/policy/permissions.py:251
+msgid "one-sided printing"
+msgstr "stampa solo fronte"
+
+#: app/admin/me.py:301 app/admin/templates/requests.html:117
+#: app/policy/permissions.py:251
+msgid "printing outside the hours"
+msgstr "stampa fuori orario"
+
+#: app/admin/me.py:301 app/admin/templates/requests.html:117
+msgid "a printer"
+msgstr "una stampante"
+
+#: app/admin/me.py:316
+msgid "that printer does not exist"
+msgstr "questa stampante non esiste"
+
+#: app/admin/me.py:332
 msgid "Request canceled"
 msgstr "Richiesta annullata"
 
-#: app/admin/me_notices.py:45 app/admin/notices.py:59
+#: app/admin/me_notices.py:47 app/admin/notices.py:63
 #, python-format
 msgid "%(n)s notices dismissed"
 msgstr "%(n)s avvisi chiusi"
@@ -825,333 +918,369 @@ msgstr "Mancate prese carta"
 msgid "Ink used (total)"
 msgstr "Inchiostro usato (totale)"
 
-#: app/admin/printers.py:224 app/admin/printers.py:314
+#: app/admin/printers.py:225 app/admin/printers.py:317
 #: app/policy/keepalive.py:119
 msgid "CUPS does not answer"
 msgstr "CUPS non risponde"
 
-#: app/admin/printers.py:245
+#: app/admin/printers.py:247
 #, python-format
 msgid "Test printer %(name)s created: it writes PDFs, it uses no paper"
 msgstr "Stampante di prova %(name)s creata: scrive PDF, non consuma carta"
 
-#: app/admin/printers.py:245 app/admin/printers.py:274
-#: app/admin/printers.py:335 app/admin/printers.py:339
+#: app/admin/printers.py:247 app/admin/printers.py:276
+#: app/admin/printers.py:338 app/admin/printers.py:342
 msgid "CUPS did not accept the request"
 msgstr "CUPS non ha accettato la richiesta"
 
-#: app/admin/printers.py:260 app/admin/printers.py:288
-#: app/admin/printers.py:318 app/admin/printers.py:398
+#: app/admin/printers.py:262 app/admin/printers.py:290
+#: app/admin/printers.py:321 app/admin/printers.py:404
 #, python-format
 msgid "%(name)s: printer not found"
 msgstr "%(name)s: stampante non trovata"
 
-#: app/admin/printers.py:263
+#: app/admin/printers.py:265
 #, python-format
 msgid "%(name)s answers: only virtual printers and printers that do not answer can be deleted from here"
 msgstr "%(name)s risponde: da qui si possono eliminare solo le stampanti virtuali e quelle che non rispondono"
 
-#: app/admin/printers.py:274
+#: app/admin/printers.py:276
 #, python-format
 msgid "%(name)s deleted"
 msgstr "%(name)s eliminata"
 
-#: app/admin/printers.py:309
+#: app/admin/printers.py:312
 msgid "Queue names use letters, digits and . _ @ + - only (max 127)"
 msgstr "I nomi delle code usano solo lettere, cifre e . _ @ + - (massimo 127)"
 
-#: app/admin/printers.py:321
+#: app/admin/printers.py:324
 msgid "That is already its name"
 msgstr "È già il suo nome"
 
-#: app/admin/printers.py:324
+#: app/admin/printers.py:327
 #, python-format
 msgid "A queue called %(name)s already exists"
 msgstr "Esiste già una coda chiamata %(name)s"
 
-#: app/admin/printers.py:327
+#: app/admin/printers.py:330
 #, python-format
 msgid "%(name)s has jobs waiting: rename it when the queue is empty"
 msgstr "%(name)s ha dei job in attesa: rinominala quando la coda è vuota"
 
-#: app/admin/printers.py:331
+#: app/admin/printers.py:334
 #, python-format
 msgid "%(name)s can not be renamed: its driver is not known to the gateway"
 msgstr "%(name)s non si può rinominare: il gateway non conosce il suo driver"
 
-#: app/admin/printers.py:349
+#: app/admin/printers.py:355
 #, python-format
 msgid "%(old)s is now called %(new)s. Computers and phones set up by hand with the old address must be set up again."
 msgstr "%(old)s ora si chiama %(new)s. I computer e i telefoni configurati a mano con il vecchio indirizzo vanno configurati di nuovo."
 
-#: app/admin/printers.py:358
+#: app/admin/printers.py:364
 #, python-format
 msgid "%(n)s new printer added"
 msgid_plural "%(n)s new printers added"
 msgstr[0] "%(n)s nuova stampante aggiunta"
 msgstr[1] "%(n)s nuove stampanti aggiunte"
 
-#: app/admin/printers.py:362
+#: app/admin/printers.py:368
 msgid "No new printer found"
 msgstr "Nessuna stampante nuova trovata"
 
-#: app/admin/printers.py:368
+#: app/admin/printers.py:374
 #, python-format
 msgid "USB printer %(model)s found, but CUPS has no driver for it: it can not be added"
 msgstr "Stampante USB %(model)s trovata, ma CUPS non ha un driver per essa: non si può aggiungere"
 
-#: app/admin/printers.py:369
+#: app/admin/printers.py:375
 #, python-format
 msgid "CUPS did not accept the new printer %(model)s"
 msgstr "CUPS non ha accettato la nuova stampante %(model)s"
 
-#: app/admin/printers.py:395
+#: app/admin/printers.py:401
 #, python-format
 msgid "%(name)s is a virtual printer: maintenance is only for physical ones"
 msgstr "%(name)s è una stampante virtuale: la manutenzione serve solo a quelle fisiche"
 
-#: app/admin/printers.py:422 app/admin/printers.py:498
+#: app/admin/printers.py:428 app/admin/printers.py:504
 #, python-format
 msgid "%(name)s does not print in colour"
 msgstr "%(name)s non stampa a colori"
 
-#: app/admin/printers.py:431
+#: app/admin/printers.py:437
 #, python-format
 msgid "%(name)s: periodic print %(every)s, %(mode)s. The settings are saved; turn it on or off with the switch"
 msgstr "%(name)s: stampa periodica %(every)s, %(mode)s. Le impostazioni sono salvate; si attiva o disattiva con l'interruttore"
 
-#: app/admin/printers.py:432 app/admin/templates/printers.html:54
+#: app/admin/printers.py:438 app/admin/templates/printers.html:72
 msgid "in colour"
 msgstr "a colori"
 
-#: app/admin/printers.py:432 app/admin/templates/printers.html:54
+#: app/admin/printers.py:438 app/admin/templates/printers.html:72
 msgid "in black and white"
 msgstr "in bianco e nero"
 
-#: app/admin/printers.py:451
+#: app/admin/printers.py:457
 #, python-format
 msgid "%(name)s: periodic print turned on (%(every)s)"
 msgstr "%(name)s: stampa periodica attivata (%(every)s)"
 
-#: app/admin/printers.py:451
+#: app/admin/printers.py:457
 #, python-format
 msgid "%(name)s: periodic print turned off"
 msgstr "%(name)s: stampa periodica disattivata"
 
-#: app/admin/printers.py:461 app/admin/templates/printers.html:103
+#: app/admin/printers.py:467 app/admin/templates/printers.html:121
 msgid "NOT REACHABLE"
 msgstr "NON RAGGIUNGIBILE"
 
-#: app/admin/printers.py:461 app/admin/templates/printers.html:105
+#: app/admin/printers.py:467 app/admin/templates/printers.html:123
 #, python-format
 msgid "%(n)s in queue"
 msgstr "%(n)s in coda"
 
-#: app/admin/printers.py:462 app/admin/templates/printers.html:104
+#: app/admin/printers.py:468 app/admin/templates/printers.html:122
 msgid "not accepting jobs"
 msgstr "non accetta job"
 
-#: app/admin/printers.py:463
+#: app/admin/printers.py:469
 #, python-format
 msgid "%(jobs)s jobs, %(pages)s pages, last %(when)s"
 msgstr "%(jobs)s job, %(pages)s pagine, ultimo %(when)s"
 
-#: app/admin/printers.py:466 app/admin/templates/printers.html:157
+#: app/admin/printers.py:472 app/admin/templates/printers.html:176
 msgid "scans"
 msgstr "scansioni"
 
-#: app/admin/printers.py:466
+#: app/admin/printers.py:472
 #, python-format
 msgid "%(n)s, last %(when)s"
 msgstr "%(n)s, ultima %(when)s"
 
-#: app/admin/printers.py:467 app/admin/templates/printers.html:167
+#: app/admin/printers.py:473 app/admin/templates/printers.html:186
 #, python-format
 msgid "%(n)s pages/min"
 msgstr "%(n)s pagine/min"
 
-#: app/admin/printers.py:467 app/admin/templates/printers.html:167
+#: app/admin/printers.py:473 app/admin/templates/printers.html:186
 #, python-format
 msgid "colour %(n)s"
 msgstr "colore %(n)s"
 
-#: app/admin/printers.py:470
+#: app/admin/printers.py:476
 #, python-format
 msgid "Test print · %(title)s"
 msgstr "Stampa di prova · %(title)s"
 
-#: app/admin/printers.py:471
+#: app/admin/printers.py:477
 #, python-format
 msgid "queue %(name)s · %(when)s · %(mode)s"
 msgstr "coda %(name)s · %(when)s · %(mode)s"
 
-#: app/admin/printers.py:472 app/admin/templates/printers.html:140
+#: app/admin/printers.py:478 app/admin/templates/printers.html:159
 msgid "Ink left"
 msgstr "Inchiostro rimasto"
 
-#: app/admin/printers.py:473 app/admin/printers.py:479
+#: app/admin/printers.py:479 app/admin/printers.py:485
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/grants.html:8 app/admin/templates/jobs.html:34
-#: app/admin/templates/jobs.html:56 app/admin/templates/keys.html:8
-#: app/admin/templates/keys.html:15 app/admin/templates/me.html:47
-#: app/admin/templates/printers.html:176 app/admin/templates/requests.html:37
-#: app/admin/templates/user_edit.html:18 app/admin/templates/users.html:9
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:57
+#: app/admin/templates/keys.html:8 app/admin/templates/keys.html:15
+#: app/admin/templates/me.html:62 app/admin/templates/printers.html:195
+#: app/admin/templates/requests.html:181 app/admin/templates/requests.html:194
+#: app/admin/templates/user_edit.html:17 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:15
 msgid "State"
 msgstr "Stato"
 
-#: app/admin/printers.py:473 app/admin/templates/printers.html:148
+#: app/admin/printers.py:479 app/admin/templates/printers.html:167
 msgid "Printer counters"
 msgstr "Contatori della stampante"
 
-#: app/admin/printers.py:474 app/admin/templates/printers.html:153
+#: app/admin/printers.py:480 app/admin/templates/printers.html:172
 msgid "From the gateway"
 msgstr "Dal gateway"
 
-#: app/admin/printers.py:475 app/admin/templates/actions.html:11
+#: app/admin/printers.py:481 app/admin/templates/actions.html:11
 #: app/admin/templates/archive_view.html:15
-#: app/admin/templates/printers.html:162
+#: app/admin/templates/printers.html:181
 msgid "Details"
 msgstr "Dettagli"
 
-#: app/admin/printers.py:475 app/admin/templates/printers.html:164
+#: app/admin/printers.py:481 app/admin/templates/printers.html:183
 msgid "Serial number"
 msgstr "Numero di serie"
 
-#: app/admin/printers.py:475 app/admin/templates/printers.html:166
+#: app/admin/printers.py:481 app/admin/templates/printers.html:185
 msgid "Model"
 msgstr "Modello"
 
-#: app/admin/printers.py:476 app/admin/templates/printers.html:167
+#: app/admin/printers.py:482 app/admin/templates/printers.html:186
 msgid "Speed"
 msgstr "Velocità"
 
-#: app/admin/printers.py:476 app/admin/templates/printers.html:168
+#: app/admin/printers.py:482 app/admin/templates/printers.html:187
 msgid "Paper ready"
 msgstr "Carta pronta"
 
-#: app/admin/printers.py:477 app/admin/templates/printers.html:169
+#: app/admin/printers.py:483 app/admin/templates/printers.html:188
 msgid "Location"
 msgstr "Posizione"
 
-#: app/admin/printers.py:477 app/admin/templates/printers.html:170
+#: app/admin/printers.py:483 app/admin/templates/printers.html:189
 msgid "Connection"
 msgstr "Collegamento"
 
-#: app/admin/printers.py:478
+#: app/admin/printers.py:484
 msgid "Alerts"
 msgstr "Avvisi"
 
-#: app/admin/printers.py:479 app/admin/templates/printers.html:175
+#: app/admin/printers.py:485 app/admin/templates/printers.html:194
 #: app/admin/templates/scan.html:32
 msgid "Scanner"
 msgstr "Scanner"
 
-#: app/admin/printers.py:479 app/admin/templates/printers.html:177
+#: app/admin/printers.py:485 app/admin/templates/printers.html:196
 msgid "Feeder"
 msgstr "Caricatore"
 
-#: app/admin/printers.py:480 app/admin/templates/printers.html:178
+#: app/admin/printers.py:486 app/admin/templates/printers.html:197
 msgid "Resolutions"
 msgstr "Risoluzioni"
 
-#: app/admin/printers.py:481 app/admin/templates/printers.html:179
+#: app/admin/printers.py:487 app/admin/templates/printers.html:198
 msgid "Formats"
 msgstr "Formati"
 
-#: app/admin/printers.py:495
+#: app/admin/printers.py:501
 #, python-format
 msgid "%(name)s does not answer (off or unplugged?): nothing to print"
 msgstr "%(name)s non risponde (spenta o scollegata?): niente da stampare"
 
-#: app/admin/printers.py:505
+#: app/admin/printers.py:511
 #, python-format
 msgid "Test print sent to %(name)s (%(mode)s)"
 msgstr "Stampa di prova inviata a %(name)s (%(mode)s)"
 
-#: app/admin/printing.py:84 app/admin/printing.py:97
+#: app/admin/printing.py:90 app/admin/printing.py:103
 #, python-format
 msgid "The file is larger than %(mb)s MB"
 msgstr "Il file è più grande di %(mb)s MB"
 
-#: app/admin/printing.py:93
+#: app/admin/printing.py:99
 msgid "Choose a file to print"
 msgstr "Scegli un file da stampare"
 
-#: app/admin/printing.py:100
+#: app/admin/printing.py:106
 msgid "The file is empty"
 msgstr "Il file è vuoto"
 
-#: app/admin/printing.py:104
+#: app/admin/printing.py:110
 msgid "Unsupported file: PDF, JPEG, PNG, GIF or plain text only"
 msgstr "File non supportato: solo PDF, JPEG, PNG, GIF o testo semplice"
 
-#: app/admin/printing.py:110
+#: app/admin/printing.py:116
 #, python-format
 msgid "%(printer)s does not answer (off or unplugged?): choose another one or try again later"
 msgstr "%(printer)s non risponde (spenta o scollegata?): scegline un'altra o riprova più tardi"
 
-#: app/admin/printing.py:113
+#: app/admin/printing.py:119
 msgid "Choose a printer from the list"
 msgstr "Scegli una stampante dall'elenco"
 
-#: app/admin/printing.py:117
+#: app/admin/printing.py:123
 #, python-format
 msgid "Copies must be between 1 and %(max)s"
 msgstr "Le copie devono essere tra 1 e %(max)s"
 
-#: app/admin/printing.py:123
+#: app/admin/printing.py:129
 #, python-format
 msgid "The comment can be at most %(n)s characters long"
 msgstr "Il commento può avere al massimo %(n)s caratteri"
 
-#: app/admin/printing.py:129
+#: app/admin/printing.py:135
 msgid "Paper size not available on this printer"
 msgstr "Formato carta non disponibile su questa stampante"
 
-#: app/admin/printing.py:146
+#: app/admin/printing.py:155
 msgid "Landscape is available for PDF files and images, not for text files"
 msgstr "L'orientamento orizzontale è disponibile per i file PDF e le immagini, non per i file di testo"
 
-#: app/admin/printing.py:152
+#: app/admin/printing.py:161
 msgid "This PDF can not be turned to landscape (protected or damaged): choose automatic orientation"
 msgstr "Questo PDF non si può mettere in orizzontale (protetto o danneggiato): scegli l'orientamento automatico"
 
-#: app/admin/printing.py:182
+#: app/admin/printing.py:204
 #, python-format
 msgid "%(reason)s. You can ask for more quota below."
 msgstr "%(reason)s. Puoi chiedere più quota qui sotto."
 
-#: app/admin/printing.py:219
+#: app/admin/printing.py:248
 #, python-format
 msgid "Sent to %(printer)s: %(title)s"
 msgstr "Inviato a %(printer)s: %(title)s"
 
-#: app/admin/printing.py:219
+#: app/admin/printing.py:248
 #, python-format
 msgid " — %(n)s page(s)"
 msgstr " — %(n)s pagina/e"
 
-#: app/admin/printing.py:221
+#: app/admin/printing.py:250
 msgid "The print server did not accept the file. Try another format (PDF works best)."
 msgstr "Il server di stampa non ha accettato il file. Prova un altro formato (il PDF funziona meglio)."
 
-#: app/admin/requests.py:68
+#: app/admin/reports.py:146
+msgid "The dates must look like 2026-10-31"
+msgstr "Le date devono avere la forma 2026-10-31"
+
+#: app/admin/reports.py:149
+msgid "The end of the period is before its start"
+msgstr "La fine del periodo è prima del suo inizio"
+
+#: app/admin/reports.py:154
+#, python-format
+msgid "The number of users must be between 1 and %(max)s"
+msgstr "Il numero di utenti deve essere tra 1 e %(max)s"
+
+#: app/admin/requests.py:53
+msgid "choose the last day the permission is valid"
+msgstr "scegli l'ultimo giorno in cui il permesso è valido"
+
+#: app/admin/requests.py:136
 msgid "Approved"
 msgstr "Approvata"
 
-#: app/admin/requests.py:81
+#: app/admin/requests.py:153
 msgid "Rejected"
 msgstr "Rifiutata"
 
-#: app/admin/requests.py:114
+#: app/admin/requests.py:170
+msgid "unknown user"
+msgstr "utente sconosciuto"
+
+#: app/admin/requests.py:185 app/policy/grants.py:273
+msgid "invalid grant"
+msgstr "concessione non valida"
+
+#: app/admin/requests.py:186
 #, python-format
 msgid "Grant created for %(user)s"
 msgstr "Concessione creata per %(user)s"
 
-#: app/admin/requests.py:127
+#: app/admin/requests.py:202 app/admin/requests.py:218
 msgid "Grant revoked"
 msgstr "Concessione revocata"
+
+#: app/admin/requests.py:229
+#, python-format
+msgid "%(n)s ended grant deleted"
+msgid_plural "%(n)s ended grants deleted"
+msgstr[0] "%(n)s concessione scaduta eliminata"
+msgstr[1] "%(n)s concessioni scadute eliminate"
+
+#: app/admin/requests.py:229
+msgid "No ended grants to delete"
+msgstr "Nessuna concessione scaduta da eliminare"
 
 #: app/admin/routes.py:52
 msgid "Too many failed attempts, retry later"
@@ -1217,6 +1346,309 @@ msgstr "Non è stato possibile passare l'aggiornamento all'updater: %(error)s"
 msgid "Update to %(version)s requested. The gateway restarts in a minute or two; this page shows the result."
 msgstr "Aggiornamento alla %(version)s richiesto. Il gateway si riavvia entro un paio di minuti; questa pagina mostra il risultato."
 
+#: app/admin/templates/_own_notices.html:3
+#: app/admin/templates/_own_notices.html:6 app/admin/templates/actions.html:11
+#: app/admin/templates/archive_view.html:11
+#: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:39
+#: app/admin/templates/me.html:62 app/admin/templates/requests.html:7
+#: app/admin/templates/requests.html:181
+msgid "When"
+msgstr "Quando"
+
+#: app/admin/templates/_own_notices.html:3
+#: app/admin/templates/_own_notices.html:7 app/admin/templates/notices.html:16
+#: app/admin/templates/notices.html:20
+msgid "What happened"
+msgstr "Cosa è successo"
+
+#: app/admin/templates/_own_notices.html:9
+#, python-format
+msgid "An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it."
+msgstr "Un amministratore ha revocato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Non funziona più: se ti serve, creane un'altra nel tuo profilo."
+
+#: app/admin/templates/_own_notices.html:11
+#, python-format
+msgid "An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them."
+msgstr "Un amministratore ha revocato TUTTE le tue chiavi di stampa (%(n)s). Non funzionano più: se ti servono, creane di nuove dal tuo profilo."
+
+#: app/admin/templates/_own_notices.html:13
+#, python-format
+msgid "An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change."
+msgstr "Un amministratore ha disattivato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Per ora non funziona e la data di scadenza non cambia."
+
+#: app/admin/templates/_own_notices.html:15
+#, python-format
+msgid "An administrator switched your print key “%(label)s” (starts with %(prefix)s) back on. It works again."
+msgstr "Un amministratore ha riattivato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Funziona di nuovo."
+
+#: app/admin/templates/_own_notices.html:17
+#, python-format
+msgid "An administrator extended your print key “%(label)s” (starts with %(prefix)s). It now expires on %(date)s."
+msgstr "Un amministratore ha prolungato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Ora scade il %(date)s."
+
+#: app/admin/templates/_own_notices.html:19
+#, python-format
+msgid "Your print key “%(label)s” (starts with %(prefix)s) expires on %(date)s. Create a new one before then and set it up on your devices."
+msgstr "La tua chiave di stampa «%(label)s» (inizia con %(prefix)s) scade il %(date)s. Creane una nuova prima di quella data e configurala sui tuoi dispositivi."
+
+#: app/admin/templates/_own_notices.html:21
+#, python-format
+msgid "An administrator moved you from the group “%(old)s” to the group “%(new)s”. Your limits are now those of the new group."
+msgstr "Un amministratore ti ha spostato dal gruppo “%(old)s” al gruppo “%(new)s”. I tuoi limiti sono ora quelli del nuovo gruppo."
+
+#: app/admin/templates/_own_notices.html:23
+msgid "An administrator made you an administrator. You can now manage users, groups and printers: the menu at the top has the new pages."
+msgstr "Un amministratore ti ha reso amministratore. Ora puoi gestire utenti, gruppi e stampanti: il menu in alto ha le nuove pagine."
+
+#: app/admin/templates/_own_notices.html:25
+#, python-format
+msgid "An administrator removed your administrator rights. You are now in the group “%(group)s”."
+msgstr "Un amministratore ti ha tolto i diritti di amministratore. Ora sei nel gruppo “%(group)s”."
+
+#: app/admin/templates/_own_notices.html:27
+#, python-format
+msgid "An administrator gave you a permission: %(what)s, %(when)s."
+msgstr "Un amministratore ti ha dato un permesso: %(what)s, %(when)s."
+
+#: app/admin/templates/_own_notices.html:27
+#: app/admin/templates/_own_notices.html:38
+#, python-format
+msgid "until the end of %(date)s"
+msgstr "fino alla fine del %(date)s"
+
+#: app/admin/templates/_own_notices.html:27
+#: app/admin/templates/_own_notices.html:38
+msgid "with no end date"
+msgstr "senza scadenza"
+
+#: app/admin/templates/_own_notices.html:27
+#: app/admin/templates/_own_notices.html:33
+#: app/admin/templates/_own_notices.html:39
+#: app/admin/templates/_own_notices.html:41
+#, python-format
+msgid "Note: %(note)s"
+msgstr "Nota: %(note)s"
+
+#: app/admin/templates/_own_notices.html:29
+#, python-format
+msgid "An administrator withdrew the permission you had been given: %(what)s."
+msgstr "Un amministratore ha ritirato il permesso che ti era stato dato: %(what)s."
+
+#: app/admin/templates/_own_notices.html:31
+#, python-format
+msgid "The permission you had been given has ended: %(what)s. You can ask for it again from your profile."
+msgstr "Il permesso che ti era stato dato è finito: %(what)s. Puoi chiederlo di nuovo dal tuo profilo."
+
+#: app/admin/templates/_own_notices.html:33
+#, python-format
+msgid "An administrator gave you extra quota: %(amount)s %(metric)s, %(scope)s."
+msgstr "Un amministratore ti ha dato una quota extra: %(amount)s %(metric)s, %(scope)s."
+
+#: app/admin/templates/_own_notices.html:35
+#, python-format
+msgid "An administrator withdrew your extra quota of %(amount)s %(metric)s."
+msgstr "Un amministratore ha ritirato la tua quota extra di %(amount)s %(metric)s."
+
+#: app/admin/templates/_own_notices.html:37
+#, python-format
+msgid "Your request to change group was approved: you are now in the group “%(group)s”."
+msgstr "La tua richiesta di cambio gruppo è stata approvata: ora sei nel gruppo “%(group)s”."
+
+#: app/admin/templates/_own_notices.html:38
+#, python-format
+msgid "Your request for a permission was approved: %(what)s, %(when)s."
+msgstr "La tua richiesta di un permesso è stata approvata: %(what)s, %(when)s."
+
+#: app/admin/templates/_own_notices.html:39
+#, python-format
+msgid "Your request for more quota was approved: %(amount)s %(metric)s, %(scope)s."
+msgstr "La tua richiesta di più quota è stata approvata: %(amount)s %(metric)s, %(scope)s."
+
+#: app/admin/templates/_own_notices.html:41
+#, python-format
+msgid "Your request for a permission was rejected: %(what)s."
+msgstr "La tua richiesta di un permesso è stata rifiutata: %(what)s."
+
+#: app/admin/templates/_own_notices.html:41
+msgid "Your request was rejected."
+msgstr "La tua richiesta è stata rifiutata."
+
+#: app/admin/templates/_own_notices.html:44
+#, python-format
+msgid "The printer “%(printer)s” has a paper jam, and your print is waiting. Somebody has to clear it; the print will go on by itself."
+msgstr "La stampante “%(printer)s” ha un inceppamento della carta e la tua stampa è in attesa. Qualcuno deve liberarla; la stampa riprenderà da sola."
+
+#: app/admin/templates/_own_notices.html:45
+#, python-format
+msgid "The printer “%(printer)s” is out of paper (or the tray is empty), and your print is waiting. When paper is loaded the print will go on by itself."
+msgstr "La stampante “%(printer)s” è senza carta (o il vassoio è vuoto) e la tua stampa è in attesa. Quando viene caricata la carta la stampa riprenderà da sola."
+
+#: app/admin/templates/_own_notices.html:46
+#, python-format
+msgid "The printer “%(printer)s” is out of ink or toner, and your print may not come out right or may stop. Tell whoever looks after the printer."
+msgstr "La stampante “%(printer)s” ha finito inchiostro o toner e la tua stampa potrebbe uscire male o fermarsi. Avvisa chi si occupa della stampante."
+
+#: app/admin/templates/_own_notices.html:47
+#, python-format
+msgid "The printer “%(printer)s” reports a problem, and your print is waiting."
+msgstr "La stampante “%(printer)s” segnala un problema e la tua stampa è in attesa."
+
+#: app/admin/templates/_own_notices.html:49
+msgid "An administrator changed what you may print (colour, one-sided prints, printers or hours). Your profile shows your permissions."
+msgstr "Un amministratore ha cambiato cosa puoi stampare (colore, stampa solo fronte, stampanti od orari). Il tuo profilo mostra i tuoi permessi."
+
+#: app/admin/templates/_own_notices.html:52
+#, python-format
+msgid "Your print to “%(printer)s” was refused: your account is not allowed to use that printer. Your profile shows the printers you can use."
+msgstr "La tua stampa su “%(printer)s” è stata rifiutata: il tuo account non può usare quella stampante. Il tuo profilo mostra le stampanti che puoi usare."
+
+#: app/admin/templates/_own_notices.html:53
+#, python-format
+msgid "Your print to “%(printer)s” was refused: printing is allowed only %(window)s."
+msgstr "La tua stampa su “%(printer)s” è stata rifiutata: si può stampare solo %(window)s."
+
+#: app/admin/templates/_own_notices.html:53
+#, python-format
+msgid "Your print to “%(printer)s” was refused: printing is not allowed at this hour."
+msgstr "La tua stampa su “%(printer)s” è stata rifiutata: a quest'ora non è consentito stampare."
+
+#: app/admin/templates/_own_notices.html:54
+#, python-format
+msgid "Your print to “%(printer)s” was refused: colour printing is not allowed for your account. Choose black and white in the print window and send it again."
+msgstr "La tua stampa su “%(printer)s” è stata rifiutata: la stampa a colori non è consentita al tuo account. Scegli bianco e nero nella finestra di stampa e invia di nuovo."
+
+#: app/admin/templates/_own_notices.html:55
+#, python-format
+msgid "Your print to “%(printer)s” was refused: one-sided printing is not allowed for your account. Choose double-sided in the print window and send it again."
+msgstr "La tua stampa su “%(printer)s” è stata rifiutata: la stampa solo fronte non è consentita al tuo account. Scegli fronte-retro nella finestra di stampa e invia di nuovo."
+
+#: app/admin/templates/_own_notices.html:56
+#, python-format
+msgid "Your print to “%(printer)s” was refused."
+msgstr "La tua stampa su “%(printer)s” è stata rifiutata."
+
+#: app/admin/templates/_own_notices.html:59
+#, python-format
+msgid "Your print to “%(printer)s” was made in black and white: colour printing is not allowed for your account."
+msgstr "La tua stampa su “%(printer)s” è stata fatta in bianco e nero: la stampa a colori non è consentita al tuo account."
+
+#: app/admin/templates/_own_notices.html:59
+#, python-format
+msgid "Your print to “%(printer)s” was made double-sided: one-sided printing is not allowed for your account."
+msgstr "La tua stampa su “%(printer)s” è stata fatta in fronte-retro: la stampa solo fronte non è consentita al tuo account."
+
+#: app/admin/templates/_own_notices.html:61 app/admin/templates/notices.html:44
+msgid "<b>Save the secret key in a safe place.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> in the <span class=\"mono\">.env</span> file encrypts the file names kept in the audit and signs the portal sessions. A backup without encryption does not contain it: if the server breaks and you restore the backup with a new key, the names stay unreadable (<span class=\"mono\">[encrypted]</span>) for good. Copy the line from <span class=\"mono\">.env</span> into a password manager, or make encrypted backups (they include <span class=\"mono\">.env</span>)."
+msgstr "<b>Salva la chiave segreta in un posto sicuro.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> nel file <span class=\"mono\">.env</span> cifra i nomi dei file conservati nell'audit e firma le sessioni del portale. Un backup senza cifratura non la contiene: se il server si rompe e ripristini il backup con una chiave nuova, i nomi restano illeggibili (<span class=\"mono\">[encrypted]</span>) per sempre. Copia la riga da <span class=\"mono\">.env</span> in un password manager, oppure fai backup cifrati (includono <span class=\"mono\">.env</span>)."
+
+#: app/admin/templates/_own_notices.html:64
+msgid "dismissed"
+msgstr "nascosto"
+
+#: app/admin/templates/_own_notices.html:65 app/admin/templates/notices.html:53
+msgid "Dismiss"
+msgstr "Chiudi"
+
+#: app/admin/templates/_own_notices.html:69 app/admin/templates/notices.html:57
+msgid "No notices."
+msgstr "Nessun avviso."
+
+#: app/admin/templates/_own_notices.html:72 app/admin/templates/notices.html:60
+msgid "Dismiss all"
+msgstr "Chiudi tutti"
+
+#: app/admin/templates/_perm_fields.html:11
+msgid "Advanced permissions"
+msgstr "Permessi avanzati"
+
+#: app/admin/templates/_perm_fields.html:14
+msgid "All permissions, can not be limited."
+msgstr "Tutti i permessi, non limitabile."
+
+#: app/admin/templates/_perm_fields.html:14
+msgid "This is the emergency administrator: colour, one-sided prints, every printer and every hour are always allowed. The quotas above still apply."
+msgstr "Questo è l'amministratore di emergenza: colore, stampa solo fronte, tutte le stampanti e tutti gli orari sono sempre consentiti. Le quote qui sopra valgono comunque."
+
+#: app/admin/templates/_perm_fields.html:15
+msgid "Besides the quotas: what this user may print, and when. “As the group” follows the group's values. Scanning is not limited."
+msgstr "Oltre alle quote: cosa può stampare questo utente, e quando. “Come il gruppo” segue i valori del gruppo. La scansione non è limitata."
+
+#: app/admin/templates/_perm_fields.html:16
+msgid "Besides the quotas: what the members of this group may print, and when. A user can have values of their own. Scanning is not limited."
+msgstr "Oltre alle quote: cosa possono stampare i membri di questo gruppo, e quando. Un utente può avere valori propri. La scansione non è limitata."
+
+#: app/admin/templates/_perm_fields.html:19
+msgid "Without it the prints come out in black and white."
+msgstr "Senza, le stampe escono in bianco e nero."
+
+#: app/admin/templates/_perm_fields.html:20
+#: app/admin/templates/_perm_fields.html:24
+#: app/admin/templates/_perm_fields.html:28
+#: app/admin/templates/_perm_fields.html:39
+#, python-format
+msgid "as the group (%(value)s)"
+msgstr "come il gruppo (%(value)s)"
+
+#: app/admin/templates/_perm_fields.html:23 app/admin/templates/me.html:30
+#: app/admin/templates/print.html:53
+msgid "One-sided"
+msgstr "Solo fronte"
+
+#: app/admin/templates/_perm_fields.html:23
+msgid "Without it the prints come out double-sided, on the printers that can."
+msgstr "Senza, le stampe escono in fronte-retro, sulle stampanti che lo sanno fare."
+
+#: app/admin/templates/_perm_fields.html:27 app/admin/templates/me.html:31
+#: app/admin/templates/printers.html:2 app/admin/templates/printers.html:4
+msgid "Printers"
+msgstr "Stampanti"
+
+#: app/admin/templates/_perm_fields.html:27
+msgid "A printer added later is not allowed to someone with a list until you add it here."
+msgstr "Una stampante aggiunta dopo non è consentita a chi ha un elenco, finché non la aggiungi qui."
+
+#: app/admin/templates/_perm_fields.html:28
+msgctxt "printers"
+msgid "only some"
+msgstr "solo alcune"
+
+#: app/admin/templates/_perm_fields.html:31
+msgid "not present"
+msgstr "non presente"
+
+#: app/admin/templates/_perm_fields.html:32
+msgid "No printer found right now."
+msgstr "Nessuna stampante trovata in questo momento."
+
+#: app/admin/templates/_perm_fields.html:34
+msgid "Tap the printers this account may use."
+msgstr "Tocca le stampanti che questo account può usare."
+
+#: app/admin/templates/_perm_fields.html:38 app/admin/templates/me.html:32
+msgid "Hours"
+msgstr "Orari"
+
+#: app/admin/templates/_perm_fields.html:38
+msgid "Checked when the job is sent, in the gateway's time zone."
+msgstr "Controllato quando il lavoro viene inviato, nel fuso orario del gateway."
+
+#: app/admin/templates/_perm_fields.html:39
+msgid "some hours"
+msgstr "solo in certi orari"
+
+#: app/admin/templates/_perm_fields.html:45
+msgid "from"
+msgstr "dalle"
+
+#: app/admin/templates/_perm_fields.html:46
+msgid "to"
+msgstr "alle"
+
+#: app/admin/templates/_perm_fields.html:48
+msgid "An end earlier than the start goes past midnight (22:00 to 06:00): it belongs to the day it starts. The end time itself is not included."
+msgstr "Una fine prima dell'inizio passa la mezzanotte (dalle 22:00 alle 06:00): appartiene al giorno in cui comincia. L'ora di fine non è inclusa."
+
 #: app/admin/templates/_pwfield.html:4
 msgid "Show password"
 msgstr "Mostra la password"
@@ -1249,21 +1681,12 @@ msgstr "Azione (es. user.update)"
 msgid "Filter"
 msgstr "Filtra"
 
-#: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:11
-#: app/admin/templates/archive_view.html:15 app/admin/templates/backups.html:48
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:38
-#: app/admin/templates/me.html:47 app/admin/templates/me_notices.html:9
-#: app/admin/templates/me_notices.html:12 app/admin/templates/requests.html:7
-#: app/admin/templates/requests.html:37
-msgid "When"
-msgstr "Quando"
-
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:15
 msgid "Who"
 msgstr "Chi"
 
 #: app/admin/templates/actions.html:11 app/admin/templates/archive_view.html:15
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:49
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:50
 msgid "Action"
 msgstr "Azione"
 
@@ -1276,18 +1699,18 @@ msgid "No actions."
 msgstr "Nessuna azione."
 
 #: app/admin/templates/actions.html:20 app/admin/templates/archive_view.html:22
-#: app/admin/templates/jobs.html:82
+#: app/admin/templates/jobs.html:83
 msgid "Previous"
 msgstr "Precedente"
 
 #: app/admin/templates/actions.html:21 app/admin/templates/archive_view.html:23
-#: app/admin/templates/jobs.html:83
+#: app/admin/templates/jobs.html:84
 #, python-format
 msgid "Page %(page)s / %(pages)s"
 msgstr "Pagina %(page)s / %(pages)s"
 
 #: app/admin/templates/actions.html:22 app/admin/templates/archive_view.html:24
-#: app/admin/templates/jobs.html:84
+#: app/admin/templates/jobs.html:85
 msgid "Next"
 msgstr "Successiva"
 
@@ -1317,7 +1740,7 @@ msgid "Current size of the active tables:"
 msgstr "Peso attuale delle tabelle attive:"
 
 #: app/admin/templates/archive.html:14 app/admin/templates/archive_view.html:11
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:58
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:59
 msgid "File"
 msgstr "File"
 
@@ -1328,7 +1751,7 @@ msgstr "Contenuto"
 #: app/admin/templates/archive.html:14 app/admin/templates/group_edit.html:13
 #: app/admin/templates/groups.html:8 app/admin/templates/groups.html:15
 #: app/admin/templates/me.html:10 app/admin/templates/me.html:14
-#: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:9
+#: app/admin/templates/user_edit.html:23 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:19
 msgid "Period"
 msgstr "Periodo"
@@ -1400,28 +1823,31 @@ msgstr "Cerca"
 msgid "%(n)s results"
 msgstr "%(n)s risultati"
 
-#: app/admin/templates/archive_view.html:11 app/admin/templates/grants.html:8
-#: app/admin/templates/jobs.html:23 app/admin/templates/jobs.html:34
-#: app/admin/templates/jobs.html:39 app/admin/templates/login.html:8
-#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:37
-#: app/admin/templates/settings.html:6 app/admin/templates/users.html:9
-#: app/admin/templates/users.html:12
+#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:23
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:40
+#: app/admin/templates/login.html:8 app/admin/templates/report.html:35
+#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:83
+#: app/admin/templates/requests.html:98 app/admin/templates/requests.html:181
+#: app/admin/templates/requests.html:194 app/admin/templates/settings.html:7
+#: app/admin/templates/users.html:9 app/admin/templates/users.html:12
 msgid "User"
 msgstr "Utente"
 
 #: app/admin/templates/archive_view.html:11
+#: app/admin/templates/request_permission.html:17
+#: app/admin/templates/requests.html:118
 msgid "Printer"
 msgstr "Stampante"
 
-#: app/admin/templates/archive_view.html:11 app/admin/templates/print.html:50
-#: app/admin/templates/printers.html:155
+#: app/admin/templates/archive_view.html:11 app/admin/templates/print.html:54
+#: app/admin/templates/printers.html:174 app/admin/templates/report.html:35
 #: app/admin/templates/request_quota.html:14 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:18
 msgid "Pages"
 msgstr "Pagine"
 
-#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:34
-#: app/admin/templates/jobs.html:68
+#: app/admin/templates/archive_view.html:11 app/admin/templates/jobs.html:35
+#: app/admin/templates/jobs.html:69
 msgid "Notes"
 msgstr "Note"
 
@@ -1488,10 +1914,6 @@ msgid "Encryption"
 msgstr "Cifratura"
 
 #: app/admin/templates/backup_edit.html:19
-msgid "none"
-msgstr "nessuna"
-
-#: app/admin/templates/backup_edit.html:19
 msgid "passphrase"
 msgstr "passphrase"
 
@@ -1504,20 +1926,21 @@ msgid "it cannot be changed from here, so you never lose the ability to open the
 msgstr "non si cambia da qui, per non perdere la possibilità di aprire le copie: crea un nuovo backup con la cifratura voluta."
 
 #: app/admin/templates/backup_edit.html:22
-#: app/admin/templates/group_edit.html:16 app/admin/templates/printers.html:85
-#: app/admin/templates/settings.html:12 app/admin/templates/settings.html:22
-#: app/admin/templates/settings.html:31 app/admin/templates/user_edit.html:27
+#: app/admin/templates/group_edit.html:17 app/admin/templates/printers.html:103
+#: app/admin/templates/settings.html:13 app/admin/templates/settings.html:23
+#: app/admin/templates/settings.html:32 app/admin/templates/user_edit.html:32
 msgid "Save"
 msgstr "Salva"
 
 #: app/admin/templates/backup_edit.html:22
-#: app/admin/templates/group_edit.html:16 app/admin/templates/jobs.html:76
-#: app/admin/templates/me.html:52 app/admin/templates/print.html:57
-#: app/admin/templates/printers.html:93
+#: app/admin/templates/group_edit.html:17 app/admin/templates/jobs.html:77
+#: app/admin/templates/me.html:67 app/admin/templates/print.html:61
+#: app/admin/templates/printers.html:111
 #: app/admin/templates/request_group.html:15
+#: app/admin/templates/request_permission.html:24
 #: app/admin/templates/request_quota.html:25
 #: app/admin/templates/user_delete.html:11
-#: app/admin/templates/user_edit.html:27
+#: app/admin/templates/user_edit.html:32
 msgid "Cancel"
 msgstr "Annulla"
 
@@ -1585,7 +2008,7 @@ msgstr "Versione installata: %(v)s"
 msgid "new version %(v)s available"
 msgstr "nuova versione %(v)s disponibile"
 
-#: app/admin/templates/backups.html:14 app/admin/templates/base.html:216
+#: app/admin/templates/backups.html:14 app/admin/templates/base.html:271
 msgid "Release notes"
 msgstr "Note di rilascio"
 
@@ -1731,7 +2154,7 @@ msgid "Delete this scheduled backup? The files already written stay in the folde
 msgstr "Eliminare questo backup programmato? I file già scritti restano nella cartella."
 
 #: app/admin/templates/backups.html:68 app/admin/templates/groups.html:20
-#: app/admin/templates/printers.html:124
+#: app/admin/templates/printers.html:143
 msgid "Delete"
 msgstr "Elimina"
 
@@ -1815,78 +2238,78 @@ msgstr "Senza cifratura il file contiene il database (utenti, nomi dei file stam
 msgid "Create backup"
 msgstr "Crea backup"
 
-#: app/admin/templates/base.html:164 app/admin/templates/settings.html:2
-#: app/admin/templates/settings.html:5
+#: app/admin/templates/base.html:217 app/admin/templates/settings.html:2
+#: app/admin/templates/settings.html:6
 msgid "Settings"
 msgstr "Impostazioni"
 
-#: app/admin/templates/base.html:172
+#: app/admin/templates/base.html:225
 msgctxt "menu"
 msgid "Audit"
 msgstr "Audit"
 
-#: app/admin/templates/base.html:173
+#: app/admin/templates/base.html:226
 msgctxt "menu"
 msgid "Users"
 msgstr "Utenti"
 
-#: app/admin/templates/base.html:174
+#: app/admin/templates/base.html:227
 msgctxt "menu"
 msgid "Groups"
 msgstr "Gruppi"
 
-#: app/admin/templates/base.html:175
+#: app/admin/templates/base.html:228
 msgctxt "menu"
 msgid "Requests"
 msgstr "Richieste"
 
-#: app/admin/templates/base.html:176
-msgctxt "menu"
-msgid "Grants"
-msgstr "Extra"
-
-#: app/admin/templates/base.html:177
+#: app/admin/templates/base.html:229
 msgctxt "menu"
 msgid "Actions"
 msgstr "Azioni"
 
-#: app/admin/templates/base.html:178
+#: app/admin/templates/base.html:230
 msgctxt "menu"
 msgid "Printers"
 msgstr "Stampanti"
 
-#: app/admin/templates/base.html:179
+#: app/admin/templates/base.html:231
 msgctxt "menu"
 msgid "Backup"
 msgstr "Backup"
 
-#: app/admin/templates/base.html:180
+#: app/admin/templates/base.html:232
 msgctxt "menu"
 msgid "Archive"
 msgstr "Archivio"
 
-#: app/admin/templates/base.html:183
+#: app/admin/templates/base.html:235
 msgctxt "menu"
 msgid "Profile"
 msgstr "Profilo"
 
-#: app/admin/templates/base.html:184
+#: app/admin/templates/base.html:236
 msgctxt "menu"
 msgid "Print"
 msgstr "Stampa"
 
-#: app/admin/templates/base.html:185
+#: app/admin/templates/base.html:237
 msgctxt "menu"
 msgid "Scan"
 msgstr "Scansiona"
 
-#: app/admin/templates/base.html:190 app/admin/templates/base.html:196
+#: app/admin/templates/base.html:242 app/admin/templates/base.html:248
 #: app/admin/templates/me_notices.html:2 app/admin/templates/me_notices.html:5
-#: app/admin/templates/notices.html:2 app/admin/templates/notices.html:5
+#: app/admin/templates/notices.html:2 app/admin/templates/notices.html:12
 msgid "Notices"
 msgstr "Avvisi"
 
-#: app/admin/templates/base.html:200
+#: app/admin/templates/base.html:252 app/admin/templates/docs.html:2
+#: app/admin/templates/docs.html:30 app/admin/templates/docs.html:45
+msgid "Documentation"
+msgstr "Documentazione"
+
+#: app/admin/templates/base.html:255
 msgid ""
 "Put the WHOLE gateway in maintenance?\n"
 "\n"
@@ -1896,124 +2319,70 @@ msgstr ""
 "\n"
 "Le stampanti spariscono dalla rete (mDNS) e nessun utente potrà stampare né scansionare: solo gli amministratori."
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:258
 msgid "LEAVE MAINTENANCE"
 msgstr "ESCI DALLA MANUTENZIONE"
 
-#: app/admin/templates/base.html:203
+#: app/admin/templates/base.html:258
 msgid "PUT IN MAINTENANCE"
 msgstr "METTI IN MANUTENZIONE"
 
-#: app/admin/templates/base.html:204
+#: app/admin/templates/base.html:259
 msgid "Turn the gateway back on"
 msgstr "Riattiva il gateway"
 
-#: app/admin/templates/base.html:204
+#: app/admin/templates/base.html:259
 msgid "Stops printing and scanning for everyone except the admins and hides the printers from the network"
 msgstr "Ferma stampa e scansione per tutti tranne gli admin e nasconde le stampanti dalla rete"
 
-#: app/admin/templates/base.html:210
+#: app/admin/templates/base.html:265
 msgid "Log out"
 msgstr "Esci"
 
-#: app/admin/templates/base.html:215
+#: app/admin/templates/base.html:270
 msgid "GATEWAY IN MAINTENANCE"
 msgstr "GATEWAY IN MANUTENZIONE"
 
-#: app/admin/templates/base.html:215
+#: app/admin/templates/base.html:270
 msgid "printing and scanning are stopped for users; administrators can still use them"
 msgstr "stampa e scansione sono ferme per gli utenti; gli amministratori possono ancora usarle"
 
-#: app/admin/templates/base.html:215
+#: app/admin/templates/base.html:270
 msgid "printing and scanning are temporarily suspended"
 msgstr "stampa e scansione sono temporaneamente sospese"
 
-#: app/admin/templates/base.html:216
+#: app/admin/templates/base.html:271
 #, python-format
 msgid "A new version is available: %(new)s (installed: %(old)s)."
 msgstr "È disponibile una nuova versione: %(new)s (installata: %(old)s)."
 
-#: app/admin/templates/base.html:216
+#: app/admin/templates/base.html:271
 msgid "To update, run on the server:"
 msgstr "Per aggiornare, esegui sul server:"
 
-#: app/admin/templates/base.html:254
+#: app/admin/templates/base.html:309
 msgid "Copied"
 msgstr "Copiato"
 
-#: app/admin/templates/base.html:254 app/admin/templates/macros.html:3
+#: app/admin/templates/base.html:309 app/admin/templates/macros.html:3
 msgid "Copy"
 msgstr "Copia"
 
-#: app/admin/templates/grants.html:2
-msgid "Grants"
-msgstr "Concessioni"
+#: app/admin/templates/docs.html:31
+msgid "The documentation is not installed on this server."
+msgstr "La documentazione non è installata su questo server."
 
-#: app/admin/templates/grants.html:5
-msgid "Quota grants"
-msgstr "Concessioni di quota"
+#: app/admin/templates/docs.html:32
+msgid "It is the docs folder of PrintMinder: the standard image and the host install both include it. You can also read it on GitHub:"
+msgstr "È la cartella docs di PrintMinder: l'immagine standard e l'installazione sull'host la includono entrambe. Puoi leggerla anche su GitHub:"
 
-#: app/admin/templates/grants.html:6
-msgid "Quota added on top of the limit. The print history is never modified. Temporary ones end with the period of the user's limit."
-msgstr "Quota aggiunta oltre il limite. Lo storico delle stampe non viene mai modificato. Le temporanee finiscono con il periodo del limite dell'utente."
+#: app/admin/templates/docs.html:36
+msgid "Documentation index"
+msgstr "Indice della documentazione"
 
-#: app/admin/templates/grants.html:8 app/admin/templates/me.html:10
-#: app/admin/templates/me.html:12 app/admin/templates/me.html:47
-#: app/admin/templates/request_quota.html:11
-msgid "What"
-msgstr "Cosa"
-
-#: app/admin/templates/grants.html:8
-msgid "Type"
-msgstr "Tipo"
-
-#: app/admin/templates/grants.html:8
-msgid "From"
-msgstr "Dal"
-
-#: app/admin/templates/grants.html:8
-msgid "Until"
-msgstr "Fino al"
-
-#: app/admin/templates/grants.html:8 app/admin/templates/requests.html:37
-msgid "By"
-msgstr "Da"
-
-#: app/admin/templates/grants.html:11
-msgid "no expiry"
-msgstr "senza scadenza"
-
-#: app/admin/templates/grants.html:13
-msgid "Revoke this grant?"
-msgstr "Revocare questa concessione?"
-
-#: app/admin/templates/grants.html:13 app/admin/templates/keys.html:33
-msgid "Revoke"
-msgstr "Revoca"
-
-#: app/admin/templates/grants.html:14
-msgid "No grants."
-msgstr "Nessuna concessione."
-
-#: app/admin/templates/grants.html:18
-msgid "Grant quota without a request"
-msgstr "Concedi quota senza una richiesta"
-
-#: app/admin/templates/grants.html:23
-msgid "amount"
-msgstr "quantità"
-
-#: app/admin/templates/grants.html:24 app/admin/templates/requests.html:12
-msgid "temporary (until the end of the period)"
-msgstr "temporanea (fino a fine periodo)"
-
-#: app/admin/templates/grants.html:25
-msgid "note"
-msgstr "nota"
-
-#: app/admin/templates/grants.html:26
-msgid "Grant"
-msgstr "Concedi"
+#: app/admin/templates/docs.html:38
+msgid "Language of the documentation"
+msgstr "Lingua della documentazione"
 
 #: app/admin/templates/group_edit.html:2
 msgid "Edit group"
@@ -2038,7 +2407,7 @@ msgid "Only administrators belong here."
 msgstr "Ci stanno gli amministratori e basta."
 
 #: app/admin/templates/group_edit.html:11 app/admin/templates/groups.html:8
-#: app/admin/templates/groups.html:13 app/admin/templates/user_edit.html:20
+#: app/admin/templates/groups.html:13 app/admin/templates/user_edit.html:19
 msgid "Job limit"
 msgstr "Limite job"
 
@@ -2049,7 +2418,7 @@ msgid "unlimited"
 msgstr "illimitato"
 
 #: app/admin/templates/group_edit.html:12 app/admin/templates/groups.html:8
-#: app/admin/templates/groups.html:14 app/admin/templates/user_edit.html:22
+#: app/admin/templates/groups.html:14 app/admin/templates/user_edit.html:21
 msgid "Page limit"
 msgstr "Limite pagine"
 
@@ -2062,15 +2431,15 @@ msgstr "Richiedibile"
 msgid "users can ask to be moved to this group"
 msgstr "gli utenti possono chiedere di essere spostati in questo gruppo"
 
-#: app/admin/templates/group_edit.html:16
+#: app/admin/templates/group_edit.html:17
 msgid "Create group"
 msgstr "Crea gruppo"
 
-#: app/admin/templates/group_edit.html:20
+#: app/admin/templates/group_edit.html:21
 msgid "Delete group"
 msgstr "Elimina gruppo"
 
-#: app/admin/templates/group_edit.html:22
+#: app/admin/templates/group_edit.html:23
 #, python-format
 msgid "Delete %(name)s"
 msgstr "Elimina %(name)s"
@@ -2084,8 +2453,8 @@ msgid "Read-only values: use <b>Edit</b> to change them. Empty limit = no limit.
 msgstr "Valori in sola lettura: per cambiarli usa <b>Modifica</b>. Limite vuoto = nessun limite. I job rifiutati, falliti o annullati prima della stampa non contano. Il limite pagine è morbido: il job che lo supera viene comunque stampato."
 
 #: app/admin/templates/groups.html:8 app/admin/templates/groups.html:11
-#: app/admin/templates/user_edit.html:13 app/admin/templates/users.html:9
-#: app/admin/templates/users.html:14
+#: app/admin/templates/report.html:35 app/admin/templates/user_edit.html:12
+#: app/admin/templates/users.html:9 app/admin/templates/users.html:14
 msgid "Group"
 msgstr "Gruppo"
 
@@ -2169,147 +2538,153 @@ msgstr "Tutti gli stati"
 msgid "Export CSV"
 msgstr "Esporta CSV"
 
-#: app/admin/templates/jobs.html:32
+#: app/admin/templates/jobs.html:31 app/admin/templates/report.html:2
+msgid "Report"
+msgstr "Report"
+
+#: app/admin/templates/jobs.html:33
 #, python-format
 msgid "The search by file name looks in the latest %(n)s actions that match the other filters."
 msgstr "La ricerca per nome file guarda nelle ultime %(n)s azioni che rispettano gli altri filtri."
 
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:37
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:38
 msgid "No."
 msgstr "N."
 
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:48
-#: app/admin/templates/me.html:35
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:49
+#: app/admin/templates/me.html:50
 msgid "Device"
 msgstr "Dispositivo"
 
-#: app/admin/templates/jobs.html:34
+#: app/admin/templates/jobs.html:35
 msgid "What the states mean"
 msgstr "Cosa significano gli stati"
 
-#: app/admin/templates/jobs.html:34 app/admin/templates/jobs.html:57
+#: app/admin/templates/jobs.html:35 app/admin/templates/jobs.html:58
 msgid "Pg."
 msgstr "Pag."
 
-#: app/admin/templates/jobs.html:40
+#: app/admin/templates/jobs.html:41
 msgid "Where the scan came from"
 msgstr "Da dove è partita la scansione"
 
-#: app/admin/templates/jobs.html:42
+#: app/admin/templates/jobs.html:43
 #, python-format
 msgid "Scan without sign-in · no. %(id)s"
 msgstr "Scansione senza accesso · n. %(id)s"
 
-#: app/admin/templates/jobs.html:43
+#: app/admin/templates/jobs.html:44
 #, python-format
 msgid "Whoever scanned did not sign in: they are recorded as “%(name)s”. This is all that is known about them."
 msgstr "Chi ha scansionato non si è autenticato: è registrato come «%(name)s». Questo è tutto ciò che si sa di lui."
 
-#: app/admin/templates/jobs.html:44
+#: app/admin/templates/jobs.html:45
 msgid "IP address"
 msgstr "Indirizzo IP"
 
-#: app/admin/templates/jobs.html:45
+#: app/admin/templates/jobs.html:46
 msgid "Host name"
 msgstr "Nome host"
 
-#: app/admin/templates/jobs.html:45
+#: app/admin/templates/jobs.html:46
 msgid "not available (no name registered in the DNS)"
 msgstr "non disponibile (nessun nome registrato dal DNS)"
 
-#: app/admin/templates/jobs.html:46 app/admin/templates/jobs.html:54
-#: app/admin/templates/jobs.html:66 app/admin/templates/jobs.html:72
-#: app/admin/templates/jobs.html:98 app/admin/templates/printers.html:41
-#: app/admin/templates/printers.html:66
+#: app/admin/templates/jobs.html:47 app/admin/templates/jobs.html:55
+#: app/admin/templates/jobs.html:67 app/admin/templates/jobs.html:73
+#: app/admin/templates/jobs.html:99 app/admin/templates/printers.html:41
+#: app/admin/templates/printers.html:84 app/admin/templates/printers.html:209
+#: app/admin/templates/printers.html:215 app/admin/templates/requests.html:47
+#: app/admin/templates/requests.html:51
 msgid "Close"
 msgstr "Chiudi"
 
-#: app/admin/templates/jobs.html:49 app/admin/templates/scan.html:18
+#: app/admin/templates/jobs.html:50 app/admin/templates/scan.html:18
 msgid "scan"
 msgstr "scansione"
 
-#: app/admin/templates/jobs.html:49
+#: app/admin/templates/jobs.html:50
 msgid "Scanned with the automatic document feeder (ADF)"
 msgstr "Scansionato con il caricatore automatico dei fogli (ADF)"
 
-#: app/admin/templates/jobs.html:49
+#: app/admin/templates/jobs.html:50
 msgid "print"
 msgstr "stampa"
 
-#: app/admin/templates/jobs.html:50
+#: app/admin/templates/jobs.html:51
 msgid "Specifications of this print"
 msgstr "Specifiche di questa stampa"
 
-#: app/admin/templates/jobs.html:52
+#: app/admin/templates/jobs.html:53
 #, python-format
 msgid "Print specifications · no. %(id)s"
 msgstr "Specifiche di stampa · n. %(id)s"
 
-#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:61
-#: app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:61 app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:63
 msgid "Show all"
 msgstr "Mostra tutto"
 
-#: app/admin/templates/jobs.html:60 app/admin/templates/jobs.html:61
+#: app/admin/templates/jobs.html:61 app/admin/templates/jobs.html:62
 msgid "Show the complete information of the file"
 msgstr "Mostra le informazioni complete del file"
 
-#: app/admin/templates/jobs.html:62
+#: app/admin/templates/jobs.html:63
 msgid "Show the complete comment"
 msgstr "Mostra il commento completo"
 
-#: app/admin/templates/jobs.html:64
+#: app/admin/templates/jobs.html:65
 #, python-format
 msgid "File · no. %(id)s"
 msgstr "File · n. %(id)s"
 
-#: app/admin/templates/jobs.html:68
+#: app/admin/templates/jobs.html:69
 msgid "Show and copy the whole note"
 msgstr "Mostra e copia tutta la nota"
 
-#: app/admin/templates/jobs.html:70
+#: app/admin/templates/jobs.html:71
 #, python-format
 msgid "Note · no. %(id)s"
 msgstr "Nota · n. %(id)s"
 
-#: app/admin/templates/jobs.html:75
+#: app/admin/templates/jobs.html:76
 msgid "Cancel this queued job?"
 msgstr "Annullare questo job in coda?"
 
-#: app/admin/templates/jobs.html:78
+#: app/admin/templates/jobs.html:79
 msgid "No jobs."
 msgstr "Nessun job."
 
-#: app/admin/templates/jobs.html:89
+#: app/admin/templates/jobs.html:90
 msgid "States of a print or scan"
 msgstr "Stati di una stampa o scansione"
 
-#: app/admin/templates/jobs.html:91
+#: app/admin/templates/jobs.html:92
 msgid "<b>Accepted.</b> It passed the checks (identity, quota, blocks, maintenance) and was handed to CUPS or the scanner: it is printing, queued or in progress. It already counts toward the quota."
 msgstr "<b>Accettato.</b> Ha superato i controlli (identità, quota, blocchi, manutenzione) ed è stato passato a CUPS o allo scanner: sta stampando, è in coda o è in corso. Conta già nella quota."
 
-#: app/admin/templates/jobs.html:92
+#: app/admin/templates/jobs.html:93
 msgid "<b>Completed.</b> Print finished (CUPS confirms it) or scan delivered. The real pages replace the estimate made before printing."
 msgstr "<b>Completato.</b> Stampa terminata (CUPS lo conferma) o scansione consegnata. Le pagine reali sostituiscono la stima fatta prima di stampare."
 
-#: app/admin/templates/jobs.html:93
+#: app/admin/templates/jobs.html:94
 msgid "<b>Denied.</b> The gateway refused it and nothing started: quota used up, printer blocked, gateway in maintenance, invalid file… The reason is in the Notes column. It does not count toward the quota."
 msgstr "<b>Negato.</b> Il gateway l'ha rifiutato e non è partito nulla: quota finita, stampante bloccata, gateway in manutenzione, file non valido… Il motivo è nella colonna Note. Non conta nella quota."
 
-#: app/admin/templates/jobs.html:94
+#: app/admin/templates/jobs.html:95
 msgid "<b>Failed.</b> It had been accepted but the printer or scanner could not carry it out (CUPS reported an error, the device did not answer). It does not count toward the quota."
 msgstr "<b>Fallito.</b> Era stato accettato ma la stampante o lo scanner non sono riusciti a eseguirlo (CUPS ha dato errore, il dispositivo non rispondeva). Non conta nella quota."
 
-#: app/admin/templates/jobs.html:95
+#: app/admin/templates/jobs.html:96
 msgid "<b>Canceled.</b> Stopped before printing, by the user, by an administrator (“Cancel”) or by the scanning program. The quota is freed."
 msgstr "<b>Annullato.</b> Fermato prima che stampasse, dall'utente, da un amministratore («Annulla») o dal programma di scansione. La quota torna libera."
 
-#: app/admin/templates/jobs.html:96
+#: app/admin/templates/jobs.html:97
 msgid "<b>On hold.</b> CUPS is holding it (queue paused or waiting for someone to act). Until it restarts it counts toward the quota."
 msgstr "<b>In attesa.</b> CUPS lo tiene fermo (coda in pausa o in attesa di un intervento). Finché non riparte conta nella quota."
 
 #: app/admin/templates/keys.html:2 app/admin/templates/keys.html:5
-#: app/admin/templates/user_edit.html:32
+#: app/admin/templates/user_edit.html:37
 msgid "Print keys"
 msgstr "Chiavi di stampa"
 
@@ -2385,6 +2760,10 @@ msgstr "Prolunga"
 msgid "Revoke the key “%(label)s”?"
 msgstr "Revocare la chiave \"%(label)s\"?"
 
+#: app/admin/templates/keys.html:33 app/admin/templates/requests.html:91
+msgid "Revoke"
+msgstr "Revoca"
+
 #: app/admin/templates/keys.html:36
 msgid "No keys."
 msgstr "Nessuna chiave."
@@ -2431,7 +2810,7 @@ msgstr "Torna all'utente"
 msgid "Login"
 msgstr "Login"
 
-#: app/admin/templates/login.html:9 app/admin/templates/settings.html:46
+#: app/admin/templates/login.html:9 app/admin/templates/settings.html:47
 msgid "Password"
 msgstr "Password"
 
@@ -2474,15 +2853,15 @@ msgstr "Gruppo: <b>%(group)s</b>"
 msgid "no group"
 msgstr "nessun gruppo"
 
-#: app/admin/templates/me.html:6 app/admin/templates/settings.html:6
+#: app/admin/templates/me.html:6 app/admin/templates/settings.html:7
 msgid "Sign-in"
 msgstr "Accesso"
 
-#: app/admin/templates/me.html:6 app/admin/templates/settings.html:6
+#: app/admin/templates/me.html:6 app/admin/templates/settings.html:7
 msgid "local account"
 msgstr "account locale"
 
-#: app/admin/templates/me.html:6 app/admin/templates/settings.html:6
+#: app/admin/templates/me.html:6 app/admin/templates/settings.html:7
 #, python-format
 msgid "RADIUS (%(provider)s)"
 msgstr "RADIUS (%(provider)s)"
@@ -2494,6 +2873,14 @@ msgstr "impostazioni"
 #: app/admin/templates/me.html:8
 msgid "My usage"
 msgstr "Il mio consumo"
+
+#: app/admin/templates/me.html:10 app/admin/templates/me.html:12
+#: app/admin/templates/me.html:62
+#: app/admin/templates/request_permission.html:11
+#: app/admin/templates/request_quota.html:11
+#: app/admin/templates/requests.html:83 app/admin/templates/requests.html:194
+msgid "What"
+msgstr "Cosa"
 
 #: app/admin/templates/me.html:10 app/admin/templates/me.html:12
 msgid "Used"
@@ -2535,215 +2922,258 @@ msgid "Ask to change group"
 msgstr "Chiedi di cambiare gruppo"
 
 #: app/admin/templates/me.html:26
+msgid "Your permissions"
+msgstr "I tuoi permessi"
+
+#: app/admin/templates/me.html:27
+msgid "This account has all permissions and they can not be limited."
+msgstr "Questo account ha tutti i permessi e non possono essere limitati."
+
+#: app/admin/templates/me.html:29
+msgid "not allowed: prints are made in black and white"
+msgstr "non consentito: le stampe escono in bianco e nero"
+
+#: app/admin/templates/me.html:29 app/admin/templates/me.html:30
+#: app/admin/templates/me.html:32
+msgid "request waiting"
+msgstr "richiesta in attesa"
+
+#: app/admin/templates/me.html:29 app/admin/templates/me.html:30
+#: app/admin/templates/me.html:32
+msgid "Ask"
+msgstr "Chiedi"
+
+#: app/admin/templates/me.html:30
+msgid "not allowed: prints are made double-sided"
+msgstr "non consentito: le stampe escono in fronte-retro"
+
+#: app/admin/templates/me.html:31 app/admin/templates/report.html:11
+msgid "all"
+msgstr "tutti"
+
+#: app/admin/templates/me.html:31
+msgid "none at the moment"
+msgstr "nessuna al momento"
+
+#: app/admin/templates/me.html:31
+msgid "Ask for another printer"
+msgstr "Chiedi un'altra stampante"
+
+#: app/admin/templates/me.html:32
+msgid "not now"
+msgstr "non ora"
+
+#: app/admin/templates/me.html:35
+msgid "Granted to you after a request:"
+msgstr "Ti sono stati dati dopo una richiesta:"
+
+#: app/admin/templates/me.html:36 app/admin/templates/user_edit.html:29
+#, python-format
+msgid "until %(date)s"
+msgstr "fino al %(date)s"
+
+#: app/admin/templates/me.html:41
 msgid "My print keys"
 msgstr "Le mie chiavi di stampa"
 
-#: app/admin/templates/me.html:27
+#: app/admin/templates/me.html:42
 #, python-format
 msgid "Instead of the domain password, on the computer or phone you use a personal <b>key</b> (user name <b>%(user)s</b>, server <b>%(server)s</b>). It only works for printing and you can revoke it whenever you want."
 msgstr "Al posto della password di dominio, sul computer o sul telefono si usa una <b>chiave</b> personale (nome utente <b>%(user)s</b>, server <b>%(server)s</b>). Funziona solo per stampare e si revoca quando vuoi."
 
-#: app/admin/templates/me.html:28
+#: app/admin/templates/me.html:43
 msgid "The domain password is <b>not</b> accepted for printing."
 msgstr "La password di dominio <b>non</b> è accettata per stampare."
 
-#: app/admin/templates/me.html:29
+#: app/admin/templates/me.html:44
 #, python-format
 msgid "Active keys: <b>%(n)s</b>"
 msgstr "Chiavi attive: <b>%(n)s</b>"
 
-#: app/admin/templates/me.html:29
+#: app/admin/templates/me.html:44
 msgid "Manage keys"
 msgstr "Gestisci le chiavi"
 
-#: app/admin/templates/me.html:33
+#: app/admin/templates/me.html:48
 msgid "How to connect a device"
 msgstr "Come collegare un dispositivo"
 
-#: app/admin/templates/me.html:35
+#: app/admin/templates/me.html:50
 msgid "What to do"
 msgstr "Cosa fare"
 
-#: app/admin/templates/me.html:36
+#: app/admin/templates/me.html:51
 msgid "Phone or tablet"
 msgstr "Telefono o tablet"
 
-#: app/admin/templates/me.html:36
+#: app/admin/templates/me.html:51
 msgid "The easiest way: <a href=\"/me/print\">Print a file</a> (PDF, photo, text) and <a href=\"/me/scan\">Scan</a>, without installing or configuring anything. Alternatively on Android: <b>Mopria Print Service</b>, which shows the printers and asks for the name and key."
 msgstr "Il modo più semplice: <a href=\"/me/print\">Stampa un file</a> (PDF, foto, testo) e <a href=\"/me/scan\">Scansiona</a>, senza installare né configurare niente. In alternativa su Android: <b>Mopria Print Service</b>, che mostra le stampanti e chiede nome e chiave."
 
-#: app/admin/templates/me.html:37
+#: app/admin/templates/me.html:52
 msgid "Create a key above: the next page shows the ready-made command (user name and key included), to paste just once."
 msgstr "Crea una chiave qui sopra: la pagina successiva mostra il comando già pronto (nome utente e chiave inclusi), da incollare una volta sola."
 
-#: app/admin/templates/me.html:38
+#: app/admin/templates/me.html:53
 msgid "Or <span class=\"mono\">scripts/add-printer-linux.sh</span> from the project."
 msgstr "Oppure <span class=\"mono\">scripts/add-printer-linux.sh</span> dal progetto."
 
-#: app/admin/templates/me.html:39
+#: app/admin/templates/me.html:54
 #, python-format
 msgid "Add a network printer with the address <span class=\"mono\">ipps://%(server)s/printers/&lt;name&gt;</span>; when it asks for the user name and password enter <b>%(user)s</b> and the key, and choose \"remember\"."
 msgstr "Aggiungi una stampante di rete con indirizzo <span class=\"mono\">ipps://%(server)s/printers/&lt;nome&gt;</span>; quando chiede nome utente e password inserisci <b>%(user)s</b> e la chiave, e scegli \"ricorda\"."
 
-#: app/admin/templates/me.html:39
+#: app/admin/templates/me.html:54
 msgid "Not yet tried on these systems."
 msgstr "Non ancora provato su questi sistemi."
 
-#: app/admin/templates/me.html:41
+#: app/admin/templates/me.html:56
 msgid "Available printers:"
 msgstr "Stampanti disponibili:"
 
-#: app/admin/templates/me.html:45
+#: app/admin/templates/me.html:60
 msgid "My requests"
 msgstr "Le mie richieste"
 
-#: app/admin/templates/me.html:47 app/admin/templates/request_group.html:13
+#: app/admin/templates/me.html:62 app/admin/templates/request_group.html:13
+#: app/admin/templates/request_permission.html:22
 #: app/admin/templates/request_quota.html:23
-#: app/admin/templates/requests.html:7
+#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:46
 msgid "Reason"
 msgstr "Motivo"
 
-#: app/admin/templates/me.html:47
+#: app/admin/templates/me.html:62
 msgid "Answer"
 msgstr "Risposta"
 
-#: app/admin/templates/me.html:54
+#: app/admin/templates/me.html:69
 msgid "No requests."
 msgstr "Nessuna richiesta."
 
 #: app/admin/templates/me_notices.html:6
-msgid "What the administrators did that concerns you, for example with your print keys."
-msgstr "Cosa hanno fatto gli amministratori che ti riguarda, per esempio con le tue chiavi di stampa."
+msgid "What concerns you: what the administrators did with your account (keys, group, quota, requests) and problems of the printer your print is waiting for."
+msgstr "Ciò che ti riguarda: cosa hanno fatto gli amministratori con il tuo account (chiavi, gruppo, quota, richieste) e i problemi della stampante su cui la tua stampa è in attesa."
 
-#: app/admin/templates/me_notices.html:9 app/admin/templates/me_notices.html:13
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:13
-msgid "What happened"
-msgstr "Cosa è successo"
-
-#: app/admin/templates/me_notices.html:15
-#, python-format
-msgid "An administrator revoked your print key “%(label)s” (starts with %(prefix)s). It no longer works: create another one in your profile if you need it."
-msgstr "Un amministratore ha revocato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Non funziona più: se ti serve, creane un'altra nel tuo profilo."
-
-#: app/admin/templates/me_notices.html:17
-#, python-format
-msgid "An administrator revoked ALL your print keys (%(n)s). They no longer work: create new ones in your profile if you need them."
-msgstr "Un amministratore ha revocato TUTTE le tue chiavi di stampa (%(n)s). Non funzionano più: se ti servono, creane di nuove dal tuo profilo."
-
-#: app/admin/templates/me_notices.html:19
-#, python-format
-msgid "An administrator switched off your print key “%(label)s” (starts with %(prefix)s). It does not work for now, and its expiry date does not change."
-msgstr "Un amministratore ha disattivato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Per ora non funziona e la data di scadenza non cambia."
-
-#: app/admin/templates/me_notices.html:21
-#, python-format
-msgid "An administrator switched your print key “%(label)s” (starts with %(prefix)s) back on. It works again."
-msgstr "Un amministratore ha riattivato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Funziona di nuovo."
-
-#: app/admin/templates/me_notices.html:23
-#, python-format
-msgid "An administrator extended your print key “%(label)s” (starts with %(prefix)s). It now expires on %(date)s."
-msgstr "Un amministratore ha prolungato la tua chiave di stampa «%(label)s» (inizia con %(prefix)s). Ora scade il %(date)s."
-
-#: app/admin/templates/me_notices.html:25
-#, python-format
-msgid "Your print key “%(label)s” (starts with %(prefix)s) expires on %(date)s. Create a new one before then and set it up on your devices."
-msgstr "La tua chiave di stampa «%(label)s» (inizia con %(prefix)s) scade il %(date)s. Creane una nuova prima di quella data e configurala sui tuoi dispositivi."
-
-#: app/admin/templates/me_notices.html:28
-msgid "dismissed"
-msgstr "nascosto"
-
-#: app/admin/templates/me_notices.html:29 app/admin/templates/notices.html:34
-msgid "Dismiss"
-msgstr "Chiudi"
-
-#: app/admin/templates/me_notices.html:33 app/admin/templates/notices.html:38
-msgid "No notices."
-msgstr "Nessun avviso."
-
-#: app/admin/templates/me_notices.html:36 app/admin/templates/notices.html:41
-msgid "Dismiss all"
-msgstr "Chiudi tutti"
-
-#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+#: app/admin/templates/me_notices.html:9 app/admin/templates/notices.html:62
 msgid "Hide dismissed"
 msgstr "Nascondi i chiusi"
 
-#: app/admin/templates/me_notices.html:38 app/admin/templates/notices.html:43
+#: app/admin/templates/me_notices.html:9 app/admin/templates/notices.html:62
 msgid "Show dismissed too"
 msgstr "Mostra anche i chiusi"
 
 #: app/admin/templates/notices.html:6
+msgid "For you"
+msgstr "Per te"
+
+#: app/admin/templates/notices.html:7
+msgid "What concerns your own account: print keys, group, quota, requests."
+msgstr "Ciò che riguarda il tuo account: chiavi di stampa, gruppo, quota, richieste."
+
+#: app/admin/templates/notices.html:13
 #, python-format
 msgid "Things the gateway noticed that administrators should know about. The same notice from the same source is reported again only after a while (now: every %(when)s), and repeats in between are counted."
 msgstr "Cose che il gateway ha notato e che gli amministratori dovrebbero sapere. Lo stesso avviso dalla stessa fonte viene segnalato di nuovo solo dopo un po' (ora: ogni %(when)s) e le ripetizioni nel frattempo vengono contate."
 
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:12
+#: app/admin/templates/notices.html:16 app/admin/templates/notices.html:19
 msgid "Last time"
 msgstr "Ultima volta"
 
-#: app/admin/templates/notices.html:9 app/admin/templates/notices.html:32
+#: app/admin/templates/notices.html:16 app/admin/templates/notices.html:51
 msgid "Times"
 msgstr "Volte"
 
-#: app/admin/templates/notices.html:12
+#: app/admin/templates/notices.html:19
 #, python-format
 msgid "first: %(t)s"
 msgstr "prima: %(t)s"
 
-#: app/admin/templates/notices.html:15
+#: app/admin/templates/notices.html:22
 #, python-format
 msgid "A scan request without a user name and password from <span class=\"mono\">%(ip)s</span> was refused, because scans without login are off. If your scan app can not send credentials, set <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">.env</span> and run <span class=\"mono\">docker compose up -d</span>."
 msgstr "Una richiesta di scansione senza nome utente e password da <span class=\"mono\">%(ip)s</span> è stata rifiutata, perché le scansioni senza accesso sono disattivate. Se la tua app di scansione non sa inviare le credenziali, imposta <span class=\"mono\">CUPSPL_ESCL_ANONYMOUS=true</span> in <span class=\"mono\">.env</span> ed esegui <span class=\"mono\">docker compose up -d</span>."
 
-#: app/admin/templates/notices.html:17
+#: app/admin/templates/notices.html:24
 #, python-format
 msgid "<b>Backup not done: the destination folder can not be reached.</b> The latest backup of “%(name)s” was not saved, because the network disk or USB disk does not seem to be connected. Nothing was written. Check that it is switched on and mounted, then press “Run now”. Last successful backup: %(last)s."
 msgstr "<b>Backup non eseguito: la cartella di destinazione non è raggiungibile.</b> L'ultimo backup di «%(name)s» non è stato salvato, perché il disco di rete o USB non risulta collegato. Nessun file è stato scritto. Controlla che sia acceso e montato, poi premi «Esegui ora». Ultimo backup riuscito: %(last)s."
 
-#: app/admin/templates/notices.html:19
+#: app/admin/templates/notices.html:26
 #, python-format
 msgid "<b>Backup failed.</b> The latest backup of “%(name)s” was not saved. Reason: %(error)s. Last successful backup: %(last)s."
 msgstr "<b>Backup fallito.</b> L'ultimo backup di «%(name)s» non è stato salvato. Motivo: %(error)s. Ultimo backup riuscito: %(last)s."
 
-#: app/admin/templates/notices.html:21
+#: app/admin/templates/notices.html:28
 #, python-format
 msgid "<b>The certificate could not be updated.</b> The last run of <span class=\"mono\">scripts/cert-sync.sh</span> (%(when)s) failed: %(message)s. The certificate in use is the old one. Run the script by hand to see the error, and check the cron job."
 msgstr "<b>Non è stato possibile aggiornare il certificato.</b> L'ultima esecuzione di <span class=\"mono\">scripts/cert-sync.sh</span> (%(when)s) è fallita: %(message)s. Il certificato in uso è quello vecchio. Lancia lo script a mano per vedere l'errore e controlla il cron."
 
-#: app/admin/templates/notices.html:23
+#: app/admin/templates/notices.html:30
 #, python-format
 msgid "<b>The TLS certificate has expired</b> (on %(date)s). Phones and computers refuse to connect to the gateway until a valid one is in <span class=\"mono\">config/tls</span> and the gateway has been restarted."
 msgstr "<b>Il certificato TLS è scaduto</b> (il %(date)s). Telefoni e computer rifiutano di collegarsi al gateway finché in <span class=\"mono\">config/tls</span> non c'è un certificato valido e il gateway non è stato riavviato."
 
-#: app/admin/templates/notices.html:25
+#: app/admin/templates/notices.html:32
 #, python-format
 msgid "<b>The TLS certificate expires on %(date)s.</b> The last synchronisation worked, so the source has not renewed it yet: check the program that renews it (for example Nginx Proxy Manager)."
 msgstr "<b>Il certificato TLS scade il %(date)s.</b> L'ultima sincronizzazione è riuscita, quindi la sorgente non lo ha ancora rinnovato: controlla il programma che lo rinnova (per esempio Nginx Proxy Manager)."
 
-#: app/admin/templates/notices.html:26
+#: app/admin/templates/notices.html:33
 #, python-format
 msgid "<b>The TLS certificate expires on %(date)s.</b> The last synchronisation failed: see the other notice about the certificate."
 msgstr "<b>Il certificato TLS scade il %(date)s.</b> L'ultima sincronizzazione è fallita: guarda l'altro avviso sul certificato."
 
-#: app/admin/templates/notices.html:27
+#: app/admin/templates/notices.html:34
 #, python-format
 msgid "<b>The TLS certificate expires on %(date)s.</b> Renew it and put the new files in <span class=\"mono\">config/tls</span>, then restart the gateway."
 msgstr "<b>Il certificato TLS scade il %(date)s.</b> Rinnovalo, metti i file nuovi in <span class=\"mono\">config/tls</span> e riavvia il gateway."
 
-#: app/admin/templates/notices.html:29
+#: app/admin/templates/notices.html:36
 #, python-format
 msgid "<b>The announced address is not in the TLS certificate.</b> The gateway announces itself on the network as <span class=\"mono\">%(names)s</span> at <span class=\"mono\">%(addresses)s</span>, and the certificate covers none of them: phones and computers that find the printers this way will show a certificate error. Make the certificate list the address (or give the machine a fixed address and a name that the certificate covers)."
 msgstr "<b>L'indirizzo annunciato non è nel certificato TLS.</b> Il gateway si annuncia in rete come <span class=\"mono\">%(names)s</span> all'indirizzo <span class=\"mono\">%(addresses)s</span>, e il certificato non copre nessuno dei due: telefoni e computer che trovano le stampanti in questo modo mostreranno un errore di certificato. Fai elencare l'indirizzo al certificato (oppure dai alla macchina un indirizzo fisso e un nome che il certificato copre)."
 
-#: app/admin/templates/notices.html:33
+#: app/admin/templates/notices.html:38
+#, python-format
+msgid "<b>Paper jam</b> on the printer “%(printer)s”. Jobs wait until somebody clears it."
+msgstr "<b>Inceppamento carta</b> sulla stampante “%(printer)s”. I lavori restano in attesa finché qualcuno non la libera."
+
+#: app/admin/templates/notices.html:39
+#, python-format
+msgid "<b>Out of paper</b> (or empty tray) on the printer “%(printer)s”. Jobs wait until paper is loaded."
+msgstr "<b>Carta finita</b> (o vassoio vuoto) sulla stampante “%(printer)s”. I lavori restano in attesa finché non viene caricata la carta."
+
+#: app/admin/templates/notices.html:40
+#, python-format
+msgid "<b>Ink or toner is out</b> on the printer “%(printer)s”: %(what)s."
+msgstr "<b>Inchiostro o toner esaurito</b> sulla stampante “%(printer)s”: %(what)s."
+
+#: app/admin/templates/notices.html:41
+#, python-format
+msgid "<b>Ink or toner is running low</b> on the printer “%(printer)s”: %(what)s."
+msgstr "<b>Inchiostro o toner in esaurimento</b> sulla stampante “%(printer)s”: %(what)s."
+
+#: app/admin/templates/notices.html:42
+#, python-format
+msgid "<b>Problem</b> on the printer “%(printer)s”: %(what)s."
+msgstr "<b>Problema</b> sulla stampante “%(printer)s”: %(what)s."
+
+#: app/admin/templates/notices.html:46
+#, python-format
+msgid "<b>The secret key has changed</b> since the previous start (<span class=\"mono\">CUPSPL_SECRET_KEY</span> in <span class=\"mono\">.env</span>). %(count)s file names in the audit were encrypted with the old key and now show as <span class=\"mono\">[encrypted]</span>. If the change was not wanted (for example a restore with a new <span class=\"mono\">.env</span>), put the old key back and restart: the names become readable again."
+msgstr "<b>La chiave segreta è cambiata</b> rispetto all'avvio precedente (<span class=\"mono\">CUPSPL_SECRET_KEY</span> in <span class=\"mono\">.env</span>). %(count)s nomi di file nell'audit erano cifrati con la vecchia chiave e ora compaiono come <span class=\"mono\">[encrypted]</span>. Se il cambio non era voluto (per esempio un ripristino con un <span class=\"mono\">.env</span> nuovo), rimetti la vecchia chiave e riavvia: i nomi tornano leggibili."
+
+#: app/admin/templates/notices.html:48
+msgid "<b>No secret key is set.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> is empty in <span class=\"mono\">.env</span>: the file names in the audit are stored without encryption and everybody has to sign in again after every restart. Set a long random value (for example the output of <span class=\"mono\">openssl rand -base64 48</span>), run <span class=\"mono\">docker compose up -d</span> and save the key in a safe place."
+msgstr "<b>Nessuna chiave segreta impostata.</b> <span class=\"mono\">CUPSPL_SECRET_KEY</span> è vuota in <span class=\"mono\">.env</span>: i nomi dei file nell'audit sono salvati senza cifratura e dopo ogni riavvio tutti devono rifare il login. Imposta un valore lungo e casuale (per esempio l'output di <span class=\"mono\">openssl rand -base64 48</span>), esegui <span class=\"mono\">docker compose up -d</span> e salva la chiave in un posto sicuro."
+
+#: app/admin/templates/notices.html:52
 #, python-format
 msgid "dismissed by %(who)s"
 msgstr "chiuso da %(who)s"
 
 #: app/admin/templates/password.html:2 app/admin/templates/password.html:7
-#: app/admin/templates/settings.html:37 app/admin/templates/settings.html:42
+#: app/admin/templates/settings.html:38 app/admin/templates/settings.html:43
 msgid "Change password"
 msgstr "Cambia password"
 
@@ -2767,118 +3197,132 @@ msgstr "Ripeti la nuova password"
 msgid "Change"
 msgstr "Cambia"
 
-#: app/admin/templates/print.html:2 app/admin/templates/print.html:57
+#: app/admin/templates/print.html:2 app/admin/templates/print.html:61
 msgid "Print"
 msgstr "Stampa"
 
 #: app/admin/templates/print.html:20
 #, python-format
+msgid "You can print %(window)s. Printing now is not possible."
+msgstr "Puoi stampare %(window)s. In questo momento non è possibile stampare."
+
+#: app/admin/templates/print.html:21
+#, python-format
 msgid "Not reachable right now: %(printers)s."
 msgstr "Non raggiungibili in questo momento: %(printers)s."
 
-#: app/admin/templates/print.html:22
+#: app/admin/templates/print.html:23
+msgid "Your account is not allowed to use any of the printers. Your profile shows what you may print on."
+msgstr "Il tuo account non può usare nessuna delle stampanti. Il tuo profilo mostra su quali puoi stampare."
+
+#: app/admin/templates/print.html:25
 msgid "No printer available at the moment. Try again shortly or tell an administrator."
 msgstr "Nessuna stampante disponibile al momento. Riprova tra poco o avvisa un amministratore."
 
-#: app/admin/templates/print.html:26
+#: app/admin/templates/print.html:29
 msgid "Choose the file"
 msgstr "Scegli il file"
 
-#: app/admin/templates/print.html:29
+#: app/admin/templates/print.html:32
 msgid "Tap to choose a file"
 msgstr "Tocca per scegliere un file"
 
-#: app/admin/templates/print.html:30
+#: app/admin/templates/print.html:33
 #, python-format
 msgid "or drag it here · PDF, photo (JPEG, PNG, GIF) or text · at most %(mb)s MB"
 msgstr "oppure trascinalo qui · PDF, foto (JPEG, PNG, GIF) o testo · massimo %(mb)s MB"
 
-#: app/admin/templates/print.html:33
+#: app/admin/templates/print.html:36
 msgid "Choose the printer"
 msgstr "Scegli la stampante"
 
-#: app/admin/templates/print.html:38
+#: app/admin/templates/print.html:41
 #, python-format
 msgid "Test printer (%(name)s)"
 msgstr "Stampante di prova (%(name)s)"
 
-#: app/admin/templates/print.html:40
+#: app/admin/templates/print.html:43
 msgid "double-sided"
 msgstr "fronte/retro"
 
-#: app/admin/templates/print.html:43
+#: app/admin/templates/print.html:46
 msgid "Print options"
 msgstr "Opzioni di stampa"
 
-#: app/admin/templates/print.html:45
+#: app/admin/templates/print.html:48
 #, python-format
 msgid "What it contains (optional, max %(n)s characters)"
 msgstr "Cosa contiene (facoltativo, max %(n)s caratteri)"
 
-#: app/admin/templates/print.html:46
+#: app/admin/templates/print.html:49
 msgid "It stays in the print log, under the file name."
 msgstr "Resta nel registro delle stampe, sotto il nome del file."
 
-#: app/admin/templates/print.html:47
+#: app/admin/templates/print.html:50
 msgid "Paper size"
 msgstr "Formato carta"
 
-#: app/admin/templates/print.html:48
+#: app/admin/templates/print.html:51
 msgid "Automatic"
 msgstr "Automatico"
 
-#: app/admin/templates/print.html:48
+#: app/admin/templates/print.html:51
 msgid "Portrait"
 msgstr "Verticale"
 
-#: app/admin/templates/print.html:48
+#: app/admin/templates/print.html:51
 msgid "Landscape"
 msgstr "Orizzontale"
 
-#: app/admin/templates/print.html:49 app/admin/templates/print.html:69
+#: app/admin/templates/print.html:52 app/admin/templates/print.html:53
+#: app/admin/templates/print.html:73
 msgid "Printer default"
 msgstr "Predefinito della stampante"
 
-#: app/admin/templates/print.html:49 app/admin/templates/scan.html:37
+#: app/admin/templates/print.html:52 app/admin/templates/scan.html:37
 msgid "In colour"
 msgstr "A colori"
 
-#: app/admin/templates/print.html:49 app/admin/templates/scan.html:37
+#: app/admin/templates/print.html:52 app/admin/templates/scan.html:37
 msgid "Black and white"
 msgstr "Bianco e nero"
 
-#: app/admin/templates/print.html:50
+#: app/admin/templates/print.html:53
+msgid "Double-sided, long edge"
+msgstr "Fronte-retro, lato lungo"
+
+#: app/admin/templates/print.html:53
+msgid "Double-sided, short edge"
+msgstr "Fronte-retro, lato corto"
+
+#: app/admin/templates/print.html:54
 msgid "All — or 1,5 or 2-4"
 msgstr "Tutte — oppure 1,5 o 2-4"
 
-#: app/admin/templates/print.html:51
+#: app/admin/templates/print.html:55
 msgid "fewer"
 msgstr "meno"
 
-#: app/admin/templates/print.html:53
+#: app/admin/templates/print.html:57
 msgid "more"
 msgstr "più"
 
-#: app/admin/templates/print.html:54
+#: app/admin/templates/print.html:58
 #, python-format
 msgid "at most %(n)s"
 msgstr "massimo %(n)s"
 
-#: app/admin/templates/print.html:58
+#: app/admin/templates/print.html:62
 msgid "It counts as a normal print: same limits and same log. The pages are counted before printing."
 msgstr "Conta come una normale stampa: stessi limiti e stesso registro. Le pagine vengono contate prima di stampare."
 
-#: app/admin/templates/print.html:71
+#: app/admin/templates/print.html:75
 msgid "(default)"
 msgstr "(predefinito)"
 
-#: app/admin/templates/print.html:86
+#: app/admin/templates/print.html:97
 msgid "Sending…"
 msgstr "Invio in corso…"
-
-#: app/admin/templates/printers.html:2 app/admin/templates/printers.html:4
-msgid "Printers"
-msgstr "Stampanti"
 
 #: app/admin/templates/printers.html:4
 msgid "data read from the printers; physical ones first, in your own order"
@@ -2981,12 +3425,12 @@ msgstr "Stampa periodica di %(printer)s"
 msgid "Test print with the printer statistics"
 msgstr "Stampa di prova con le statistiche della stampante"
 
-#: app/admin/templates/printers.html:33 app/admin/templates/printers.html:89
+#: app/admin/templates/printers.html:33 app/admin/templates/printers.html:107
 #, python-format
 msgid "Test print on %(printer)s"
 msgstr "Stampa di prova su %(printer)s"
 
-#: app/admin/templates/printers.html:41 app/admin/templates/printers.html:66
+#: app/admin/templates/printers.html:41 app/admin/templates/printers.html:84
 msgid "Close (changes nothing)"
 msgstr "Chiudi (non cambia nulla)"
 
@@ -3005,229 +3449,365 @@ msgstr "Rinominare %(printer)s? I computer e i telefoni su cui è stata configur
 
 #: app/admin/templates/printers.html:49
 #, python-format
-msgid "New name of %(printer)s"
-msgstr "Nuovo nome di %(printer)s"
+msgid "New name for %(printer)s"
+msgstr "Nuovo nome per %(printer)s"
 
-#: app/admin/templates/printers.html:50
+#: app/admin/templates/printers.html:52
 msgid "Rename"
 msgstr "Rinomina"
 
-#: app/admin/templates/printers.html:54
+#: app/admin/templates/printers.html:59
+msgid "Names used before"
+msgstr "Nomi usati in passato"
+
+#: app/admin/templates/printers.html:63
+msgid "Write this name in the field"
+msgstr "Scrivi questo nome nel campo"
+
+#: app/admin/templates/printers.html:64
+#, python-format
+msgid "renamed on %(date)s"
+msgstr "rinominata il %(date)s"
+
+#: app/admin/templates/printers.html:64
+#, python-format
+msgid "removed automatically on %(date)s"
+msgstr "tolta automaticamente il %(date)s"
+
+#: app/admin/templates/printers.html:64
+#, python-format
+msgid "deleted on %(date)s"
+msgstr "eliminata il %(date)s"
+
+#: app/admin/templates/printers.html:67
+msgid "A new printer that takes the name of a removed one prints again for the computers and phones set up with the old address, and the permissions given to that name apply to it again. A computer set up with the driver of the old model may need to be set up again if the new model is different."
+msgstr "Una stampante nuova che prende il nome di una tolta torna a stampare per i computer e i telefoni configurati con il vecchio indirizzo, e i permessi dati a quel nome valgono di nuovo. Un computer configurato con il driver del vecchio modello può dover essere configurato di nuovo se il modello nuovo è diverso."
+
+#: app/admin/templates/printers.html:72
 #, python-format
 msgid "Periodic print active: %(every)s, %(mode)s"
 msgstr "Stampa periodica attiva: %(every)s, %(mode)s"
 
-#: app/admin/templates/printers.html:55
+#: app/admin/templates/printers.html:73
 #, python-format
 msgid "next %(when)s"
 msgstr "prossima %(when)s"
 
-#: app/admin/templates/printers.html:56
+#: app/admin/templates/printers.html:74
 #, python-format
 msgid "last attempt failed: %(error)s"
 msgstr "ultimo tentativo fallito: %(error)s"
 
-#: app/admin/templates/printers.html:57
+#: app/admin/templates/printers.html:75
 msgid "printer not reachable: I will retry as soon as it answers"
 msgstr "stampante non raggiungibile: riprovo appena risponde"
 
-#: app/admin/templates/printers.html:61
+#: app/admin/templates/printers.html:79
 msgid "Periodic print"
 msgstr "Stampa periodica"
 
-#: app/admin/templates/printers.html:64
+#: app/admin/templates/printers.html:82
 msgid "Turn on the periodic print"
 msgstr "Attiva la stampa periodica"
 
-#: app/admin/templates/printers.html:64
+#: app/admin/templates/printers.html:82
 msgid "On: click to turn off"
 msgstr "Attiva: clic per disattivare"
 
-#: app/admin/templates/printers.html:64
+#: app/admin/templates/printers.html:82
 msgid "Off: click to turn on"
 msgstr "Disattiva: clic per attivare"
 
-#: app/admin/templates/printers.html:68
+#: app/admin/templates/printers.html:86
 #, python-format
 msgid "A printer left idle for a long time dries its ink or sticks its rollers. With the periodic print the gateway sends <b class=\"mono\">%(printer)s</b> a maintenance page at regular intervals. It applies to all administrators."
 msgstr "Una stampante ferma a lungo asciuga l'inchiostro o incolla i rullini. Con la stampa periodica il gateway manda a <b class=\"mono\">%(printer)s</b> una pagina di manutenzione a intervalli regolari. Vale per tutti gli amministratori."
 
-#: app/admin/templates/printers.html:72
+#: app/admin/templates/printers.html:90
 msgid "Every"
 msgstr "Ogni"
 
-#: app/admin/templates/printers.html:74 app/policy/keepalive.py:132
+#: app/admin/templates/printers.html:92 app/policy/keepalive.py:132
 msgid "Interval"
 msgstr "Intervallo"
 
-#: app/admin/templates/printers.html:75
+#: app/admin/templates/printers.html:93
 msgid "Unit"
 msgstr "Unità"
 
-#: app/admin/templates/printers.html:75
+#: app/admin/templates/printers.html:93
 msgid "days"
 msgstr "giorni"
 
-#: app/admin/templates/printers.html:75
+#: app/admin/templates/printers.html:93
 msgid "hours"
 msgstr "ore"
 
-#: app/admin/templates/printers.html:81
+#: app/admin/templates/printers.html:99
 msgid "Print in colour (uses a little of every ink: keeps the colour heads working too)"
 msgstr "Stampa a colori (consuma un po' di tutti gli inchiostri: tiene in funzione anche le testine colore)"
 
-#: app/admin/templates/printers.html:82
+#: app/admin/templates/printers.html:100
 msgid "This printer does not print in colour: the page will be black and white."
 msgstr "Questa stampante non stampa a colori: la pagina sarà in bianco e nero."
 
-#: app/admin/templates/printers.html:83
+#: app/admin/templates/printers.html:101
 msgid "Between 1 hour and 90 days. “Save” records the settings without turning the program on or off: the switch at the top decides that."
 msgstr "Tra 1 ora e 90 giorni. «Salva» registra i parametri senza accendere o spegnere il programma: lo decide l'interruttore in alto."
 
-#: app/admin/templates/printers.html:84
+#: app/admin/templates/printers.html:102
 #, python-format
 msgid "Last change: %(who)s, %(when)s."
 msgstr "Ultima modifica: %(who)s, %(when)s."
 
-#: app/admin/templates/printers.html:84
+#: app/admin/templates/printers.html:102
 #, python-format
 msgid "Last page printed: %(when)s."
 msgstr "Ultima pagina stampata: %(when)s."
 
-#: app/admin/templates/printers.html:90
+#: app/admin/templates/printers.html:108
 msgid "Prints a page with all the statistics you see here: state, ink, counters, data from the gateway and device details."
 msgstr "Stampa una pagina con tutte le statistiche che vedi qui: stato, inchiostro, contatori, dati dal gateway e dettagli del dispositivo."
 
-#: app/admin/templates/printers.html:90
+#: app/admin/templates/printers.html:108
 msgid "The printer does not answer."
 msgstr "La stampante non risponde."
 
-#: app/admin/templates/printers.html:94
+#: app/admin/templates/printers.html:112
 msgid "Print black and white"
 msgstr "Stampa bianco e nero"
 
-#: app/admin/templates/printers.html:95
+#: app/admin/templates/printers.html:113
 msgid "This printer does not print in colour"
 msgstr "Questa stampante non stampa a colori"
 
-#: app/admin/templates/printers.html:95
+#: app/admin/templates/printers.html:113
 msgid "Print in colour"
 msgstr "Stampa a colori"
 
-#: app/admin/templates/printers.html:103
+#: app/admin/templates/printers.html:121
 msgid "The device does not answer on the network: cable unplugged or printer off? The queue still exists in CUPS"
 msgstr "Il dispositivo non risponde sulla rete: cavo scollegato o stampante spenta? La coda in CUPS esiste ancora"
 
-#: app/admin/templates/printers.html:111
+#: app/admin/templates/printers.html:124 app/admin/templates/printers.html:208
+msgid "Address of the queue"
+msgstr "Indirizzo della coda"
+
+#: app/admin/templates/printers.html:124
+#, python-format
+msgid "Address of %(printer)s"
+msgstr "Indirizzo di %(printer)s"
+
+#: app/admin/templates/printers.html:130
 msgid "Applies to all users, also to the accounts of the administrator group"
 msgstr "Vale per tutti gli utenti, anche per gli account del gruppo administrator"
 
-#: app/admin/templates/printers.html:111
+#: app/admin/templates/printers.html:130
 msgid "BLOCKED FOR EVERYONE · admins included"
 msgstr "BLOCCATA PER TUTTI · admin inclusi"
 
-#: app/admin/templates/printers.html:112
+#: app/admin/templates/printers.html:131
 msgid "It is not announced on the network: still usable by whoever knows it"
 msgstr "Non è annunciata sulla rete: resta utilizzabile da chi la conosce"
 
-#: app/admin/templates/printers.html:112
+#: app/admin/templates/printers.html:131
 msgid "hidden from the network (mDNS)"
 msgstr "nascosta dalla rete (mDNS)"
 
-#: app/admin/templates/printers.html:114
+#: app/admin/templates/printers.html:133
 #, python-format
 msgid "Block %(printer)s for EVERYONE, administrators included?"
 msgstr "Bloccare %(printer)s per TUTTI, amministratori compresi?"
 
-#: app/admin/templates/printers.html:116
+#: app/admin/templates/printers.html:135
 msgid "If blocked nobody can print, not even the admins"
 msgstr "Se bloccata nessuno può stampare, nemmeno gli admin"
 
-#: app/admin/templates/printers.html:116
+#: app/admin/templates/printers.html:135
 msgid "Unblock use"
 msgstr "Sblocca uso"
 
-#: app/admin/templates/printers.html:116
+#: app/admin/templates/printers.html:135
 msgid "Block use"
 msgstr "Blocca uso"
 
-#: app/admin/templates/printers.html:120
+#: app/admin/templates/printers.html:139
 msgid "Removes (or restores) the printer from the automatic announcement on the network"
 msgstr "Toglie (o rimette) la stampante dall'annuncio automatico sulla rete"
 
-#: app/admin/templates/printers.html:120
+#: app/admin/templates/printers.html:139
 msgid "Show on mDNS"
 msgstr "Mostra su mDNS"
 
-#: app/admin/templates/printers.html:120
+#: app/admin/templates/printers.html:139
 msgid "Hide from mDNS"
 msgstr "Nascondi da mDNS"
 
-#: app/admin/templates/printers.html:123
+#: app/admin/templates/printers.html:142
 #, python-format
 msgid "Delete the virtual printer %(printer)s? The PDFs already produced stay where they are."
 msgstr "Eliminare la stampante virtuale %(printer)s? I PDF già prodotti restano dove sono."
 
-#: app/admin/templates/printers.html:124
+#: app/admin/templates/printers.html:143
 msgid "Only virtual printers can be deleted"
 msgstr "Si possono eliminare solo le stampanti virtuali"
 
-#: app/admin/templates/printers.html:127
+#: app/admin/templates/printers.html:146
 #, python-format
 msgid "Delete the queue %(printer)s? The printer does not answer. Its settings (block, maintenance print) are forgotten; if it comes back it is added again as a new printer."
 msgstr "Eliminare la coda %(printer)s? La stampante non risponde. Le sue impostazioni (blocco, stampa di manutenzione) vengono dimenticate; se torna viene aggiunta di nuovo come stampante nuova."
 
-#: app/admin/templates/printers.html:128
+#: app/admin/templates/printers.html:147
 msgid "The printer does not answer: remove its queue now"
 msgstr "La stampante non risponde: rimuovi subito la sua coda"
 
-#: app/admin/templates/printers.html:128
+#: app/admin/templates/printers.html:147
 msgid "Delete queue"
 msgstr "Elimina coda"
 
-#: app/admin/templates/printers.html:134
+#: app/admin/templates/printers.html:153
 msgid "The device does not answer (cable unplugged? printer off?): ink and counters are not shown because they would be stale data."
 msgstr "Il dispositivo non risponde (cavo scollegato? stampante spenta?): inchiostro e contatori non vengono mostrati perché sarebbero dati vecchi."
 
-#: app/admin/templates/printers.html:136
+#: app/admin/templates/printers.html:155
 #, python-format
 msgid "The queue %(name)s will be removed automatically in %(time)s (%(when)s) unless the printer comes back."
 msgstr "La coda %(name)s verrà rimossa automaticamente tra %(time)s (%(when)s) se la stampante non torna."
 
-#: app/admin/templates/printers.html:142
+#: app/admin/templates/printers.html:161
 msgid "almost empty"
 msgstr "quasi finito"
 
-#: app/admin/templates/printers.html:150
+#: app/admin/templates/printers.html:169
 msgid "Since the printer was born, including prints made without going through the gateway."
 msgstr "Dalla nascita della stampante, comprese le stampe fatte senza passare dal gateway."
 
-#: app/admin/templates/printers.html:155
+#: app/admin/templates/printers.html:174
 msgid "Queue"
 msgstr "Coda"
 
-#: app/admin/templates/printers.html:155
+#: app/admin/templates/printers.html:174 app/admin/templates/report.html:35
 #: app/admin/templates/request_quota.html:14 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:17
 msgid "Jobs"
 msgstr "Job"
 
-#: app/admin/templates/printers.html:155
+#: app/admin/templates/printers.html:174
 msgid "Last"
 msgstr "Ultimo"
 
-#: app/admin/templates/printers.html:159
+#: app/admin/templates/printers.html:178
 msgid "Only what went through the gateway (pages counted on successful jobs)."
 msgstr "Solo ciò che è passato dal gateway (pagine contate sui job riusciti)."
 
-#: app/admin/templates/printers.html:172
+#: app/admin/templates/printers.html:191
 #, python-format
 msgid "Alerts: %(list)s"
 msgstr "Avvisi: %(list)s"
 
-#: app/admin/templates/printers.html:185
+#: app/admin/templates/printers.html:204
 msgid "CUPS does not answer or has no queues configured."
 msgstr "CUPS non risponde o non ha code configurate."
+
+#: app/admin/templates/printers.html:212
+msgid "The address to add the printer by hand on a computer. When it asks, the user enters their user name and a print key."
+msgstr "L'indirizzo per aggiungere la stampante a mano su un computer. Quando lo chiede, l'utente inserisce il proprio nome utente e una chiave di stampa."
+
+#: app/admin/templates/printers.html:213
+msgid "Address"
+msgstr "Indirizzo"
+
+#: app/admin/templates/printers.html:221
+#, python-format
+msgid "Used before: no queue has had this name since %(date)s. Computers set up with this address will print again."
+msgstr "Usato in passato: nessuna coda ha questo nome dal %(date)s. I computer configurati con questo indirizzo torneranno a stampare."
+
+#: app/admin/templates/printers.html:222
+msgid "A queue with this name already exists."
+msgstr "Esiste già una coda con questo nome."
+
+#: app/admin/templates/printers.html:223
+msgid "That is already its name."
+msgstr "È già il suo nome."
+
+#: app/admin/templates/printers.html:224
+msgid "Letters, digits and . _ @ + - only."
+msgstr "Solo lettere, cifre e . _ @ + -"
+
+#: app/admin/templates/report.html:5
+msgid "Usage report"
+msgstr "Report di utilizzo"
+
+#: app/admin/templates/report.html:6
+msgid "Who printed most in a period. It counts the prints that used paper (completed, waiting or running); scans are not included. Prints that were already moved to the compressed archive are not in the report."
+msgstr "Chi ha stampato di più in un periodo. Conta le stampe che hanno usato carta (completate, in attesa o in corso); le scansioni non sono incluse. Le stampe già spostate nell'archivio compresso non sono nel report."
+
+#: app/admin/templates/report.html:9 app/admin/templates/requests.html:83
+#: app/admin/templates/requests.html:194
+msgid "From"
+msgstr "Dal"
+
+#: app/admin/templates/report.html:10
+msgid "To (included)"
+msgstr "A (compreso)"
+
+#: app/admin/templates/report.html:11
+msgid "Show the first … users"
+msgstr "Mostra i primi … utenti"
+
+#: app/admin/templates/report.html:13
+msgid "Detailed report: also how many prints each user made on each printer"
+msgstr "Report dettagliato: anche quante stampe ha fatto ogni utente su ogni stampante"
+
+#: app/admin/templates/report.html:16
+msgid "Leave out these groups"
+msgstr "Escludi questi gruppi"
+
+#: app/admin/templates/report.html:21
+msgid "Show"
+msgstr "Mostra"
+
+#: app/admin/templates/report.html:22
+msgid "Download CSV"
+msgstr "Scarica CSV"
+
+#: app/admin/templates/report.html:23
+msgid "Download PDF"
+msgstr "Scarica PDF"
+
+#: app/admin/templates/report.html:25
+msgid "The PDF is in English and can only show Western letters (other characters appear as ?): the CSV has every name as it is."
+msgstr "Il PDF è in inglese e può mostrare solo lettere occidentali (gli altri caratteri appaiono come ?): il CSV ha ogni nome così com'è."
+
+#: app/admin/templates/report.html:30
+msgid "The period reaches back before the oldest row of the active audit: older prints are in the archive and are not counted here."
+msgstr "Il periodo arriva prima della riga più vecchia dell'audit attivo: le stampe più vecchie sono nell'archivio e qui non sono contate."
+
+#: app/admin/templates/report.html:31
+#, python-format
+msgid "%(n)s user"
+msgid_plural "%(n)s users"
+msgstr[0] "%(n)s utente"
+msgstr[1] "%(n)s utenti"
+
+#: app/admin/templates/report.html:31
+#, python-format
+msgid "%(jobs)s jobs"
+msgstr "%(jobs)s lavori"
+
+#: app/admin/templates/report.html:31
+#, python-format
+msgid "%(pages)s pages"
+msgstr "%(pages)s pagine"
+
+#: app/admin/templates/report.html:32
+#, python-format
+msgid "only the first %(top)s are listed"
+msgstr "sono elencati solo i primi %(top)s"
+
+#: app/admin/templates/report.html:41
+msgid "No prints in this period."
+msgstr "Nessuna stampa in questo periodo."
 
 #: app/admin/templates/request_group.html:2
 msgid "Group change"
@@ -3242,14 +3822,43 @@ msgstr "Ora sei in: <b>%(group)s</b>. Il gruppo determina i tuoi limiti."
 msgid "No group is available for this request."
 msgstr "Nessun gruppo è disponibile per questa richiesta."
 
+#: app/admin/templates/request_group.html:13
+#: app/admin/templates/request_permission.html:22
+#: app/admin/templates/request_quota.html:23
+msgid "optional"
+msgstr "facoltativo"
+
 #: app/admin/templates/request_group.html:14
 msgid "Why do you need to change group?"
 msgstr "Perché devi cambiare gruppo?"
 
 #: app/admin/templates/request_group.html:15
+#: app/admin/templates/request_permission.html:24
 #: app/admin/templates/request_quota.html:25
 msgid "Send the request"
 msgstr "Invia la richiesta"
+
+#: app/admin/templates/request_permission.html:2
+#: app/admin/templates/request_permission.html:5
+msgid "Ask for a permission"
+msgstr "Chiedi un permesso"
+
+#: app/admin/templates/request_permission.html:7
+msgid "There is nothing to ask for: you already have every permission, or you are waiting for the answer to what you asked."
+msgstr "Non c'è niente da chiedere: hai già tutti i permessi, oppure aspetti la risposta a ciò che hai chiesto."
+
+#: app/admin/templates/request_permission.html:10
+#, python-format
+msgid "You can have at most %(n)s open requests. An administrator will review it and choose whether it lasts for good or until a date."
+msgstr "Puoi avere al massimo %(n)s richieste aperte. Un amministratore la esaminerà e sceglierà se vale per sempre o fino a una data."
+
+#: app/admin/templates/request_permission.html:19
+msgid "Only needed when you ask for a printer."
+msgstr "Serve solo quando chiedi una stampante."
+
+#: app/admin/templates/request_permission.html:23
+msgid "Why do you need it? (e.g. printing the posters for the fair in colour)"
+msgstr "Perché ti serve? (es. stampare a colori i manifesti per la fiera)"
 
 #: app/admin/templates/request_quota.html:7
 msgid "No limit applies to you: there is nothing to ask for."
@@ -3293,7 +3902,7 @@ msgstr "Richieste"
 msgid "Pending requests"
 msgstr "Richieste in attesa"
 
-#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:37
+#: app/admin/templates/requests.html:7 app/admin/templates/requests.html:181
 msgid "Request"
 msgstr "Richiesta"
 
@@ -3306,41 +3915,164 @@ msgstr "Decisione"
 msgid "expires on %(date)s"
 msgstr "scade il %(date)s"
 
-#: app/admin/templates/requests.html:18
+#: app/admin/templates/requests.html:12 app/admin/templates/requests.html:108
+msgid "temporary (until the end of the period)"
+msgstr "temporanea (fino a fine periodo)"
+
+#: app/admin/templates/requests.html:13
+msgid "Show the reason"
+msgstr "Mostra il motivo"
+
+#: app/admin/templates/requests.html:13
+#, python-format
+msgid "Show the reason of %(user)s"
+msgstr "Mostra il motivo di %(user)s"
+
+#: app/admin/templates/requests.html:19
+msgid "Amount"
+msgstr "Quantità"
+
+#: app/admin/templates/requests.html:19
 msgid "amount (you can change it)"
 msgstr "quantità (puoi modificarla)"
 
-#: app/admin/templates/requests.html:21
-msgid "note (optional)"
-msgstr "nota (facoltativa)"
+#: app/admin/templates/requests.html:20 app/admin/templates/requests.html:27
+msgid "Duration"
+msgstr "Durata"
 
-#: app/admin/templates/requests.html:22
+#: app/admin/templates/requests.html:29 app/admin/templates/requests.html:119
+msgid "until the end of…"
+msgstr "fino alla fine del…"
+
+#: app/admin/templates/requests.html:31 app/admin/templates/requests.html:120
+msgid "last day the permission is valid"
+msgstr "ultimo giorno in cui il permesso è valido"
+
+#: app/admin/templates/requests.html:34
+msgid "Note for the user (optional)"
+msgstr "Nota per l'utente (facoltativa)"
+
+#: app/admin/templates/requests.html:36
 msgid "Approve"
 msgstr "Approva"
 
-#: app/admin/templates/requests.html:26
-msgid "reason for the refusal"
-msgstr "motivo del rifiuto"
-
-#: app/admin/templates/requests.html:27
+#: app/admin/templates/requests.html:37
 msgid "Reject"
 msgstr "Rifiuta"
 
-#: app/admin/templates/requests.html:31
+#: app/admin/templates/requests.html:42
 msgid "No pending requests."
 msgstr "Nessuna richiesta in attesa."
 
-#: app/admin/templates/requests.html:35
+#: app/admin/templates/requests.html:80
+msgid "Active grants"
+msgstr "Concessioni attive"
+
+#: app/admin/templates/requests.html:81
+msgid "Quota added on top of the limit, and permissions (colour, one-sided, a printer, any hours) added on top of what the group allows. The print history is never modified. Temporary quota ends with the period of the user's limit."
+msgstr "Quota aggiunta al limite e permessi (colore, solo fronte, una stampante, qualsiasi orario) aggiunti a quelli del gruppo. Lo storico delle stampe non viene mai modificato. La quota temporanea finisce con il periodo del limite dell'utente."
+
+#: app/admin/templates/requests.html:83 app/admin/templates/requests.html:194
+msgid "Type"
+msgstr "Tipo"
+
+#: app/admin/templates/requests.html:83 app/admin/templates/requests.html:194
+msgid "Until"
+msgstr "Fino al"
+
+#: app/admin/templates/requests.html:83 app/admin/templates/requests.html:181
+#: app/admin/templates/requests.html:194
+msgid "By"
+msgstr "Da"
+
+#: app/admin/templates/requests.html:87 app/admin/templates/requests.html:89
+#: app/admin/templates/requests.html:198 app/admin/templates/requests.html:200
+msgid "no expiry"
+msgstr "senza scadenza"
+
+#: app/admin/templates/requests.html:91
+msgid "Revoke this grant?"
+msgstr "Revocare questa concessione?"
+
+#: app/admin/templates/requests.html:92 app/admin/templates/requests.html:202
+msgid "No grants."
+msgstr "Nessuna concessione."
+
+#: app/admin/templates/requests.html:95
+msgid "Grant without a request"
+msgstr "Concedi senza richiesta"
+
+#: app/admin/templates/requests.html:99
+msgid "What to grant"
+msgstr "Cosa concedere"
+
+#: app/admin/templates/requests.html:100
+msgid "quota"
+msgstr "quota"
+
+#: app/admin/templates/requests.html:100
+msgid "a permission"
+msgstr "un permesso"
+
+#: app/admin/templates/requests.html:103
+msgid "Quota"
+msgstr "Quota"
+
+#: app/admin/templates/requests.html:104
+msgid "This user has no quota limit (unlimited): there is nothing to add."
+msgstr "Questo utente non ha limiti di quota (illimitata): non c'è niente da aggiungere."
+
+#: app/admin/templates/requests.html:107
+msgid "amount"
+msgstr "quantità"
+
+#: app/admin/templates/requests.html:112
+msgid "Permission"
+msgstr "Permesso"
+
+#: app/admin/templates/requests.html:113
+msgid "This user already has every permission: there is nothing to grant."
+msgstr "Questo utente ha già tutti i permessi: non c'è niente da concedere."
+
+#: app/admin/templates/requests.html:124
+msgid "note"
+msgstr "nota"
+
+#: app/admin/templates/requests.html:125
+msgid "Grant"
+msgstr "Concedi"
+
+#: app/admin/templates/requests.html:178
+msgid "History"
+msgstr "Storico"
+
+#: app/admin/templates/requests.html:178
+msgid "(decisions and grants that no longer count)"
+msgstr "(decisioni e concessioni che non contano più)"
+
+#: app/admin/templates/requests.html:179
 msgid "Latest decisions"
 msgstr "Ultime decisioni"
 
-#: app/admin/templates/requests.html:37
+#: app/admin/templates/requests.html:181
 msgid "Note"
 msgstr "Nota"
 
-#: app/admin/templates/requests.html:42
+#: app/admin/templates/requests.html:186
 msgid "None yet."
 msgstr "Ancora nessuna."
+
+#: app/admin/templates/requests.html:189
+msgid "Ended and revoked grants"
+msgstr "Concessioni finite e revocate"
+
+#: app/admin/templates/requests.html:190
+msgid "Delete every ended or revoked grant? Active grants are not touched; the administrators' log keeps the history."
+msgstr "Eliminare tutte le concessioni finite o revocate? Quelle attive non vengono toccate; il registro degli amministratori conserva lo storico."
+
+#: app/admin/templates/requests.html:191
+msgid "Delete ended grants"
+msgstr "Elimina le concessioni scadute"
 
 #: app/admin/templates/scan.html:5
 msgid "The folder chooser opens when you press \"Scan\"."
@@ -3516,55 +4248,55 @@ msgstr "Preferisci il terminale?"
 msgid "I copied the value, continue"
 msgstr "Ho copiato il valore, continua"
 
-#: app/admin/templates/settings.html:9
+#: app/admin/templates/settings.html:10
 msgid "Appearance"
 msgstr "Aspetto"
 
-#: app/admin/templates/settings.html:11
+#: app/admin/templates/settings.html:12
 msgid "Theme"
 msgstr "Tema"
 
-#: app/admin/templates/settings.html:16 app/admin/templates/settings.html:18
+#: app/admin/templates/settings.html:17 app/admin/templates/settings.html:19
 msgid "Language"
 msgstr "Lingua"
 
-#: app/admin/templates/settings.html:19
+#: app/admin/templates/settings.html:20
 msgid "Automatic (as the browser)"
 msgstr "Automatica (come il browser)"
 
-#: app/admin/templates/settings.html:27
+#: app/admin/templates/settings.html:28
 msgid "Audit: automatic refresh"
 msgstr "Audit: aggiornamento automatico"
 
-#: app/admin/templates/settings.html:28
+#: app/admin/templates/settings.html:29
 msgid "How many seconds between the automatic reloads of the Audit page while its switch is on (it does not reload while you type in the filters or have a popup open). With 0 the switch starts off, and uses 30 seconds when you turn it on."
 msgstr "Quanti secondi tra un ricaricamento automatico e l'altro della pagina Audit quando il suo interruttore è acceso (non ricarica mentre scrivi nei filtri o hai un popup aperto). Con 0 l'interruttore parte spento e usa 30 secondi quando lo accendi."
 
-#: app/admin/templates/settings.html:30
+#: app/admin/templates/settings.html:31
 msgid "Seconds"
 msgstr "Secondi"
 
-#: app/admin/templates/settings.html:30
+#: app/admin/templates/settings.html:31
 msgid "seconds"
 msgstr "secondi"
 
-#: app/admin/templates/settings.html:39
+#: app/admin/templates/settings.html:40
 msgid "current password"
 msgstr "password attuale"
 
-#: app/admin/templates/settings.html:40
+#: app/admin/templates/settings.html:41
 msgid "new password (min. 12)"
 msgstr "nuova password (min. 12)"
 
-#: app/admin/templates/settings.html:41
+#: app/admin/templates/settings.html:42
 msgid "repeat the new one"
 msgstr "ripeti la nuova"
 
-#: app/admin/templates/settings.html:43
+#: app/admin/templates/settings.html:44
 msgid "Other sessions open with this account will be closed. Print keys stay valid."
 msgstr "Le altre sessioni aperte con questo account verranno chiuse. Le chiavi di stampa restano valide."
 
-#: app/admin/templates/settings.html:46
+#: app/admin/templates/settings.html:47
 msgid "Your password is managed by the RADIUS server: it cannot be changed here."
 msgstr "La tua password è gestita dal server RADIUS: qui non si cambia."
 
@@ -3652,63 +4384,66 @@ msgid "%(provider)s (password on the server)"
 msgstr "%(provider)s (password sul server)"
 
 #: app/admin/templates/user_edit.html:11
-#, python-format
-msgid "%(provider)s (not available)"
-msgstr "%(provider)s (non disponibile)"
+msgid "Shown for information: the way this account signs in is set when it is created."
+msgstr "Solo informativo: il modo in cui questo account accede viene deciso quando viene creato."
 
-#: app/admin/templates/user_edit.html:12
-msgid "From RADIUS to local generates a temporary password; from local to RADIUS deletes the password stored here."
-msgstr "Da RADIUS a locale genera una password temporanea; da locale a RADIUS cancella la password salvata qui."
-
-#: app/admin/templates/user_edit.html:17
+#: app/admin/templates/user_edit.html:16
 #, python-format
 msgid "“%(group)s” is reserved for administrators: it changes by itself with the flag below."
 msgstr "\"%(group)s\" è riservato agli amministratori: cambia da solo con il flag qui sotto."
 
-#: app/admin/templates/user_edit.html:19
+#: app/admin/templates/user_edit.html:18
 msgid "Administrator"
 msgstr "Amministratore"
 
-#: app/admin/templates/user_edit.html:19
+#: app/admin/templates/user_edit.html:18
 msgid "can use the administration panel"
 msgstr "può usare il pannello di amministrazione"
 
-#: app/admin/templates/user_edit.html:20 app/admin/templates/user_edit.html:22
+#: app/admin/templates/user_edit.html:19 app/admin/templates/user_edit.html:21
 msgid "inherit"
 msgstr "eredita"
 
-#: app/admin/templates/user_edit.html:21 app/admin/templates/user_edit.html:23
+#: app/admin/templates/user_edit.html:20 app/admin/templates/user_edit.html:22
 msgid "empty = inherit from the group"
 msgstr "vuoto = eredita dal gruppo"
 
-#: app/admin/templates/user_edit.html:21 app/admin/templates/user_edit.html:23
+#: app/admin/templates/user_edit.html:20 app/admin/templates/user_edit.html:22
 #, python-format
 msgid "<span class=\"extra\">+%(n)s</span> granted"
 msgstr "<span class=\"extra\">+%(n)s</span> concessi"
 
-#: app/admin/templates/user_edit.html:25 app/admin/templates/users.html:9
+#: app/admin/templates/user_edit.html:24 app/admin/templates/users.html:9
 #: app/admin/templates/users.html:20
 msgid "Usage"
 msgstr "Consumo"
 
-#: app/admin/templates/user_edit.html:25
+#: app/admin/templates/user_edit.html:24
 msgid "no limit"
 msgstr "nessun limite"
 
+#: app/admin/templates/user_edit.html:28
+msgid "Permissions granted after a request or directly:"
+msgstr "Permessi concessi dopo una richiesta o direttamente:"
+
 #: app/admin/templates/user_edit.html:30
+msgid "manage"
+msgstr "gestisci"
+
+#: app/admin/templates/user_edit.html:35
 msgid "Other actions"
 msgstr "Altre azioni"
 
-#: app/admin/templates/user_edit.html:34
+#: app/admin/templates/user_edit.html:39
 #, python-format
 msgid "Generate a new temporary password for %(user)s?"
 msgstr "Generare una nuova password temporanea per %(user)s?"
 
-#: app/admin/templates/user_edit.html:35
+#: app/admin/templates/user_edit.html:40
 msgid "Reset password"
 msgstr "Reimposta password"
 
-#: app/admin/templates/user_edit.html:37
+#: app/admin/templates/user_edit.html:42
 msgid "Delete account…"
 msgstr "Elimina account…"
 
@@ -3937,81 +4672,98 @@ msgstr "il limite di pagine %(period)s verrebbe superato (usate %(used)s, questo
 msgid "%(period)s %(noun)s limit reached (%(used)s/%(limit)s)"
 msgstr "limite di %(noun)s %(period)s raggiunto (%(used)s/%(limit)s)"
 
-#: app/policy/grants.py:45
+#: app/policy/grants.py:51
 msgid "The reason is required"
 msgstr "Il motivo è obbligatorio"
 
-#: app/policy/grants.py:47
+#: app/policy/grants.py:53
 #, python-format
 msgid "The reason is too long (max %(max)s characters)"
 msgstr "Il motivo è troppo lungo (max %(max)s caratteri)"
 
-#: app/policy/grants.py:48
+#: app/policy/grants.py:54
 #, python-format
 msgid "The note is too long (max %(max)s characters)"
 msgstr "La nota è troppo lunga (max %(max)s caratteri)"
 
-#: app/policy/grants.py:76
+#: app/policy/grants.py:82
 msgid "account disabled"
 msgstr "account disattivato"
 
-#: app/policy/grants.py:78
+#: app/policy/grants.py:84
 #, python-format
 msgid "you already have %(n)s open requests: wait for an answer or cancel one"
 msgstr "hai già %(n)s richieste aperte: attendi una risposta o annullane una"
 
-#: app/policy/grants.py:92
+#: app/policy/grants.py:98 app/policy/grants.py:121
 msgid "invalid request"
 msgstr "richiesta non valida"
 
-#: app/policy/grants.py:94 app/policy/grants.py:166 app/policy/grants.py:207
+#: app/policy/grants.py:100 app/policy/grants.py:229 app/policy/grants.py:275
 #, python-format
 msgid "the amount must be between 1 and %(max)s"
 msgstr "la quantità deve essere tra 1 e %(max)s"
 
-#: app/policy/grants.py:96
+#: app/policy/grants.py:102
 #, python-format
 msgid "no %(metric)s limit applies to you, there is nothing to ask for"
 msgstr "nessun limite di %(metric)s si applica a te, non c'è niente da chiedere"
 
-#: app/policy/grants.py:105
+#: app/policy/grants.py:111
 msgid "that group can not be requested"
 msgstr "quel gruppo non si può richiedere"
 
-#: app/policy/grants.py:107
+#: app/policy/grants.py:113
 msgid "you are already in that group"
 msgstr "sei già in quel gruppo"
 
-#: app/policy/grants.py:114
+#: app/policy/grants.py:126
+msgid "invalid printer name"
+msgstr "nome di stampante non valido"
+
+#: app/policy/grants.py:137
+msgid "you already have this permission"
+msgstr "hai già questo permesso"
+
+#: app/policy/grants.py:142
+msgid "you already asked for this: wait for the answer"
+msgstr "lo hai già chiesto: attendi la risposta"
+
+#: app/policy/grants.py:148
 msgid "not your request"
 msgstr "non è una tua richiesta"
 
-#: app/policy/grants.py:120 app/policy/grants.py:159 app/policy/grants.py:194
+#: app/policy/grants.py:154 app/policy/grants.py:222 app/policy/grants.py:262
 msgid "the request was already decided"
 msgstr "la richiesta è già stata decisa"
 
-#: app/policy/grants.py:135
+#: app/policy/grants.py:169
 #, python-format
 msgid "no %(metric)s limit applies to %(user)s any more: nothing to extend"
 msgstr "nessun limite di %(metric)s si applica più a %(user)s: niente da estendere"
 
-#: app/policy/grants.py:150
+#: app/policy/grants.py:197
+msgid "the end date must be in the future"
+msgstr "la data di fine deve essere nel futuro"
+
+#: app/policy/grants.py:213
 msgid "the user is disabled"
 msgstr "l'utente è disattivato"
 
-#: app/policy/grants.py:153
+#: app/policy/grants.py:216
 msgid "the request has expired"
 msgstr "la richiesta è scaduta"
 
-#: app/policy/grants.py:175
+#: app/policy/grants.py:243
 msgid "the requested group no longer exists"
 msgstr "il gruppo richiesto non esiste più"
 
-#: app/policy/grants.py:205
-msgid "invalid grant"
-msgstr "concessione non valida"
+#: app/policy/grants.py:289
+#, python-format
+msgid "%(user)s already has this permission"
+msgstr "%(user)s ha già questo permesso"
 
-#: app/policy/grants.py:221
+#: app/policy/grants.py:304 app/policy/grants.py:315
 msgid "the grant was already revoked"
 msgstr "la concessione era già stata revocata"
 
@@ -4112,6 +4864,57 @@ msgid "The document has only %(n)s page"
 msgid_plural "The document has only %(n)s pages"
 msgstr[0] "Il documento ha solo %(n)s pagina"
 msgstr[1] "Il documento ha solo %(n)s pagine"
+
+#: app/policy/permissions.py:43
+msgid "Mon"
+msgstr "Lun"
+
+#: app/policy/permissions.py:43
+msgid "Tue"
+msgstr "Mar"
+
+#: app/policy/permissions.py:43
+msgid "Wed"
+msgstr "Mer"
+
+#: app/policy/permissions.py:43
+msgid "Thu"
+msgstr "Gio"
+
+#: app/policy/permissions.py:43
+msgid "Fri"
+msgstr "Ven"
+
+#: app/policy/permissions.py:43
+msgid "Sat"
+msgstr "Sab"
+
+#: app/policy/permissions.py:43
+msgid "Sun"
+msgstr "Dom"
+
+#: app/policy/permissions.py:250
+#, python-format
+msgid "printer %(printer)s"
+msgstr "stampante %(printer)s"
+
+#: app/policy/permissions.py:365
+#, python-format
+msgid "printing on %(printer)s is not allowed for this account"
+msgstr "stampare su %(printer)s non è consentito a questo account"
+
+#: app/policy/permissions.py:369
+#, python-format
+msgid "printing is allowed only %(window)s"
+msgstr "si può stampare solo %(window)s"
+
+#: app/policy/permissions.py:376
+msgid "colour printing is not allowed for this account"
+msgstr "la stampa a colori non è consentita a questo account"
+
+#: app/policy/permissions.py:388
+msgid "one-sided printing is not allowed for this account"
+msgstr "la stampa solo fronte non è consentita a questo account"
 
 #: app/policy/rules.py:19
 #, python-format

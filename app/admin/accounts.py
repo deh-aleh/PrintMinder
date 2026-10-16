@@ -15,15 +15,20 @@ from app.admin.common import (
     PAGE, back, current_admin, flash, get_db, localtime, parse_limit, render, verify_csrf,
 )
 from app import notices
+from app.admin.printers import NAME_RE
 from app.audit.adminlog import record
 from app.auth import keys as keylib
 from app.auth.groups import ADMIN_GROUP, set_admin, system_group_names
-from app.auth.users import default_group_id, delete_user
+from app.auth.users import default_group_id, delete_user, is_emergency
 from app.auth.passwords import hash_password, validate_new_password
 from app.config import settings
+from app.cups_client import list_queues
 from app.i18n import _, ngettext
+from app.i18n import html_pgettext as pgettext
 from app.db.models import AdminAudit, Group, JobLog, Metric, Period, PrintKey, Resource, SubjectType, User
+from app.policy import grants, permissions
 from app.policy.engine import active_grant_list, effective_limit, effective_rules, usage
+from app.policy.ordering import key as queue_key
 from app.policy.rules import get_limits, set_limit
 
 log = logging.getLogger("app.admin")
@@ -47,11 +52,103 @@ def _protected_admin(db: Session, user: User, acting: User) -> str | None:
     """Why this account may not lose admin rights / be disabled, or None."""
     if user.id == acting.id:
         return _("You cannot disable or demote yourself")
-    if user.username == settings.bootstrap_admin_username and user.provider == "local":
+    if is_emergency(user):
         return _("%(user)s is the emergency administrator: it can not be disabled or demoted", user=user.username)
     if user.is_admin and user.enabled and _other_admins(db, user) == 0:
         return _("That is the last administrator")
     return None
+
+
+# ------------------------------------------------------------------ advanced permissions (form <-> rule)
+
+def _parse_permissions(inherit: bool, color: str, one_sided: str, printers_mode: str, printers: list[str], hours_mode: str,
+                       days: list[str], start: str, end: str) -> dict:
+    """The permission fields of a user form (`inherit`: an empty choice means "as the group") or of a group form (an empty
+    choice is an unchecked box, and the defaults are stored as nothing). Raises ValueError with the message to show."""
+    def flag(raw: str) -> bool | None:
+        raw = raw.strip()
+        if raw not in ("", "0", "1"):
+            raise ValueError(_("Invalid permission value"))
+        return None if raw == "" and inherit else raw == "1"
+
+    color, one_sided = flag(color), flag(one_sided)
+    if not inherit:  # a group that allows it has nothing stored: no row means everything allowed
+        color, one_sided = (None if color else False), (None if one_sided else False)
+    out = {"color": color, "one_sided": one_sided, "printers_mode": None, "printers": None,
+           "hours_mode": None, "hours_days": None, "hours_start": None, "hours_end": None}
+    if printers_mode not in ("", "all", "list") or (printers_mode == "" and not inherit):
+        raise ValueError(_("Invalid permission value"))
+    if printers_mode == "all" and not inherit:
+        printers_mode = ""  # a group that allows every printer has nothing stored
+    out["printers_mode"] = printers_mode or None
+    if printers_mode == "list":
+        names = []
+        for raw in printers:
+            name = raw.strip()
+            if not NAME_RE.match(name):
+                raise ValueError(_("Invalid printer name %(name)s", name=repr(name[:40])))
+            names.append(queue_key(name))
+        names = sorted(set(names))
+        if not names:
+            raise ValueError(_("Choose at least one printer, or choose “all printers”"))
+        if len(names) > permissions.MAX_PRINTERS:
+            raise ValueError(_("Too many printers in the list (at most %(max)s)", max=permissions.MAX_PRINTERS))
+        out["printers"] = names
+    if hours_mode not in ("", "any", "window") or (hours_mode == "" and not inherit):
+        raise ValueError(_("Invalid permission value"))
+    if hours_mode == "any" and not inherit:
+        hours_mode = ""
+    out["hours_mode"] = hours_mode or None
+    if hours_mode == "window":
+        if not days or any(d not in tuple("0123456") for d in days):
+            raise ValueError(_("Choose at least one day of the week for the hours"))
+        try:
+            lo, hi = permissions.parse_time(start), permissions.parse_time(end)
+        except ValueError:
+            raise ValueError(_("Enter the hours as HH:MM, for example 08:00 and 17:30")) from None
+        if lo == hi:
+            raise ValueError(_("The start and the end of the hours must be different"))
+        out["hours_days"], out["hours_start"], out["hours_end"] = "".join(sorted(set(days))), lo, hi
+    return out
+
+
+def _permission_changes(old: dict, new: dict) -> dict:
+    return {k: [old[k], new[k]] for k in new if old[k] != new[k]}
+
+
+def _tri(value: bool | None, inherit: bool) -> str:
+    return ("" if inherit else "1") if value is None else ("1" if value else "0")
+
+
+async def _permission_form(request: Request, db: Session, rule, *, inherit: bool, group_id: int | None = None,
+                           disabled: bool = False) -> dict:
+    """What the "Advanced permissions" block of a user (`inherit`) or group page shows."""
+    f = permissions.rule_fields(rule)
+    current = [q["name"] for q in await list_queues(request.app)]
+    saved = set(f["printers"] or [])
+    shown = {queue_key(n) for n in current}
+    group = permissions.group_perms(db, group_id) if inherit else None
+    out = {
+        "inherit": inherit, "disabled": disabled,
+        "color": _tri(f["color"], inherit), "one_sided": _tri(f["one_sided"], inherit),
+        "printers_mode": f["printers_mode"] or ("" if inherit else "all"),
+        "queues": [{"name": n, "checked": queue_key(n) in saved, "present": True} for n in current]
+                  + [{"name": n, "checked": True, "present": False} for n in sorted(saved - shown)],
+        "hours_mode": f["hours_mode"] or ("" if inherit else "any"),
+        "days": {int(c) for c in f["hours_days"] or ""} or {0, 1, 2, 3, 4},
+        "start": permissions.fmt_minutes(f["hours_start"]) if f["hours_start"] is not None else "08:00",
+        "end": permissions.fmt_minutes(f["hours_end"]) if f["hours_end"] is not None else "17:00",
+        "day_names": [(i, _(n)) for i, n in enumerate(permissions.DAYS)],
+        "open": any(v is not None for v in f.values()),
+    }
+    if group is not None:
+        out["group"] = {
+            "color": _("allowed") if group.color else _("not allowed"),
+            "one_sided": _("allowed") if group.one_sided else _("not allowed"),
+            "printers": pgettext("printers", "all") if group.printers is None else (", ".join(sorted(group.printers)) or _("none")),
+            "hours": _("any time") if group.window is None else permissions.describe_window(group.window),
+        }
+    return out
 
 
 # ------------------------------------------------------------------ users
@@ -86,7 +183,7 @@ def users(request: Request, admin: User = Depends(current_admin), db: Session = 
         (PrintKey.expires_at.is_(None)) | (PrintKey.expires_at > now))
         .group_by(PrintKey.user_id)).all())
     rows = [{"u": u, "group": group_names.get(u.group_id, "—"), "key_count": key_counts.get(u.id, 0),
-             "view": _limit_view(db, u, now), "protected": _is_emergency(u)}
+             "view": _limit_view(db, u, now), "protected": is_emergency(u)}
             for u in db.scalars(select(User).order_by(User.username))]
     groups = db.scalars(select(Group).where(Group.name != ADMIN_GROUP).order_by(Group.name)).all()  # administrators are made with the checkbox
     return render(request, "users.html", admin, rows=rows, groups=groups, default_group=settings.default_group)
@@ -97,27 +194,28 @@ def _is_admin_group(db: Session, group_id: int) -> bool:
     return g is not None and g.name == ADMIN_GROUP
 
 
-def _is_emergency(u: User) -> bool:
-    return u.username == settings.bootstrap_admin_username and u.provider == "local"
-
-
 def _providers(request: Request) -> list[str]:
     auth = getattr(request.app.state, "auth", None)
     return ["local"] + ([auth.name] if auth is not None else [])
 
 
 @router.get("/users/{user_id}/edit", response_class=HTMLResponse)
-def user_edit(request: Request, user_id: int, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
+async def user_edit(request: Request, user_id: int, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     u = db.get(User, user_id)
     if u is None:
         raise HTTPException(404)
     v = _limit_view(db, u, datetime.now(timezone.utc))
     own = get_limits(db, SubjectType.user, u.id)
-    return render(request, "user_edit.html", admin, u=u, view=v, groups=db.scalars(select(Group).order_by(Group.name)).all(),
+    perm = await _permission_form(request, db, permissions.get_rule(db, SubjectType.user, u.id), inherit=True,
+                                  group_id=u.group_id, disabled=is_emergency(u))
+    now = datetime.now(timezone.utc)
+    perm_grants = [{"what": permissions.describe_grant(g.perm, g.printer), "until": grants.last_day(g.valid_until, ZoneInfo(settings.timezone))}
+                   for g in permissions.active_grants(db, u, now)]
+    return render(request, "user_edit.html", admin, u=u, view=v, perm=perm, perm_grants=perm_grants, groups=db.scalars(select(Group).order_by(Group.name)).all(),
                   jobs=own[Metric.jobs].limit if Metric.jobs in own else "",
                   pages=own[Metric.pages].limit if Metric.pages in own else "",
                   periods=[p.value for p in Period], providers=_providers(request), admin_group=ADMIN_GROUP,
-                  protected=_is_emergency(u), is_self=u.id == admin.id)
+                  protected=is_emergency(u), is_self=u.id == admin.id)
 
 
 def _temp_password() -> str:
@@ -186,6 +284,9 @@ def user_create(request: Request, username: str = Form(...), group_id: int = For
 def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled: str = Form(""),
                 is_admin: str = Form(""), jobs_limit: str = Form(""), pages_limit: str = Form(""),
                 period: str = Form("weekly"), provider: str = Form(""),
+                perm_color: str = Form(""), perm_one_sided: str = Form(""), perm_printers: str = Form(""),
+                perm_printer: list[str] = Form([]), perm_hours: str = Form(""), perm_day: list[str] = Form([]),
+                perm_start: str = Form(""), perm_end: str = Form(""), perm_form: str = Form(""),
                 admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     u = db.get(User, user_id)
     if u is None:
@@ -193,6 +294,10 @@ def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled
     edit = f"/admin/users/{u.id}/edit"
     try:
         jl, pl, per = parse_limit(jobs_limit), parse_limit(pages_limit), Period(period)
+        # the emergency administrator has every permission whatever is posted: nothing is read, nothing is stored
+        # (`perm_form` says the block was on the page: a post without it leaves the permissions alone)
+        perm = None if is_emergency(u) or not perm_form else _parse_permissions(
+            True, perm_color, perm_one_sided, perm_printers, perm_printer, perm_hours, perm_day, perm_start, perm_end)
     except ValueError as exc:
         flash(request, str(exc), "err")
         return back(edit)
@@ -208,7 +313,7 @@ def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled
         if reason:
             flash(request, reason, "err")
             return back(edit)
-    if provider != u.provider and _is_emergency(u):
+    if provider != u.provider and is_emergency(u):
         flash(request, _("%(user)s is the emergency administrator: it must stay a local account", user=u.username), "err")
         return back(edit)
     admin_group = db.scalars(select(Group).where(Group.name == ADMIN_GROUP)).first()
@@ -245,10 +350,18 @@ def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled
         u.password_changed_at = datetime.now(timezone.utc)  # ends the user's current portal sessions
     set_limit(db, SubjectType.user, u.id, Metric.jobs, jl, per)
     set_limit(db, SubjectType.user, u.id, Metric.pages, pl, per)
+    perm_changes = {}
+    if perm is not None:
+        perm_changes = _permission_changes(permissions.rule_fields(permissions.get_rule(db, SubjectType.user, u.id)), perm)
+        if perm_changes:
+            permissions.set_rule(db, SubjectType.user, u.id, **perm)
     record(db, admin, "user.update", "user", u.id, username=u.username, limits={"jobs": jl, "pages": pl, "period": per.value},
-           **changes)
+           **({"permissions": perm_changes} if perm_changes else {}), **changes)
     db.commit()
     log.info("admin %s updated user %s", admin.username, u.username)
+    _tell_account_change(request, db, admin, u, changes)
+    if perm_changes and u.id != admin.id:  # their own rule changed (not the group's): they find it in their bell
+        notices.notify_user(request.app.state.sessionmaker, u.id, "permissions_changed", {})
     if temp:
         return render(request, "secret_shown.html", admin, title=_("%(user)s is now a local account", user=u.username),
                       what=_("Temporary password"), secret=temp,
@@ -256,6 +369,26 @@ def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled
                       next_url="/admin/users")
     flash(request, _("Saved %(name)s", name=u.username))
     return back("/admin/users")
+
+
+def _group_name(db: Session, group_id: int | None) -> str:
+    g = db.get(Group, group_id) if group_id else None
+    return g.name if g else ""
+
+
+def _tell_account_change(request: Request, db: Session, admin: User, u: User, changes: dict) -> None:
+    """The person finds in their bell that an administrator changed their group or their administrator right."""
+    if u.id == admin.id:
+        return
+    sm = request.app.state.sessionmaker
+    if "is_admin" in changes:
+        if u.is_admin:
+            notices.notify_user(sm, u.id, "admin_on", {})
+        else:
+            notices.notify_user(sm, u.id, "admin_off", {"group": _group_name(db, u.group_id)})
+    elif "group_id" in changes:
+        old, new = changes["group_id"]
+        notices.notify_user(sm, u.id, "group_changed", {"old": _group_name(db, old), "new": _group_name(db, new)})
 
 
 @router.get("/users/{user_id}/delete", response_class=HTMLResponse)
@@ -274,7 +407,7 @@ def user_delete_confirm(request: Request, user_id: int, admin: User = Depends(cu
 def _delete_blocked(db: Session, u: User, acting: User) -> str | None:
     if u.id == acting.id:
         return _("You cannot delete yourself")
-    if _is_emergency(u):
+    if is_emergency(u):
         return _("%(user)s is the emergency administrator: it can not be deleted", user=u.username)
     if u.is_admin and u.enabled and _other_admins(db, u) == 0:
         return _("That is the last administrator")
@@ -450,18 +583,20 @@ def groups(request: Request, admin: User = Depends(current_admin), db: Session =
 
 
 @router.get("/groups/new", response_class=HTMLResponse)
-def group_new(request: Request, admin: User = Depends(current_admin)):
+async def group_new(request: Request, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     return render(request, "group_edit.html", admin, g=None, jobs="", pages="", period="weekly",
+                  perm=await _permission_form(request, db, None, inherit=False),
                   periods=[p.value for p in Period], system=system_group_names(), admin_group=ADMIN_GROUP, warning="")
 
 
 @router.get("/groups/{group_id}/edit", response_class=HTMLResponse)
-def group_edit(request: Request, group_id: int, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
+async def group_edit(request: Request, group_id: int, admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     g = db.get(Group, group_id)
     if g is None:
         raise HTTPException(404)
     r = _group_row(db, g)
-    return render(request, "group_edit.html", admin, g=g, jobs=r["jobs"], pages=r["pages"], period=r["period"],
+    perm = await _permission_form(request, db, permissions.get_rule(db, SubjectType.group, g.id), inherit=False)
+    return render(request, "group_edit.html", admin, g=g, jobs=r["jobs"], pages=r["pages"], period=r["period"], perm=perm,
                   periods=[p.value for p in Period], system=system_group_names(), admin_group=ADMIN_GROUP,
                   warning=r["warning"])
 
@@ -469,10 +604,15 @@ def group_edit(request: Request, group_id: int, admin: User = Depends(current_ad
 @router.post("/groups", dependencies=[Depends(verify_csrf)])
 def group_create(request: Request, name: str = Form(...), jobs_limit: str = Form(""), pages_limit: str = Form(""),
                  period: str = Form("weekly"), requestable: str = Form(""),
+                 perm_color: str = Form(""), perm_one_sided: str = Form(""), perm_printers: str = Form("all"),
+                 perm_printer: list[str] = Form([]), perm_hours: str = Form("any"), perm_day: list[str] = Form([]),
+                 perm_start: str = Form(""), perm_end: str = Form(""), perm_form: str = Form(""),
                  admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     name = name.strip()
     try:
         jl, pl, per = parse_limit(jobs_limit), parse_limit(pages_limit), Period(period)
+        perm = _parse_permissions(False, perm_color, perm_one_sided, perm_printers, perm_printer, perm_hours, perm_day,
+                                  perm_start, perm_end) if perm_form else None
     except ValueError as exc:
         flash(request, str(exc), "err")
         return back("/admin/groups/new")
@@ -486,8 +626,11 @@ def group_create(request: Request, name: str = Form(...), jobs_limit: str = Form
         db.flush()
         set_limit(db, SubjectType.group, g.id, Metric.jobs, jl, per)
         set_limit(db, SubjectType.group, g.id, Metric.pages, pl, per)
+        perm_changes = _permission_changes(permissions.rule_fields(None), perm) if perm else {}
+        if perm_changes:
+            permissions.set_rule(db, SubjectType.group, g.id, **perm)
         record(db, admin, "group.create", "group", g.id, name=name, requestable=g.requestable,
-               limits={"jobs": jl, "pages": pl, "period": per.value})
+               limits={"jobs": jl, "pages": pl, "period": per.value}, **({"permissions": perm_changes} if perm_changes else {}))
         db.commit()
         log.info("admin %s created group %s", admin.username, name)
         flash(request, _("Group %(name)s created", name=name))
@@ -498,6 +641,9 @@ def group_create(request: Request, name: str = Form(...), jobs_limit: str = Form
 @router.post("/groups/{group_id}", dependencies=[Depends(verify_csrf)])
 def group_update(request: Request, group_id: int, name: str = Form(""), jobs_limit: str = Form(""),
                  pages_limit: str = Form(""), period: str = Form("weekly"), requestable: str = Form(""),
+                 perm_color: str = Form(""), perm_one_sided: str = Form(""), perm_printers: str = Form("all"),
+                 perm_printer: list[str] = Form([]), perm_hours: str = Form("any"), perm_day: list[str] = Form([]),
+                 perm_start: str = Form(""), perm_end: str = Form(""), perm_form: str = Form(""),
                  admin: User = Depends(current_admin), db: Session = Depends(get_db)):
     g = db.get(Group, group_id)
     if g is None:
@@ -505,6 +651,8 @@ def group_update(request: Request, group_id: int, name: str = Form(""), jobs_lim
     edit = f"/admin/groups/{g.id}/edit"
     try:
         jl, pl, per = parse_limit(jobs_limit), parse_limit(pages_limit), Period(period)
+        perm = _parse_permissions(False, perm_color, perm_one_sided, perm_printers, perm_printer, perm_hours, perm_day,
+                                  perm_start, perm_end) if perm_form else None
     except ValueError as exc:
         flash(request, str(exc), "err")
         return back(edit)
@@ -524,6 +672,10 @@ def group_update(request: Request, group_id: int, name: str = Form(""), jobs_lim
     set_limit(db, SubjectType.group, g.id, Metric.jobs, jl, per)
     set_limit(db, SubjectType.group, g.id, Metric.pages, pl, per)
     extra = {"renamed_from": old_name} if g.name != old_name else {}
+    perm_changes = _permission_changes(permissions.rule_fields(permissions.get_rule(db, SubjectType.group, g.id)), perm) if perm else {}
+    if perm_changes:
+        permissions.set_rule(db, SubjectType.group, g.id, **perm)
+        extra["permissions"] = perm_changes
     record(db, admin, "group.update", "group", g.id, name=g.name, requestable=g.requestable,
            limits={"jobs": jl, "pages": pl, "period": per.value}, **extra)
     db.commit()
@@ -548,10 +700,14 @@ def group_delete(request: Request, group_id: int, admin: User = Depends(current_
             u.group_id = target
         set_limit(db, SubjectType.group, g.id, Metric.jobs, None)
         set_limit(db, SubjectType.group, g.id, Metric.pages, None)
+        permissions.set_rule(db, SubjectType.group, g.id)  # no fields: removes the group's permission rule
         record(db, admin, "group.delete", "group", g.id, name=g.name, moved_users=[u.username for u in members],
                moved_to=settings.default_group if members else None)
+        moved, old_name = [u.id for u in members if u.id != admin.id], g.name
         db.delete(g)
         db.commit()
+        for uid_ in moved:
+            notices.notify_user(request.app.state.sessionmaker, uid_, "group_changed", {"old": old_name, "new": settings.default_group})
         log.info("admin %s deleted group %s (%d user(s) moved to %s)", admin.username, g.name, len(members), settings.default_group)
         flash(request, _("Group %(name)s deleted", name=g.name) + (_("; %(n)s user(s) moved to %(group)s", n=len(members), group=settings.default_group) if members else ""))
     return back("/admin/groups")

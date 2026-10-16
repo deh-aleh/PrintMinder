@@ -12,7 +12,7 @@ can say a lot about a person, so it must be treated as personal data. This page 
 | **Name of the file** printed or scanned | **Encrypted** in the database, in the audit archive (the `.jsonl.gz` files) and therefore also in backups |
 | Passwords of local accounts | Only the fingerprint (argon2 hash): the password cannot be recovered |
 | Print keys | Only the fingerprint (sha256) |
-| User name, groups, printer names, the administrators' action log, reasons of quota requests, IP addresses | **In clear** in the database |
+| User name, groups, printer names, the administrators' action log, reasons of requests (quota, group, permission) and notes of grants, permissions and allowed hours, IP addresses | **In clear** in the database |
 | Amounts (pages, date, state of each print) | In clear: quotas need them |
 | The database as a file | Not encrypted: whoever copies the file reads everything except the file names |
 | Backups | Encrypted only if you choose encryption in the *Backup* menu (recommended) |
@@ -55,7 +55,8 @@ Names are encrypted with a key derived from `CUPSPL_SECRET_KEY` (in `.env`, crea
 > (sessions are reset and everybody logs in again). Putting the old key back makes the names readable again.
 
 - **Encrypted** backups include `.env`, so the key too; unencrypted ones do not (and without the key the names they contain cannot be read: that is intended).
-- If the key is empty the gateway encrypts nothing (and warns in the log), because a different key at every start would make names unreadable after the next restart.
+- If the key is empty the gateway encrypts nothing (and warns in the log and in the bell), because a different key at every start would make names unreadable after the next restart.
+- **Keep a copy of the key outside the server** (a password manager): after the first start the first-run administrator finds a reminder in the bell, once. If the gateway starts with a key that is not the one of the previous start, it says so in the bell with the number of names that can no longer be read ([backup.md](backup.md#save-the-secret-key)).
 - If you had names in clear before, at the first start with the key the gateway encrypts them by itself, in chunks, without stopping.
 
 **Searching by file name** in the audit looks in the latest 5,000 actions that match the other filters (names are encrypted: to search, they are opened one by one). Searching by user has no such limit.

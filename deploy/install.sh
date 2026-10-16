@@ -44,4 +44,6 @@ if [ -z "${SKIP_SYSTEMD:-}" ]; then
     systemctl daemon-reload
 fi
 cp "$SRC/README.md" "$PREFIX/README.md" 2>/dev/null || true
+# the documentation the portal shows to administrators (/admin/docs); replaced at every install so it matches the version
+if [ -d "$SRC/docs" ]; then rm -rf "$PREFIX/docs"; cp -R "$SRC/docs" "$PREFIX/docs"; fi
 echo "done. next: edit $ETC/env, put the TLS cert in $ETC/tls, run deploy/setup-cups.sh"

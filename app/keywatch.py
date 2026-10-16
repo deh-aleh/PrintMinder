@@ -1,4 +1,5 @@
-"""Housekeeping of the print keys, once an hour: forget the ones that are over, warn the owner of the ones about to expire."""
+"""Housekeeping once an hour: forget the print keys that are over, warn the owner of the ones about to expire, and tell
+people whose temporary permission (granted after a request) has just ended."""
 
 import asyncio
 import logging
@@ -11,6 +12,7 @@ from app import notices
 from app.auth import keys
 from app.config import settings
 from app.db.models import PrintKey
+from app.policy import permissions
 
 log = logging.getLogger("app.keywatch")
 EVERY = 3600
@@ -34,9 +36,13 @@ def warn_expiring(sm, now: datetime | None = None) -> int:
 
 
 def run_once(sm, now: datetime | None = None) -> tuple[int, int]:
+    """(keys forgotten, key expiry warnings sent). Also tells the people whose temporary permission has ended."""
     with sm() as db:
         gone = keys.purge(db, now)
     sent = warn_expiring(sm, now) if settings.key_expiry_warn_enabled else 0
+    ended = permissions.notify_expired(sm, now)
+    if ended:
+        log.info("%d temporary permission(s) ended: their owners were told", ended)
     return gone, sent
 
 

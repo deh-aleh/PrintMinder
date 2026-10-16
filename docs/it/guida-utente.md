@@ -17,14 +17,23 @@ l'installazione usa RADIUS. Una password temporanea va cambiata al primo accesso
   copia). Usala come password quando il computer o il telefono chiede le credenziali; il nome utente è il tuo. Una chiave serve solo a
   stampare e scansionare — non apre mai il portale e la tua password di dominio non serve mai su un dispositivo. Revoca una chiave (o
   tutte) in *Le mie chiavi* se perdi un dispositivo. Quando la crei scegli per quanto tempo vale (da 1 mese a 2 anni, o una sola stampa); gli utenti RADIUS hanno un massimo più corto e la rinnovano rifacendo il login nel portale. La campanella in alto ti dice quando un amministratore revoca, disattiva o prolunga una tua chiave.
-- **Richieste**: chiedi più quota (temporanea o permanente) o il cambio di gruppo, con un motivo. L'amministratore approva, modifica o
+- **Richieste**: chiedi più quota (temporanea o permanente), il cambio di gruppo o un permesso (vedi sotto), con un motivo. L'amministratore approva, modifica o
   rifiuta. Puoi avere fino a 3 richieste aperte e annullarle.
 
-Se una stampa viene rifiutata per la quota, il messaggio contiene il link per chiedere una deroga.
+- **I tuoi permessi**: se puoi stampare a colori e solo fronte, su quali stampanti e in quali orari. Se non puoi stampare a colori, le tue
+  stampe escono in bianco e nero; se non puoi stampare solo fronte, escono in fronte-retro. La scansione non cambia.
+  Accanto a ciò che ti manca c'è il link **Chiedi** (e **Chiedi un'altra stampante**): scegli cosa ti serve, scrivi perché, e un
+  amministratore risponde. Finché la richiesta aspetta, al posto del link c'è «(richiesta in attesa)». La risposta può essere per sempre o fino a una data; la campanella ti dice quando la richiesta è approvata,
+  rifiutata o finita, e il riquadro mostra i permessi che ti sono stati concessi e fino a quando.
+
+Se una stampa viene rifiutata per la quota, il messaggio contiene il link per chiedere una deroga. Se viene rifiutata per i tuoi
+permessi (una stampante che non puoi usare, un'ora fuori dai tuoi orari, oppure colore / solo fronte quando l'installazione rifiuta
+invece di correggere), il messaggio rimanda a questa pagina, e la campanella ti dice cos'è successo e cosa cambiare. Anche quando una
+stampa esce in bianco e nero o in fronte-retro a causa dei tuoi permessi, la campanella te lo dice.
 
 ## 3. Stampa (`/me/print`)
 
-Carica un PDF, una foto (JPEG, PNG, GIF) o un testo. Scegli stampante, formato carta, orientamento, colore o bianco e nero, un intervallo
+Carica un PDF, una foto (JPEG, PNG, GIF) o un testo. Scegli la stampante (compaiono solo quelle che puoi usare), il formato carta, l'orientamento, colore o bianco e nero (solo se puoi stampare a colori), solo fronte o fronte-retro (solo se puoi stampare solo fronte e la stampante ha l'unità fronte-retro), un intervallo
 di pagine (`1,5` o `2-4`), le copie e un commento facoltativo (50 caratteri, visibile agli amministratori accanto al nome del file).
 Stessa quota e stesso audit di ogni altra stampa. Funziona da un telefono senza installare nulla. Per collegare un computer vedi
 [stampa.md](stampa.md).
@@ -46,4 +55,5 @@ il file entro 15 minuti. Vedi [scansione.md](scansione.md).
 
 - La quota conta i job accettati, completati e trattenuti; quelli rifiutati, falliti e annullati prima di stampare non costano nulla.
 - Il limite pagine si controlla prima di stampare: un documento che non ci sta viene rifiutato subito.
-- Le stampanti che non rispondono, o sono bloccate, non vengono offerte.
+- Le stampanti che non rispondono, o sono bloccate, non vengono offerte. Non vengono offerte nemmeno quelle che non puoi usare.
+- Se i tuoi orari sono limitati e sei fuori orario, la pagina Stampa dice quando puoi stampare, e un lavoro inviato lo stesso viene rifiutato.

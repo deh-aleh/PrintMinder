@@ -13,6 +13,7 @@ COLOR = {"color": N_("colour"), "monochrome": N_("black and white"), "bi-level":
          "process-monochrome": N_("black and white"), "auto": N_("automatic"), "auto-monochrome": N_("automatic (black and white)")}
 SIDES = {"one-sided": N_("normal"), "two-sided-long-edge": N_("double-sided (long edge)"), "two-sided-short-edge": N_("double-sided (short edge)")}
 VIA = {"web": N_("web portal"), "escl": N_("eSCL client")}
+ADJUSTED = {"color": N_("colour"), "one_sided": N_("one-sided")}  # what the permissions corrected in a job
 ORIENTATION = {"portrait": N_("portrait"), "landscape": N_("landscape")}
 
 
@@ -53,6 +54,8 @@ def file_details(j: JobLog) -> list[tuple[str, str]]:
         rows.append((_("Pages chosen"), str(o["page_ranges"])))
     if o.get("pages_counted"):
         rows.append((_("Pages counted"), str(o["pages_counted"])))
+    if o.get("adjusted"):
+        rows.append((_("Corrected by the permissions"), ", ".join(_word(ADJUSTED, c) for c in o["adjusted"])))
     rows.append((_("Sent from"), _word(VIA, o.get("via")) if o.get("via") in VIA else _("IPP client")))
     return rows
 

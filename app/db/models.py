@@ -52,6 +52,7 @@ class JobState(str, enum.Enum):
 class RequestKind(str, enum.Enum):
     quota = "quota"
     group_change = "group_change"
+    permission = "permission"  # colour, one-sided, a printer or the hours: becomes a PermissionGrant
 
 
 class RequestScope(str, enum.Enum):
@@ -118,6 +119,40 @@ class PolicyRule(Base):
     enabled: Mapped[bool] = mapped_column(default=True)
 
     __table_args__ = (UniqueConstraint("subject_type", "subject_id", "resource", "metric"),)
+
+
+class PermissionRule(Base):
+    """What a group or a user may do, besides the quotas: colour, one-sided prints, which printers, at which hours.
+    One row per subject. On a group a NULL field means "allowed / all / any time"; on a user it means "as the group"."""
+
+    __tablename__ = "permission_rule"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    subject_type: Mapped[SubjectType] = mapped_column(Enum(SubjectType))
+    subject_id: Mapped[int]
+    color: Mapped[bool | None]
+    one_sided: Mapped[bool | None]  # may print one-sided; without it the job is made double-sided
+    printers_mode: Mapped[str | None] = mapped_column(String(8))  # "all" | "list"
+    printers: Mapped[list | None] = mapped_column(JSON)  # lower-case queue names, used when printers_mode is "list"
+    hours_mode: Mapped[str | None] = mapped_column(String(8))  # "any" | "window"
+    hours_days: Mapped[str | None] = mapped_column(String(7))  # weekdays as digits, 0 = Monday ("01234")
+    hours_start: Mapped[int | None]  # minutes after midnight, 0-1439
+    hours_end: Mapped[int | None]
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    __table_args__ = (UniqueConstraint("subject_type", "subject_id"),)
+
+
+class PrinterFormer(Base):
+    """A queue name that was used before (deleted, removed because its USB device stayed away, or renamed). The rename
+    dialog offers these names: giving a replacement printer the old name makes the old addresses and permissions work again."""
+
+    __tablename__ = "printer_former"
+
+    name: Mapped[str] = mapped_column(String(128), primary_key=True)  # lower-case
+    display: Mapped[str] = mapped_column(String(128))  # as it was written
+    removed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    reason: Mapped[str] = mapped_column(String(16))  # "deleted" | "removed_offline" | "renamed"
 
 
 class JobLog(Base):
@@ -241,7 +276,7 @@ class QuotaRequest(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True)
     kind: Mapped[RequestKind] = mapped_column(Enum(RequestKind))
     scope: Mapped[RequestScope | None] = mapped_column(Enum(RequestScope))  # quota requests only
-    params_json: Mapped[dict | None] = mapped_column(JSON)  # quota: {metric, amount}; group_change: {target_group_id}
+    params_json: Mapped[dict | None] = mapped_column(JSON)  # quota: {metric, amount}; group_change: {target_group_id}; permission: {perm, printer}
     reason: Mapped[str] = mapped_column(String(500))
     status: Mapped[RequestStatus] = mapped_column(Enum(RequestStatus), default=RequestStatus.pending, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
@@ -269,6 +304,27 @@ class QuotaGrant(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revoked_by: Mapped[int | None] = mapped_column(ForeignKey("user.id"))
+
+
+class PermissionGrant(Base):
+    """A permission added on top of what the user's group and own rule give (colour, one-sided, one more printer, any hours),
+    for a while or for good. Only widens: it never takes a permission away."""
+
+    __tablename__ = "permission_grant"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True)
+    perm: Mapped[str] = mapped_column(String(16))  # color | one_sided | printer | hours
+    printer: Mapped[str | None] = mapped_column(String(128))  # lower-case queue name, only for perm == "printer"
+    valid_from: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    valid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # NULL = permanent
+    request_id: Mapped[int | None] = mapped_column(ForeignKey("quota_request.id"))
+    granted_by: Mapped[int | None] = mapped_column(ForeignKey("user.id"))
+    note: Mapped[str | None] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_by: Mapped[int | None] = mapped_column(ForeignKey("user.id"))
+    expiry_notified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # the "it ended" notice was sent
 
 
 class AdminAudit(Base):

@@ -14,9 +14,10 @@ from starlette.concurrency import run_in_threadpool
 from app.auth import keys, service
 from app.auth.throttle import IP_FAILS, USER_FAILS, register_failure
 from app.config import settings
+from app.cups_client import UNKNOWN_CAPS, queue_caps
 from app.ipp import codec
 from app.ipp.rewrite import advertise_auth, rewrite_uris
-from app.policy import audit, control
+from app.policy import audit, control, permissions
 from app.db.models import Metric, PrintKey, Resource
 from app.policy import pages as pages_mod
 from app.policy.engine import Decision, check_job, effective_rules
@@ -40,6 +41,9 @@ ANON_OPS = {codec.GET_PRINTER_ATTRIBUTES, codec.VALIDATE_JOB}
 ANON_MAX_BODY = 64 << 10  # a capability query is a few hundred bytes
 STATUS_OPS = {codec.GET_PRINTER_ATTRIBUTES, codec.GET_JOBS, 0x0008, 0x0009}  # a single-use key that has printed may still do these
 SUBMIT_OPS = {codec.PRINT_JOB, codec.CREATE_JOB}  # each counts as one job against the quota
+PERMISSION_OPS = {codec.PRINT_JOB, codec.CREATE_JOB, codec.VALIDATE_JOB}  # the ones the user's permissions are applied to
+LISTING_OPS = {0x4002, 0x4005}  # CUPS-Get-Printers, CUPS-Get-Classes: a person limited to some printers only sees those
+PERM_ATTRS = ("print-color-mode", "sides", "ColorModel", "ColorMode", "Duplex")  # what the permissions look at in a job
 USER_OPS = {
     codec.PRINT_JOB, codec.VALIDATE_JOB, codec.CREATE_JOB, codec.SEND_DOCUMENT,
     0x0008,  # Cancel-Job
@@ -202,18 +206,38 @@ async def ipp_proxy(path: str, request: Request) -> Response:
             if n:
                 copies = msg.get(codec.TAG_JOB, "copies")
                 pages = n * (copies if isinstance(copies, int) and copies > 0 else 1)
+    # What the person's permissions say about this job (colour, one-sided, printer, hours); None = nothing limits them.
+    perm = await _permissions(request, sm, user, printer, msg, tz) if user is not None and msg.code in PERMISSION_OPS else None
+    listing = None  # the printers a limited person may see in a printer list
+    if user is not None and msg.code in LISTING_OPS:
+        listing = await run_in_threadpool(permissions.load, sm, user)
+        if listing.printers is not None:
+            _ask_for_names(og)
+        else:
+            listing = None
     if msg.code in SUBMIT_OPS:
         title, options = _job_info(og, msg)
         if pages:
             options["pages_counted"] = pages
-        decision, log_id = await run_in_threadpool(_reserve, sm, user, printer, title, options, tz, pages)
+        if perm is not None and perm.changed:
+            options["adjusted"] = list(perm.changed)  # the audit shows what was asked (color, sides) and what was corrected
+        decision, log_id = await run_in_threadpool(_reserve, sm, user, printer, title, options, tz, pages, perm)
         if not decision.allowed:
             log.info("job denied user=%s printer=%s reason=%s", identity, printer, decision.reason)
-            return _ipp_error(msg, codec.STATUS_NOT_POSSIBLE, _with_portal_hint(request, decision.reason))
+            refused = _refused_by(perm, decision)
+            if refused:
+                await run_in_threadpool(permissions.notify_refused, sm, user.id, printer, perm)
+            return _ipp_error(msg, codec.STATUS_NOT_POSSIBLE, _with_portal_hint(request, decision.reason, permission=refused))
+        if perm is not None:
+            _apply_permission(msg, perm)
+            if perm.changed:
+                await run_in_threadpool(permissions.notify_adjusted, sm, user.id, printer, perm)
     elif msg.code == codec.VALIDATE_JOB and user is not None:
-        decision = await run_in_threadpool(_peek, sm, user, tz, printer)
+        decision = await run_in_threadpool(_peek, sm, user, tz, printer, perm)
         if not decision.allowed:
-            return _ipp_error(msg, codec.STATUS_NOT_POSSIBLE, _with_portal_hint(request, decision.reason))
+            return _ipp_error(msg, codec.STATUS_NOT_POSSIBLE, _with_portal_hint(request, decision.reason, permission=_refused_by(perm, decision)))
+        if perm is not None:
+            _apply_permission(msg, perm)
     elif msg.code == codec.SEND_DOCUMENT and user is not None:
         why = await run_in_threadpool(_blocked, sm, user, printer)
         if why:
@@ -285,6 +309,8 @@ async def ipp_proxy(path: str, request: Request) -> Response:
                 og.get("document-format") and og.get("document-format").first, pages,
             )
 
+    if out is not None and listing is not None and out.code < 0x0100:
+        out.groups = [g for g in out.groups if g.tag != codec.TAG_PRINTER or _may_see(listing, g)]
     if out is not None:
         internal = {"localhost", "127.0.0.1", "::1", urlsplit(settings.cups_url).hostname or ""}
         rewrite_uris(out, internal, *_public_bases(request))
@@ -299,12 +325,71 @@ async def ipp_proxy(path: str, request: Request) -> Response:
 
 # ---- helpers (sync ones run in the threadpool)
 
-def _with_portal_hint(request: Request, reason: str | None) -> str:
+def _with_portal_hint(request: Request, reason: str | None, permission: bool = False) -> str:
     """Where to go when a limit is reached: some clients show the status message to the user."""
     if reason in (control.BLOCKED_REASON, control.MAINTENANCE_REASON):
         return reason  # nothing to ask for: more quota would not help
     base = settings.portal_url.rstrip("/") or f"https://{request.headers.get('host', 'localhost')}"
+    if permission:  # more quota would not help here either: the profile page says what the account may do
+        return f"{reason}. To see what you may print: {base}/me"
     return f"{reason or 'not allowed'}. To ask for more quota: {base}/me"
+
+
+def _refused_by(perm: permissions.PermDecision | None, decision: Decision) -> bool:
+    """Was `decision` the refusal of the permissions (and not a blocked printer or the quota that came first or after)?"""
+    return perm is not None and not perm.allowed and decision.reason == perm.reason
+
+
+def _job_attrs(msg: codec.IppMessage) -> dict:
+    """The values of the options the permissions care about. Job options belong in the job group, but some clients put them
+    in the operation group: both are read (the job group wins)."""
+    out: dict = {}
+    for tag in (codec.TAG_OPERATION, codec.TAG_JOB):
+        for g in msg.groups:
+            if g.tag == tag:
+                for a in g.attrs:
+                    if a.name in PERM_ATTRS and isinstance(a.first, str):
+                        out[a.name] = a.first
+    return out
+
+
+async def _permissions(request: Request, sm, user, printer, msg, tz) -> permissions.PermDecision | None:
+    perms = await run_in_threadpool(permissions.load, sm, user)
+    if not perms.restricted:
+        return None
+    # the printer is asked what it can do only when colour or sides matter (and it is not refused for another reason anyway)
+    need_caps = printer and permissions.printer_allowed(perms, printer) and not (perms.color and perms.one_sided)
+    caps = await queue_caps(request.app, printer) if need_caps else dict(UNKNOWN_CAPS)
+    return permissions.decide(perms, printer, caps, _job_attrs(msg), settings.permission_mode, audit.now_utc(), ZoneInfo(settings.timezone))
+
+
+def _apply_permission(msg: codec.IppMessage, d: permissions.PermDecision) -> None:
+    """Write the corrections into the request before it goes to CUPS: the attributes are taken out of the operation and job
+    groups and the new values put in the job group (made if the client sent none)."""
+    names = set(d.set_attrs) | d.drop_attrs
+    if not names:
+        return
+    for g in msg.groups:
+        if g.tag in (codec.TAG_OPERATION, codec.TAG_JOB):
+            g.attrs = [a for a in g.attrs if a.name not in names]
+    job = msg.group(codec.TAG_JOB)
+    if job is None:
+        job = codec.Group(codec.TAG_JOB, [])
+        msg.groups.append(job)
+    for name, value in d.set_attrs.items():
+        job.attrs.append(codec.Attr(name, [codec.Val(codec.TAG_KEYWORD, value)]))
+
+
+def _ask_for_names(og: codec.Group) -> None:
+    """A printer list is filtered by name: make sure CUPS says the names, whatever attributes the client asked for."""
+    a = og.get("requested-attributes")
+    if a is not None and not any(v.value in ("all", "printer-name") for v in a.values):
+        a.values.append(codec.Val(codec.TAG_KEYWORD, "printer-name"))
+
+
+def _may_see(perms: permissions.Perms, group: codec.Group) -> bool:
+    name = group.get("printer-name")
+    return name is not None and isinstance(name.first, str) and permissions.printer_allowed(perms, name.first)
 
 
 def _queue_of(path: str) -> str | None:
@@ -354,9 +439,9 @@ def _job_id_from_request(og: codec.Group) -> int | None:
     return None
 
 
-def _reserve(sm, user, printer, title, options, tz, pages=None):
+def _reserve(sm, user, printer, title, options, tz, pages=None, deny=None):
     with sm() as session:
-        return audit.reserve(session, user, printer, title, options, tz, pages)
+        return audit.reserve(session, user, printer, title, options, tz, pages, deny=deny)
 
 
 def _has_pages_rule(sm, user) -> bool:
@@ -374,10 +459,15 @@ async def _buffer(head: bytes, rest: AsyncIterator[bytes], cap: int) -> tuple[by
     return bytes(buf), _no_more(), True
 
 
-def _peek(sm, user, tz, printer=None):
+def _peek(sm, user, tz, printer=None, perm=None):
+    """Would a job be accepted? Same order as `audit.reserve`: blocked printer, permissions, quota."""
     with sm() as session:
         why = control.block_reason(session, user, printer)
-        return Decision(False, why) if why else check_job(session, user, Resource.print, audit.now_utc(), tz)
+        if why:
+            return Decision(False, why)
+        if perm is not None and not perm.allowed:
+            return Decision(False, perm.reason, perm.localized)
+        return check_job(session, user, Resource.print, audit.now_utc(), tz)
 
 
 def _consume_key(sm, key_id):

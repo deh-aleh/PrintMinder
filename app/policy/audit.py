@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.db.models import JobKind, JobLog, JobState, Resource, User
 from app.policy import control
 from app.policy.engine import Decision, check_job
+from app.policy.permissions import PermDecision
 
 # check + insert must be one critical section or concurrent submissions overshoot the limit.
 # The thread lock covers one process (and in-memory test DBs); _lock_quota covers many processes.
@@ -27,16 +28,23 @@ def now_utc() -> datetime:
 
 def reserve(
     session: Session, user: User, printer: str | None, title: str | None, options: dict, tz: ZoneInfo,
-    pages: int | None = None, kind: JobKind = JobKind.print,
+    pages: int | None = None, kind: JobKind = JobKind.print, deny: PermDecision | None = None,
 ) -> tuple[Decision, int]:
     """Check the quota and record the attempt. Allowed attempts count immediately (state=accepted).
     `pages` = counted pages of the document (copies included), recorded at once so concurrent jobs see them.
-    A blocked printer or the maintenance mode refuses before any quota is looked at (and is audited as denied)."""
+    A blocked printer or the maintenance mode refuses before any quota is looked at (and is audited as denied).
+    `deny`: a refusal already decided by the caller (the user's permissions, see app.policy.permissions): it is recorded as
+    denied with its reason and the quota is not looked at, so nothing is consumed. A blocked printer still comes first."""
     now = now_utc()
     with _submit_lock:
         _lock_quota(session, user.id)
         why = control.block_reason(session, user, printer)
-        decision = Decision(False, why) if why else check_job(session, user, Resource(kind.value), now, tz, pages)
+        if why:
+            decision = Decision(False, why)
+        elif deny is not None and not deny.allowed:
+            decision = Decision(False, deny.reason, deny.localized)
+        else:
+            decision = check_job(session, user, Resource(kind.value), now, tz, pages)
         if not control.titles_enabled(session):  # the administrator turned the names off: only counts and states are kept
             title, options = None, {k: v for k, v in (options or {}).items() if k != "document_name"}
         row = JobLog(

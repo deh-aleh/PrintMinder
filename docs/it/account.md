@@ -67,6 +67,9 @@ password di dominio: usano una **chiave di stampa personale**.
   (nuova scadenza = adesso + la durata scelta, entro il massimo dell'account; il tempo rimasto **non** si somma: una chiave che scade tra 2 mesi, prolungata di «1 anno», scade tra 1 anno e non tra 1 anno e 2 mesi) o **revocarla**. Ogni azione finisce nell'audit (`key.disable`,
   `key.enable`, `key.extend`, `key.revoke`) e **l'utente la trova nelle sue notifiche** (la campanella, `/me/notices`), con un testo fisso e senza
   il nome dell'amministratore. Se l'amministratore agisce su una chiave propria non c'è nessuna notifica.
+- Oltre alle chiavi, l'utente trova negli avvisi (stessa campanella) quando un amministratore **cambia il suo gruppo** (anche quando un gruppo viene eliminato e i suoi membri passano a
+  `default`), **lo rende amministratore o gli toglie il diritto**, **gli dà o gli ritira quota extra**, oppure quando una **richiesta è approvata o rifiutata** (con la nota, se c'è).
+  Non c'è nessun avviso per le modifiche che fai a te stesso, e cambiare i limiti di un gruppo non manda avvisi. Neppure la riga di comando (`set-group`) ne manda.
 - Le chiavi **revocate** e quelle **scadute** spariscono dall'elenco dopo `CUPSPL_KEY_HISTORY_DAYS` giorni (14; 0 = restano per sempre). Finché ci
   sono, l'elenco dice quando se ne andranno.
 - Facoltativo, spento di default: `CUPSPL_KEY_EXPIRY_WARN_ENABLED=true` avvisa l'utente nella campanella `CUPSPL_KEY_EXPIRY_WARN_DAYS` giorni
@@ -89,11 +92,12 @@ temporaneamente.
 
 ## 7. Eliminare un utente
 
-Rimuove account, chiavi, richieste, concessioni e limiti personali, ma **non lo storico**: le righe di audit conservano il nome utente e
+Rimuove account, chiavi, richieste, concessioni (di quota e di permesso), limiti personali e permessi personali, ma **non lo storico**: le righe di audit conservano il nome utente e
 perdono solo il legame con l'id; le righe dell'audit amministrativo conservano già il nome di chi ha agito. L'amministratore scrive il
 nome dell'utente per confermare.
 
-## 8. Cambiare l'origine di un account
+## 8. L'origine di un account
 
-Dalla pagina di modifica dell'utente: locale → RADIUS cancella la password salvata; RADIUS → locale genera una password temporanea
-mostrata una volta. L'account di emergenza resta locale.
+La pagina di modifica dell'utente mostra, come semplice testo, da dove l'account fa l'accesso (locale o RADIUS): dal portale non si
+può cambiare. Per spostare una persona da un'origine all'altra si elimina l'account e lo si ricrea dall'altra parte (lo storico delle
+stampe conserva il nome utente).

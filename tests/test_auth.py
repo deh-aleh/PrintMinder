@@ -1,3 +1,4 @@
+import time
 import pytest
 
 from app.auth.cache import CachedAuth
@@ -82,3 +83,35 @@ async def test_radius_reject_reason_is_logged_without_the_password(caplog):
         assert not await p.authenticate("mario", "S3cretWrong")
     assert "RADIUS rejected user='mario'" in caplog.text
     assert "S3cretWrong" not in caplog.text
+
+
+def test_a_lockout_survives_a_restart_but_not_its_window(tmp_path):
+    f = tmp_path / "lock.json"
+    t = Throttle(limit=3, window=100, path=f)
+    for _ in range(3):
+        t.fail("mario")
+    t.fail("x|fingerprint")                       # fingerprints of a wrong password are not written
+    assert t.blocked("mario") and f.is_file() and oct(f.stat().st_mode & 0o777) == "0o600"
+    assert "fingerprint" not in f.read_text()
+    again = Throttle(limit=3, window=100, path=f)  # the gateway restarts
+    assert again.blocked("mario") and not again.blocked("luigi")
+    again.clear("mario")
+    assert not Throttle(limit=3, window=100, path=f).blocked("mario")
+    old = Throttle(limit=3, window=100, path=f)
+    for _ in range(3):
+        old.fail("luigi")
+    time.sleep(0.05)
+    assert not Throttle(limit=3, window=0.02, path=f).blocked("luigi")    # failures older than the window are forgotten
+
+
+def test_a_broken_or_unwritable_lockout_file_never_stops_the_gateway(tmp_path):
+    f = tmp_path / "lock.json"
+    f.write_text("{not json")
+    t = Throttle(limit=2, window=100, path=f)     # reads garbage: starts empty
+    t.fail("a")
+    t.fail("a")
+    assert t.blocked("a")
+    t2 = Throttle(limit=2, window=100, path=tmp_path / "no" / "such" / "dir" / "x.json")
+    t2.fail("a")
+    t2.fail("a")
+    assert t2.blocked("a")                        # the file can not be written: memory only, no exception

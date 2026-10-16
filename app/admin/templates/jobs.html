@@ -28,6 +28,7 @@
     </select>
     <button>{{ _("Filter") }}</button>
     <a href="/admin/jobs.csv?user={{ f.user|urlencode }}&state={{ f.state|urlencode }}&q={{ f.q|urlencode }}"><button type="button" class="sec">{{ _("Export CSV") }}</button></a>
+    <a href="/admin/report"><button type="button" class="sec">{{ _("Report") }}</button></a>
   </form>
   {% if f.q %}<p class="muted" style="margin:-4px 0 10px">{{ _("The search by file name looks in the latest %(n)s actions that match the other filters.", n=title_scan) }}</p>{% endif %}
   <table class="stack-md zebra">

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Report") }}{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>{{ _("Usage report") }}</h1>
+  <p class="muted">{{ _("Who printed most in a period. It counts the prints that used paper (completed, waiting or running); scans are not included. Prints that were already moved to the compressed archive are not in the report.") }}</p>
+  <form method="get" action="/admin/report">
+    <div class="row">
+      <label>{{ _("From") }} <input type="date" name="start" value="{{ f.start }}"></label>
+      <label>{{ _("To (included)") }} <input type="date" name="end" value="{{ f.end }}"></label>
+      <label>{{ _("Show the first … users") }} <input type="number" name="top" min="1" max="{{ max_top }}" value="{{ f.top }}" placeholder="{{ _('all') }}" style="width:90px"></label>
+    </div>
+    <p><label><input type="checkbox" name="detail" value="1" {% if detail %}checked{% endif %}> {{ _("Detailed report: also how many prints each user made on each printer") }}</label></p>
+    {% if groups %}
+    <fieldset style="border:1px solid var(--line);border-radius:6px;margin:8px 0">
+      <legend>{{ _("Leave out these groups") }}</legend>
+      {% for gid, gname in groups %}<label style="margin-right:14px;white-space:nowrap"><input type="checkbox" name="exclude" value="{{ gid }}" {% if gid in exclude %}checked{% endif %}> {{ gname }}</label>{% endfor %}
+    </fieldset>
+    {% endif %}
+    <div class="row">
+      <button>{{ _("Show") }}</button>
+      <button class="sec" name="format" value="csv" formaction="/admin/report/download">{{ _("Download CSV") }}</button>
+      <button class="sec" name="format" value="pdf" formaction="/admin/report/download">{{ _("Download PDF") }}</button>
+    </div>
+    <p class="muted">{{ _("The PDF is in English and can only show Western letters (other characters appear as ?): the CSV has every name as it is.") }}</p>
+  </form>
+</div>
+{% if data %}
+<div class="card">
+  {% if archived %}<p class="flash err">{{ _("The period reaches back before the oldest row of the active audit: older prints are in the archive and are not counted here.") }}</p>{% endif %}
+  <p>{{ ngettext("%(n)s user", "%(n)s users", data.total.users) }} · {{ _("%(jobs)s jobs", jobs=data.total.jobs) }} · {{ _("%(pages)s pages", pages=data.total.pages) }}
+    {% if data.cut %}<span class="muted"> — {{ _("only the first %(top)s are listed", top=f.top) }}</span>{% endif %}</p>
+  {% if data.users %}
+  <table class="stack">
+    <tr><th>#</th><th>{{ _("User") }}</th><th>{{ _("Group") }}</th><th>{{ _("Jobs") }}</th><th>{{ _("Pages") }}</th></tr>
+    {% for u in data.users %}
+    <tr><td>{{ loop.index }}</td><td><b>{{ u.name }}</b></td><td>{{ u.group or "—" }}</td><td>{{ u.jobs }}</td><td>{{ u.pages }}</td></tr>
+    {% for p in u.printers %}<tr class="muted"><td></td><td colspan="2">&nbsp;&nbsp;↳ {{ p.printer }}</td><td>{{ p.jobs }}</td><td>{{ p.pages }}</td></tr>{% endfor %}
+    {% endfor %}
+  </table>
+  {% else %}<p>{{ _("No prints in this period.") }}</p>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

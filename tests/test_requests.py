@@ -111,7 +111,8 @@ def test_the_form_offers_only_limited_metrics_and_the_period_the_admin_set(org):
 # ---------------------------------------------------------------- creating requests
 
 @pytest.mark.usefixtures("english")
-def test_request_validation(org):
+def test_request_validation(org, monkeypatch):
+    monkeypatch.setattr(settings, "request_reason_required", True)
     with org.sm() as s:
         ann = s.get(User, org.ann)
         ok = dict(user=ann, metric="jobs", amount=5, scope="temporary", reason="because", now=NOW)
@@ -382,7 +383,8 @@ def test_grants_count_inside_the_atomic_quota_check(tmp_path):
 # ---------------------------------------------------------------- changing group
 
 @pytest.mark.usefixtures("english")
-def test_only_requestable_other_groups_can_be_asked_for(org):
+def test_only_requestable_other_groups_can_be_asked_for(org, monkeypatch):
+    monkeypatch.setattr(settings, "request_reason_required", True)
     with org.sm() as s:
         ann = s.get(User, org.ann)
         gid = {g.name: g.id for g in s.scalars(select(Group))}
@@ -465,7 +467,8 @@ async def test_free_text_is_never_interpreted_as_html(web):
         assert "&lt;script&gt;" in page
 
 
-async def test_validation_errors_come_back_as_messages_not_crashes(web):
+async def test_validation_errors_come_back_as_messages_not_crashes(web, monkeypatch):
+    monkeypatch.setattr(settings, "request_reason_required", True)
     for data in ({"metric": "jobs", "amount": "abc", "scope": "temporary", "reason": "x"},
                  {"metric": "jobs", "amount": "-4", "scope": "temporary", "reason": "x"},
                  {"metric": "jobs", "amount": "1", "scope": "temporary", "reason": ""},
@@ -477,7 +480,7 @@ async def test_validation_errors_come_back_as_messages_not_crashes(web):
 
 
 async def test_users_can_not_see_or_decide_other_peoples_requests_or_admin_pages(web):
-    for path in ("/admin/requests", "/admin/grants", "/admin/actions"):
+    for path in ("/admin/requests", "/admin/actions"):
         assert (await web.get(path)).status_code == 403
     rid = decide(web.sm, web.ann)
     r = await web.post(f"/admin/requests/{rid}/approve", data={"csrf_token": web.ann_token})
@@ -522,15 +525,46 @@ async def test_users_can_cancel_their_request_from_their_page(web):
 
 
 @pytest.mark.usefixtures("english")
-async def test_grants_page_create_and_revoke(web):
-    await web.admin.post("/admin/grants", data={"username": "ann", "metric": "jobs", "amount": "4", "scope": "temporary",
-                                                "note": "gift", "csrf_token": web.boss_token})
-    html = (await web.admin.get("/admin/grants")).text
-    assert "+4 jobs" in html and "active" in html and "gift" in html
+async def test_grants_live_in_the_requests_page_create_and_revoke(web):
+    r = await web.admin.post("/admin/grants", data={"username": "ann", "metric": "jobs", "amount": "4", "scope": "temporary",
+                                                    "note": "gift", "csrf_token": web.boss_token})
+    assert r.headers["location"] == "/admin/requests"
+    html = (await web.admin.get("/admin/requests")).text
+    assert "+4 jobs" in html and "Active grants" in html and "gift" in html
+    assert (await web.admin.get("/admin/grants")).status_code in (404, 405)                    # one page only, no menu entry
+    assert 'href="/admin/grants"' not in html
     with web.sm() as s:
         gid = s.scalars(select(QuotaGrant)).one().id
     await web.admin.post(f"/admin/grants/{gid}/revoke", data={"csrf_token": web.boss_token})
-    assert "revoked" in (await web.admin.get("/admin/grants")).text
+    assert "revoked" in (await web.admin.get("/admin/requests")).text
+
+
+@pytest.mark.usefixtures("english")
+async def test_deleting_ended_grants_keeps_the_active_ones_and_is_logged(web):
+    now = datetime.now(timezone.utc)
+    with web.sm() as s:
+        s.add_all([
+            QuotaGrant(user_id=web.ann, metric=Metric.jobs, amount=1, scope=RequestScope.permanent, valid_from=now),
+            QuotaGrant(user_id=web.ann, metric=Metric.jobs, amount=2, scope=RequestScope.temporary, valid_from=now - timedelta(days=9),
+                       valid_until=now - timedelta(days=1)),
+            QuotaGrant(user_id=web.ann, metric=Metric.jobs, amount=3, scope=RequestScope.permanent, valid_from=now, revoked_at=now),
+            QuotaGrant(user_id=web.ann, metric=Metric.jobs, amount=4, scope=RequestScope.temporary, valid_from=now,
+                       valid_until=now + timedelta(days=3)),
+        ])
+        s.commit()
+    assert "Delete ended grants" in (await web.admin.get("/admin/requests")).text
+    await web.admin.post("/admin/grants/purge", data={"csrf_token": web.boss_token})
+    with web.sm() as s:
+        assert sorted(g.amount for g in s.scalars(select(QuotaGrant))) == [1, 4]
+        assert s.scalars(select(AdminAudit).where(AdminAudit.action == "grant.purge")).one().detail_json == {"count": 2, "quota": 2, "permission": 0}
+    assert "Delete ended grants" not in (await web.admin.get("/admin/requests")).text
+    await web.admin.post("/admin/grants/purge", data={"csrf_token": web.boss_token})          # nothing left: nothing logged
+    with web.sm() as s:
+        assert len(s.scalars(select(AdminAudit).where(AdminAudit.action == "grant.purge")).all()) == 1
+
+
+async def test_users_can_not_delete_grants(web):
+    assert (await web.post("/admin/grants/purge", data={"csrf_token": web.ann_token})).status_code == 403
 
 
 # ---------------------------------------------------------------- the printing side
@@ -572,3 +606,30 @@ async def test_a_refusal_tells_the_user_where_to_ask_and_a_grant_unblocks_printi
     assert (await ipp_post(ipp, pj(11))).code == c.STATUS_NOT_POSSIBLE                      # ...and not two
     with ipp.sm() as s:
         assert s.scalar(select(func.count(JobLog.id)).where(JobLog.state == JobState.accepted)) == 3
+
+
+# ---------------------------------------------------------------- optional reason, unlimited quota in the grant form
+
+def test_the_reason_is_optional_by_default(org):
+    assert settings.request_reason_required is False
+    with org.sm() as s:
+        req = grants.create_quota_request(s, s.get(User, org.ann), "jobs", 5, "temporary", "  ", NOW)
+        assert req.reason == ""
+
+
+async def test_forms_say_if_the_reason_is_required(web, monkeypatch):
+    for url in ("/me/request/quota", "/me/request/group", "/me/request/permission"):
+        page = (await web.get(url)).text
+        assert 'name="reason"' not in page or "required" not in page.split('name="reason"')[1].split(">")[0], url
+    monkeypatch.setattr(settings, "request_reason_required", True)
+    assert "required" in (await web.get("/me/request/quota")).text.split('name="reason"')[1].split(">")[0]
+
+
+async def test_lacks_lists_only_the_metrics_that_limit_the_user(web):
+    me = (await web.admin.get("/admin/requests/lacks?username=ann")).json()
+    assert "jobs" in me["metrics"]
+    with web.sm() as s:
+        set_limit(s, SubjectType.group, s.get(User, web.ann).group_id, Metric.jobs, None)
+        set_limit(s, SubjectType.group, s.get(User, web.ann).group_id, Metric.pages, None)
+        s.commit()
+    assert (await web.admin.get("/admin/requests/lacks?username=ann")).json()["metrics"] == []

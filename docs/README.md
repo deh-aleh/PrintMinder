@@ -8,6 +8,7 @@ La documentazione è scritta in due lingue con la stessa struttura. L'inglese è
 | Architecture and technologies | [architecture.md](en/architecture.md) | [architettura.md](it/architettura.md) |
 | How the application is built (files, `.env`) | [application-internals.md](en/application-internals.md) | [funzionamento-applicazione.md](it/funzionamento-applicazione.md) |
 | Installation | [installation.md](en/installation.md) | [installazione.md](it/installazione.md) |
+| Configuration reference (every `.env` variable) | [configuration.md](en/configuration.md) | [configurazione.md](it/configurazione.md) |
 | Troubleshooting | [troubleshooting.md](en/troubleshooting.md) | [risoluzione-problemi.md](it/risoluzione-problemi.md) |
 | User guide | [user-guide.md](en/user-guide.md) | [guida-utente.md](it/guida-utente.md) |
 | Administrator guide | [admin-guide.md](en/admin-guide.md) | [guida-amministratore.md](it/guida-amministratore.md) |
@@ -24,5 +25,7 @@ La documentazione è scritta in due lingue con la stessa struttura. L'inglese è
 | Known limitations | [limitations.md](en/limitations.md) | [limiti.md](it/limiti.md) |
 
 Project README: [English](../README.md) · [Italiano](../README.it.md).
+
+The same pages are shown to administrators inside the portal (the **?** icon in the top bar, `/admin/docs`), in English or Italian.
 
 When you change behaviour, update **both** languages (same section order, so they stay easy to compare).

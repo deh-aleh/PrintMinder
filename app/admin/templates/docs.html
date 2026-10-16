@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Documentation") }}{% endblock %}
+{% block body %}
+<style>
+  .docbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--line) }
+  .docbar .sp { flex:1 }
+  .langsw { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden }
+  .langsw a, .langsw span { padding:4px 12px; text-decoration:none; font-size:13px }
+  .langsw span { background:var(--bg); color:var(--orange); font-weight:600 }
+  .langsw a { color:var(--muted) } .langsw a:hover { color:var(--orange) }
+  .doc { line-height:1.6; overflow-wrap:anywhere; max-width:900px }
+  .doc h1 { font-size:20px; margin:4px 0 12px } .doc h2 { font-size:16.5px; margin:22px 0 8px } .doc h3 { font-size:15px; margin:18px 0 6px }
+  .doc h4, .doc h5, .doc h6 { font-size:14px; margin:14px 0 6px }
+  .doc h1, .doc h2, .doc h3, .doc h4 { scroll-margin-top:80px }
+  .doc p, .doc ul, .doc ol { margin:8px 0 }
+  .doc li { margin:3px 0 }
+  .doc code { font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:1px 5px }
+  .doc pre { background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:10px 12px; overflow-x:auto; margin:10px 0 }
+  .doc pre code { background:none; border:0; padding:0; white-space:pre }
+  .doc blockquote { margin:10px 0; padding:2px 14px; border-left:3px solid var(--orange); background:var(--bg); border-radius:0 6px 6px 0; color:var(--muted) }
+  .doc table { display:block; overflow-x:auto; width:max-content; max-width:100%; margin:10px 0; border:1px solid var(--line) }
+  .doc th, .doc td { border:1px solid var(--line); vertical-align:top; text-align:left }
+  .doc th { text-transform:none; font-size:13px; color:var(--fg); background:var(--bg) }
+  .doc hr { border:0; border-top:1px solid var(--line); margin:18px 0 }
+  .doc img { max-width:100% }
+  .docindex { list-style:none; margin:0; padding:0 } .docindex li { padding:7px 0; border-bottom:1px solid var(--line) } .docindex li:last-child { border-bottom:0 }
+</style>
+<div class="card">
+  {% if kind == "missing" %}
+  <h1>{{ _("Documentation") }}</h1>
+  <p>{{ _("The documentation is not installed on this server.") }}</p>
+  <p class="muted">{{ _("It is the docs folder of PrintMinder: the standard image and the host install both include it. You can also read it on GitHub:") }}
+    <a href="https://github.com/deh-aleh/PrintMinder/tree/main/docs" target="_blank" rel="noopener noreferrer">github.com/deh-aleh/PrintMinder</a></p>
+  {% else %}
+  <div class="docbar">
+    {% if kind == "page" %}<a href="/admin/docs/{{ doc_lang }}/">&larr; {{ _("Documentation index") }}</a>{% endif %}
+    <span class="sp"></span>
+    <span class="langsw" role="group" aria-label="{{ _('Language of the documentation') }}">
+      {% if doc_lang == "en" %}<span aria-current="true">EN</span><a href="{{ switch }}" hreflang="it" lang="it" title="Italiano">IT</a>
+      {% else %}<a href="{{ switch }}" hreflang="en" lang="en" title="English">EN</a><span aria-current="true">IT</span>{% endif %}
+    </span>
+  </div>
+  {% if kind == "index" %}
+  <div class="doc" lang="{{ doc_lang }}">
+    <h1>{{ _("Documentation") }}</h1>
+    <ul class="docindex">
+      {% for name, title in entries %}<li><a href="/admin/docs/{{ doc_lang }}/{{ name|urlencode }}">{{ title }}</a></li>{% endfor %}
+    </ul>
+  </div>
+  {% else %}
+  <div class="doc" lang="{{ doc_lang }}">{{ html|safe }}</div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

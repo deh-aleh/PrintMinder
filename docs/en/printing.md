@@ -23,6 +23,11 @@ There are two ways to print: through the **gateway's IPP address** (computers an
   before any quota is reserved.
 - A printer that does not answer is not offered; a blocked printer is not offered either. The list order is described in
   [printers.md](printers.md).
+- **Permissions** ([quotas.md](quotas.md#5-advanced-permissions)). Only the printers the user may use are listed. The colour choice is
+  hidden without the colour permission. A **double-sided choice** (printer default / one-sided / long edge / short edge) appears when the printer has a duplex unit
+  and the user may print one-sided; a user who may not, prints double-sided (long edge). The form asks for a choice, the server decides
+  with the same rules as the IPP gateway, so a form edited by hand gets the same result. Outside the allowed hours a banner at the top
+  says when printing is possible, and a job sent anyway is refused.
 
 ## 2. Printing with the IPP address
 
@@ -92,6 +97,15 @@ The `mdns` service announces every queue as `_ipps._tcp` with the `_universal` (
 name is `<name>.local` (Android resolves only those via multicast), and its address must be in the TLS certificate.
 Blocked-hidden printers, unreachable devices and maintenance mode withdraw the announcement. Scanners are announced as
 `_uscans._tcp` ([scanning.md](scanning.md)).
+
+### Permissions and IPP
+
+For `Print-Job`, `Create-Job` and `Validate-Job` the gateway applies the user's permissions (colour, one-sided, printers, hours)
+after the blocked-printer check and before the quota. To correct a job it rewrites `print-color-mode` and `sides` in the request before it goes to
+CUPS, and removes the PPD-style options `ColorModel`, `ColorMode` and `Duplex`. `Validate-Job` does not fail on colour or sides in `adjust`
+mode. `CUPS-Get-Printers` and `CUPS-Get-Classes` leave out the printers a limited user may not use. A phone or computer that found the
+printer through the network announcement still sees it, because the announcement is the same for everybody; the job is refused. Details and cautions:
+[quotas.md](quotas.md#5-advanced-permissions).
 
 ## 5. Refused jobs, cancel and states
 

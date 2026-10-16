@@ -9,8 +9,7 @@ For people who run the installation. The portal is at `https://<server>:8631/adm
 | **Audit** | `/admin/jobs` | Who printed or scanned what; filters, CSV, cancel queued jobs → [audit.md](audit.md) |
 | **Users** | `/admin/users` | Create local or RADIUS users, edit, reset password, revoke keys, delete |
 | **Groups** | `/admin/groups` | Create, rename, limits, "requestable", delete |
-| **Requests** | `/admin/requests` | Approve, edit or reject quota and group requests (badge = pending) → [quotas.md](quotas.md) |
-| **Grants** | `/admin/grants` | Give or revoke extra quota directly |
+| **Requests** | `/admin/requests` | Approve, edit or reject quota, group and permission requests (badge = pending); active grants, give or revoke extra quota or a permission directly, history → [quotas.md](quotas.md) |
 | **Actions** | `/admin/actions` | Who did what in the portal |
 | **Printers** | `/admin/printers` | State, ink, counters; block, hide, rename, move up/down (your own order), test printers, maintenance print, test print → [printers.md](printers.md) |
 | **Backup** | `/admin/backups` | Your scheduled backups → [backup.md](backup.md) |
@@ -18,6 +17,7 @@ For people who run the installation. The portal is at `https://<server>:8631/adm
 | **Print / Scan / Profile** | `/me…` | The same pages users have → [user-guide.md](user-guide.md) |
 | **Logo, name and (user)** | `/me/settings` | The block at the top left opens the settings: theme, language, refresh |
 | **Bell** (administrators only) | `/admin/notices` | Things the gateway noticed (badge = open ones), see "Notices" below |
+| **?** (administrators only) | `/admin/docs` | This documentation, in English or Italian (switch at the top of each page) |
 | **Maintenance** (red wrench) | — | Stops print and scan for everyone but administrators |
 | **Door with arrow** | — | Log out |
 
@@ -32,7 +32,7 @@ For people who run the installation. The portal is at `https://<server>:8631/adm
 ## 2. Users
 
 The list is read-only: a user's own limit or the inherited one (italics), active grants as a coloured `+N`, consumption and active keys.
-**Edit** opens the page with every field, including the **source** (local ↔ RADIUS), and **Delete** (type the name to confirm).
+**Edit** opens the page with every field, which shows the **source** of the account (local or RADIUS, for information only), and **Delete** (type the name to confirm).
 
 - Create **local**: a temporary password is shown once; the user changes it at first login.
 - Create **RADIUS**: choose the group; the person signs in with their office password.
@@ -48,10 +48,25 @@ Deleting keeps the history ([accounts.md](accounts.md#7-deleting-a-user)).
 A group has limits (jobs / pages, weekly / monthly) and a **requestable** flag. System groups `default` and `administrator` can not be
 deleted; deleting another group moves its users to `default`. Personal limits are set in the user's edit page. Details in [quotas.md](quotas.md).
 
+**Advanced permissions.** At the bottom of the group page and of the user page, the **Advanced permissions** button opens colour, one-sided
+prints, which printers, and which days and hours. A user's field is "as the group" or has its own value. The emergency administrator is
+exempt and its page shows the block switched off. `CUPSPL_PERMISSION_MODE` decides whether a client that explicitly asks for colour or
+a one-sided print that is not allowed is corrected (`adjust`, default) or refused (`refuse`). Read the notes in
+[quotas.md](quotas.md#5-advanced-permissions) before choosing: with `refuse` many Windows and Android jobs are refused. A user is told in
+their bell when you change their own permissions, and when a job of theirs is refused or corrected.
+
 ## 4. Requests and grants
 
-Review requests (edit the amount or the kind before approving, add a note). Approval is idempotent. In **Grants** you see active
-grants and revoke them; you can create one directly with a reason. Everything is logged.
+Everything is on one page, *Requests*, in three parts:
+
+- **Pending requests**: edit the amount or the kind before approving, add one note (the user sees it, whether you approve or reject). A permission request (colour, one-sided, a printer, outside the hours) is approved *permanent* or *until the end of* a date you choose. Approval is idempotent.
+- **Active grants**: the extra quota and the permissions that count now; revoke them, or give one directly with a note (choose *quota* or *a permission* in the form).
+- **History** (closed until you open it): the latest decisions and the grants that no longer count (ended or revoked).
+  *Delete ended grants* removes those from the list; active grants are not touched, and the administrators' log (*Actions*) keeps
+  who granted what and who deleted them. It removes the ended permission grants too.
+  More in [quotas.md](quotas.md#asking-for-a-permission).
+
+Everything is logged.
 
 ## 5. Printers
 
@@ -95,6 +110,18 @@ The kinds of notice:
 | Certificate update failed | The last run of `scripts/cert-sync.sh` failed | the next run works |
 | Announced address not in the certificate | Phones that find the printers by themselves will show a certificate error | the certificate lists the address |
 | Certificate about to expire | Only if you turned it on (`CUPSPL_CERT_EXPIRY_WARN_ENABLED`) | the certificate is renewed |
+| Paper jam / Out of paper | A physical printer reports it (once a minute, confirmed twice in a row) | the printer stops reporting it |
+| Out of ink or toner / Running low | Out: the ink level is 0 or the printer says so. Running low: only the level below the printer's own "low" mark | the printer stops reporting it |
+| Save the secret key | Once, after the first start: copy `CUPSPL_SECRET_KEY` from `.env` to a safe place. It goes to the first-run administrator (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`) in their own bell, or to all administrators if that account does not exist. It does not come back at a restart; it comes back once if the key changes | never (dismiss it) |
+| The secret key has changed | `CUPSPL_SECRET_KEY` is not the one of the previous start; says how many file names can no longer be read | never (dismiss it) |
+| No secret key | `CUPSPL_SECRET_KEY` is empty: file names are not encrypted and everybody signs in again after a restart | a key is set |
+
+**Printer problems and users.** The notices above about printers are always for administrators. With `CUPSPL_PRINTER_ALERTS_USERS=true` (default) the people who have a
+print waiting on that printer get a notice in their own bell too (jam, paper and ink out; not "running low"), once per problem and only them, not everybody.
+It closes by itself when the printer is fine again. With `false` only the administrators are told.
+
+**One bell.** An administrator has a single bell: `/admin/notices` shows first the notices about their own account ("For you": their keys, group, quota,
+requests) and then the gateway's ones, and the red number adds both. `/me/notices` sends administrators there.
 
 To keep one client that retries 100 times from filling the list, the same notice from the same source is written again only
 after an interval; the repeats in between are counted. The interval depends on `CUPSPL_LOG_LEVEL`, and the same text is

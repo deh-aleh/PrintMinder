@@ -108,8 +108,8 @@ def cmd_add(path: str) -> None:
     unknown = []
     for english, by_lang in mod.TRANSLATIONS.items():
         context = None
-        if english.startswith("menu::"):  # "menu::Backup": the text Backup in the menu context (short labels)
-            context, english = "menu", english[len("menu::"):]
+        if "::" in english:  # "menu::Backup": the text Backup in the context "menu" (short labels that need their own translation)
+            context, english = english.split("::", 1)
         key = tuple(english.split("|")) if "|" in english else english
         if isinstance(by_lang, (tuple, list)):  # plural: one dict per form (singular first) -> {lang: (form, form...)}
             by_lang = {lang: tuple(form[lang] for form in by_lang if lang in form) for lang in by_lang[0]}

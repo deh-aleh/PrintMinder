@@ -10,6 +10,9 @@ ha registrato. Tutto si legge dal vivo e al meglio: una stampante che non offre 
 - Stato e coda di ogni coda CUPS; per un dispositivo che non risponde, **NON RAGGIUNGIBILE** (e sparisce dal modulo di stampa e
   dall'annuncio mDNS). Il rilevamento può ritardare di ~30 s. Per le code di rete è una prova TCP (non può sapere che la carta è
   finita); le code `usb:` / `file:` si assumono presenti.
+- Accanto a «n in coda», il pulsante **…** mostra l'indirizzo della coda (`ipps://<server>/printers/<nome>`) con un pulsante per
+  copiarlo: quello da scrivere per aggiungere la stampante a mano su un computer. La parte del server è l'indirizzo con cui è stato
+  aperto il portale.
 - **Inchiostro** rimasto (livelli e colori da CUPS).
 - **Contatori della stampante** (a vita): pagine totali, bianco/nero, colore, fogli fronte singolo/fronte-retro, inceppamenti, mancate
   prese — letti dal servizio web incorporato HP (`/DevMgmt/ProductUsageDyn.xml`). Le altre marche mostrano solo i dati IPP.
@@ -75,15 +78,38 @@ una stampante il suo posto nel tuo elenco è fisso; una stampante collegata dopo
 spostamenti sono registrati nell'audit degli amministratori (`printer.move`). Una stampante che non hai mai spostato segue l'ordine
 predefinito descritto sotto.
 
-**Rinominare una coda.** Il pulsante con la matita apre una finestra con il nome della coda (l'ultima parte dell'indirizzo,
-`…/printers/<nome>`; lettere, cifre e `. _ @ + -`). CUPS non sa rinominare una coda, quindi il gateway crea la nuova sullo stesso dispositivo
+**Rinominare una coda.** Il pulsante con la matita apre una finestra con un campo vuoto per il nuovo nome (il nome attuale compare
+in grigio come segnaposto). Il nome è l'ultima parte dell'indirizzo, `…/printers/<nome>`: lettere, cifre e `. _ @ + -`. CUPS non sa rinominare una coda, quindi il gateway crea la nuova sullo stesso dispositivo
 — stesso driver (stampanti IPP: senza driver; USB: il driver che CUPS ha per quel modello; virtuali: CUPS-PDF), stessa descrizione e
 posizione — e solo dopo toglie la vecchia; se qualcosa fallisce la vecchia resta. Blocco, nascondimento da mDNS, impostazioni della stampa di
 manutenzione, conto alla rovescia e posizione negli elenchi seguono la coda; l'audit conserva il vecchio nome per ciò che è già successo.
 Cliccando *Rinomina* si chiede conferma e si avverte che **i computer e i telefoni configurati a mano con il vecchio indirizzo smetteranno di
 stampare** finché non vengono configurati di nuovo. Si rifiuta una coda con job in attesa, un nome già in uso o una coda di cui il gateway
 non può conoscere il driver (per esempio una coda `socket://`). Le opzioni impostate a mano in CUPS (carta predefinita, …) non vengono
-riportate. Registrata come `printer.rename`.
+riportate. Le stampanti consentite a gruppi e utenti ([quote.md](quote.md#5-permessi-avanzati)), i permessi concessi per quella stampante e
+le richieste per essa ancora in attesa seguono il nuovo nome.
+Registrata come `printer.rename`.
+
+**Nomi usati in passato.** Il gateway ricorda i nomi che le code hanno avuto: una coda eliminata dalla pagina Stampanti, una coda USB
+tolta perché il dispositivo è rimasto assente, e il vecchio nome di una coda rinominata (ci sono anche i nomi trovati nell'audit prima di
+questa funzione). Nella finestra di rinomina:
+
+- **Mentre scrivi**, se un nome usato in passato comincia con le lettere scritte fin lì, il resto compare in grigio dentro il campo, come
+  il suggerimento di un motore di ricerca. È solo un promemoria: il nome va comunque scritto per intero, e la parte grigia sparisce appena
+  nessun nome passato comincia in quel modo.
+- **Sotto il campo** una riga dice: «Usato in passato: nessuna coda ha questo nome dal …» per un nome del passato; «Esiste già una coda
+  con questo nome» per un nome in uso (il pulsante *Rinomina* si disattiva); «È già il suo nome» per il nome attuale (anche qui
+  disattivato); un avviso per i caratteri non ammessi.
+- **Nomi usati in passato (n)**, un menu che si apre come *Permessi avanzati*, li elenca dal più recente (al massimo 20, senza i nomi di
+  code che esistono), ognuno con il giorno e il motivo: eliminata, tolta automaticamente, rinominata. Cliccando un nome lo si scrive nel
+  campo.
+
+Un nome smette di essere «usato in passato» quando una coda lo riprende, con una rinomina o perché ne viene creata una nuova con quel nome.
+
+A cosa serve: una stampante si rompe, la sua coda viene tolta, ne arriva una sostitutiva con un altro nome. Rinomina la sostitutiva con il
+**vecchio nome**. I computer e i telefoni configurati a mano con il vecchio indirizzo tornano a stampare, con le stesse chiavi, e i
+permessi che elencavano quel nome valgono di nuovo. Il limite: un computer configurato con un driver specifico del vecchio modello può dover
+essere configurato di nuovo se il modello nuovo è diverso. I computer che usano la stampante senza driver (IPP Everywhere) no.
 
 CUPS non dice quando una coda è stata creata: il gateway annota la **prima volta che la vede** (controlla ogni minuto, quindi una
 stampante collegata e mai aperta in nessuna pagina viene comunque registrata entro un minuto). Le code già presenti quando la funzione è

@@ -29,10 +29,14 @@ def listing(request: Request, all: int = 0, admin: User = Depends(current_admin)
     q = select(Notice).where(Notice.user_id.is_(None)).order_by(Notice.last_at.desc())
     if not all:
         q = q.where(Notice.dismissed_at.is_(None))
-    admin.notices_seen_at = datetime.now(timezone.utc)   # opening the list is what "seeing" them means: the red dot goes away
+    own = select(Notice).where(Notice.user_id == admin.id).order_by(Notice.last_at.desc())   # the administrator's own notices share this page: one bell
+    if not all:
+        own = own.where(Notice.dismissed_at.is_(None))
+    own_rows = list(db.scalars(own.limit(200)))
+    admin.notices_seen_at = admin.own_notices_seen_at = datetime.now(timezone.utc)   # opening the list is what "seeing" them means: the red dot goes away
     db.commit()
     rows = [{"n": n, "extra": notices.pending(n.kind, n.key) if n.dismissed_at is None else 0} for n in db.scalars(q.limit(200))]
-    return render(request, "notices.html", admin, rows=rows, show_all=bool(all), when=_every(notices.interval()))
+    return render(request, "notices.html", admin, rows=rows, own_rows=own_rows, show_all=bool(all), when=_every(notices.interval()))
 
 
 @router.post("/{nid}/dismiss", dependencies=[Depends(verify_csrf)])
