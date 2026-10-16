@@ -142,3 +142,16 @@ def test_new_migrations_only_expand_the_schema():
         upgrade = f.read_text().split("def upgrade", 1)[1].split("def downgrade", 1)[0]
         bad += [f"{f.name}: {op}" for op in FORBIDDEN if op in upgrade]
     assert not bad, "a migration after the released ones removes or changes something (see the note above): " + ", ".join(bad)
+
+
+def test_a_database_from_a_newer_version_is_left_alone(tmp_path):
+    """Rollback: the old code starts on a database a newer version already migrated (revision it does not know)."""
+    from sqlalchemy import text
+
+    eng = create_engine(f"sqlite:///{tmp_path / 'n.db'}")
+    upgrade(eng)
+    with eng.begin() as conn:
+        conn.execute(text("UPDATE alembic_version SET version_num = '9999'"))
+    upgrade(eng)                                                      # does not raise
+    with eng.connect() as conn:
+        assert conn.execute(text("SELECT version_num FROM alembic_version")).scalar() == "9999"

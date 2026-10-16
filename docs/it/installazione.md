@@ -240,6 +240,20 @@ Se non vuoi quel rischio, lascialo spento e usa `scripts/update.sh`. Per spegner
 predefinito anche se nel tuo `.env` non c'è. Per vedere quali opzioni ci sono, apri `docker/env.example` (lo sostituisce ogni aggiornamento): ogni opzione
 ha la sua spiegazione. Se ne vuoi cambiare una, copia la riga nel tuo `.env` e lancia `docker compose up -d`.
 
+**Tornare a una versione più vecchia.** `scripts/update.sh 0.3.0` rimette i file e le immagini di quella versione. Dalla 0.3.1 in poi, una versione rimessa così parte anche su un database che quella nuova ha già migrato (le migrazioni aggiungono soltanto). Le versioni fino alla 0.3.0 no: si rifiutano di partire davanti a un database che non conoscono. In quel caso, e ogni volta che la versione nuova ha rovinato qualcosa, si usa il backup che `update.sh` ha fatto **prima** dell'aggiornamento (procedura di emergenza):
+
+```sh
+ls data/backups/pre-update/
+#   printgw-v0.3.0-20261016-132831.tar.gz   <- fatto mentre girava la 0.3.0
+#   printgw-v0.2.2-20261016-101500.tar.gz   <- fatto mentre girava la 0.2.2 (prima dell'aggiornamento alla 0.3.0)
+scripts/backup.sh restore data/backups/pre-update/printgw-v0.2.2-20261016-101500.tar.gz    # chiede di scrivere YES
+scripts/update.sh 0.2.2                    # rimette i file di quella versione (il ripristino ha riportato il suo .env)
+```
+
+La versione nel nome del file è quella che girava quando il backup è stato fatto: per tornare a una versione si prende il backup con quel nome. Tutto ciò che è successo dopo quel backup (storico delle stampe, nuovi utenti, richieste) si perde; il backup riporta anche il `.env` di quel momento. Ogni tentativo fa prima un nuovo backup, quindi non si sovrascrive niente: il file più recente è sempre lo stato appena prima dell'ultimo comando.
+
+**Beta.** Una versione come `0.4.0-beta.1` è una release di prova, pubblicata come pre-release su GitHub. `scripts/update.sh` senza argomenti, il pulsante *Aggiorna* e l'avviso "nuova versione" non la propongono mai: la si ottiene solo nominandola, con `scripts/update.sh 0.4.0-beta.1`. Da una beta la versione finale (`0.4.0`) viene proposta normalmente. Non usare una beta su un server da cui dipendono altre persone.
+
 **Blocca la versione.** Non usare mai `latest`: lascia `PRINTGW_VERSION` a un numero, così l'aggiornamento è una decisione.
 
 ## 9. Alternativa: installazione sull'host (senza docker)

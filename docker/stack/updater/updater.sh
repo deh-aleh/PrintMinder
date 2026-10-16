@@ -11,7 +11,7 @@ status() { # state version backup
     printf '{"state":"%s","version":"%s","backup":"%s","ts":"%s"}\n' "$1" "$2" "$3" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$D/.status.tmp"
     chmod 644 "$D/.status.tmp"; mv "$D/.status.tmp" "$D/status.json"
 }
-valid() { printf '%s' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; }
+valid() { printf '%s' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$'; }
 field() { sed -n "s/.*\"$1\": *\"\([^\"]*\)\".*/\1/p" "$D/request.json" | head -1; }
 
 echo "updater ready (project: $PROJECT)"

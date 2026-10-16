@@ -113,12 +113,13 @@ Restore is the way back after an upgrade you want to undo.
 ## 3. Host-side full backup
 
 ```sh
-scripts/backup.sh backup [DEST_DIR]        # writes DEST_DIR/printgw-YYYYMMDD-HHMMSS.tar.gz  (default ./backups)
+scripts/backup.sh backup [DEST_DIR]        # writes DEST_DIR/printgw-vX.Y.Z-YYYYMMDD-HHMMSS.tar.gz  (default ./backups; X.Y.Z = the version running)
 scripts/backup.sh restore FILE.tar.gz      # stops the gateway first and asks for confirmation
 ```
 
 Includes the database (SQLite backup call), `config/` (with secrets), `.env`, the audit archive and the CUPS configuration (queues).
 Not included: images and the spool of jobs in progress. The archive holds secrets: keep it as private as the server.
+`restore` brings back the `.env` of the backup, hence its version too: if the files in the folder are of another version, it tells you to run `scripts/update.sh <version>` (see "Going back to an older version" in [installation.md](installation.md)).
 `restore` has only been tested by hand.
 
 ## 4. Limits

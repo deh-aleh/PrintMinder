@@ -114,12 +114,13 @@ i backup a mano. Il ripristino è la via di ritorno dopo un aggiornamento che vu
 ## 3. Backup completo dal lato host
 
 ```sh
-scripts/backup.sh backup [CARTELLA]        # scrive CARTELLA/printgw-AAAAMMGG-HHMMSS.tar.gz  (predefinito ./backups)
+scripts/backup.sh backup [CARTELLA]        # scrive CARTELLA/printgw-vX.Y.Z-AAAAMMGG-HHMMSS.tar.gz  (predefinito ./backups; X.Y.Z = la versione in uso)
 scripts/backup.sh restore FILE.tar.gz      # ferma prima il gateway e chiede conferma
 ```
 
 Include il database (con la chiamata di backup di SQLite), `config/` (segreti compresi), `.env`, l'archivio audit e la configurazione
 di CUPS (le code). Non include le immagini né lo spool dei job in corso. L'archivio contiene segreti: tienilo riservato quanto il server.
+`restore` riporta il `.env` del backup, quindi anche la sua versione: se i file della cartella sono di un'altra versione, ti dice di eseguire `scripts/update.sh <versione>` (vedi "Tornare a una versione più vecchia" in [installazione.md](installazione.md)).
 `restore` è provato solo a mano.
 
 ## 4. Limiti

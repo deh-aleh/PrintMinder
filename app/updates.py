@@ -22,6 +22,8 @@ log = logging.getLogger("app.updates")
 
 CHECK_EVERY = 24 * 3600
 _VERSION = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
+# the version of a beta as the package metadata writes it (1.2.3b1) or as the tag does (1.2.3-beta.1)
+_BETA = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)(?:b|-beta\.)(\d+)$")
 
 
 def parse(text: str) -> tuple[int, int, int] | None:
@@ -30,9 +32,18 @@ def parse(text: str) -> tuple[int, int, int] | None:
     return (int(m[1]), int(m[2]), int(m[3])) if m else None
 
 
+def _order(text: str) -> tuple | None:
+    """Sort key: a beta comes before the final version it leads to (1.2.3-beta.2 < 1.2.3 < 1.2.4-beta.1)."""
+    final = parse(text)
+    if final:
+        return (*final, 1, 0)
+    m = _BETA.match(text.strip())
+    return (int(m[1]), int(m[2]), int(m[3]), 0, int(m[4])) if m else None
+
+
 def newer(latest: str, installed: str) -> bool:
-    a, b = parse(latest), parse(installed)
-    return a is not None and b is not None and a > b
+    a, b = parse(latest), _order(installed)   # only a final release is ever offered; the installed one may be a beta
+    return a is not None and b is not None and (*a, 1, 0) > b
 
 
 async def fetch_latest(client: httpx.AsyncClient | None = None) -> dict | None:
@@ -123,7 +134,7 @@ def eligible_backup(db, now: datetime):
 
 def write_request(version: str, who: str, backup: str) -> None:
     """Hand the update to the updater. `version` must be a plain x.y.z of the same major as the installed one."""
-    installed, wanted = parse(app_version()), parse(version)
+    installed, wanted = _order(app_version()), parse(version)   # an installed beta may update to its final release
     if wanted is None or installed is None or wanted[0] != installed[0]:
         raise ValueError("version not allowed from the portal")
     d = _dir()

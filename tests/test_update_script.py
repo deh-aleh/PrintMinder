@@ -16,7 +16,7 @@ UPDATE = ROOT / "scripts" / "update.sh"
 pytestmark = pytest.mark.skipif(sys.platform == "win32" or not shutil.which("curl") or not shutil.which("sha256sum"),
                                 reason="needs sh, curl and sha256sum")
 
-BACKUP_STUB = '#!/bin/sh\necho "backup.sh $*" >> "$LOG"\nif [ "$1" = backup ]; then mkdir -p "$2"; echo data > "$2/printgw-20260101-000000.tar.gz"; fi\n'
+BACKUP_STUB = '#!/bin/sh\necho "backup.sh $*" >> "$LOG"\nif [ "$1" = backup ]; then mkdir -p "$2"; echo data > "$2/printgw-v1.0.0-20260101-000000.tar.gz"; fi\n'
 
 
 def build(rel: Path, version: str, files: dict[str, str], *, extra_members=(), corrupt_sum=False):
@@ -117,7 +117,7 @@ def test_unhealthy_new_version_puts_the_old_files_and_version_back(site):
 def test_when_the_old_version_does_not_start_either_the_backup_can_be_restored(site):
     r = site("1.1.0", healthy="", stdin="YES\n")
     assert r.returncode == 1 and "does not start either" in r.stderr
-    assert "backup.sh restore data/backups/pre-update/printgw-20260101-000000.tar.gz --yes" in site.log()
+    assert "backup.sh restore data/backups/pre-update/printgw-v1.0.0-20260101-000000.tar.gz --yes" in site.log()
     r = site("1.1.0", healthy="", stdin="no\n")                       # asked again (the first try left 1.0.0 in .env)
     assert "backup.sh restore" in r.stderr                            # the instructions are printed instead
 
@@ -166,3 +166,41 @@ def test_the_real_release_package_is_complete_and_has_nothing_of_the_users(tmp_p
     compose = (ROOT / "docker-compose.yml").read_text()
     for mounted in ("docker/stack/cups/cupsd.conf", "docker/radius/clients.conf", "docker/radius/authorize"):
         assert f"./{mounted}" in compose and mounted in files        # whatever the compose file mounts must come with it
+
+
+def test_a_git_clone_is_refused_even_before_it_has_a_dot_env(site):
+    (site.project / ".env").unlink()
+    (site.project / ".git").mkdir()
+    r = site("1.1.0")
+    assert r.returncode == 1 and "git clone" in r.stderr and ".env not found" not in r.stderr
+    assert "docker compose pull" not in site.log()
+
+
+def test_after_restoring_an_older_backup_the_files_of_that_version_are_installed_again(site):
+    """The backup brings back .env (version 1.1.0) while the files here are of 1.0.0: update.sh 1.1.0 must not say 'already on'."""
+    site.project.joinpath(".env").write_text(site.env().replace("PRINTGW_VERSION=1.0.0", "PRINTGW_VERSION=1.1.0"))
+    r = site("1.1.0")
+    assert r.returncode == 0 and "OK: now on 1.1.0" in r.stdout
+    assert (site.project / "docker-compose.yml").read_text() == "# compose 1.1.0\n" and (site.project / "VERSION").read_text() == "1.1.0\n"
+    r = site("1.1.0")                                                  # now the files agree: nothing to do
+    assert "already on 1.1.0" in r.stdout
+
+
+def test_a_beta_can_be_installed_by_naming_it_and_the_wrong_spellings_are_refused(site):
+    build(site.rel, "1.2.0-beta.1", {"docker-compose.yml": "# compose beta\n", "scripts/update.sh": UPDATE.read_text(), "scripts/backup.sh": BACKUP_STUB})
+    r = site("1.2.0-beta.1", healthy="1.2.0-beta.1")
+    assert r.returncode == 0, r.stderr + r.stdout
+    assert "PRINTGW_VERSION=1.2.0-beta.1" in site.env() and (site.project / "VERSION").read_text() == "1.2.0-beta.1\n"
+    before = site.log()
+    for bad in ("1.2.0-beta", "1.2.0b1", "1.2.0-rc.1", "1.2.0-beta.1; id"):
+        r = site(bad)
+        assert r.returncode == 1 and "not a version number" in r.stderr, bad
+    assert site.log() == before                                       # nothing was run for them
+
+
+def test_the_release_package_builder_takes_a_beta_and_refuses_junk(tmp_path):
+    ok = subprocess.run(["sh", str(ROOT / "scripts" / "make-release-package.sh"), "3.2.1-beta.2", str(tmp_path)], cwd=ROOT, capture_output=True, text=True)
+    assert ok.returncode == 0, ok.stderr and (tmp_path / "printminder-3.2.1-beta.2.tar.gz").is_file()
+    for bad in ("3.2.1b2", "3.2.1-beta", "3.2.1-x"):
+        assert subprocess.run(["sh", str(ROOT / "scripts" / "make-release-package.sh"), bad, str(tmp_path)], cwd=ROOT,
+                              capture_output=True).returncode == 2

@@ -76,3 +76,14 @@ def test_docker_init_takes_the_version_from_pyproject_in_a_clone(tmp_path):
     (tmp_path / "pyproject.toml").write_text('[project]\nname = "x"\nversion = "0.4.2"\n')
     assert subprocess.run(["sh", "scripts/docker-init.sh"], cwd=tmp_path, capture_output=True).returncode == 0
     assert "PRINTGW_VERSION=0.4.2" in (tmp_path / ".env").read_text()
+
+
+@pytest.mark.skipif(not shutil.which("openssl"), reason="needs openssl")
+def test_docker_init_writes_a_beta_the_way_the_images_are_tagged(tmp_path):
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "docker").mkdir()
+    shutil.copy(ROOT / "scripts" / "docker-init.sh", tmp_path / "scripts")
+    shutil.copy(TEMPLATE, tmp_path / "docker" / "env.example")
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "x"\nversion = "0.4.2b3"\n')
+    assert subprocess.run(["sh", "scripts/docker-init.sh"], cwd=tmp_path, capture_output=True).returncode == 0
+    assert "PRINTGW_VERSION=0.4.2-beta.3\n" in (tmp_path / ".env").read_text()

@@ -1,8 +1,10 @@
 #!/bin/sh
 # Update PrintMinder to a newer published version, safely.
 #   scripts/update.sh              update to the newest release
-#   scripts/update.sh 1.2.0        update (or go back) to this exact version
+#   scripts/update.sh 1.2.0        update (or go back) to this exact version. After restoring a backup made with 1.2.0 it
+#                                  puts the files of 1.2.0 back too
 #   scripts/update.sh --check      only say if a newer version exists
+#   scripts/update.sh 1.3.0-beta.1 a beta (a pre-release) is never offered by itself: only by naming it
 #   (--from-portal VERSION is used by the "updater" container: the portal already made the backup, there are no questions,
 #    and the updater container itself is left alone while it works)
 #
@@ -37,13 +39,17 @@ case "${1:-}" in
     *)       target="${1#v}" ;;
 esac
 
-# only plain numbers like 1.2.3 are accepted: the value ends up in .env, in image names and in a URL
-valid() { printf '%s' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; }
+# only 1.2.3 or a beta like 1.2.3-beta.1 are accepted: the value ends up in .env, in image names and in a URL
+valid() { printf '%s' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$'; }
 envget() { sed -n "s/^$1=//p" .env 2>/dev/null | head -1; }
 # a path from a package: relative, no "..", and never something that belongs to the user
 safe_path() { case "$1" in ""|/*|*..*|.env|.env/*|config|config/*|data|data/*|.git|.git/*) return 1 ;; esac; return 0; }
 sha256() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi; }
 
+if [ "$mode" != "check" ] && [ -d .git ]; then
+    echo "This folder is a git clone: update it with  git pull && docker compose up -d --build  (this script replaces files, which would fight with git)." >&2
+    return 1
+fi
 [ -e .env ] || { echo ".env not found: run scripts/docker-init.sh first" >&2; return 1; }
 current="$(envget PRINTGW_VERSION)"
 registry="$(envget PRINTGW_REGISTRY)"
@@ -53,19 +59,17 @@ if [ -z "$target" ]; then
     target="$(curl -fsS --max-time 15 "$API" | sed -n 's/.*"tag_name": *"v\{0,1\}\([0-9][0-9.]*\)".*/\1/p' | head -1)"
     [ -n "$target" ] || { echo "could not look up the newest version (no network?). Give one: $0 1.2.0" >&2; return 1; }
 fi
-valid "$target" || { echo "'$target' is not a version number like 1.2.3" >&2; return 1; }
+valid "$target" || { echo "'$target' is not a version number like 1.2.3 (or 1.2.3-beta.1)" >&2; return 1; }
 
 echo "installed: $current    wanted: $target"
 if [ "$mode" = "check" ]; then
     [ "$current" = "$target" ] && echo "up to date" || echo "update available: run scripts/update.sh"
     return 0
 fi
-[ "$current" != "$target" ] || { echo "already on $target"; return 0; }
+# after restoring an old backup, .env says one version while the files here (VERSION) are of another: then the files are installed again
+files_version="$(cat VERSION 2>/dev/null || true)"
+if [ "$current" = "$target" ] && { [ -z "$files_version" ] || [ "$files_version" = "$target" ]; }; then echo "already on $target"; return 0; fi
 [ -n "$registry" ] || { echo "PRINTGW_REGISTRY is empty in .env: images are built from this folder. Update with: git pull && docker compose up -d --build" >&2; return 1; }
-if [ -d .git ]; then
-    echo "This folder is a git clone: update it with  git pull && docker compose up -d --build  (this script replaces files, which would fight with git)." >&2
-    return 1
-fi
 
 # a jump to another major version can change things by hand: ask first
 if [ "$portal" = 0 ] && [ "${current%%.*}" != "${target%%.*}" ]; then

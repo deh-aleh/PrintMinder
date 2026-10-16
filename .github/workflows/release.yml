@@ -1,11 +1,13 @@
 # Publishes the container images when you push a version tag, for example:  git tag v1.2.0 && git push origin v1.2.0
+# A beta is tagged v1.2.0-beta.1 and written 1.2.0b1 in pyproject.toml; it is published as a GitHub "pre-release", which
+# scripts/update.sh and the portal never offer by themselves.
 # One tag gives one image per service, built for both amd64 (PC, server) and arm64 (Raspberry Pi, ARM NAS).
 # Images go to ghcr.io/<owner>/<service>:<version> (gateway, cups, ipp-usb, updater). The tag must match "version" in pyproject.toml.
 # The release also gets printminder-<version>.tar.gz (+ SHA256SUMS): docker-compose.yml, scripts/, docker/env.example and the docs.
 name: Release
 on:
   push:
-    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+", "v[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+"]
   workflow_dispatch:      # "Run workflow" button: builds everything for both architectures but publishes nothing (a dry run)
 
 permissions:
@@ -25,7 +27,7 @@ jobs:
       - name: Tag must match the version in pyproject.toml
         if: github.event_name == 'push'
         run: |
-          v="$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')"
+          v="$(python -c 'import re,tomllib;print(re.sub(r"^(\d+\.\d+\.\d+)b(\d+)$", r"\1-beta.\2", tomllib.load(open("pyproject.toml","rb"))["project"]["version"]))')"
           test "v$v" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} != pyproject version v$v"; exit 1; }
 
   images:
@@ -52,7 +54,7 @@ jobs:
       - id: meta
         run: |
           echo "owner=$(echo '${{ github.repository_owner }}' | tr 'A-Z' 'a-z')" >> "$GITHUB_OUTPUT"
-          echo "version=$(python3 -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')" >> "$GITHUB_OUTPUT"
+          echo "version=$(python3 -c 'import re,tomllib;print(re.sub(r"^(\d+\.\d+\.\d+)b(\d+)$", r"\1-beta.\2", tomllib.load(open("pyproject.toml","rb"))["project"]["version"]))')" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
@@ -76,6 +78,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-beta.') }}
           files: |
             dist/printminder-*.tar.gz
             dist/SHA256SUMS

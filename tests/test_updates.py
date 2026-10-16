@@ -30,3 +30,25 @@ def test_fetch_latest_ignores_prereleases_and_bad_urls():
     assert asyncio.run(updates.fetch_latest(_client({"tag_name": "nightly"}))) is None
     odd = asyncio.run(updates.fetch_latest(_client({"tag_name": "v2.0.0", "html_url": "javascript:alert(1)"})))
     assert odd["url"] == ""
+
+
+def test_a_beta_is_never_offered_but_an_installed_beta_is_told_about_the_final_release():
+    for beta in ("v1.2.3-beta.1", "1.2.3b1"):
+        assert updates.parse(beta) is None                           # never offered
+    assert updates.newer("1.2.3", "1.2.3b1") and updates.newer("1.2.3", "1.2.3-beta.4")   # the final release follows its betas
+    assert updates.newer("1.2.4", "1.2.3b1") and not updates.newer("1.2.2", "1.2.3b1")
+    assert not updates.newer("1.2.3", "1.2.3")
+    assert not updates.newer("1.2.3", "1.2.3bx")                      # junk installed version: say nothing
+
+
+def test_a_pre_release_on_github_is_not_offered():
+    assert asyncio.run(updates.fetch_latest(_client({"tag_name": "v1.2.3-beta.1", "prerelease": True, "html_url": "https://x"}))) is None
+
+
+def test_an_installed_beta_can_update_from_the_portal_within_its_major(monkeypatch, tmp_path):
+    monkeypatch.setattr(updates, "app_version", lambda: "1.2.3b1")
+    monkeypatch.setattr(updates, "_dir", lambda: tmp_path)
+    updates.write_request("1.2.3", "root", "b")
+    import pytest
+    with pytest.raises(ValueError):
+        updates.write_request("2.0.0", "root", "b")

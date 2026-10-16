@@ -239,6 +239,20 @@ If you do not want that risk, keep it off and use `scripts/update.sh`. To turn i
 in your `.env`. To see which options exist, open `docker/env.example` (every update replaces it): each option has its explanation. To change one,
 copy its line into your `.env` and run `docker compose up -d`.
 
+**Going back to an older version.** `scripts/update.sh 0.3.0` puts the files and images of that version back. From 0.3.1 on, a version put back this way starts on a database the newer one already migrated (migrations only add). Versions up to 0.3.0 do not: they refuse to start on a database they do not know. In that case, and in any case where the new version damaged something, use the backup that `update.sh` made **before** the update (emergency procedure):
+
+```sh
+ls data/backups/pre-update/
+#   printgw-v0.3.0-20261016-132831.tar.gz   <- made while 0.3.0 was running
+#   printgw-v0.2.2-20261016-101500.tar.gz   <- made while 0.2.2 was running (before the update to 0.3.0)
+scripts/backup.sh restore data/backups/pre-update/printgw-v0.2.2-20261016-101500.tar.gz    # asks you to type YES
+scripts/update.sh 0.2.2                    # puts the files of that version back (the restore brought back its .env)
+```
+
+The version in the file name is the one that was running when the backup was made: to go back to a version, take the backup with that name. Everything done after that backup (print history, new users, requests) is lost; the backup also brings back the `.env` of that moment. Each attempt makes a new backup first, so nothing is overwritten: the newest file is always the state just before your last command.
+
+**Betas.** A version such as `0.4.0-beta.1` is a test release, published as a GitHub pre-release. `scripts/update.sh` without arguments, the *Update* button and the "new version" note never offer it; you get it only by naming it: `scripts/update.sh 0.4.0-beta.1`. From a beta, the final release (`0.4.0`) is offered normally. Do not use a beta on a server people depend on.
+
 **Pin the version.** Never use `latest`: leave `PRINTGW_VERSION` at a number, so an update is a decision.
 
 ## 9. Alternative: install on the host (no docker)

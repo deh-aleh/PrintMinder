@@ -15,23 +15,23 @@ Principio cardine: **il gateway è l'unico punto d'ingresso**. CUPS e la stampan
 che CUPS vede non viene mai dal client: lo decide il gateway dopo l'autenticazione.
 
 ```
-                         ┌──────────────────────────────────────────┐
-  client IPP  ──ipps──▶  │ GATEWAY (container, porta 8631)          │
-  (PC, Mac, …)  TLS +    │  • TLS + HTTP Basic (nome + chiave)      │ ──▶ RADIUS (facoltativo)
-  Basic auth             │  • identità imposta dal gateway          │
-                         │  • quote/concessioni + audit  ◀──▶  DB   │
-  browser  ───https────▶ │  • portale: /admin (admin), /me (utenti) │
-                         └──────────────┬───────────────────────────┘
-                                        │ socket unix (volume condiviso)
-                         ┌──────────────▼───────────────┐
-                         │ CUPS 2.4 (container)         │  nessuna porta TCP
-                         └──────────────┬───────────────┘
-                                        │ rete interna docker
-                         ┌──────────────▼───────────────┐
-                         │ ipp-usb (container)          │  /dev/bus/usb
-                         └──────────────┬───────────────┘
-                                        │ USB
-                                  stampante / scanner
+                            ┌──────────────────────────────────────────┐
+    client IPP  ──ipps──▶   │ GATEWAY (container, porta 8631)          │
+    (PC, Mac, …)  TLS +     │  • TLS + HTTP Basic (nome + chiave)      │ ──▶ RADIUS (facoltativo)
+    Basic auth              │  • identità imposta dal gateway          │
+                            │  • quote/concessioni + audit  ◀──▶  DB   │
+    browser  ───https────▶  │  • portale: /admin (admin), /me (utenti) │
+                            └──────────────┬───────────────────────────┘
+                                           │ socket unix (volume condiviso)
+                            ┌──────────────▼───────────────┐
+                            │ CUPS 2.4 (container)         │  nessuna porta TCP
+                            └──────────────┬───────────────┘
+                                           │ rete interna docker
+                            ┌──────────────▼───────────────┐
+                            │ ipp-usb (container)          │  /dev/bus/usb
+                            └──────────────┬───────────────┘
+                                           │ USB
+                                   stampante / scanner
 
    mdns (container, rete host): legge l'elenco delle code e lo annuncia sulla LAN (DNS-SD / AirPrint / Mopria)
 ```

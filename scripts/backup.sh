@@ -1,7 +1,8 @@
 #!/bin/sh
 # HOST-SIDE full backup / restore (also takes the CUPS queues and .env; use it to move the machine).
 # The gateway has its own scheduled backups in the portal (menu Backup): see README. Run from anywhere; works on the running stack.
-#   scripts/backup.sh backup [DEST_DIR]      writes DEST_DIR/printgw-YYYYMMDD-HHMMSS.tar.gz   (default DEST_DIR: ./backups)
+#   scripts/backup.sh backup [DEST_DIR]      writes DEST_DIR/printgw-vX.Y.Z-YYYYMMDD-HHMMSS.tar.gz   (default DEST_DIR: ./backups)
+#                                            X.Y.Z = the version that was running: to go back to a version, restore a backup with that name
 #   scripts/backup.sh restore FILE.tar.gz [--yes]   puts it back (stops the gateway first, asks for confirmation; --yes = already asked,
 #                                            used by scripts/update.sh)
 #
@@ -40,7 +41,8 @@ PY
     [ -e .env ] && cp -a .env "$work/dot-env"
     cp -a data/audit-archive/. "$work/audit-archive/" 2>/dev/null || true
     docker run --rm -v "${project}_cups-config:/c:ro" alpine tar -C /c -cf - . > "$work/cups-config.tar"
-    out="$dest/printgw-$(date +%Y%m%d-%H%M%S).tar.gz"
+    ver="$(sed -n 's/^PRINTGW_VERSION=//p' .env 2>/dev/null | head -1 | tr -cd '0-9A-Za-z.-')"
+    out="$dest/printgw-v${ver:-unknown}-$(date +%Y%m%d-%H%M%S).tar.gz"
     tar -C "$work" -czf "$out" .
     chmod 600 "$out"
     echo "backup written: $out"
@@ -68,6 +70,12 @@ restore)
         sh -c 'cd /c && tar -xf /w/cups-config.tar'
     docker compose up -d
     echo "restored. Check:  docker compose logs --tail 20 gateway"
+    # the backup brings back .env, so also the version it was made with; the compose file and the scripts here may be of another one
+    was="$(sed -n 's/^PRINTGW_VERSION=//p' .env 2>/dev/null | head -1)"; files="$(cat VERSION 2>/dev/null || true)"
+    if [ -n "$was" ] && [ -n "$files" ] && [ "$was" != "$files" ]; then
+        echo "NOTE: this backup was made with version $was, but the files in this folder (docker-compose.yml, scripts) are of $files."
+        echo "      Put the files of $was back with:  scripts/update.sh $was"
+    fi
     ;;
 *)
     echo "usage: $0 backup [DEST_DIR] | restore FILE.tar.gz [--yes]" >&2

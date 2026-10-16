@@ -7,7 +7,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 version="${1:?usage: $0 VERSION OUT_DIR}"; out="${2:?usage: $0 VERSION OUT_DIR}"
-printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "VERSION must look like 1.2.3" >&2; exit 2; }
+printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$' || { echo "VERSION must look like 1.2.3 or 1.2.3-beta.1" >&2; exit 2; }
 top="printminder-$version"
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT

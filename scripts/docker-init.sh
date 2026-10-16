@@ -13,7 +13,8 @@ mkdir -p config/tls data/audit-archive data/backups
 if [ ! -e .env ]; then
     [ -f docker/env.example ] || { echo "docker/env.example not found: run this from the PrintMinder folder" >&2; exit 1; }
     # the version: the file VERSION of the release package, or pyproject.toml in a git clone
-    version="$(cat VERSION 2>/dev/null || sed -n 's/^version *= *"\([0-9][0-9.]*\)".*/\1/p' pyproject.toml 2>/dev/null | head -1)"
+    version="$(cat VERSION 2>/dev/null || sed -n 's/^version *= *"\([0-9][0-9.]*\(b[0-9][0-9]*\)\{0,1\}\)".*/\1/p' pyproject.toml 2>/dev/null | head -1)"
+    version="$(printf '%s' "$version" | sed 's/^\([0-9][0-9.]*\)b\([0-9][0-9]*\)$/\1-beta.\2/')"   # pyproject says 0.3.1b1, the images are 0.3.1-beta.1
     [ -n "$version" ] || { echo "can not tell which version this is (no VERSION file, no pyproject.toml)" >&2; exit 1; }
     secret="$(openssl rand -base64 48 | tr -d '\n=' | tr '+/' '-_')"
     here="$(pwd)"
