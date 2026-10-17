@@ -67,7 +67,7 @@ browser ───────https───────────▶     │  
 | | Scheduled backups per administrator (folder, hour, rotation, passphrase/recovery-key encryption), restore from CLI | ✅ |
 | | Database migrations (Alembic), health check, logs, admin CLI | ✅ |
 | | Images for amd64 and arm64 on ghcr.io; update script that downloads a checked release package, makes a backup first and goes back by itself (and offers to restore the backup) if the new version does not start; notice of new versions; one `.env` file that an update never touches | ✅ amd64; arm64 run on a Raspberry Pi 4B (64-bit) |
-| | Update button in the portal (optional `updater` container, needs the Docker socket) | 🟡 only tested with simulations |
+| | Update button in the portal (optional `updater` container, needs the Docker socket) | ✅ |
 | | Backups on a network disk or USB disk: marker file against an unmounted disk (on by default), a notice in the bell when a backup fails, time limit for a disk that stops answering | ✅ tested with an SMB share |
 | | TLS certificate: notices (expired, announced address missing, optional expiry warning) and `scripts/cert-sync.sh` to copy a renewed certificate from Nginx Proxy Manager or certbot | 🟡 script tested with simulations, not yet with a real Nginx Proxy Manager |
 | | Bell with notices for administrators (one bell, their own notices first); printer problems (jam, paper, ink) for administrators and for the users waiting; users are told when their group, rights, quota or request change; a one-time reminder to save `CUPSPL_SECRET_KEY` and a notice if it changes; `/healthz` shows only the status unless you ask for more | ✅ |
@@ -86,6 +86,20 @@ The full list, with workarounds, is in [docs/en/limitations.md](docs/en/limitati
 - Printer disconnection is detected within ~30 s (network queues: a TCP check, not paper).
 - Printed **file names are encrypted** in the database (key from `CUPSPL_SECRET_KEY`: do not change it); the rest of the database is not. For everything else encrypt the disk: [data-protection.md](docs/en/data-protection.md).
 - Spanish, Russian and Chinese translations are not reviewed by native speakers; pages printed by the gateway stay English.
+
+
+## How it was developed
+
+PrintMinder started as a solution to a problem of my own, and I published it because it may be useful to others. I used AI tools in a significant way, and I would rather say so plainly:
+
+- **Documentation, automated tests and code comments** were written mostly with AI assistance.
+- **The application code** was written partly by me and partly with AI assistance.
+- **Translations** were made with DeepL and then harmonised with AI tools. The Spanish, Russian and Chinese ones have not been reviewed by native speakers.
+
+If you are looking for software written entirely by a human, this is not the right repository for you.
+
+What you can check for yourself: the automated tests (`tests/`), the feature status table (what has been tried on real hardware) and the list of known limits. The code has not had an independent review: if you use it where it matters, look closely at the security-sensitive parts (authentication, print keys, certificates).
+
 
 ## Install (Docker, recommended)
 

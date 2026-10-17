@@ -29,7 +29,7 @@ tests/_out/
 /requirement.txt
 
 # notes for whoever maintains the project (releases, development): local only
-/MAINTAINER-NOTES.md
+/NOTE.md
 /.env.bak-*
 
 # update.sh working folders

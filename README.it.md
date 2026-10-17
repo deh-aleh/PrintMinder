@@ -67,7 +67,7 @@ browser ───────https───────────▶     │  
 | | Backup programmati per amministratore (cartella, ora, rotazione, cifratura con passphrase/chiave di recupero), ripristino da CLI | ✅ |
 | | Migrazioni del database (Alembic), health check, log, CLI di amministrazione | ✅ |
 | | Immagini per amd64 e arm64 su ghcr.io; script di aggiornamento che scarica un pacchetto di release controllato, fa prima un backup e torna indietro da solo (proponendo il ripristino del backup) se la nuova versione non parte; avviso di nuove versioni; un solo file `.env` che un aggiornamento non tocca mai | ✅ amd64; arm64 in funzione su un Raspberry Pi 4B (64 bit) |
-| | Pulsante Aggiorna nel portale (contenitore facoltativo `updater`, usa il socket di Docker) | 🟡 provato solo con simulazioni |
+| | Pulsante Aggiorna nel portale (contenitore facoltativo `updater`, usa il socket di Docker) | ✅  |
 | | Backup su disco di rete o USB: file segnaposto contro un disco non montato (attivo di default), avviso nella campanella quando un backup fallisce, limite di tempo per un disco che non risponde | ✅ provato con una condivisione SMB |
 | | Certificato TLS: avvisi (scaduto, indirizzo annunciato mancante, avviso di scadenza facoltativo) e `scripts/cert-sync.sh` per copiare un certificato rinnovato da Nginx Proxy Manager o certbot | 🟡 script provato con simulazioni, non ancora con un vero Nginx Proxy Manager |
 | | Campanella con gli avvisi per gli amministratori (una sola, prima i propri); problemi di stampante (inceppamento, carta, inchiostro) per gli amministratori e per chi aspetta; l'utente è avvisato se cambiano gruppo, diritti, quota o richiesta; promemoria, una volta sola, di salvare `CUPSPL_SECRET_KEY` e avviso se cambia; `/healthz` mostra solo lo stato se non chiedi di più | ✅ |
@@ -87,6 +87,20 @@ L'elenco completo, con le soluzioni, è in [docs/it/limiti.md](docs/it/limiti.md
 - Una stampante scollegata si rileva entro ~30 s (code di rete: prova TCP, non la carta).
 - I **nomi dei file stampati sono cifrati** nel database (chiave da `CUPSPL_SECRET_KEY`: non cambiarla); il resto del database no. Per tutto il resto cifra il disco: [protezione-dati.md](docs/it/protezione-dati.md).
 - Le traduzioni in spagnolo, russo e cinese non sono riviste da madrelingua; le pagine stampate dal gateway restano in inglese.
+
+
+## Come è stato sviluppato
+
+PrintMinder nasce per risolvere un mio problema e l'ho pubblicato perché può servire ad altri. Ho usato strumenti di intelligenza artificiale (IA) in modo rilevante, e preferisco dirlo apertamente:
+
+- **Documentazione, test automatici e commenti nel codice**: scritti per lo più con l'aiuto dell'IA.
+- **Codice dell'applicazione**: scritto in parte da me e in parte con l'aiuto dell'IA.
+- **Traduzioni**: fatte con DeepL e poi uniformate con strumenti di IA. Quelle in spagnolo, russo e cinese non sono state riviste da madrelingua.
+
+Se cerchi un software scritto interamente da una persona, questo non è il repository adatto.
+
+Cosa puoi controllare da solo: i test automatici (`tests/`), la tabella di stato delle funzioni (cosa è stato provato su hardware reale) e l'elenco dei limiti noti. Il codice non ha avuto una revisione indipendente: se lo usi dove conta, guarda con attenzione le parti che riguardano la sicurezza (autenticazione, chiavi di stampa, certificati).
+
 
 ## Installazione (Docker, consigliata)
 
