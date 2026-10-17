@@ -49,7 +49,7 @@ everything else needs HTTP Basic with **user name + print key**, same authentica
   as the passwordless local account `ospite-scansione` (it can not log in to the portal), with the caller's IP in the audit
   options. Wrong credentials are still 401. While the option is off, a request without credentials is refused (401) and shows up as a notice in the bell ([admin-guide.md](admin-guide.md)), at most once per interval and source. **Default off**; anyone on the network who reaches port 8631 could scan: use only on a trusted
   network. NAPS2 did not find the mDNS announcement: type IP and port by hand.
-- **Scan window** (`CUPSPL_ESCL_WINDOW`, on by default): a button at the top right of *Scan* (a scanner with a clock) tells the
+- **Scan window** (`CUPSPL_ESCL_WINDOW`, on by default; a last resort, see its limits below): a button at the top right of *Scan* (a scanner with a clock) tells the
   gateway "my scan app is about to scan". The gateway notes the address it sees for that connection and, for
   `CUPSPL_ESCL_WINDOW_SECONDS` (60–900, default 180), accepts requests **without credentials from that address only**, as
   the person who pressed the button: their quota and permissions apply and the audit shows their name and the address. Any
@@ -66,7 +66,8 @@ everything else needs HTTP Basic with **user name + print key**, same authentica
 
 ### Limits of the scan window
 
-The gateway can only compare the address of the TCP connection. Everything that changes that address breaks the method:
+The scan window is a **last resort**, for apps that can not send a user name and a key at all and where you still want every scan
+in the audit. It rests on one weak thing: the address of the TCP connection. Everything that changes that address breaks the method:
 
 - **NAT**: if the browser and the scan app are behind the same router as seen by the server (for example another network, a VPN
   or a guest Wi-Fi), the server sees the router's address for *both*. The window then also accepts every other device behind
@@ -76,10 +77,13 @@ The gateway can only compare the address of the TCP connection. Everything that 
   The two addresses are different and do not match. Open the portal with the address of the same family that the scan app uses
   (the box that opens when you press the button says which address the server saw). An IPv4 address written in IPv6 form
   (`::ffff:192.168.1.5`) is treated as the IPv4 one.
-- **Proxies**: behind a reverse proxy the server sees the proxy's address, the same for everybody, unless the proxy is trusted
-  to pass the real one on (`X-Forwarded-For`; the application server only believes it from `127.0.0.1`). The box shows a warning
-  when the portal request carried such a header. Scan apps normally connect straight to port 8631, not through the proxy, so the
-  two addresses differ.
+- **Reverse proxy** (Nginx Proxy Manager and the like). If you open the portal *through* the proxy, the server sees the proxy's
+  address, not your computer's, and the window is opened for the proxy's address. The scan app normally connects straight to
+  port 8631 with its own address, so the two never match and the scan is refused. The reverse case is worse: if the scan app also
+  goes through the proxy, every device that reaches the server through the proxy has the same address, so during the window
+  *any of them* can scan. The server believes `X-Forwarded-For` only from `127.0.0.1`, so a proxy on another machine does not help.
+  What works: press the button from a page opened **directly** on the gateway (`https://<server>:8631/me/scan`, not through the
+  proxy). The box warns you when the request carried proxy headers.
 - **A different device**: the button must be pressed from the computer that runs the scan app. Pressing it on a phone opens the
   window for the phone.
 - **Changing address**: DHCP or Wi-Fi roaming during the window ends the match.

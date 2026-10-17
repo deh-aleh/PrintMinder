@@ -2,11 +2,11 @@
 
 [Documentation index](../README.md) · English · [Italiano](../it/guida-amministratore.md)
 
-For people who run the installation. The portal is at `https://<server>:8631/admin`. The top menu:
+For people who run the installation. The portal is at `https://<server>:8631/` (sign-in at `/login`, first-run setup at `/setup`). The top menu:
 
 | Menu | Page | What you do there |
 |---|---|---|
-| **Audit** | `/admin/jobs` | Who printed or scanned what; filters, CSV, cancel queued jobs → [audit.md](audit.md) |
+| **Audit** | `/admin/jobs` | Who printed or scanned what; filters, CSV, usage report (`/admin/report`), cancel queued jobs → [audit.md](audit.md) |
 | **Users** | `/admin/users` | Create local or RADIUS users, edit, reset password, revoke keys, delete |
 | **Groups** | `/admin/groups` | Create, rename, limits, "requestable", delete |
 | **Requests** | `/admin/requests` | Approve, edit or reject quota, group and permission requests (badge = pending); active grants, give or revoke extra quota or a permission directly, history → [quotas.md](quotas.md) |
@@ -24,7 +24,7 @@ For people who run the installation. The portal is at `https://<server>:8631/adm
 ## 1. First steps
 
 1. Set the `cups_orchestrator` password with the one-time code ([installation.md](installation.md#36-first-administrator)).
-2. Create your **own** administrator account (Users → create → administrator) and use it day to day; keep `cups_orchestrator` for emergencies.
+2. Create your **own** administrator account (Users → create → administrator) and use it day to day. `cups_orchestrator` is the emergency account: it belongs to no group and nothing limits it (no quota, no permission rule), so keep it for recovery.
 3. Edit the **default** group limits (Groups) and create groups for the people who need different limits.
 4. Create users, or let RADIUS users log in. Tell people to create a print key ([user-guide.md](user-guide.md)).
 5. Set up a backup ([backup.md](backup.md)).
@@ -49,8 +49,8 @@ A group has limits (jobs / pages, weekly / monthly) and a **requestable** flag. 
 deleted; deleting another group moves its users to `default`. Personal limits are set in the user's edit page. Details in [quotas.md](quotas.md).
 
 **Advanced permissions.** At the bottom of the group page and of the user page, the **Advanced permissions** button opens colour, one-sided
-prints, which printers, and which days and hours. A user's field is "as the group" or has its own value. The emergency administrator is
-exempt and its page shows the block switched off. `CUPSPL_PERMISSION_MODE` decides whether a client that explicitly asks for colour or
+prints, which printers, and which days and hours. A user's field is "as the group" or has its own value. The emergency administrator has no group and no
+limits at all; its page shows the block switched off. `CUPSPL_PERMISSION_MODE` decides whether a client that explicitly asks for colour or
 a one-sided print that is not allowed is corrected (`adjust`, default) or refused (`refuse`). Read the notes in
 [quotas.md](quotas.md#5-advanced-permissions) before choosing: with `refuse` many Windows and Android jobs are refused. A user is told in
 their bell when you change their own permissions, and when a job of theirs is refused or corrected.
@@ -102,19 +102,20 @@ The bell in the top bar (administrators only) lists what the gateway noticed and
 last time, the source, and how many times it happened; *Dismiss* closes it (the dismissal is recorded in *Actions*).
 The kinds of notice:
 
-| Notice | What it says | Closes by itself when |
+| Notice (as shown in the bell) | Meaning | Closes by itself when |
 |---|---|---|
-| Scan without login | A scan request without user name and password was refused because `CUPSPL_ESCL_ANONYMOUS` is off | never (dismiss it) |
-| Backup not done / Backup failed | A backup could not be saved, with the real name of the backup ([backup.md](backup.md)) | the next backup works |
-| Certificate expired | Devices no longer trust the gateway ([certificates.md](certificates.md)) | a valid certificate is in place |
-| Certificate update failed | The last run of `scripts/cert-sync.sh` failed | the next run works |
-| Announced address not in the certificate | Phones that find the printers by themselves will show a certificate error | the certificate lists the address |
-| Certificate about to expire | Only if you turned it on (`CUPSPL_CERT_EXPIRY_WARN_ENABLED`) | the certificate is renewed |
-| Paper jam / Out of paper | A physical printer reports it (once a minute, confirmed twice in a row) | the printer stops reporting it |
-| Out of ink or toner / Running low | Out: the ink level is 0 or the printer says so. Running low: only the level below the printer's own "low" mark | the printer stops reporting it |
-| Save the secret key | Once, after the first start: copy `CUPSPL_SECRET_KEY` from `.env` to a safe place. It goes to the first-run administrator (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`) in their own bell, or to all administrators if that account does not exist. It does not come back at a restart; it comes back once if the key changes | never (dismiss it) |
-| The secret key has changed | `CUPSPL_SECRET_KEY` is not the one of the previous start; says how many file names can no longer be read | never (dismiss it) |
-| No secret key | `CUPSPL_SECRET_KEY` is empty: file names are not encrypted and everybody signs in again after a restart | a key is set |
+| A scan request without a user name and password from IP was refused | `CUPSPL_ESCL_ANONYMOUS` is off and a client sent no credentials ([scanning.md](scanning.md)) | never (dismiss it) |
+| **Backup not done: the destination folder can not be reached** | The marker file of the destination is missing (disk not mounted); nothing was written ([backup.md](backup.md)) | the next backup works |
+| **Backup failed** | Any other error, with the reason; both notices carry the real name of the backup | the next backup works |
+| **The TLS certificate has expired** | Clients no longer trust the gateway ([certificates.md](certificates.md)) | a valid certificate is in place and the gateway restarted |
+| **The certificate could not be updated** | The last run of `scripts/cert-sync.sh` failed | the next run works |
+| **The announced address is not in the TLS certificate** | Clients that discover the printers through mDNS get a certificate error | the SAN lists the address |
+| **The TLS certificate expires on DATE** | Only if `CUPSPL_CERT_EXPIRY_WARN_ENABLED=true` | the certificate is renewed |
+| **Paper jam** / **Out of paper** | A physical printer reports it (checked once a minute, reported after two consecutive checks) | the printer stops reporting it |
+| **Ink or toner is out** / **running low** | Out: level 0, or the printer's state reason says so. Low: the printer's own low mark. Both name the supplies | the printer stops reporting it |
+| **Save the secret key in a safe place** | Once, after the first start: copy `CUPSPL_SECRET_KEY` from `.env`. Goes to the first-run administrator (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`) in their own bell, or to all administrators if that account does not exist or `CUPSPL_BOOTSTRAP_ADMIN=false`. Not repeated at a restart; repeated once if the key changes | never (dismiss it) |
+| **The secret key has changed** | `CUPSPL_SECRET_KEY` differs from the previous start; says how many file names can no longer be read | never (dismiss it) |
+| **No secret key is set** | `CUPSPL_SECRET_KEY` is empty: file names are not encrypted and sessions end at every restart | a key is set |
 
 **Printer problems and users.** The notices above about printers are always for administrators. With `CUPSPL_PRINTER_ALERTS_USERS=true` (default) the people who have a
 print waiting on that printer get a notice in their own bell too (jam, paper and ink out; not "running low"), once per problem and only them, not everybody.

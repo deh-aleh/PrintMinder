@@ -48,7 +48,7 @@ richiede HTTP Basic con **nome utente + chiave di stampa**, stessa autenticazion
   l'account locale senza password `ospite-scansione` (non può entrare nel portale), con l'IP di chi chiama nelle opzioni dell'audit.
   Credenziali sbagliate restano 401. Finché l'opzione è spenta, una richiesta senza credenziali viene rifiutata (401) e compare come avviso nella campanella ([guida-amministratore.md](guida-amministratore.md)), al massimo una volta per intervallo e per fonte. **Predefinito spento**; chiunque nella rete raggiunga la porta 8631 potrebbe scansionare: usalo solo su
   rete fidata. NAPS2 non ha trovato l'annuncio mDNS: inserisci IP e porta a mano.
-- **Finestra di scansione** (`CUPSPL_ESCL_WINDOW`, accesa di default): un pulsante in alto a destra in *Scansione* (uno scanner con un
+- **Finestra di scansione** (`CUPSPL_ESCL_WINDOW`, accesa di default; è un ultimo rimedio, vedi i limiti più sotto): un pulsante in alto a destra in *Scansione* (uno scanner con un
   timer) dice al gateway «la mia app sta per scansionare». Il gateway si segna l'indirizzo che vede per quella connessione e, per
   `CUPSPL_ESCL_WINDOW_SECONDS` (60–900, predefinito 180), accetta richieste **senza credenziali solo da quell'indirizzo**, a nome di
   chi ha premuto il pulsante: valgono la sua quota e i suoi permessi e l'audit riporta il suo nome e l'indirizzo. Finché la finestra
@@ -66,7 +66,8 @@ richiede HTTP Basic con **nome utente + chiave di stampa**, stessa autenticazion
 
 ### Limiti della finestra di scansione
 
-Il gateway può solo confrontare l'indirizzo della connessione TCP. Tutto ciò che cambia quell'indirizzo rompe il metodo:
+La finestra di scansione è un **ultimo rimedio**, per le app che non sanno inviare né nome utente né chiave e quando vuoi comunque ogni
+scansione nell'audit. Si regge su una cosa debole: l'indirizzo della connessione TCP. Tutto ciò che cambia quell'indirizzo rompe il metodo:
 
 - **NAT**: se il browser e l'app di scansione stanno dietro lo stesso router, per il server (per esempio un'altra rete, una VPN o il
   Wi-Fi ospiti), il server vede l'indirizzo del router per *entrambi*. La finestra accetta allora anche ogni altro dispositivo dietro
@@ -76,10 +77,13 @@ Il gateway può solo confrontare l'indirizzo della connessione TCP. Tutto ciò c
   indirizzi sono diversi e non coincidono. Apri il portale con l'indirizzo della stessa famiglia usata dall'app (il riquadro che si
   apre premendo il pulsante dice quale indirizzo ha visto il server). Un indirizzo IPv4 scritto in forma IPv6 (`::ffff:192.168.1.5`) è
   trattato come quello IPv4.
-- **Proxy**: dietro un reverse proxy il server vede l'indirizzo del proxy, uguale per tutti, a meno che il proxy sia considerato
-  attendibile per inoltrare quello vero (`X-Forwarded-For`; il server dell'applicazione ci crede solo da `127.0.0.1`). Il riquadro
-  mostra un avviso quando la richiesta al portale portava un'intestazione di questo tipo. Le app di scansione di norma si collegano
-  direttamente alla porta 8631, non attraverso il proxy, quindi i due indirizzi differiscono.
+- **Reverse proxy** (Nginx Proxy Manager e simili). Se apri il portale *attraverso* il proxy, il server vede l'indirizzo del proxy e non
+  quello del tuo computer, e la finestra si apre per l'indirizzo del proxy. L'app di scansione di norma si collega direttamente alla
+  porta 8631 con il proprio indirizzo, quindi i due non coincidono mai e la scansione è rifiutata. Il caso inverso è peggiore: se
+  anche l'app di scansione passa dal proxy, tutti i dispositivi che raggiungono il server tramite il proxy hanno lo stesso indirizzo,
+  quindi durante la finestra *qualsiasi* di loro può scansionare. Il server si fida di `X-Forwarded-For` solo da `127.0.0.1`, perciò
+  un proxy su un'altra macchina non aiuta. Quello che funziona: premi il pulsante da una pagina aperta **direttamente** sul gateway
+  (`https://<server>:8631/me/scan`, non attraverso il proxy). Il riquadro avvisa quando la richiesta portava intestazioni di proxy.
 - **Un altro dispositivo**: il pulsante va premuto dal computer su cui gira l'app di scansione. Premerlo da un telefono apre la
   finestra per il telefono.
 - **Indirizzo che cambia**: DHCP o roaming Wi-Fi durante la finestra interrompono la corrispondenza.

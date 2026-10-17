@@ -4,7 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.db.models import Group, User
+from app.auth.users import is_emergency
+from app.db.models import Group, PermissionRule, PolicyRule, SubjectType, User
 
 ADMIN_GROUP = "administrator"
 
@@ -25,7 +26,9 @@ def _get_or_create(db: Session, name: str) -> Group:
 def set_admin(db: Session, user: User, flag: bool) -> None:
     """Promote/demote and move the account: administrators live in "administrator", demoted ones go back to "default"."""
     user.is_admin = bool(flag)
-    if flag:
+    if is_emergency(user):  # the built-in administrator belongs to no group: nothing limits it
+        user.group_id = None
+    elif flag:
         user.group_id = _get_or_create(db, ADMIN_GROUP).id
     else:
         admin_group = db.scalars(select(Group).where(Group.name == ADMIN_GROUP)).first()
@@ -34,11 +37,16 @@ def set_admin(db: Session, user: User, flag: bool) -> None:
 
 
 def ensure_system_groups(sm) -> None:
-    """At start: both groups exist; every administrator is in "administrator", nobody else is."""
+    """At start: both groups exist; every administrator is in "administrator", nobody else is. The only exception is the
+    emergency administrator: it has no group and no limits of its own (rows left from an older version are removed)."""
     with sm() as db:
         default, admins = _get_or_create(db, settings.default_group), _get_or_create(db, ADMIN_GROUP)
         for u in db.scalars(select(User)):
-            if u.is_admin and u.group_id != admins.id:
+            if is_emergency(u):
+                u.group_id = None
+                for model in (PolicyRule, PermissionRule):
+                    db.query(model).filter(model.subject_type == SubjectType.user, model.subject_id == u.id).delete()
+            elif u.is_admin and u.group_id != admins.id:
                 u.group_id = admins.id
             elif not u.is_admin and u.group_id == admins.id:
                 u.group_id = default.id

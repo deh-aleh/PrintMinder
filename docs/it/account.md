@@ -24,7 +24,7 @@ l'accesso è negato (fail closed). I nomi RADIUS si confrontano senza distinguer
 Il codice è protetto da throttling. In alternativa: `cups-policy-admin set-admin-password`. Di proposito non esiste una pagina aperta
 a tutti per diventare amministratore.
 
-L'account di emergenza non si può disattivare, declassare, eliminare né cambiargli origine. Nessuno può disattivare, declassare o
+L'account di emergenza non si può disattivare, declassare, eliminare né cambiargli origine, e il suo nome non si può dare a nessun altro account. È l'unico account senza gruppo: niente lo limita (nessuna quota, nessuna regola di permessi) e non può chiedere di cambiare gruppo. Gli altri amministratori stanno nel gruppo "administrator", di cui puoi modificare limiti e permessi (il gruppo però non si può eliminare). Nessuno può disattivare, declassare o
 eliminare se stesso, né l'ultimo amministratore.
 
 ## 3. Password (account locali)
@@ -59,8 +59,7 @@ password di dominio: usano una **chiave di stampa personale**.
 - **Chiave monouso**: vale per una sola stampa. Se nessuno la usa smette di valere dopo `CUPSPL_KEY_ONCE_HOURS` ore (24). Appena la stampa è
   accettata la chiave sparisce dall'elenco; per `CUPSPL_KEY_ONCE_GRACE_SECONDS` secondi (120) può ancora servire a chiedere lo stato del lavoro,
   non a stamparne un altro. Una stampa respinta dalla quota non la consuma; una stampa accettata ma poi non riuscita sì (se ne crea un'altra).
-- Chi aggiorna dalla 0.2.0: le chiavi già create restano come sono. Se nel tuo `.env` c'è ancora `CUPSPL_KEY_TTL_DAYS_LOCAL=365`, quel valore
-  diventa il massimo che gli utenti locali possono scegliere (prima era la durata fissa).
+- Una chiave è personale: chi la possiede stampa e scansiona come quell'utente, sulla sua quota e nel suo audit. Cederla a un altro è responsabilità del titolare; se è successo, o il dispositivo è perso, va revocata.
 - L'ultimo uso (ora e IP) è annotato al massimo una volta al minuto.
 - Si revoca una chiave, o tutte, in *Le mie chiavi* (`/me/keys`) oppure, per un amministratore, in `/admin/users/<id>/keys`.
 - L'amministratore, per ogni chiave, può **disattivarla** (non funziona, ma la scadenza continua a scorrere; si può riattivare), **prolungarla**
@@ -83,7 +82,7 @@ temporaneamente.
 
 - 5 password *diverse* sbagliate in 5 minuti per la stessa coppia (utente, IP) bloccano quella coppia; c'è anche un tetto per IP. La
   stessa password sbagliata ripetuta da un client conta una volta (libcups riprova 3–5 volte) e un estraneo non può bloccare un altro utente.
-- Il blocco è in memoria: un riavvio lo azzera. Blocca la coppia (utente, IP) per 5 minuti e **non** disattiva l'account: lo stesso utente da un altro
+- Il blocco è salvato in un piccolo file (`/data/login-lockout.json`, solo nomi utente, indirizzi e orari), quindi un riavvio non lo azzera. Blocca la coppia (utente, IP) per 5 minuti e **non** disattiva l'account: lo stesso utente da un altro
   indirizzo non è toccato. Durante il blocco la pagina di accesso risponde "Troppi tentativi falliti, riprova più tardi" anche se poi la password è giusta.
   Per vederlo prova sei password *diverse* sbagliate; ripetere sempre la stessa non blocca mai.
 - Disabilitare un utente nel portale blocca subito login e chiavi.

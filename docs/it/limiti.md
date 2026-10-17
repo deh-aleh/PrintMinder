@@ -42,7 +42,7 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
   - Con `refuse`, Windows e Android spesso rifiutano molti lavori, perché mandano solo fronte o colore in ogni lavoro. Il predefinito `adjust` lo evita.
   - L'annuncio in rete (mDNS) è uguale per tutti: le stampanti che una persona non può usare si vedono comunque, e il lavoro viene rifiutato. L'elenco delle stampanti che il gateway dà dopo l'accesso le nasconde.
   - Gli orari si controllano quando il lavoro viene inviato, non mentre stampa. C'è una sola fascia (giorni + due ore) per gruppo o utente.
-  - La scansione non è limitata. L'amministratore di emergenza è esente dai permessi (non dalle quote).
+  - La scansione non è limitata. L'amministratore di emergenza è esente dai permessi e dalle quote.
   - Un permesso chiesto viene concesso per sempre o fino a una data, non per un numero di stampe o di ore d'uso.
 
 ## 3. Client
@@ -53,6 +53,8 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 - Le chiavi di stampa dei client Linux/CUPS finiscono comunque salvate sul client (revocabili e inutili altrove).
 - Una chiave monouso si consuma quando la stampa viene accettata: se poi CUPS o la stampante falliscono, la chiave è comunque spesa e se ne crea un'altra. Dopo la stampa vale ancora 2 minuti, solo per chiedere lo stato.
 - Le stampanti annunciate compaiono anche ai desktop Linux (Avahi) senza chiave; non fanno nulla finché la coda non è aggiunta con la chiave.
+- **GNOME** (Impostazioni → Stampanti) non sa aggiungere una coda il cui indirizzo contiene nome utente e chiave: usa il comando `lpadmin` della pagina «Crea una chiave» o `scripts/add-printer-linux.sh`.
+- La **finestra di scansione** è un ultimo rimedio: confronta solo l'indirizzo della connessione TCP, quindi NAT, reverse proxy, IPv4/IPv6 mescolati o un indirizzo che cambia la rompono, e dietro un indirizzo condiviso lascia scansionare anche altri dispositivi finché è aperta ([scansione.md](scansione.md)).
 
 ## 4. Stampanti e scanner
 
@@ -75,7 +77,7 @@ Ciò che PrintMinder **non** fa (ancora) o fa con delle riserve. La versione bre
 
 - Backup integrati: solo SQLite; code CUPS non incluse (sono in `scripts/backup.sh`); i file di configurazione si ripristinano a mano;
   nessuna destinazione remota diretta; la passphrase non è recuperabile. `scripts/backup.sh restore` è provato solo a mano.
-- Il blocco dei login sopravvive al riavvio: i login falliti degli ultimi 5 minuti sono tenuti in `data/login-lockout.json` (nomi utente e indirizzi con gli orari, nessuna password). Se il file non si può scrivere il blocco resta solo in memoria e il log lo dice.
+- Il blocco dei login sopravvive al riavvio: i login falliti degli ultimi 5 minuti sono tenuti in `/data/login-lockout.json` (nel volume del gateway; nomi utente e indirizzi con gli orari, nessuna password). Se il file non si può scrivere il blocco resta solo in memoria e il log lo dice.
 - L'audit e il database non sono cifrati, salvo i nomi dei file (vedi §1 e [protezione-dati.md](protezione-dati.md)).
 
 ## 6. Lingue

@@ -16,7 +16,7 @@ ha registrato. Tutto si legge dal vivo e al meglio: una stampante che non offre 
 - **Inchiostro** rimasto (livelli e colori da CUPS).
 - **Contatori della stampante** (a vita): pagine totali, bianco/nero, colore, fogli fronte singolo/fronte-retro, inceppamenti, mancate
   prese — letti dal servizio web incorporato HP (`/DevMgmt/ProductUsageDyn.xml`). Le altre marche mostrano solo i dati IPP.
-- Numero di serie, firmware, velocità, carta pronta, avvisi (come li riporta il dispositivo).
+- Numero di serie, firmware, velocità, carta pronta, avvisi (come li riporta il dispositivo). Inceppamento, carta finita e inchiostro/toner esaurito o in esaurimento generano anche un avviso nella campanella ([guida-amministratore.md](guida-amministratore.md)).
 - Stato e capacità dello **scanner** (eSCL), con un badge *MFP* per i multifunzione.
 - Accanto, ciò che il gateway ha registrato: job, pagine, scansioni, ultimo job.
 
@@ -112,14 +112,12 @@ permessi che elencavano quel nome valgono di nuovo. Il limite: un computer confi
 essere configurato di nuovo se il modello nuovo è diverso. I computer che usano la stampante senza driver (IPP Everywhere) no.
 
 CUPS non dice quando una coda è stata creata: il gateway annota la **prima volta che la vede** (controlla ogni minuto, quindi una
-stampante collegata e mai aperta in nessuna pagina viene comunque registrata entro un minuto). Le code già presenti quando la funzione è
-stata introdotta risultano viste tutte nello stesso istante e restano in ordine alfabetico fra loro; una coda eliminata perde il posto
+stampante collegata e mai aperta in nessuna pagina viene comunque registrata entro un minuto). Una coda eliminata perde il posto
 (una nuova con lo stesso nome va in fondo). L'annuncio mDNS non ha un database e resta alfabetico.
 
 ## 4. Stampa periodica di manutenzione (solo stampanti fisiche)
 
-Una stampante ferma per settimane asciuga l'inchiostro e incolla i rullini. Il gateway può stampare da solo una piccola pagina di
-manutenzione a intervalli regolari. Pulsante con la stampante e il timer, in alto a destra su ogni scheda (assente per le virtuali; il
+Il gateway può stampare da solo una piccola pagina di manutenzione a intervalli regolari, perché una stampante ferma non asciughi l'inchiostro. Pulsante con la stampante e il timer, in alto a destra su ogni scheda (assente per le virtuali; il
 server rifiuta comunque la richiesta).
 
 - **Un'impostazione per stampante, uguale per tutti gli amministratori.**

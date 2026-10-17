@@ -14,7 +14,7 @@ identity, enforces print limits, records who printed and scanned what, and forwa
 ```
 IPP client ──ipps (TLS + Basic)──▶ gateway ──unix socket──▶ CUPS ──internal net──▶ ipp-usb ──USB──▶ printer
 browser ───────https───────────▶     │  └─▶ DB (SQLite): users, groups, rules, audit
-                                     └────▶ RADIUS (optional)           portal on /admin (admins) and /me (users)
+                                     └────▶ RADIUS (optional)           portal: /login, /admin (admins), /me (users)
 ```
 
 > Internal names such as `CUPSPL_*`, `cups-policy-admin` and the compose project `printgw` predate the name PrintMinder and are
@@ -48,8 +48,8 @@ browser ───────https───────────▶     │  
 | **Policy** | Users and groups; job and page limits per week/month; per-user overrides | ✅ |
 | | Exceptions: user requests, administrator approval, temporary or permanent grants; group change on request | ✅ |
 | | Pages counted before printing for PDF, images, text and PostScript | ✅ soft limit for other files |
-| | Limits per feature (colour, duplex) or per printer; allowed hours | 🟡 not yet tested on real printers |
-| **Scanning** | eSCL through the gateway (same keys, audit, together with printing), scanning from the portal, and a scan window so apps that cannot send a password can scan from the IP of whoever pressed a button | ✅ |
+| | Permissions per group/user: colour, one-sided, printers, allowed hours; `adjust` or `refuse` mode; users ask for what they lack | 🟡 covered by tests, not yet checked on many real printers |
+| **Scanning** | eSCL through the gateway (same keys, audit, together with printing), scanning from the portal, and a scan window (last resort: it trusts the TCP address, which NAT and reverse proxies break) so apps that cannot send a password can scan from the IP of whoever pressed a button | ✅ |
 | | Native eSCL clients that can authenticate (field test) | ⬜ |
 | **Audit** | Print/scan audit with real pages; separate log of administrative actions | ✅ |
 | | Unlimited retention with verified compressed archives; CSV export, filters, archive viewer and download | ✅ |
@@ -61,12 +61,12 @@ browser ───────https───────────▶     │  
 | | Printers page: status, ink, lifetime counters (HP), firmware, scanner; block, hide, test printers; gateway maintenance mode | ✅ |
 | | Periodic maintenance print and test print with statistics (physical printers); ordering physical first, movable with up/down arrows (own order per administrator); queues can be renamed; IPP-USB / USB badges | ✅ |
 | | Portal in English, Italian, Spanish, Russian, Chinese | ✅ Spanish/Russian/Chinese need native review |
-| | Notifications (email/webhook) for pending requests; usage reports | ⬜ |
+| | Notifications (email/webhook) for pending requests | ⬜ |
 | | Permission requests (colour, one-sided, printers, hours) | ✅ |
 | **Operations** | Docker stack (ipp-usb + CUPS + gateway + mDNS), nothing installed on the host | ✅ |
 | | Scheduled backups per administrator (folder, hour, rotation, passphrase/recovery-key encryption), restore from CLI | ✅ |
 | | Database migrations (Alembic), health check, logs, admin CLI | ✅ |
-| | Images for amd64 and arm64 on ghcr.io; update script that downloads a checked release package, makes a backup first and goes back by itself (and offers to restore the backup) if the new version does not start; notice of new versions; one `.env` file that an update never touches | 🟡 not yet run on a real ARM machine |
+| | Images for amd64 and arm64 on ghcr.io; update script that downloads a checked release package, makes a backup first and goes back by itself (and offers to restore the backup) if the new version does not start; notice of new versions; one `.env` file that an update never touches | ✅ amd64; arm64 run on a Raspberry Pi 4B (64-bit) |
 | | Update button in the portal (optional `updater` container, needs the Docker socket) | 🟡 only tested with simulations |
 | | Backups on a network disk or USB disk: marker file against an unmounted disk (on by default), a notice in the bell when a backup fails, time limit for a disk that stops answering | ✅ tested with an SMB share |
 | | TLS certificate: notices (expired, announced address missing, optional expiry warning) and `scripts/cert-sync.sh` to copy a renewed certificate from Nginx Proxy Manager or certbot | 🟡 script tested with simulations, not yet with a real Nginx Proxy Manager |
@@ -81,8 +81,7 @@ The full list, with workarounds, is in [docs/en/limitations.md](docs/en/limitati
   arrives after the job was accepted. A `Create-Job` without a document frees its quota only when CUPS cancels it (default 3 h).
 - **Linux host required** for USB printers and mDNS announcement (Docker Desktop on Windows/macOS: network printers only, no discovery).
 - **Android's system print service cannot authenticate**: use Mopria Print Service or print from the browser. Windows 11 25H2 is tested ([windows.md](docs/en/windows.md)); iPhone and macOS are untested.
-- **One gateway per USB printer** and **one per SQLite database** (no high availability). Images are built for the building machine's
-  architecture; going back to an older version after a migration needs a backup.
+- **One gateway per USB printer** and **one per SQLite database** (no high availability). Going back to an older version after a migration may need a backup.
 - **TLS is mandatory**: install the self-signed certificate on clients or use your CA's.
 - Printer disconnection is detected within ~30 s (network queues: a TCP check, not paper).
 - Printed **file names are encrypted** in the database (key from `CUPSPL_SECRET_KEY`: do not change it); the rest of the database is not. For everything else encrypt the disk: [data-protection.md](docs/en/data-protection.md).
@@ -95,7 +94,7 @@ reachable by clients (default 8631). Nothing is installed on the host.
 
 ```sh
 # 0. download the release package (newest version: https://github.com/deh-aleh/PrintMinder/releases)
-VERSION=1.0.0
+VERSION=x.y.z
 curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/printminder-$VERSION.tar.gz
 tar xzf printminder-$VERSION.tar.gz && cd printminder-$VERSION      # (the guide also shows how to check the download)
 
@@ -118,7 +117,7 @@ docker compose logs gateway | grep "FIRST RUN"
 #    then open https://<server>:8631/setup
 ```
 
-Then: create users and groups in the portal (`https://<server>:8631/admin`); every user creates a **print key** in *Profile*
+Then: create users and groups in the portal (`https://<server>:8631/`); every user creates a **print key** in *Profile*
 and uses it as the password when a computer or phone asks for credentials (printer address `ipps://<server>:8631/printers/<queue>`);
 phones with nothing installed can use *Print* in the portal. Check the install with `curl -sk https://<server>:8631/healthz`.
 To use a CA-signed certificate put `fullchain.pem` and `privkey.pem` in `config/tls/` and `docker compose restart gateway` (to keep a renewed one up to date by itself: [certificates.md](docs/en/certificates.md)).

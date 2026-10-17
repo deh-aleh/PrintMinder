@@ -8,7 +8,7 @@ one-sided (instead of being made double-sided), to use some printers only, and t
     print form both use it, so the two behave the same.
   * `permission_grant` adds to that for one user, for a while or for good: what an administrator approved after a request (or
     handed out directly). `effective` includes the active ones. (`app.policy.grants` makes and revokes them.)
-  * The emergency administrator is exempt (a wrong rule must never lock everybody out). Quotas still apply to it.
+  * The emergency administrator is exempt (a wrong rule must never lock everybody out). It has no group and no quota either.
   * Scanning is not limited by any of this.
 """
 

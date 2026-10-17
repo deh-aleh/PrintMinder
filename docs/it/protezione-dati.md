@@ -2,9 +2,8 @@
 
 [Indice della documentazione](../README.md) · [English](../en/data-protection.md) · Italiano
 
-PrintMinder tiene un registro di chi ha stampato e scansionato cosa ([audit.md](audit.md)). Il **nome del file** («Licenziamento_Rossi.pdf»,
-«Referto_medico.pdf») può dire molto di una persona, quindi va trattato come un dato personale. Questa pagina spiega cosa è protetto, cosa no, e
-cosa puoi fare per ridurre i dati che il server conserva.
+L'audit ([audit.md](audit.md)) registra chi ha stampato e scansionato cosa. Il **nome del file** è un dato personale, quindi è cifrato a riposo; questa pagina
+elenca cosa è protetto e cosa no, e le impostazioni che riducono ciò che il server conserva.
 
 ## 1. Cosa è protetto e cosa no
 
@@ -15,11 +14,8 @@ cosa puoi fare per ridurre i dati che il server conserva.
 | Chiavi di stampa | Solo l'impronta (sha256) |
 | Nome utente, gruppi, nomi delle stampanti, registro delle azioni degli amministratori, motivi delle richieste (quota, gruppo, permesso) e note delle concessioni, permessi e orari consentiti, indirizzi IP | **In chiaro** nel database |
 | Quantità (pagine, data, stato di ogni stampa) | In chiaro: servono alle quote |
-| Il database come file | Non cifrato: chi copia il file legge tutto tranne i nomi dei file |
+| Il database come file | Non cifrato: chi copia il file legge tutto tranne i nomi dei file (salvati come `enc1:<base64>`, AES-256-GCM) |
 | I backup | Cifrati solo se scegli la cifratura nel menu *Backup* (consigliata) |
-
-**Esempio.** Un ladro copia il file del database dal server. Vede chi ha stampato quante pagine e quando, ma al posto dei nomi dei file trova testo senza senso
-(`enc1:Q3x…`). Se invece ruba il disco intero con la chiave in `.env`, può leggere tutto: per questo la misura principale è cifrare il disco (§5).
 
 ## 2. Il pulsante «Nomi dei file» (verde / rosso)
 
@@ -30,9 +26,6 @@ In *Amministrazione → Audit* (`/admin/jobs`), in alto a destra, c'è un pulsan
 
 Cliccando per spegnerlo compare una domanda di conferma. I nomi **già salvati restano**; quelli nuovi non vengono più scritti. Cliccando di nuovo si torna a salvarli.
 La scelta viene registrata nel registro delle azioni degli amministratori.
-
-**Esempio.** In un ufficio legale gli avvocati non vogliono che si sappia quali documenti stampano. L'amministratore spegne il pulsante: da quel momento nell'audit si vede
-«Mario, 12 pagine, ieri alle 15:03» ma non cosa.
 
 ## 3. Dimenticare i nomi vecchi: la retention
 

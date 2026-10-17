@@ -426,6 +426,8 @@ def restore(path: Path, passphrase: str | None, *, db_path: Path, config_out: Pa
         rev = manifest.get("schema")
         if rev and rev not in known_revisions():
             raise BackupError(f"This backup comes from a newer version (schema {rev}): update the gateway first")
+        if not (Path(tmp) / "gateway.db").is_file():  # checked before anything is moved: a backup without a database changes nothing
+            raise BackupError("This backup holds no database (gateway.db): nothing was restored")
         if db_path.exists():
             keep = db_path.with_name(f"{db_path.name}.before-restore-{datetime.now():%Y%m%d-%H%M%S}")
             shutil.move(db_path, keep)

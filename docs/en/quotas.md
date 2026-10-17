@@ -30,7 +30,7 @@ multiplies by the copies and by the selected page range. If `used + pages > limi
 Otherwise the pages are recorded immediately, so simultaneous jobs see them. After printing, the reconciler replaces the
 estimate with the **real pages** read from CUPS. A job whose page count is not yet known counts as at least 1 page.
 
-### The soft limit (important)
+### The soft limit
 
 The pages limit is **hard** only for documents the gateway can count. It is **soft** in these cases:
 
@@ -107,7 +107,7 @@ shows what the group says next to each field. Changing the group's permissions c
 send them a notice; changing a user's own permissions does (see "What the user sees"). An administrator is limited like anybody
 else. The only exception is the **emergency administrator** (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`, a local account): it has every
 permission, its page shows the block switched off ("all permissions, can not be limited") and the server ignores anything posted
-for it. Quotas still apply to it. **Scanning is not limited** by any of this: a user can scan with a printer they may not print on.
+for it. It also has no group and no quota: it is not in the "administrator" group, has no job or page limit, and can not ask to change group. Quotas, limits and permissions of the "administrator" group apply to every other administrator. **Scanning is not limited** by any of this: a user can scan with a printer they may not print on.
 
 ### Printers
 
@@ -165,7 +165,7 @@ of the profile page, where the user sees their permissions and can ask for the m
    their phone or computer, and a job sent to them is refused. The list of printers that the gateway gives after the login leaves them out.
 4. **The hours are checked when the job is sent**, not while it prints.
 5. **Scanning is not limited.**
-6. **The emergency administrator is exempt** from the permissions (not from the quotas).
+6. **The emergency administrator is exempt** from the permissions and from the quotas: it belongs to no group.
 
 ### What the user sees
 
@@ -174,7 +174,7 @@ of the profile page, where the user sees their permissions and can ask for the m
 - *Print*: only the allowed printers; no colour choice without the colour permission; a double-sided choice (one-sided / long edge
   / short edge) on printers that have a duplex unit, only for those who may print one-sided; a banner with the allowed hours when
   they are outside them, and the job is refused.
-- The bell: "refused" and "changed" notices when it happens (the "changed" one is *secondary*: it is read automatically after the time the user chose in `/me/settings`, 20 minutes by default), and one when an administrator changes the person's own permissions.
+- The bell: "refused", "quota reached" and "changed" notices when it happens (the "changed" one is *secondary*: it is read automatically after the time the user chose in `/me/settings`, 20 minutes by default), and one when an administrator changes the person's own permissions.
 
 The administrators' log (*Actions*) records every change to a group's or a user's permissions with the old and the new values.
 

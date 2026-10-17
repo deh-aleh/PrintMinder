@@ -24,7 +24,7 @@ not answer, access is denied (fail closed). RADIUS names are matched case-insens
 itself. The code is protected by throttling. Alternative: `cups-policy-admin set-admin-password`. There is deliberately no
 page open to everybody for becoming an administrator.
 
-The emergency account cannot be disabled, demoted, deleted or have its source changed. Nobody can disable, demote or
+The emergency account cannot be disabled, demoted, deleted or have its source changed, and its name can not be given to any other account. It is the only account without a group: nothing limits it (no quota, no permission rule) and it cannot ask to change group. The other administrators live in the "administrator" group, whose limits and permissions you can edit (the group itself cannot be deleted). Nobody can disable, demote or
 delete themselves, nor the last administrator.
 
 ## 3. Passwords (local accounts)
@@ -59,8 +59,7 @@ domain password: they use a **personal print key**.
 - **Single-use key**: valid for one print. If nobody uses it, it stops working after `CUPSPL_KEY_ONCE_HOURS` hours (24). As soon as its print is
   accepted the key disappears from the list; for `CUPSPL_KEY_ONCE_GRACE_SECONDS` seconds (120) it can still be used to ask how the job is
   going, not to print another. A print refused by the quota does not spend it; a print that was accepted and then failed does (create another).
-- Updating from 0.2.0: keys already made stay as they are. If your `.env` still has `CUPSPL_KEY_TTL_DAYS_LOCAL=365`, that value is now the
-  longest local users can pick (it used to be the fixed life).
+- A key is personal: whoever holds it prints and scans as that user, on that user's quota and in that user's audit. Passing it to somebody else is the owner's responsibility; if that happened, or the device is lost, revoke it.
 - Last use (time and IP) is recorded at most once a minute.
 - Revoke one key, or all of them, in *My keys* (`/me/keys`) or, for an administrator, in `/admin/users/<id>/keys`.
 - For each key an administrator can **switch it off** (it does not work, but its expiry keeps running; it can be switched on again), **extend it**
@@ -83,7 +82,7 @@ temporarily.
 
 - 5 *different* wrong passwords within 5 minutes for the same (user, IP) block that pair; there is also a per-IP cap. The
   same wrong password repeated by one client counts once (libcups retries 3–5 times), and a stranger can not lock another user out.
-- The lock is in memory: a restart clears it. It blocks the (user, IP) pair for 5 minutes, it does **not** disable the account: the same
+- The lock is kept in a small file (`/data/login-lockout.json`, user names, addresses and times only), so a restart does not clear it. It blocks the (user, IP) pair for 5 minutes, it does **not** disable the account: the same
   user from another address is not affected. While blocked, the login page answers "Too many failed attempts, retry later" even if the
   password is then right. To see it, try six *different* wrong passwords; repeating the same one never blocks.
 - Disabling a user in the portal blocks portal login and keys immediately.

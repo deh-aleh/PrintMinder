@@ -2,51 +2,46 @@
 
 [Indice della documentazione](../README.md) · [English](../en/certificates.md) · Italiano
 
-Il gateway parla solo in modo cifrato (TLS, quello del lucchetto nel browser) e per farlo ha bisogno di un **certificato**. Questa pagina spiega
-come deve essere fatto, cosa ti dice il portale quando qualcosa non va, e come tenerlo aggiornato da solo se lo rinnova un'altra macchina
-(per esempio Nginx Proxy Manager).
+Il gateway serve IPPS e il portale solo su TLS. Questa pagina descrive i requisiti del certificato, gli avvisi che compaiono quando è
+sbagliato e `scripts/cert-sync.sh`, che copia un certificato rinnovato da un'altra macchina (per esempio Nginx Proxy Manager).
 
-## 1. Cosa controlla un telefono quando si collega
+## 1. Cosa verifica un client
 
-Il certificato è come una carta d'identità del server. Quando un telefono o un computer si collega, controlla tre cose:
+Un client verifica tre cose prima di inviare qualunque dato; se una fallisce rifiuta la connessione o mostra un avviso:
 
-1. la carta è stata rilasciata da qualcuno di cui il dispositivo si fida (una **CA**, cioè un'autorità che rilascia certificati);
-2. il nome o l'indirizzo scritto sulla carta è quello a cui ci si sta collegando;
-3. la carta non è scaduta.
+1. **Catena**: il certificato è emesso da una CA di cui il dispositivo si fida (CA pubblica, oppure la CA aziendale installata sul dispositivo, §3).
+2. **Nome**: l'host a cui il client si collega compare nel Subject Alternative Name (SAN) del certificato, come nome DNS o indirizzo IP.
+3. **Validità**: `notAfter` è nel futuro.
 
-**Esempio.** Il certificato dice «valido per `stampa.azienda.it` e `192.168.1.50`». Il telefono trova la stampante come `https://192.168.1.50:8631`:
-l'indirizzo è sulla carta, quindi va bene. Se il router un giorno assegna al server `192.168.1.77`, il telefono non trova quell'indirizzo sulla carta
-e mostra «certificato non valido». Per questo il certificato deve elencare l'indirizzo che il gateway annuncia in rete (mDNS).
+L'annuncio (mDNS) pubblica l'indirizzo IP della route di default, oppure `CUPSPL_MDNS_ADDRESSES`, e il nome host di `CUPSPL_MDNS_HOSTNAME`
+(predefinito: la parte host di `CUPSPL_PORTAL_URL`, altrimenti il nome della macchina). I client che trovano la stampante via mDNS si collegano a
+quell'indirizzo, che deve quindi essere nel SAN. Se l'indirizzo cambia (DHCP) il certificato non corrisponde più: assegna al server un indirizzo fisso.
 
-Se una di queste tre cose non va, il dispositivo si rifiuta di stampare o mostra un avviso di sicurezza.
+## 2. Avvisi nel portale (la campanella)
 
-## 2. Gli avvisi nel portale (la campanella)
+Il gateway non sostituisce mai il certificato. `app/certwatch.py` legge `CUPSPL_TLS_CERTFILE` e `config/tls/sync-status.json` ogni 6 ore e
+apre o chiude avvisi per gli amministratori. Un avviso si chiude da solo quando la causa sparisce.
 
-Il gateway non cambia mai il certificato da solo: lo **guarda** e, se vede un problema, mette un avviso nella campanella degli amministratori.
-L'avviso sparisce da solo quando il problema è risolto.
-
-| Avviso | Quando compare | Si può spegnere? |
+| Avviso (titolo nella campanella) | Condizione | Interruttore |
 |---|---|---|
-| Il certificato è scaduto | La data di scadenza è passata: i dispositivi non si collegano più | No, è sempre attivo |
-| L'ultimo aggiornamento del certificato è fallito | L'ultima esecuzione di `scripts/cert-sync.sh` è finita con un errore (il messaggio dello script è nell'avviso) | No, compare solo se usi lo script |
-| L'indirizzo annunciato non è nel certificato | Né l'IP né il nome `.local` che il gateway annuncia in rete sono nel certificato | Sì: `CUPSPL_CERT_NAME_CHECK=false` |
-| Il certificato sta per scadere | Mancano meno di N giorni alla scadenza | **È spento di default.** `CUPSPL_CERT_EXPIRY_WARN_ENABLED=true` lo accende, `CUPSPL_CERT_EXPIRY_WARN_DAYS=14` sceglie i giorni |
+| **Il certificato TLS è scaduto** | `notAfter` è passato | sempre attivo |
+| **Non è stato possibile aggiornare il certificato** | l'ultima esecuzione di `scripts/cert-sync.sh` ha scritto `"ok": false` in `sync-status.json` (il messaggio è nell'avviso) | compare solo se usi lo script |
+| **L'indirizzo annunciato non è nel certificato TLS** | nessun indirizzo/nome annunciato (mDNS) è nel SAN; i caratteri jolly (`*.example.com`) coprono una sola etichetta | `CUPSPL_CERT_NAME_CHECK=false` lo spegne |
+| **Il certificato TLS scade il (data)** | mancano meno di `CUPSPL_CERT_EXPIRY_WARN_DAYS` giorni | **spento di default**: `CUPSPL_CERT_EXPIRY_WARN_ENABLED=true` |
 
-Le impostazioni stanno in `.env` (poi `docker compose up -d`).
+L'avviso di scadenza aggiunge un suggerimento in base all'ultima sincronizzazione: se è riuscita, la sorgente non ha rinnovato (controlla il
+programma che rinnova); se è fallita, rimanda all'altro avviso; se lo script non è usato, chiede di rinnovare e mettere i file in `config/tls`.
 
-**Perché l'avviso «sta per scadere» è spento.** Non vogliamo che qualcuno si trovi un avviso da gestire quando in realtà il rinnovo non è ancora dovuto.
-I certificati di Let's Encrypt durano 90 giorni e vengono rinnovati circa 30 giorni prima della fine: con la soglia a 14 giorni l'avviso compare solo se il
-rinnovo non è riuscito per più di due settimane, cioè se c'è davvero un problema. Con una soglia alta (per esempio 45 giorni) l'avviso comparirebbe ogni
-volta prima del rinnovo normale, quindi non metterla sopra i 30 giorni con Let's Encrypt. I certificati di una CA aziendale durano spesso un anno e si
-rinnovano a mano: lì una soglia di 30 giorni va bene.
+**Perché l'avviso di scadenza è spento di default.** Un certificato Let's Encrypt dura 90 giorni e viene rinnovato circa 30 giorni prima di
+`notAfter`. Con la soglia a 14 giorni l'avviso compare solo se il rinnovo fallisce da più di due settimane. Sopra i 30 giorni scatterebbe a ogni
+ciclo di rinnovo normale. I certificati di una CA aziendale durano spesso un anno e si rinnovano a mano: lì 30 giorni vanno bene.
 
-L'avviso dice anche dove cercare: se l'ultima sincronizzazione è riuscita, «la sorgente non ha ancora rinnovato, controlla Nginx Proxy Manager»; se è
-fallita, rimanda all'altro avviso.
+Le impostazioni stanno in `.env`; si applicano con `docker compose up -d`.
 
 ## 3. Il file della CA: cosa farne
 
-Se l'azienda ha una sua CA, l'amministratore della CA ti dà un file (di solito `.crt` o `.pem`): è il **certificato della CA**, mai la chiave privata.
-Serve per far fidare i dispositivi di tutti i certificati che quella CA rilascia, compreso quello del gateway. Va installato **una volta su ogni dispositivo**:
+Con una CA aziendale, installa il **certificato della CA** (un file `.crt` o `.pem`; mai la chiave privata) una volta su ogni dispositivo. I
+dispositivi si fidano poi di ogni certificato emesso da quella CA, compreso quello del gateway:
 
 | Dispositivo | Cosa fare |
 |---|---|
@@ -66,13 +61,13 @@ Metti `fullchain.pem` (il certificato, con la catena) e `privkey.pem` (la chiave
 (`chmod 600 config/tls/privkey.pem`) e riavvia: `docker compose restart gateway`. Dettagli e un esempio con Nginx Proxy Manager in
 [installazione.md](installazione.md#34-certificato-tls).
 
-Un certificato Let's Encrypt si rinnova ogni circa 60 giorni: farlo a mano ogni volta è facile da dimenticare. Per questo c'è lo script del capitolo seguente.
+Un certificato Let's Encrypt si rinnova circa ogni 60 giorni; per quel caso usa lo script del §5.
 
 ## 5. Tenere il certificato aggiornato da solo: `scripts/cert-sync.sh`
 
 ### 5.1 Come funziona
 
-Lo lanci tu **una volta** a mano per provare, poi lo metti in `cron` (l'orologio di Linux che esegue comandi a orari fissi). Ogni volta lo script:
+Eseguilo una volta a mano, poi da `cron`. A ogni esecuzione:
 
 1. scarica i due file dalla macchina che rinnova i certificati (con `rsync` su `ssh`) in una cartella temporanea privata;
 2. li controlla: il certificato non è scaduto e la chiave privata è proprio la sua;
@@ -108,8 +103,8 @@ Il numero di `npm-3` è diverso da installazione a installazione: guarda quale c
 
 ### 5.3 Passo per passo: un utente che può solo leggere
 
-Il certificato è un segreto (la chiave privata soprattutto). Per questo lo script **non** usa l'account di un amministratore: se la sua chiave ssh venisse
-rubata, il ladro entrerebbe nella macchina di NPM con tutti i poteri. Si crea invece un utente separato che può soltanto leggere i certificati.
+La chiave privata è un segreto, quindi lo script non usa l'account di un amministratore: una chiave ssh rubata darebbe accesso completo alla macchina sorgente.
+Si crea un utente separato che può soltanto leggere i certificati.
 
 Nell'esempio la macchina di NPM si chiama `npm.lan`, quella di PrintMinder `print.lan` (IP `192.168.1.50`), l'utente si chiama `certsync`.
 
@@ -142,7 +137,7 @@ sudo chmod 600 /home/certsync/.ssh/authorized_keys
 Le due parole davanti alla chiave sono i limiti: `from="192.168.1.50"` fa funzionare la chiave **solo** da `print.lan`; `restrict` toglie tutto il resto
 (niente inoltro di porte, niente terminale interattivo, niente agente ssh).
 
-**Passo 4 — su `npm.lan`: dai all'utente il permesso di leggere i certificati, e nient'altro.** Con le ACL (permessi per un utente preciso) si concede la sola lettura di una cartella.
+**Passo 4 — su `npm.lan`: dai all'utente il permesso di leggere i certificati, e nient'altro.** Con le ACL POSIX si concede la sola lettura di una cartella.
 Esempio per NPM, con i dati in `/home/tu/npm/data`:
 
 ```sh
@@ -194,8 +189,7 @@ e aggiungi una riga (cambia il percorso della cartella di PrintMinder):
 17 4 * * *  cd /home/tu/printminder && scripts/cert-sync.sh >> data/cert-sync.log 2>&1
 ```
 
-Si legge così: ogni giorno (`* * *`) alle 4 e 17 (`17 4`), vai nella cartella ed esegui lo script, scrivendo cosa dice in `data/cert-sync.log`. Una volta al giorno basta:
-se il certificato non è cambiato non succede nulla e nulla si riavvia.
+Esegue ogni giorno alle 4:17 e aggiunge l'output a `data/cert-sync.log`. Una volta al giorno basta: se il certificato non è cambiato non si installa nulla e non si riavvia nulla.
 
 ### 5.4 Se qualcosa va storto
 

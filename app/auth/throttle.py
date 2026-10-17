@@ -18,10 +18,13 @@ def password_fingerprint(password: str) -> str:
     return hmac.new(_FINGERPRINT_KEY, password.encode(), hashlib.sha256).hexdigest()[:24]
 
 
+FINGERPRINT_SEP = "\x1f"  # only the keys that carry a password fingerprint contain it (user names and addresses can hold "|")
+
+
 def register_failure(throttle: "Throttle", ukey: str, ikey: str, password: str) -> None:
     """Count a failed login. A client that retries the SAME wrong password (libcups does 3-5 times per
     request) counts once, so a single typo cannot lock a user out; every new guess counts."""
-    dkey = f"{ukey}|{password_fingerprint(password)}"
+    dkey = f"{ukey}{FINGERPRINT_SEP}{password_fingerprint(password)}"
     if throttle.blocked(dkey, 1):
         return
     throttle.fail(dkey)
@@ -76,7 +79,7 @@ class Throttle:
         now_wall, mono = time.time(), self.clock()
         data = {}
         for key in list(self._fails):
-            if "|" in key:   # fingerprints of a wrong password: only meaningful inside one run
+            if FINGERPRINT_SEP in key:   # fingerprints of a wrong password: only meaningful inside one run
                 continue
             stamps = [round(now_wall - (mono - t), 3) for t in self._prune(key)]
             if stamps:

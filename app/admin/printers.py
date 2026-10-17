@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 import httpx
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
@@ -274,6 +274,26 @@ async def printer_delete(request: Request, name: str, admin: User = Depends(curr
                 db.commit()
         await run_in_threadpool(note)
     flash(request, _("%(name)s deleted", name=name) if ok else _("CUPS did not accept the request"), "ok" if ok else "err")
+    return back("/admin/printers")
+
+
+@router.post("/printers/former/forget", dependencies=[Depends(verify_csrf)])
+async def printer_forget_name(request: Request, name: str = Form(...), admin: User = Depends(current_admin)):
+    """Take a name of the past out of the list of the rename dialog (and out of the database)."""
+    name = name.strip()
+
+    def forget():
+        with request.app.state.sessionmaker() as db:
+            found = discovery.forget_former(db, name)
+            if found:
+                record(db, db.get(User, admin.id), "printer.forget_name", "printer", None, printer=name)
+            db.commit()
+            return found
+    found = await run_in_threadpool(forget)
+    if request.headers.get("x-fetch"):  # the page removes the name itself, no reload and no message
+        return JSONResponse({"ok": True, "found": found})
+    flash(request, _("The name %(name)s is forgotten", name=name) if found else _("%(name)s was not in the list", name=name),
+          "ok" if found else "err")
     return back("/admin/printers")
 
 

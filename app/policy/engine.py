@@ -18,6 +18,7 @@ from app.db.models import (
     SubjectType,
     User,
 )
+from app.auth.users import is_emergency
 from app.i18n import N_, _
 
 # states that consume quota; failed/canceled/denied free it
@@ -70,7 +71,9 @@ def window_end(period: Period, now: datetime, tz: ZoneInfo) -> datetime:
 
 
 def effective_rules(session: Session, user: User, resource: Resource) -> list[PolicyRule]:
-    """One rule per metric. A user rule overrides the group rule for the same metric."""
+    """One rule per metric. A user rule overrides the group rule for the same metric. The emergency administrator has none."""
+    if is_emergency(user):
+        return []
     rules: dict[Metric, PolicyRule] = {}
     subjects = []
     if user.group_id is not None:

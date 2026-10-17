@@ -88,7 +88,7 @@ password su `https://<server>:8631/setup` (vedi [installazione.md](installazione
 
 | Variabile | Predefinito | Cosa fa |
 |---|---|---|
-| `CUPSPL_BOOTSTRAP_ADMIN` | `true` | Crea quell'account quando non c'è nessun amministratore. |
+| `CUPSPL_BOOTSTRAP_ADMIN` | `true` | Crea quell'account (senza password, senza gruppo, senza limiti) se non esiste. `false` = non viene creato; crea allora un amministratore con `cups-policy-admin set-admin-password NOME`. Il nome resta riservato in ogni caso. |
 | `CUPSPL_BOOTSTRAP_ADMIN_USERNAME` | `cups_orchestrator` | Il suo nome. È anche la persona che riceve il promemoria per salvare la chiave segreta. |
 
 ### Richieste di più quota
@@ -169,7 +169,7 @@ Come aggiornare: [installazione.md](installazione.md).
 | `CUPSPL_SCAN_URL` | l'immagine imposta `http://ipp-usb:60000` | Scanner eSCL. Gli scanner si trovano da soli; scrivila solo per **aggiungerne** altri che non si trovano (una stampante di rete con eSCL su una porta insolita), come `nome=indirizzo` separati da virgole: `http://ipp-usb:60000,ufficio=https://192.168.1.50:443`. Vuoto = la scansione è spenta. |
 | `CUPSPL_SCAN_TIMEOUT` | `180` | Secondi per una scansione (una pagina dal vetro può essere lenta). |
 | `CUPSPL_ESCL_ANONYMOUS` | `false` | `true` accetta scansioni da app che non sanno inviare le credenziali (per esempio NAPS2). Sono attribuite all'account `ospite-scansione` con l'IP di chi le manda. Lascia `false` se la rete non è fidata ([scansione.md](scansione.md)). |
-| `CUPSPL_ESCL_WINDOW` | `true` | `true` mostra in *Scansione* un pulsante che apre una **finestra di scansione**: per qualche minuto le richieste senza credenziali che arrivano dall'indirizzo IP di chi l'ha premuto sono accettate come sue. `false` toglie il pulsante. Funziona sia con `CUPSPL_ESCL_ANONYMOUS` acceso sia spento ([scansione.md](scansione.md)). |
+| `CUPSPL_ESCL_WINDOW` | `true` | `true` mostra in *Scansione* un pulsante che apre una **finestra di scansione**: per qualche minuto le richieste senza credenziali che arrivano dall'indirizzo IP di chi l'ha premuto sono accettate come sue. È un ultimo rimedio: NAT e reverse proxy lo vanificano (limiti in [scansione.md](scansione.md)). `false` toglie il pulsante. Funziona sia con `CUPSPL_ESCL_ANONYMOUS` acceso sia spento ([scansione.md](scansione.md)). |
 | `CUPSPL_ESCL_WINDOW_SECONDS` | `180` | Quanto resta aperta la finestra: da **60 a 900** secondi. Riga presente ma vuota = 60. Qualsiasi altro valore ferma il gateway all'avvio (`docker compose logs gateway`). Una scansione già partita viene portata a termine anche se il tempo finisce. |
 
 ## 7. Stampanti

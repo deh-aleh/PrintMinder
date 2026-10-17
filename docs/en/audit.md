@@ -24,7 +24,7 @@ after a number of days you choose. The row always stays, with everything else. D
 | `accepted` | Passed the checks and was handed to CUPS or the scanner (printing, queued or in progress). **Already counts toward quota.** |
 | `completed` | Finished; the pages are the **real** ones read from CUPS |
 | `held` | Held in the queue; counts toward quota |
-| `rejected` | Refused (quota, block, maintenance, invalid). Does not count. The reason is stored (in English) |
+| `denied` | Refused (quota, permission, block, maintenance, disabled account). Does not count and uses no pages. The reason is stored (in English) |
 | `failed` | Accepted but the printer or scanner could not carry it out. Does not count |
 | `canceled` | Stopped before printing, by the user, an administrator or the scanning program. Quota is freed |
 
@@ -51,11 +51,12 @@ for over a day is marked completed.
 
 ## 3. Administrative audit
 
-Logins of administrators, creation / change / deletion of users and groups (`user.*`, `group.*`), passwords and keys
-(`password.change`, `key.*`), approvals and rejections (`request.approve/reject`), grants (`grant.create/revoke`),
-printer controls (`printer.block/unblock`, `printer.mdns_hide/mdns_show`, `printer.keepalive_on/off/save`,
-`printer.test_print`, `printer.debug_create/delete`, `printer.move`, `printer.rename`, and by the system itself `printer.auto_add` / `printer.auto_remove`), backups (`backup.*`), maintenance mode (`maintenance.on/off`),
-audit archiving (`audit.archive`). 
+`login` (administrators), `admin.setup` / `admin.set_password`, `user.*` and `group.*` (create, update, delete, reset password, revoke keys),
+`password.change`, `key.*` (create, revoke, disable, enable, extend), `request.approve/reject`, `grant.create/revoke/purge`,
+printer controls (`printer.block/unblock`, `printer.mdns_hide/mdns_show`, `printer.keepalive_on/off/save`, `printer.test_print`,
+`printer.debug_create`, `printer.delete`, `printer.move`, `printer.rename`, `printer.forget_name`, and by the system itself `printer.auto_add` /
+`printer.auto_remove`), `job.cancel` / `job.cancel_failed`, `jobtitles.on/off` (saving file names), `backup.*`, `maintenance.on/off`, `audit.archive`,
+`archive.verify`, `notice.dismiss` / `notice.dismiss_all`, `update.request`.
 Each entry keeps the actor's *name* (it survives deleting the actor), the action,
 the target and details. The page has filters with suggestions.
 

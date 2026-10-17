@@ -14,7 +14,7 @@ applica i limiti di stampa, registra chi ha stampato e scansionato cosa e inoltr
 ```
 client IPP ──ipps (TLS + Basic)──▶ gateway ──socket unix──▶ CUPS ──rete interna──▶ ipp-usb ──USB──▶ stampante
 browser ───────https───────────▶     │  └─▶ DB (SQLite): utenti, gruppi, regole, audit
-                                     └────▶ RADIUS (facoltativo)        portale su /admin (admin) e /me (utenti)
+                                     └────▶ RADIUS (facoltativo)        portale: /login, /admin (admin), /me (utenti)
 ```
 
 > I nomi interni come `CUPSPL_*`, `cups-policy-admin` e il progetto compose `printgw` precedono il nome PrintMinder e restano
@@ -48,8 +48,8 @@ browser ───────https───────────▶     │  
 | **Policy** | Utenti e gruppi; limiti di job e pagine per settimana/mese; override per utente | ✅ |
 | | Deroghe: richieste degli utenti, approvazione dell'admin, concessioni temporanee o permanenti; cambio gruppo su richiesta | ✅ |
 | | Pagine contate prima di stampare per PDF, immagini, testo e PostScript | ✅ limite morbido per gli altri file |
-| | Limiti per funzionalità (colore, fronte-retro) o per stampante; orari consentiti | 🟡 non ancora provato su stampanti vere |
-| **Scansione** | eSCL attraverso il gateway (stesse chiavi, audit, insieme alla stampa), scansione dal portale e una finestra di scansione perché le app che non sanno inviare una password possano scansionare dall'IP di chi ha premuto un pulsante | ✅ |
+| | Permessi per gruppo/utente: colore, fronte singolo, stampanti, orari consentiti; modalità `adjust` o `refuse`; l'utente chiede ciò che gli manca | 🟡 coperto dai test, non ancora verificato su molte stampanti vere |
+| **Scansione** | eSCL attraverso il gateway (stesse chiavi, audit, insieme alla stampa), scansione dal portale e una finestra di scansione (ultimo rimedio: si fida dell'indirizzo TCP, che NAT e reverse proxy rompono) perché le app che non sanno inviare una password possano scansionare dall'IP di chi ha premuto un pulsante | ✅ |
 | | Client eSCL nativi che sanno autenticarsi (prova sul campo) | ⬜ |
 | **Audit** | Audit di stampe e scansioni con pagine reali; registro separato delle azioni amministrative | ✅ |
 | | Conservazione illimitata con archivi compressi verificati; esportazione CSV, filtri, consultazione e download degli archivi | ✅ |
@@ -61,12 +61,12 @@ browser ───────https───────────▶     │  
 | | Pagina Stampanti: stato, inchiostro, contatori a vita (HP), firmware, scanner; blocco, nascondimento, stampanti di prova; manutenzione del gateway | ✅ |
 | | Stampa periodica di manutenzione e stampa di prova con statistiche (stampanti fisiche); elenco con le fisiche per prime, spostabili con le frecce su/giù (ordine proprio per ogni amministratore); code rinominabili; badge IPP-USB / USB | ✅ |
 | | Portale in inglese, italiano, spagnolo, russo, cinese | ✅ spagnolo/russo/cinese da far rivedere a madrelingua |
-| | Notifiche (email/webhook) per le richieste in attesa; report di utilizzo | ⬜ |
+| | Notifiche (email/webhook) per le richieste in attesa | ⬜ |
 | | Richieste di permessi (colore, solo fronte, stampanti, orari) | ✅ |
 | **Operatività** | Stack docker (ipp-usb + CUPS + gateway + mDNS), nulla installato sull'host | ✅ |
 | | Backup programmati per amministratore (cartella, ora, rotazione, cifratura con passphrase/chiave di recupero), ripristino da CLI | ✅ |
 | | Migrazioni del database (Alembic), health check, log, CLI di amministrazione | ✅ |
-| | Immagini per amd64 e arm64 su ghcr.io; script di aggiornamento che scarica un pacchetto di release controllato, fa prima un backup e torna indietro da solo (proponendo il ripristino del backup) se la nuova versione non parte; avviso di nuove versioni; un solo file `.env` che un aggiornamento non tocca mai | 🟡 non ancora provate su una vera macchina ARM |
+| | Immagini per amd64 e arm64 su ghcr.io; script di aggiornamento che scarica un pacchetto di release controllato, fa prima un backup e torna indietro da solo (proponendo il ripristino del backup) se la nuova versione non parte; avviso di nuove versioni; un solo file `.env` che un aggiornamento non tocca mai | ✅ amd64; arm64 in funzione su un Raspberry Pi 4B (64 bit) |
 | | Pulsante Aggiorna nel portale (contenitore facoltativo `updater`, usa il socket di Docker) | 🟡 provato solo con simulazioni |
 | | Backup su disco di rete o USB: file segnaposto contro un disco non montato (attivo di default), avviso nella campanella quando un backup fallisce, limite di tempo per un disco che non risponde | ✅ provato con una condivisione SMB |
 | | Certificato TLS: avvisi (scaduto, indirizzo annunciato mancante, avviso di scadenza facoltativo) e `scripts/cert-sync.sh` per copiare un certificato rinnovato da Nginx Proxy Manager o certbot | 🟡 script provato con simulazioni, non ancora con un vero Nginx Proxy Manager |
@@ -81,8 +81,8 @@ L'elenco completo, con le soluzioni, è in [docs/it/limiti.md](docs/it/limiti.md
   arriva dopo l'accettazione del job. Un `Create-Job` senza documento libera la quota solo quando CUPS lo annulla (di default 3 h).
 - **Serve un host Linux** per le stampanti USB e per l'annuncio mDNS (Docker Desktop su Windows/macOS: solo stampanti di rete, niente scoperta).
 - **Il servizio di stampa di sistema di Android non sa autenticarsi**: usa Mopria Print Service o stampa dal browser. Windows 11 25H2 è provato ([windows.md](docs/it/windows.md)); iPhone e macOS non sono provati.
-- **Un gateway per stampante USB** e **uno per database SQLite** (nessuna alta disponibilità). Le immagini sono costruite per
-  l'architettura della macchina che le compila; tornare a una versione precedente dopo una migrazione richiede un backup.
+- **Un gateway per stampante USB** e **uno per database SQLite** (nessuna alta disponibilità). Tornare a una versione precedente
+  dopo una migrazione può richiedere un backup.
 - **TLS obbligatorio**: installa il certificato autofirmato sui client o usa quello della tua CA.
 - Una stampante scollegata si rileva entro ~30 s (code di rete: prova TCP, non la carta).
 - I **nomi dei file stampati sono cifrati** nel database (chiave da `CUPSPL_SECRET_KEY`: non cambiarla); il resto del database no. Per tutto il resto cifra il disco: [protezione-dati.md](docs/it/protezione-dati.md).
@@ -95,7 +95,7 @@ raggiungibile dai client (predefinita 8631). Sull'host non si installa nulla.
 
 ```sh
 # 0. scarica il pacchetto della release (ultima versione: https://github.com/deh-aleh/PrintMinder/releases)
-VERSION=1.0.0
+VERSION=x.y.z
 curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/printminder-$VERSION.tar.gz
 tar xzf printminder-$VERSION.tar.gz && cd printminder-$VERSION      # (nella guida c'è anche come controllare il download)
 
@@ -118,7 +118,7 @@ docker compose logs gateway | grep "FIRST RUN"
 #    poi apri https://<server>:8631/setup
 ```
 
-Poi: crea utenti e gruppi nel portale (`https://<server>:8631/admin`); ogni utente crea una **chiave di stampa** in *Profilo* e
+Poi: crea utenti e gruppi nel portale (`https://<server>:8631/`); ogni utente crea una **chiave di stampa** in *Profilo* e
 la usa come password quando un computer o un telefono chiede le credenziali (indirizzo della stampante
 `ipps://<server>:8631/printers/<coda>`); i telefoni senza nulla di installato possono usare *Stampa* nel portale. Verifica l'installazione
 con `curl -sk https://<server>:8631/healthz`. Per usare un certificato firmato da una CA metti `fullchain.pem` e `privkey.pem` in

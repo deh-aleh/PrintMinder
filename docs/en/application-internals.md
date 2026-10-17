@@ -22,7 +22,7 @@ app/            the application (Python package)
   locales/      translations (.po) for it, es, ru, zh
   migrations/   Alembic revisions
   policy/       quotas, grants, page counting, controls, keep-alive, ordering
-  certwatch.py  cli.py  config.py  crypto_fields.py  cups_client.py  escl.py  i18n.py  keywatch.py  main.py  mdns.py  notices.py  printerwatch.py  secretcheck.py  titles.py  updates.py
+  certwatch.py  cli.py  config.py  crypto_fields.py  cups_client.py  escl.py  escl_window.py  i18n.py  keywatch.py  logsetup.py  main.py  mdns.py  notices.py  printerwatch.py  secretcheck.py  titles.py  updates.py
 deploy/         installation on the host without docker (systemd)
 docker/         container definitions (stack/ is the production one)
 docs/           this documentation (en/ and it/)
@@ -87,12 +87,13 @@ authoritative list is `app/config.py`. Summary:
 
 | File | Role |
 |---|---|
-| `app/__main__.py` | The `cups-policy-gateway` command: refuses to start without TLS or with half-configured RADIUS, then runs uvicorn. |
+| `app/__main__.py` | The `cups-policy-gateway` command: refuses to start without TLS, with half-configured RADIUS or with an unusable `CUPSPL_ESCL_WINDOW_SECONDS`, then runs uvicorn. |
 | `app/main.py` | Builds the FastAPI app: HTTP client towards CUPS (unix socket), database, auth providers, middleware (sessions, language), routers, `/healthz`, and starts the background tasks. |
 | `app/cli.py` | The `cups-policy-admin` command: `set-admin-password`, `group-limit`, `user-limit`, `set-group`, `make-admin`, `jobs`, `audit-archive`, `backup-key`, `backup-run`, `backup-verify`, `backup-restore`. |
 | `app/config.py` | `Settings` (pydantic-settings): every `CUPSPL_*` variable with its default and validation. |
 | `app/cups_client.py` | The gateway's own conversation with CUPS: lists queues (state, colour, media, online/offline, virtual flag) in the display order; `queue_caps()` asks one queue whether it has colour and a duplex unit (cached 60 s) for the permission checks. |
 | `app/mdns.py` | Separate process (`python -m app.mdns`): announces queues as `_ipps._tcp` (+ AirPrint subtype) and scanners as `_uscans._tcp`. |
+| `app/escl_window.py` | The scan window: which address may scan without credentials, for whom and for how long (in memory). |
 | `app/escl.py` | Scanning: eSCL proxy for native clients (`/eSCL/...`) and the portal scan page (`/me/scan`); discovers scanners at run time. |
 | `app/i18n.py` | Translation engine: language negotiation, `_()`, plurals, middleware. See [languages.md](languages.md). |
 
@@ -170,7 +171,11 @@ authoritative list is `app/config.py`. Summary:
 | `app/printerwatch.py` | Every minute: paper jam, paper out, ink out/low on the physical printers, as notices for administrators and for the users waiting. |
 | `app/keywatch.py` | Every hour: forgets old print keys, if turned on warns of keys about to expire, and tells people whose temporary permission ended. |
 | `app/updates.py`, `app/admin/updates.py` | Daily check for a newer release (note for administrators) and the portal button that hands an update to the `updater` container through files in `/data/update` (the gateway never touches Docker). |
-| `app/migrations/` | `env.py` and the revisions `0001`…`0016` (schema history; `0015` adds `permission_rule` and `printer_former`, `0016` adds `permission_grant`). |
+| `app/crypto_fields.py` | SQLAlchemy column types that encrypt the file names (AES-GCM, key derived from `CUPSPL_SECRET_KEY`); an unreadable value shows as `[encrypted]`. |
+| `app/titles.py` | Background task: encrypts names written before the key existed and, if enabled, erases names older than `CUPSPL_JOB_TITLE_RETENTION_DAYS`. |
+| `app/certwatch.py` | Reads the TLS certificate and `sync-status.json`; opens and closes the certificate notices ([certificates.md](certificates.md)). |
+| `app/logsetup.py` | Log format: time zone of `CUPSPL_TIMEZONE` with the UTC offset, level from `CUPSPL_LOG_LEVEL`. |
+| `app/migrations/` | `env.py` and the revisions `0001`…`0017` (schema history; `0015` adds `permission_rule` and `printer_former`, `0016` adds `permission_grant`, `0017` adds `user.secondary_read_minutes`). From `0014` on a migration may only add (expand/contract; a test checks it), so a rolled-back older version still starts on a newer database. |
 | `app/locales/` | `messages.pot` (template) and `<lang>/messages.po` (it, es, ru, zh). |
 
 ## 4. Scripts

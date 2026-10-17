@@ -24,7 +24,7 @@ dopo un numero di giorni a scelta. La riga resta sempre, con tutto il resto. Det
 | `accepted` | Ha superato i controlli ed è stato consegnato a CUPS o allo scanner (in stampa, in coda o in corso). **Conta già per la quota.** |
 | `completed` | Concluso; le pagine sono quelle **reali** lette da CUPS |
 | `held` | Trattenuto in coda; conta per la quota |
-| `rejected` | Rifiutato (quota, blocco, manutenzione, non valido). Non conta. Il motivo è conservato (in inglese) |
+| `denied` | Rifiutato (quota, permesso, blocco, manutenzione, account disattivato). Non conta e non usa pagine. Il motivo è conservato (in inglese) |
 | `failed` | Accettato ma la stampante o lo scanner non ha potuto eseguirlo. Non conta |
 | `canceled` | Fermato prima di stampare, dall'utente, da un amministratore o dal programma di scansione. La quota si libera |
 
@@ -51,10 +51,12 @@ oltre un giorno è segnato come completato.
 
 ## 3. Audit amministrativo
 
-Accessi degli amministratori, creazione / modifica / eliminazione di utenti e gruppi (`user.*`, `group.*`), password e chiavi
-(`password.change`, `key.*`), approvazioni e rifiuti (`request.approve/reject`), concessioni (`grant.create/revoke`), controlli delle
-stampanti (`printer.block/unblock`, `printer.mdns_hide/mdns_show`, `printer.keepalive_on/off/save`, `printer.test_print`,
-`printer.debug_create/delete`, `printer.move`, `printer.rename`, e dal sistema stesso `printer.auto_add` / `printer.auto_remove`), backup (`backup.*`), manutenzione (`maintenance.on/off`), archiviazione dell'audit (`audit.archive`).
+`login` (amministratori), `admin.setup` / `admin.set_password`, `user.*` e `group.*` (crea, modifica, elimina, reimposta la password, revoca le chiavi),
+`password.change`, `key.*` (crea, revoca, disattiva, riattiva, prolunga), `request.approve/reject`, `grant.create/revoke/purge`,
+controlli delle stampanti (`printer.block/unblock`, `printer.mdns_hide/mdns_show`, `printer.keepalive_on/off/save`, `printer.test_print`,
+`printer.debug_create`, `printer.delete`, `printer.move`, `printer.rename`, `printer.forget_name`, e dal sistema stesso `printer.auto_add` /
+`printer.auto_remove`), `job.cancel` / `job.cancel_failed`, `jobtitles.on/off` (salvataggio dei nomi dei file), `backup.*`, `maintenance.on/off`,
+`audit.archive`, `archive.verify`, `notice.dismiss` / `notice.dismiss_all`, `update.request`.
 
 Ogni voce conserva il *nome* di chi ha agito (sopravvive all'eliminazione di quell'utente), l'azione, il bersaglio e i dettagli. La
 pagina ha filtri con suggerimenti.

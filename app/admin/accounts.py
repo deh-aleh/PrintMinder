@@ -233,6 +233,7 @@ def user_create_local(request: Request, username: str = Form(...), group_id: int
         _('Group "%(group)s" is only for administrators: tick the administrator box instead', group=ADMIN_GROUP) if _is_admin_group(db, group_id) else
         _("Invalid username (letters, digits, dot, dash, underscore; max 63)") if not USERNAME_RE.match(name) else
         _("User %(name)s already exists", name=name) if db.scalars(select(User).where(User.username == name)).first() else
+        _("The name %(name)s is reserved for the emergency administrator", name=name) if name == settings.bootstrap_admin_username else
         None if generated else validate_new_password(pw, name)
     )
     if error:
@@ -292,6 +293,9 @@ def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled
     if u is None:
         raise HTTPException(404)
     edit = f"/admin/users/{u.id}/edit"
+    emergency = is_emergency(u)  # no group, no limits, whatever is posted
+    if emergency:
+        group_id, jobs_limit, pages_limit = 0, "", ""
     try:
         jl, pl, per = parse_limit(jobs_limit), parse_limit(pages_limit), Period(period)
         # the emergency administrator has every permission whatever is posted: nothing is read, nothing is stored
@@ -313,6 +317,9 @@ def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled
         if reason:
             flash(request, reason, "err")
             return back(edit)
+    if provider == "local" and provider != u.provider and u.username == settings.bootstrap_admin_username:
+        flash(request, _("The name %(name)s is reserved for the emergency administrator", name=u.username), "err")
+        return back(edit)
     if provider != u.provider and is_emergency(u):
         flash(request, _("%(user)s is the emergency administrator: it must stay a local account", user=u.username), "err")
         return back(edit)
@@ -348,14 +355,16 @@ def user_update(request: Request, user_id: int, group_id: int = Form(0), enabled
             u.password_hash, u.must_change_password = None, False
         u.provider = provider
         u.password_changed_at = datetime.now(timezone.utc)  # ends the user's current portal sessions
-    set_limit(db, SubjectType.user, u.id, Metric.jobs, jl, per)
-    set_limit(db, SubjectType.user, u.id, Metric.pages, pl, per)
+    if not emergency:
+        set_limit(db, SubjectType.user, u.id, Metric.jobs, jl, per)
+        set_limit(db, SubjectType.user, u.id, Metric.pages, pl, per)
     perm_changes = {}
     if perm is not None:
         perm_changes = _permission_changes(permissions.rule_fields(permissions.get_rule(db, SubjectType.user, u.id)), perm)
         if perm_changes:
             permissions.set_rule(db, SubjectType.user, u.id, **perm)
-    record(db, admin, "user.update", "user", u.id, username=u.username, limits={"jobs": jl, "pages": pl, "period": per.value},
+    record(db, admin, "user.update", "user", u.id, username=u.username,
+           **({} if emergency else {"limits": {"jobs": jl, "pages": pl, "period": per.value}}),
            **({"permissions": perm_changes} if perm_changes else {}), **changes)
     db.commit()
     log.info("admin %s updated user %s", admin.username, u.username)

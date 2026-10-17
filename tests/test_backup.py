@@ -173,6 +173,38 @@ async def test_restore_brings_back_database_audit_and_config(portal, dirs, tmp_p
     assert {"ada", "bob"} <= names
 
 
+async def test_a_restore_that_cannot_work_leaves_the_current_database_alone(portal, dirs, tmp_path):
+    import json, tarfile
+    f = core.resolve_folder("t")
+    new = tmp_path / "new"
+    new.mkdir()
+    (new / "gateway.db").write_bytes(b"current database")
+
+    def attempt(path, passphrase=None):
+        with pytest.raises(core.BackupError):
+            core.restore(path, passphrase, db_path=new / "gateway.db", config_out=new / "cfg", audit_dir=new / "audit")
+        assert (new / "gateway.db").read_bytes() == b"current database" and not list(new.glob("*before-restore*"))
+
+    empty = f / "printgw-aaaaaaaa-t1-20260101-000000.tar.gz"   # a valid archive whose manifest lists no database
+    with tarfile.open(empty, "w:gz") as tf:
+        data = json.dumps({"format": 1, "schema": None, "instance": "aaaaaaaa", "files": {}}).encode()
+        info = tarfile.TarInfo(core.MANIFEST)
+        info.size = len(data)
+        tf.addfile(info, io.BytesIO(data))
+    attempt(empty)
+
+    good = core.create_backup(portal.sm, f, "printgw-aaaaaaaa-t1", recipient=None, target_name="p", instance="aaaaaaaa")
+    cut = f / "printgw-aaaaaaaa-t1-20260102-000000.tar.gz"      # cut in half: an interrupted copy
+    cut.write_bytes(good.path.read_bytes()[: good.size // 2])
+    attempt(cut)
+
+    bundle = crypto.make_recipient(PASS)
+    enc = core.create_backup(portal.sm, f, "printgw-aaaaaaaa-t1", recipient=bundle, target_name="e", instance="aaaaaaaa")
+    with pytest.raises(Exception):                                # wrong passphrase
+        core.restore(enc.path, "another long passphrase", db_path=new / "gateway.db", config_out=new / "cfg", audit_dir=new / "audit")
+    assert (new / "gateway.db").read_bytes() == b"current database"
+
+
 # ------------------------------------------------------------------------------------------------ portal
 
 async def test_admins_have_their_own_backups(portal, dirs):

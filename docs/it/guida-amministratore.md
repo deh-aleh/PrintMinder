@@ -2,11 +2,11 @@
 
 [Indice della documentazione](../README.md) · [English](../en/admin-guide.md) · Italiano
 
-Per chi gestisce l'installazione. Il portale è su `https://<server>:8631/admin`. Il menu in alto:
+Per chi gestisce l'installazione. Il portale è su `https://<server>:8631/` (accesso su `/login`, configurazione del primo avvio su `/setup`). Il menu in alto:
 
 | Menu | Pagina | Cosa ci fai |
 |---|---|---|
-| **Audit** | `/admin/jobs` | Chi ha stampato o scansionato cosa; filtri, CSV, annullare job in coda → [audit.md](audit.md) |
+| **Audit** | `/admin/jobs` | Chi ha stampato o scansionato cosa; filtri, CSV, report d'uso (`/admin/report`), annullare job in coda → [audit.md](audit.md) |
 | **Utenti** | `/admin/users` | Crea utenti locali o RADIUS, modifica, reimposta la password, revoca le chiavi, elimina |
 | **Gruppi** | `/admin/groups` | Crea, rinomina, limiti, "richiedibile", elimina |
 | **Richieste** | `/admin/requests` | Approva, modifica o rifiuta le richieste di quota, di gruppo e di permesso (contatore = in attesa); concessioni attive, quota extra o permesso dati o revocati direttamente, storico → [quote.md](quote.md) |
@@ -24,7 +24,7 @@ Per chi gestisce l'installazione. Il portale è su `https://<server>:8631/admin`
 ## 1. Primi passi
 
 1. Imposta la password di `cups_orchestrator` con il codice monouso ([installazione.md](installazione.md#36-primo-amministratore)).
-2. Crea il **tuo** account amministratore (Utenti → crea → amministratore) e usa quello ogni giorno; tieni `cups_orchestrator` per le emergenze.
+2. Crea il **tuo** account amministratore (Utenti → crea → amministratore) e usa quello ogni giorno. `cups_orchestrator` è l'account di emergenza: non appartiene a nessun gruppo e nulla lo limita (né quote né permessi), quindi tienilo per il recupero.
 3. Modifica i limiti del gruppo **default** (Gruppi) e crea gruppi per chi ha bisogno di limiti diversi.
 4. Crea gli utenti, o lascia entrare quelli RADIUS. Di' a tutti di creare una chiave di stampa ([guida-utente.md](guida-utente.md)).
 5. Imposta un backup ([backup.md](backup.md)).
@@ -104,19 +104,20 @@ La campanella nella barra in alto (solo amministratori) elenca ciò che il gatew
 l'ultima volta, la fonte e quante volte è successo; *Chiudi* lo chiude (la chiusura resta registrata in *Azioni*).
 I tipi di avviso:
 
-| Avviso | Cosa dice | Si chiude da solo quando |
+| Avviso (come appare nella campanella) | Significato | Si chiude da solo quando |
 |---|---|---|
-| Scansione senza accesso | Una richiesta di scansione senza nome utente e password è stata rifiutata perché `CUPSPL_ESCL_ANONYMOUS` è spento | mai (chiudilo tu) |
-| Backup non eseguito / Backup fallito | Un backup non è stato salvato, con il nome vero del backup ([backup.md](backup.md)) | il backup successivo riesce |
-| Certificato scaduto | I dispositivi non si fidano più del gateway ([certificati.md](certificati.md)) | c'è un certificato valido |
-| Aggiornamento del certificato fallito | L'ultima esecuzione di `scripts/cert-sync.sh` è fallita | l'esecuzione successiva riesce |
-| Indirizzo annunciato non nel certificato | I telefoni che trovano da soli le stampanti mostreranno un errore di certificato | il certificato elenca l'indirizzo |
-| Certificato in scadenza | Solo se l'hai acceso (`CUPSPL_CERT_EXPIRY_WARN_ENABLED`) | il certificato è rinnovato |
-| Carta inceppata / Carta finita | Una stampante fisica lo segnala (controllo ogni minuto, confermato due volte di fila) | la stampante smette di segnalarlo |
-| Inchiostro o toner finito / in esaurimento | Finito: il livello è 0 o lo dice la stampante. In esaurimento: solo il livello sotto la soglia «basso» della stampante | la stampante smette di segnalarlo |
-| Salva la chiave segreta | Una volta, dopo il primo avvio: copia `CUPSPL_SECRET_KEY` da `.env` in un posto sicuro. Arriva all'amministratore del primo avvio (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`) nella sua campanella, o a tutti gli amministratori se quell'account non esiste. Non torna a un riavvio; torna una volta se la chiave cambia | mai (chiudilo tu) |
-| La chiave segreta è cambiata | `CUPSPL_SECRET_KEY` non è quella dell'avvio precedente; dice quanti nomi di file non si leggono più | mai (chiudilo tu) |
-| Nessuna chiave segreta | `CUPSPL_SECRET_KEY` è vuota: i nomi dei file non sono cifrati e dopo un riavvio tutti rifanno il login | la chiave viene impostata |
+| Una richiesta di scansione senza nome utente e password da IP è stata rifiutata | `CUPSPL_ESCL_ANONYMOUS` è spento e un client non ha inviato credenziali ([scansione.md](scansione.md)) | mai (chiudilo tu) |
+| **Backup non eseguito: la cartella di destinazione non è raggiungibile** | Manca il file marcatore della destinazione (disco non montato); non è stato scritto nulla ([backup.md](backup.md)) | il backup successivo riesce |
+| **Backup fallito** | Qualunque altro errore, con il motivo; entrambi gli avvisi riportano il nome vero del backup | il backup successivo riesce |
+| **Il certificato TLS è scaduto** | I client non si fidano più del gateway ([certificati.md](certificati.md)) | c'è un certificato valido e il gateway è riavviato |
+| **Non è stato possibile aggiornare il certificato** | L'ultima esecuzione di `scripts/cert-sync.sh` è fallita | l'esecuzione successiva riesce |
+| **L'indirizzo annunciato non è nel certificato TLS** | I client che trovano le stampanti via mDNS ricevono un errore di certificato | il SAN elenca l'indirizzo |
+| **Il certificato TLS scade il (data)** | Solo con `CUPSPL_CERT_EXPIRY_WARN_ENABLED=true` | il certificato è rinnovato |
+| **Inceppamento carta** / **Carta finita** | Una stampante fisica lo segnala (controllo ogni minuto, segnalato dopo due controlli consecutivi) | la stampante smette di segnalarlo |
+| **Inchiostro o toner esaurito** / **in esaurimento** | Esaurito: livello 0, oppure lo dice lo stato della stampante. In esaurimento: la soglia «basso» della stampante. Entrambi indicano i materiali | la stampante smette di segnalarlo |
+| **Salva la chiave segreta in un posto sicuro** | Una volta, dopo il primo avvio: copia `CUPSPL_SECRET_KEY` da `.env`. Arriva all'amministratore del primo avvio (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`) nella sua campanella, o a tutti gli amministratori se quell'account non esiste o `CUPSPL_BOOTSTRAP_ADMIN=false`. Non si ripete a un riavvio; si ripete una volta se la chiave cambia | mai (chiudilo tu) |
+| **La chiave segreta è cambiata** | `CUPSPL_SECRET_KEY` è diversa da quella dell'avvio precedente; dice quanti nomi di file non si leggono più | mai (chiudilo tu) |
+| **Nessuna chiave segreta impostata** | `CUPSPL_SECRET_KEY` è vuota: i nomi dei file non sono cifrati e le sessioni finiscono a ogni riavvio | la chiave viene impostata |
 
 **Problemi di stampante e utenti.** Gli avvisi sulle stampanti qui sopra sono sempre per gli amministratori. Con `CUPSPL_PRINTER_ALERTS_USERS=true` (predefinito) chi ha una
 stampa in attesa su quella stampante riceve un avviso anche nella propria campanella (inceppamento, carta e inchiostro finiti; non «in esaurimento»), una volta per problema e solo

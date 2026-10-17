@@ -132,6 +132,20 @@ async def test_emergency_admin_stays_local(admin):
     assert user_row(admin, settings.bootstrap_admin_username).provider == "local"
 
 
+async def test_nobody_can_create_or_turn_into_local_an_account_with_the_emergency_name(admin):
+    """The name decides who is exempt from every limit: it can not be taken by an ordinary account."""
+    name = settings.bootstrap_admin_username
+    tok = await csrf_of_page(admin, "/admin/users")
+    await admin.post("/admin/users/local", data={"username": name, "csrf_token": tok, "password": GOOD})
+    assert user_row(admin, name) is None
+    with admin.sm() as s:
+        s.add(User(provider="radius", username=name))
+        s.commit()
+    uid = user_row(admin, name).id
+    await admin.post(f"/admin/users/{uid}", data={"csrf_token": tok, "enabled": "1", "provider": "local", "group_id": "0"})
+    assert user_row(admin, name).provider == "radius"
+
+
 async def test_delete_keeps_the_print_history_readable(admin):
     uid = make_user(admin.sm, "ivo", password=GOOD, group="staff")
     with admin.sm() as s:
@@ -491,3 +505,45 @@ async def test_a_scan_survives_leaving_the_page_and_belongs_to_its_owner(scanner
     await scanner.post("/logout", data={"csrf_token": tok})
     await portal_login(scanner, "sam", GOOD)
     assert (await scanner.get(f"/me/scan/{sid}/file")).status_code == 404       # someone else's scan
+
+
+# ---------------------------------------------------------------- emergency administrator: no group, no limits
+
+def test_emergency_admin_has_no_group_and_no_limits(portal):
+    name = settings.bootstrap_admin_username
+    uid = make_user(portal.sm, name, password=GOOD, admin=True, group=ADMIN_GROUP)
+    with portal.sm() as s:
+        set_limit(s, SubjectType.user, uid, Metric.jobs, 1, Period.weekly)
+        set_limit(s, SubjectType.group, s.scalars(select(Group).where(Group.name == ADMIN_GROUP)).one().id, Metric.jobs, 1, Period.weekly)
+        s.add_all([JobLog(user_id=uid, user_name=name, printer="p", state=JobState.completed, pages=2) for _ in range(3)])
+        s.commit()
+    ensure_system_groups(portal.sm)
+    assert group_name(portal, uid) is None                                          # outside every group
+    with portal.sm() as s:
+        from app.policy.engine import check_job, effective_rules
+        from app.db.models import Resource
+        from datetime import datetime, timezone
+        from zoneinfo import ZoneInfo
+        u = s.get(User, uid)
+        assert effective_rules(s, u, Resource.print) == []
+        assert check_job(s, u, Resource.print, datetime.now(timezone.utc), ZoneInfo("UTC"), pages=500).allowed
+        assert s.scalars(select(PolicyRule).where(PolicyRule.subject_type == SubjectType.user, PolicyRule.subject_id == uid)).first() is None
+
+
+async def test_emergency_admin_group_and_limits_cannot_be_set(admin):
+    name = settings.bootstrap_admin_username
+    uid = make_user(admin.sm, name, password=GOOD, admin=True)
+    ensure_system_groups(admin.sm)
+    with admin.sm() as s:
+        gid = s.scalars(select(Group).where(Group.name == settings.default_group)).one().id
+    tok = await csrf_of_page(admin, "/admin/users")
+    await admin.post(f"/admin/users/{uid}", data={"csrf_token": tok, "enabled": "1", "is_admin": "1", "group_id": str(gid),
+                                                  "jobs_limit": "3", "pages_limit": "9"})
+    assert group_name(admin, uid) is None
+    with admin.sm() as s:
+        assert s.scalars(select(PolicyRule).where(PolicyRule.subject_type == SubjectType.user, PolicyRule.subject_id == uid)).first() is None
+    ensure_system_groups(admin.sm)                                                  # a restart keeps it out of the groups
+    assert group_name(admin, uid) is None
+    other = make_user(admin.sm, "second", password=GOOD, admin=True)
+    ensure_system_groups(admin.sm)
+    assert group_name(admin, other) == ADMIN_GROUP                                  # ordinary administrators stay in the group

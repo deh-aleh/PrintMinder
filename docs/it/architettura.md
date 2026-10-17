@@ -2,8 +2,7 @@
 
 [Indice della documentazione](../README.md) · [English](../en/architecture.md) · Italiano
 
-Questa pagina spiega di cosa è fatto PrintMinder, perché è fatto così e come viaggia una richiesta al suo interno.
-Per il ruolo di ogni file sorgente vedi [funzionamento-applicazione.md](funzionamento-applicazione.md).
+Componenti, confini di fiducia e percorso di una richiesta. Per il ruolo di ogni file sorgente vedi [funzionamento-applicazione.md](funzionamento-applicazione.md).
 
 ## 1. L'idea
 
@@ -20,7 +19,7 @@ che CUPS vede non viene mai dal client: lo decide il gateway dopo l'autenticazio
     (PC, Mac, …)  TLS +     │  • TLS + HTTP Basic (nome + chiave)      │ ──▶ RADIUS (facoltativo)
     Basic auth              │  • identità imposta dal gateway          │
                             │  • quote/concessioni + audit  ◀──▶  DB   │
-    browser  ───https────▶  │  • portale: /admin (admin), /me (utenti) │
+    browser  ───https────▶  │  • portale: /login /admin /me /docs      │
                             └──────────────┬───────────────────────────┘
                                            │ socket unix (volume condiviso)
                             ┌──────────────▼───────────────┐
@@ -81,8 +80,9 @@ Dati: un volume docker per il database (`/data`), la cartella `data/audit-archiv
 ## 4. Percorso di una richiesta IPP
 
 1. Solo `application/ipp`, solo HTTPS.
-2. Le **query di capacità** (`Get-Printer-Attributes`, corpo piccolo e dichiarato, ≤ 64 KB) ricevono risposta senza credenziali:
-   servono ai client per configurare la stampante. Non creano utenti né righe di audit e non inoltrano dati.
+2. Le **query di capacità** (`Get-Printer-Attributes` e `Validate-Job`, corpo dichiarato ≤ 64 KB, `CUPSPL_ANONYMOUS_DISCOVERY`) ricevono risposta
+   senza credenziali: i client le fanno prima di avere una password. Non creano utenti né righe di audit e non portano alcun documento.
+   `Validate-Job` anonimo non viene controllato sulla quota.
 3. **Autenticazione**: HTTP Basic, nome utente + **chiave di stampa**. La password di dominio non è accettata
    (`CUPSPL_IPP_AUTH=keys`); `keys+radius` la riammette per gli utenti RADIUS durante una transizione, mai per gli account locali.
 4. **Filtro operazioni**: l'utente può stampare, annullare, vedere job e stampanti; le operazioni amministrative di CUPS e
@@ -91,12 +91,14 @@ Dati: un volume docker per il database (`/data`), la cartella `data/audit-archiv
    coincida con un amministratore di CUPS.
 6. **Coerenza**: il `printer-uri` nel corpo deve coincidere con il percorso HTTP.
 7. **Blocchi e manutenzione**: una stampante bloccata o la manutenzione del gateway rifiutano il job (vedi [stampanti.md](stampanti.md)).
-8. **Quota**: riserva atomica del posto ([quote.md](quote.md)); se superata, errore IPP con il motivo **e l'indirizzo del portale**
+8. **Permessi** (colore, fronte singolo, stampante, orari): in modalità `adjust` `print-color-mode` / `sides` sono riscritti prima di CUPS, altrimenti
+   il job è rifiutato; gli elenchi di stampanti sono filtrati ([quote.md](quote.md)). L'amministratore di emergenza è esente.
+9. **Quota**: riserva atomica del posto ([quote.md](quote.md)); se superata, errore IPP con il motivo **e l'indirizzo del portale**
    per chiedere una deroga.
-9. **Inoltro** a CUPS in streaming (tetto `CUPSPL_MAX_REQUEST_MB`, default 200); gli URI interni vengono riscritti, `device-uri`
+10. **Inoltro** a CUPS in streaming (tetto `CUPSPL_MAX_REQUEST_MB`, default 200); gli URI interni vengono riscritti, `device-uri`
    nascosto, i rifiuti HTML di CUPS trasformati in errori IPP puliti.
-10. **Registrazione** dell'esito; se l'upload si interrompe la riga passa a `failed` e il posto si libera.
-11. In seguito il **riconciliatore** sostituisce la stima delle pagine con quelle realmente stampate e libera la quota dei job mai stampati.
+11. **Registrazione** dell'esito; se l'upload si interrompe la riga passa a `failed` e il posto si libera.
+12. In seguito il **riconciliatore** sostituisce la stima delle pagine con quelle realmente stampate e libera la quota dei job mai stampati. Un job di CUPS è associato alla sua riga di audit dal numero del job *e* da `time-at-creation` (CUPS riparte da 1 se il suo volume viene ricreato).
 
 La stampa dal browser (`/me/print`) passa dagli stessi controlli (quota, audit, identità `gw:<utente>`); cambia solo
 l'autenticazione, che è la sessione del portale.
@@ -115,6 +117,9 @@ Tutte avviate dal ciclo di vita del gateway ([`app/main.py`](../../app/main.py))
 | Annunciatore mDNS | `CUPSPL_MDNS_INTERVAL` (30 s) | Contenitore a parte: rilegge l'elenco delle code e dice al gateway quale indirizzo annuncia |
 | Nomi dei file ([`app/titles.py`](../../app/titles.py)) | all'avvio, poi 1 giorno | Cifra i nomi scritti prima che ci fosse la chiave; con la retention accesa cancella i nomi più vecchi di `CUPSPL_JOB_TITLE_RETENTION_DAYS` |
 | Controllo del certificato ([`app/certwatch.py`](../../app/certwatch.py)) | 6 h | Legge il certificato TLS e `config/tls/sync-status.json`, e apre o chiude gli avvisi sul certificato |
+| Controllo stampanti ([`app/printerwatch.py`](../../app/printerwatch.py)) | 1 min | Inceppamento, carta finita, inchiostro finito/in esaurimento come avvisi (confermati da due controlli consecutivi) |
+| Manutenzione delle chiavi ([`app/keywatch.py`](../../app/keywatch.py)) | 1 h | Elimina le chiavi di stampa concluse, avvisa di quelle in scadenza e dei permessi temporanei terminati |
+| Controllo aggiornamenti ([`app/updates.py`](../../app/updates.py)) | 24 h (la prima volta 2 min dopo l'avvio) | Chiede a GitHub l'ultima release (`CUPSPL_UPDATE_CHECK`) |
 
 ## 6. Modello dei dati
 
@@ -135,7 +140,9 @@ Tabelle (Alembic applica le migrazioni all'avvio; un test fallisce se un modello
 | `printer_seen` | Prima volta che ogni coda è stata vista (ordine predefinito dell'elenco) |
 | `printer_order` | Dove ogni amministratore ha messo una stampante nel proprio elenco (frecce su/giù) |
 | `printer_offline` | Da quando una coda USB non risponde (conto alla rovescia per la rimozione automatica) |
-| `gateway_setting` | Modalità manutenzione, id dell'istanza |
+| `printer_former` | Nomi passati delle code, proposti nella finestra di rinomina |
+| `notice` | La campanella: avvisi per gli amministratori e per i singoli utenti |
+| `gateway_setting` | Modalità manutenzione, id dell'istanza, interruttore dei nomi dei file, impronta della chiave segreta |
 | `backup_target` | Destinazioni dei backup, una per amministratore oppure quella generale |
 
 ## 7. Decisioni di progetto da conoscere

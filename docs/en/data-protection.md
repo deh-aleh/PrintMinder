@@ -2,8 +2,8 @@
 
 [Documentation index](../README.md) · English · [Italiano](../it/protezione-dati.md)
 
-PrintMinder keeps a record of who printed and scanned what ([audit.md](audit.md)). The **file name** ("Dismissal_Smith.pdf", "Medical_report.pdf")
-can say a lot about a person, so it must be treated as personal data. This page explains what is protected, what is not, and what you can do to reduce the data the server keeps.
+The audit ([audit.md](audit.md)) records who printed and scanned what. The **file name** is personal data, so it is encrypted at rest; this page
+lists what is and is not protected and the settings that reduce what the server keeps.
 
 ## 1. What is protected and what is not
 
@@ -14,11 +14,8 @@ can say a lot about a person, so it must be treated as personal data. This page 
 | Print keys | Only the fingerprint (sha256) |
 | User name, groups, printer names, the administrators' action log, reasons of requests (quota, group, permission) and notes of grants, permissions and allowed hours, IP addresses | **In clear** in the database |
 | Amounts (pages, date, state of each print) | In clear: quotas need them |
-| The database as a file | Not encrypted: whoever copies the file reads everything except the file names |
+| The database as a file | Not encrypted: whoever copies the file reads everything except the file names (stored as `enc1:<base64>`, AES-256-GCM) |
 | Backups | Encrypted only if you choose encryption in the *Backup* menu (recommended) |
-
-**Example.** A thief copies the database file from the server. They see who printed how many pages and when, but where the file names should be they find meaningless text
-(`enc1:Q3x…`). If instead they steal the whole disk together with the key in `.env`, they can read everything: that is why the main measure is to encrypt the disk (§5).
 
 ## 2. The "File names" button (green / red)
 
@@ -29,9 +26,6 @@ In *Administration → Audit* (`/admin/jobs`), top right, there is a button with
 
 Clicking to turn it off shows a confirmation question. The names **already saved stay**; new ones are no longer written. Click again to go back to saving them.
 The choice is recorded in the administrators' action log.
-
-**Example.** In a law office the lawyers do not want anyone to know which documents they print. The administrator turns the button off: from then on the audit shows
-"Mario, 12 pages, yesterday at 15:03" but not what.
 
 ## 3. Forgetting old names: retention
 

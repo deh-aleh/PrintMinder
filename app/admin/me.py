@@ -17,6 +17,7 @@ from urllib.parse import quote
 from app.audit.adminlog import record
 from app.cups_client import list_queues
 from app.auth import keys as keylib
+from app.auth.users import is_emergency
 from app.auth.passwords import hash_password, validate_new_password, verify_password
 from app.auth.throttle import USER_FAILS
 from app import i18n
@@ -80,7 +81,7 @@ async def me(request: Request, user: User = Depends(current_user), db: Session =
         requests=[{"r": r, "what": _describe(db, r)} for r in reqs],
         server=request.headers.get("host", ""), ipp_mode=settings.ipp_auth,
         queues=queues,
-        can_request_group=bool(db.scalars(select(Group).where(Group.requestable, Group.id != (user.group_id or 0))).first()),
+        can_request_group=not is_emergency(user) and bool(db.scalars(select(Group).where(Group.requestable, Group.id != (user.group_id or 0))).first()),
     )
 
 

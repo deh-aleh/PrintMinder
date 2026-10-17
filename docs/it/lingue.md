@@ -22,8 +22,6 @@ che apre l'audit lo vede nella sua lingua.
 dipende dall'installazione: con RADIUS configurato dice «Accedi con il tuo account (aziendale/RADIUS o locale).»; senza RADIUS solo «Accedi con
 il tuo account locale.». Entrambe sono tradotte in ogni lingua; una frase nuova in quella pagina deve esserlo anch'essa.
 
-**Aggiornando da una versione solo italiana**: l'italiano resta per chi ha il browser in italiano; per gli altri la pagina diventa
-inglese. Imposta `CUPSPL_LANGUAGE=it` per tenere l'italiano come predefinito.
 
 ## 2. Cosa *non* è tradotto, di proposito
 

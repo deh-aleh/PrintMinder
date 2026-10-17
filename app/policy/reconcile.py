@@ -18,11 +18,13 @@ STATE_CANCELED, STATE_ABORTED, STATE_COMPLETED = 7, 8, 9
 LOOKBACK = timedelta(days=7)  # CUPS keeps finished jobs only for a while anyway
 NEVER_SUBMITTED_AFTER = timedelta(hours=1)  # reserved but no CUPS job id: the gateway died mid-upload
 PURGE_AFTER = timedelta(days=1)  # job vanished from CUPS history -> assume it ran
-_ATTRS = ["job-id", "job-state", "job-impressions-completed"]
+SAME_JOB_EARLY = 300.0   # seconds: CUPS made the job before we reserved it? only a clock difference can explain that
+SAME_JOB_LATE = 3600.0   # the job is made when the upload starts: a slow upload or a long page count may delay it
+_ATTRS = ["job-id", "job-state", "job-impressions-completed", "time-at-creation"]
 
 
-async def fetch_jobs(upstream: httpx.AsyncClient, printer: str) -> dict[int, tuple[int, int]] | None:
-    """{cups_job_id: (job-state, impressions_completed)} for a queue, or None if CUPS failed."""
+async def fetch_jobs(upstream: httpx.AsyncClient, printer: str) -> dict[int, tuple[int, int, int | None]] | None:
+    """{cups_job_id: (job-state, impressions_completed, time-at-creation)} for a queue, or None if CUPS failed."""
     req = codec.make_request(
         codec.GET_JOBS, 1, printer_uri=f"ipp://localhost/printers/{printer}", requesting_user_name="gateway"
     )
@@ -45,26 +47,37 @@ async def fetch_jobs(upstream: httpx.AsyncClient, printer: str) -> dict[int, tup
     for g in msg.groups:
         if g.tag != codec.TAG_JOB:
             continue
-        jid, state, imp = g.get("job-id"), g.get("job-state"), g.get("job-impressions-completed")
+        jid, state, imp, born = g.get("job-id"), g.get("job-state"), g.get("job-impressions-completed"), g.get("time-at-creation")
         if jid and state:
-            jobs[jid.first] = (state.first, (imp.first if imp else 0) or 0)
+            jobs[jid.first] = (state.first, (imp.first if imp else 0) or 0, born.first if born and isinstance(born.first, int) else None)
     return jobs
 
 
-def apply_updates(session, rows: list[JobLog], cups: dict[str, dict[int, tuple[int, int]] | None], now: datetime) -> int:
+def is_same_job(row: JobLog, created: int | None) -> bool:
+    """CUPS numbers its jobs from 1 again when its volume is recreated: a job number alone can then name a different, newer job.
+    The creation time tells them apart. Unknown (an old CUPS, a test) = the same."""
+    if created is None:
+        return True
+    ts = row.ts if row.ts.tzinfo else row.ts.replace(tzinfo=timezone.utc)
+    return -SAME_JOB_EARLY <= created - ts.timestamp() <= SAME_JOB_LATE
+
+
+def apply_updates(session, rows: list[JobLog], cups: dict[str, dict[int, tuple] | None], now: datetime) -> int:
     changed = 0
     for row in rows:
         known = cups.get(row.printer)
         if known is None:
             continue  # CUPS unreachable for this queue: decide nothing
         info = known.get(row.cups_job_id)
+        if info is not None and not is_same_job(row, info[2] if len(info) > 2 else None):
+            info = None  # that number belongs to another job now: ours is gone from CUPS
         if info is None:
             ts = row.ts if row.ts.tzinfo else row.ts.replace(tzinfo=timezone.utc)
             if now - ts > PURGE_AFTER:
                 row.state = JobState.completed
                 changed += 1
             continue
-        state, imp = info
+        state, imp = info[0], info[1]
         if state == STATE_COMPLETED:
             row.state, row.pages = JobState.completed, imp or row.pages  # keep the counted estimate if CUPS has none
         elif state in (STATE_CANCELED, STATE_ABORTED):

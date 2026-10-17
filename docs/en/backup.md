@@ -106,7 +106,8 @@ docker compose run --rm -it --no-deps gateway cups-policy-admin backup-restore /
 docker compose up -d
 ```
 
-The previous database stays beside as `gateway.db.before-restore-…`; configuration files go to `/data/restored-config` (copy them
+The restore reads and checks the whole file first; a damaged or truncated file, a wrong passphrase, a backup that holds no database or one made by a newer version
+is refused and the current database is not touched. Otherwise the previous database stays beside as `gateway.db.before-restore-…`; configuration files go to `/data/restored-config` (copy them
 into `./config` on a new machine). `backup-verify <file>` checks a file without restoring; `backup-run [--id N]` runs backups by hand.
 Restore is the way back after an upgrade you want to undo.
 

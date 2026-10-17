@@ -151,7 +151,8 @@
   .ghostin .ghost { position:absolute; inset:0; padding:0 9px; display:flex; align-items:center; white-space:pre; overflow:hidden; color:var(--muted); opacity:.7; pointer-events:none }
   .ghostin .ghost .typed { visibility:hidden }
   .rnhint { margin:4px 0 0; min-height:1.2em } .rnhint.err { color:var(--err) }
-  ul.formerlist { list-style:none; margin:0; padding:0 } ul.formerlist li { padding:3px 0 }
+  ul.formerlist { list-style:none; margin:0; padding:0 } ul.formerlist li { padding:3px 0; display:flex; align-items:center; gap:8px; flex-wrap:wrap } ul.formerlist li .muted { flex:1 1 auto }
+  ul.formerlist form { margin:0 } button.forget { width:24px; height:24px; min-height:0; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:6px }
   /* one row per permission: name and hint on the left, the choice on the right (stacked on phones) */
   .permrow { display:grid; grid-template-columns:minmax(140px,200px) 1fr; gap:6px 16px; padding:12px 0; border-top:1px solid var(--line) }
   .permrow:first-of-type { border-top:0 }
@@ -501,7 +502,8 @@
       var f = asking; asking = null; dlg.close(); if (!f) return;
       var name = f.getAttribute('data-confirm-check-name');
       if (name && !box.hidden && tick.checked) { var h = document.createElement('input'); h.type = 'hidden'; h.name = name; h.value = '1'; f.appendChild(h); }
-      f.__ok = true; f.submit();
+      f.__ok = true;
+      if (f.hasAttribute('data-confirm-event')) f.dispatchEvent(new CustomEvent('confirmed')); else f.submit();  // the page handles it itself (no reload)
     });
   })();
 </script>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import stepper %}
+{% from "macros.html" import stepper, seg %}
 {% block title %}{{ _("Printers") }}{% endblock %}
 {% block body %}
 <h1 style="margin:0 0 4px;font-size:18px">{{ _("Printers") }} <span class="muted" style="font-size:13px">({{ _("data read from the printers; physical ones first, in your own order") }})</span></h1>
@@ -59,12 +59,16 @@
     {% endfor %}
     {% if former %}
     <details class="adv">
-      <summary>{{ _("Names used before") }} ({{ former|length }}) <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <summary>{{ _("Names used before") }} (<span class="former-count">{{ former|length }}</span>) <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
       <div class="advbody">
         <ul class="formerlist">
           {% for f in former %}{% set day = f.removed_at|localtime('%Y-%m-%d') %}
           <li><button type="button" class="sec former mono" data-name="{{ f.display }}" title="{{ _('Write this name in the field') }}">{{ f.display }}</button>
-            <span class="muted">{% if f.reason == 'renamed' %}{{ _("renamed on %(date)s", date=day) }}{% elif f.reason == 'removed_offline' %}{{ _("removed automatically on %(date)s", date=day) }}{% else %}{{ _("deleted on %(date)s", date=day) }}{% endif %}</span></li>
+            <span class="muted">{% if f.reason == 'renamed' %}{{ _("renamed on %(date)s", date=day) }}{% elif f.reason == 'removed_offline' %}{{ _("removed automatically on %(date)s", date=day) }}{% else %}{{ _("deleted on %(date)s", date=day) }}{% endif %}</span>
+            <form method="post" action="/admin/printers/former/forget" class="forgetform" data-confirm-event data-confirm="{{ _t('Forget the name %(name)s? It will no longer be offered here.', name=f.display) }}" data-confirm-title="{{ _t('Forget this name') }}" data-confirm-ok="{{ _t('Forget') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="name" value="{{ f.display }}">
+              <button class="sec forget" aria-label="{{ _('Forget this name') }}" title="{{ _('Forget this name') }}"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round"><path d="M5 5l14 14M19 5L5 19"/></svg></button></form>
+          </li>
           {% endfor %}
         </ul>
         <p class="muted" style="margin-bottom:0">{{ _("A new printer that takes the name of a removed one prints again for the computers and phones set up with the old address, and the permissions given to that name apply to it again. A computer set up with the driver of the old model may need to be set up again if the new model is different.") }}</p>
@@ -93,7 +97,7 @@
       <label>{{ _("Every") }}</label>
       <div class="row" style="margin:4px 0 8px">
         {{ stepper("amount", cur[0], min=1, max=2160, label=_("Interval"), required=true) }}
-        <select name="unit" aria-label="{{ _('Unit') }}"><option value="days" {{ 'selected' if cur[1] == 'days' }}>{{ _("days") }}</option><option value="hours" {{ 'selected' if cur[1] == 'hours' }}>{{ _("hours") }}</option></select>
+        {{ seg("unit", [("days", _("days")), ("hours", _("hours"))], cur[1]) }}
       </div>
       <div class="row" style="margin-bottom:10px">
         {% for hrs, label in presets %}<button type="button" class="sec chip" data-amount="{{ hrs // 24 }}" data-unit="days">{{ _(label) }}</button>{% endfor %}
@@ -240,6 +244,23 @@
   }
   tick(); setInterval(tick, 1000);
 })();
+document.addEventListener('confirmed', function (e) {  // "x" next to a name used before: forgotten without reloading the page
+  var f = e.target; if (!f.classList || !f.classList.contains('forgetform')) return;
+  var name = f.elements.name.value;
+  fetch(f.action, {method: 'POST', headers: {'X-Fetch': '1', 'Content-Type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams(new FormData(f))})
+    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    .then(function () {
+      FORMER = FORMER.filter(function (x) { return x[0] !== name; });
+      document.querySelectorAll('form.forgetform').forEach(function (g) {  // every queue has its own rename window with the same list
+        if (g.elements.name.value !== name) return;
+        var item = g.closest('li'), details = item.closest('details'); item.remove();
+        var left = details.querySelectorAll('li').length;
+        if (left) details.querySelector('.former-count').textContent = left; else details.remove();
+      });
+      document.querySelectorAll('form.rnform input[name=new_name]').forEach(renameHint);
+    })
+    .catch(function () { f.submit(); });  // anything wrong: the ordinary way, with its message
+}, true);
 document.addEventListener('click', function (e) {
   var qa = e.target.closest && e.target.closest('button.qaddr');  // "..." next to a queue: its address, ready to copy
   if (qa) { var dlg = document.getElementById('qaddr-dlg'); dlg.querySelector('[data-copy]').textContent = qa.dataset.url; dlg.querySelector('#qaddr-name').textContent = qa.dataset.queue; dlg.showModal(); return; }

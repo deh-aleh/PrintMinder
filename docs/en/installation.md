@@ -25,11 +25,11 @@ Problems? See [troubleshooting.md](troubleshooting.md).
 ## 2. Quick path (Docker)
 
 ```sh
-# 0. download the package. Write the newest version in VERSION: you find it at https://github.com/deh-aleh/PrintMinder/releases
-VERSION=1.0.0
+# 0. download the package; VERSION = the newest release (https://github.com/deh-aleh/PrintMinder/releases)
+VERSION=x.y.z
 curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/printminder-$VERSION.tar.gz
 curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/SHA256SUMS
-sha256sum -c --ignore-missing SHA256SUMS            # must answer "OK": the file is the one that was published
+sha256sum -c --ignore-missing SHA256SUMS            # must answer "OK"
 tar xzf printminder-$VERSION.tar.gz && cd printminder-$VERSION
 
 # 1. names / IPs by which clients will reach the server (they go into the TLS certificate)
@@ -67,7 +67,7 @@ Re-running it never overwrites existing files. Never share `config/` or `.env`: 
 
 ### 3.2 The settings of the program (part B of `.env`)
 
-Defaults are sensible; the settings you will most often touch:
+The settings most often changed (all have a default):
 
 | Setting | When |
 |---|---|
@@ -147,7 +147,7 @@ when a computer or phone asks for credentials. See [user-guide.md](user-guide.md
 | Device | How |
 |---|---|
 | Any phone / computer | Portal → **Print** (`/me/print`): upload PDF, JPEG, PNG, GIF or text. Nothing to install. |
-| Linux | After creating a key the profile page shows a ready `lpadmin` command; or `scripts/add-printer-linux.sh <server> <queue> <user>`. |
+| Linux | GNOME's graphical dialog can not take a user name and key: use the `lpadmin` command shown after "Create a key", or `scripts/add-printer-linux.sh <server> <queue> <user>`. |
 | Android | **Mopria Print Service** discovers the printers and asks for name and key. The built-in Android print service cannot authenticate. |
 | Windows, macOS, iPhone | Add a network printer `ipps://<server>:8631/printers/<queue>`; enter user name and key when asked. Windows 11 25H2 is tested ([windows.md](windows.md)); macOS and iPhone are not. |
 
@@ -217,8 +217,7 @@ Each release also has a **package** (`printminder-<version>.tar.gz` with its `SH
 | Button *Update* in the portal | Optional. Menu *Backup*, box *Update*. Needs the `updater` container (below) **and** a scheduled backup that is on and succeeded in the last 48 h: a fresh backup is made, then the update starts. If there is no working scheduled backup the button stays off and says why. Only updates inside the same major version. If the new version does not start it puts the old one back, but restoring the backup, if needed, is up to you: from the *Backup* menu or with `scripts/backup.sh restore`. |
 | `git pull && docker compose up -d --build` | Only in a folder cloned with git (development) and for images you build yourself (`PRINTGW_REGISTRY` empty in `.env`). `scripts/update.sh` refuses to run in a folder with `.git`, so it does not fight with git. |
 
-**Example.** You are on 1.0.0 and 1.1.0 comes out, changing `docker-compose.yml` (a new volume). You run `scripts/update.sh`: the new compose file
-arrives together with the new images, so you never end up with 1.1.0 images and a 1.0.0 compose file. Your `.env` stays as it was.
+The compose file and the images always change together, so a new image never runs with an old compose file. `.env` is not touched.
 
 **Notice of a new version.** Every 24 hours (the first time 2 minutes after the gateway starts, so a restart checks again at once) the gateway asks GitHub for the newest release and shows a note to administrators.
 Only that one request goes out and it sends nothing about your server. Switch it off with `CUPSPL_UPDATE_CHECK=false`.
@@ -226,7 +225,7 @@ Only that one request goes out and it sends nothing about your server. Switch it
 **The optional `updater` container** applies updates asked for in the portal. It is **off by default** because it needs the
 Docker socket (`/var/run/docker.sock`), and whoever controls that socket controls the whole machine (root): if someone found a flaw in
 the portal and used it, they could command Docker and take the server. It only reads a version number `x.y.z` written by the gateway;
-images always come from the registry in your `.env`. Turn it on with:
+images always come from the registry in your `.env`. An update started from the portal does not replace the `updater` container itself (it is running the update): it keeps the version it was created with until you run `docker compose up -d` in a terminal. Turn it on with:
 
 ```sh
 echo "COMPOSE_PROFILES=autoupdate" >> .env      # one line in .env (or add --profile autoupdate every time)

@@ -77,15 +77,9 @@ Limits, because the gateway can only compare addresses:
   every device, so during the window those devices can scan too. If browser and scan app are NATed differently, the addresses differ.
 - **IPv4 and IPv6**: if the portal is reached over IPv6 and the scan app uses IPv4 (or the reverse), the addresses never match. Open
   the portal with the same kind of address the scan app uses.
-- **Proxy**: behind a reverse proxy the server may see the proxy's address, not your device's. The box warns you when it
-  detects one.
-- Press the button on the same device that scans (on a phone it opens the window for the phone). A restart of the server closes all windows.
-
-If the address in the box is not your device's address, ask your administrator: the window can not work on that network.
-Details: [scanning.md](scanning.md).
-
-## 5. Settings (click your name, top right)
-
+- **Reverse proxy**: if you opened the portal through a proxy, the server sees the proxy's address, not your device's, and the scan
+  app will be refused (or, if it goes through the proxy too, any device behind it could scan). Open the portal directly on the
+  server's port (`https://<server>:8631`) before pressing the button. The box warns you when it detects a proxy.
 - **Theme**: light, dark or automatic.
 - **Language**: English, Italiano, Español, Русский, 中文. Saved for your account.
 - **Auto-refresh** interval of the audit page (administrators); the Audit and Printers pages also have an *Automatic refresh* switch.
@@ -93,7 +87,7 @@ Details: [scanning.md](scanning.md).
 
 ## 6. Good to know
 
-- Your quota counts accepted, completed and held jobs; rejected, failed and canceled-before-printing jobs are free.
+- Your quota counts accepted, completed and held jobs; refused, failed and canceled-before-printing jobs are free.
 - A pages limit is checked before printing: a document that does not fit is refused at once.
 - Printers that do not answer, or are blocked, are not offered. Printers you may not use are not offered either.
 - If your hours are limited and it is outside them, the print page says when you can print, and a job sent anyway is refused.

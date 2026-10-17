@@ -76,8 +76,9 @@ Limiti, perché il gateway può solo confrontare gli indirizzi:
   tutti, quindi durante la finestra possono scansionare anche quei dispositivi. Se browser e app di scansione hanno NAT diversi, gli indirizzi differiscono.
 - **IPv4 e IPv6**: se il portale è raggiunto in IPv6 e l'app di scansione usa IPv4 (o il contrario), gli indirizzi non coincidono mai. Apri
   il portale con lo stesso tipo di indirizzo che usa l'app.
-- **Proxy**: dietro un reverse proxy il server può vedere l'indirizzo del proxy e non quello del tuo dispositivo. Il riquadro ti avvisa quando
-  ne rileva uno.
+- **Reverse proxy**: se hai aperto il portale attraverso un proxy, il server vede l'indirizzo del proxy e non quello del tuo dispositivo, e
+  l'app di scansione verrà rifiutata (o, se passa anch'essa dal proxy, qualsiasi dispositivo dietro il proxy potrebbe scansionare). Apri il
+  portale direttamente sulla porta del server (`https://<server>:8631`) prima di premere il pulsante. Il riquadro ti avvisa quando rileva un proxy.
 - Premi il pulsante sullo stesso dispositivo che scansiona (da un telefono apre la finestra per il telefono). Il riavvio del server chiude tutte le finestre.
 
 Se l'indirizzo nel riquadro non è quello del tuo dispositivo, chiedi all'amministratore: la finestra non può funzionare su quella rete.

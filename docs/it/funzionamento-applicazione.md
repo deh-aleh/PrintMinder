@@ -22,7 +22,7 @@ app/            l'applicazione (pacchetto Python)
   locales/      traduzioni (.po) per it, es, ru, zh
   migrations/   revisioni Alembic
   policy/       quote, concessioni, conteggio pagine, controlli, stampa periodica, ordinamento
-  certwatch.py  cli.py  config.py  crypto_fields.py  cups_client.py  escl.py  i18n.py  keywatch.py  main.py  mdns.py  notices.py  printerwatch.py  secretcheck.py  titles.py  updates.py
+  certwatch.py  cli.py  config.py  crypto_fields.py  cups_client.py  escl.py  escl_window.py  i18n.py  keywatch.py  logsetup.py  main.py  mdns.py  notices.py  printerwatch.py  secretcheck.py  titles.py  updates.py
 deploy/         installazione sull'host senza docker (systemd)
 docker/         definizione dei contenitori (stack/ è quella di produzione)
 docs/           questa documentazione (en/ e it/)
@@ -87,12 +87,13 @@ autorevole è `app/config.py`. Riassunto:
 
 | File | Ruolo |
 |---|---|
-| `app/__main__.py` | Il comando `cups-policy-gateway`: rifiuta di partire senza TLS o con RADIUS configurato a metà, poi avvia uvicorn. |
+| `app/__main__.py` | Il comando `cups-policy-gateway`: rifiuta di partire senza TLS, con RADIUS configurato a metà o con un `CUPSPL_ESCL_WINDOW_SECONDS` inutilizzabile, poi avvia uvicorn. |
 | `app/main.py` | Costruisce l'app FastAPI: client HTTP verso CUPS (socket unix), database, provider di autenticazione, middleware (sessioni, lingua), router, `/healthz`, e avvia le attività di fondo. |
 | `app/cli.py` | Il comando `cups-policy-admin`: `set-admin-password`, `group-limit`, `user-limit`, `set-group`, `make-admin`, `jobs`, `audit-archive`, `backup-key`, `backup-run`, `backup-verify`, `backup-restore`. |
 | `app/config.py` | `Settings` (pydantic-settings): ogni variabile `CUPSPL_*` con valore predefinito e validazione. |
 | `app/cups_client.py` | La conversazione del gateway stesso con CUPS: elenca le code (stato, colore, carta, online/offline, flag virtuale) nell'ordine di visualizzazione; `queue_caps()` chiede a una sola coda se ha colore e unità fronte-retro (in cache 60 s) per i controlli dei permessi. |
 | `app/mdns.py` | Processo a parte (`python -m app.mdns`): annuncia le code come `_ipps._tcp` (+ sottotipo AirPrint) e gli scanner come `_uscans._tcp`. |
+| `app/escl_window.py` | La finestra di scansione: quale indirizzo può scansionare senza credenziali, per chi e per quanto tempo (in memoria). |
 | `app/escl.py` | Scansione: proxy eSCL per i client nativi (`/eSCL/...`) e pagina di scansione del portale (`/me/scan`); scopre gli scanner a runtime. |
 | `app/i18n.py` | Motore delle traduzioni: negoziazione della lingua, `_()`, plurali, middleware. Vedi [lingue.md](lingue.md). |
 
@@ -170,7 +171,11 @@ autorevole è `app/config.py`. Riassunto:
 | `app/printerwatch.py` | Ogni minuto: carta inceppata, carta finita, inchiostro finito/in esaurimento sulle stampanti fisiche, come avvisi per gli amministratori e per gli utenti in attesa. |
 | `app/keywatch.py` | Ogni ora: dimentica le chiavi di stampa vecchie, se acceso avvisa delle chiavi in scadenza, e avvisa chi ha un permesso temporaneo finito. |
 | `app/updates.py`, `app/admin/updates.py` | Controllo giornaliero di una release più nuova (avviso agli amministratori) e pulsante del portale che passa un aggiornamento al contenitore `updater` tramite file in `/data/update` (il gateway non tocca mai Docker). |
-| `app/migrations/` | `env.py` e le revisioni `0001`…`0016` (storia dello schema; la `0015` aggiunge `permission_rule` e `printer_former`, la `0016` aggiunge `permission_grant`). |
+| `app/crypto_fields.py` | Tipi di colonna SQLAlchemy che cifrano i nomi dei file (AES-GCM, chiave derivata da `CUPSPL_SECRET_KEY`); un valore illeggibile appare come `[encrypted]`. |
+| `app/titles.py` | Attività di fondo: cifra i nomi scritti prima che esistesse la chiave e, se attivo, cancella i nomi più vecchi di `CUPSPL_JOB_TITLE_RETENTION_DAYS`. |
+| `app/certwatch.py` | Legge il certificato TLS e `sync-status.json`; apre e chiude gli avvisi sul certificato ([certificati.md](certificati.md)). |
+| `app/logsetup.py` | Formato dei log: fuso orario di `CUPSPL_TIMEZONE` con lo scarto da UTC, livello da `CUPSPL_LOG_LEVEL`. |
+| `app/migrations/` | `env.py` e le revisioni `0001`…`0017` (storia dello schema; la `0015` aggiunge `permission_rule` e `printer_former`, la `0016` aggiunge `permission_grant`, la `0017` aggiunge `user.secondary_read_minutes`). Dalla `0014` in poi una migrazione può solo aggiungere (expand/contract; lo verifica un test), così una versione più vecchia rimessa al suo posto parte anche su un database più nuovo. |
 | `app/locales/` | `messages.pot` (modello) e `<lingua>/messages.po` (it, es, ru, zh). |
 
 ## 4. Script

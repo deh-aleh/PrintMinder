@@ -12,6 +12,7 @@ from app.config import settings
 from app.audit.adminlog import record
 from app.audit.archive import archive_all
 from app.auth.groups import set_admin
+from app.auth.users import is_emergency
 from app.auth.passwords import hash_password, validate_new_password
 from app.db.models import Group, JobLog, Metric, Period, SubjectType, User
 from app.db.session import SessionLocal, init_db
@@ -130,6 +131,9 @@ def main(argv=None) -> int:
             u = get_user(s, args.username)
             if u is None:
                 print("unknown user", file=sys.stderr)
+                return 1
+            if is_emergency(u):
+                print(f"{u.username} is the emergency administrator: it has no group", file=sys.stderr)
                 return 1
             u.group_id = get_group(s, args.group).id
         elif args.cmd == "set-admin-password":

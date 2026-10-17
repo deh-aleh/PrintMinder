@@ -42,7 +42,7 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
   - With `refuse`, Windows and Android often refuse many jobs, because they send one-sided or colour in every job. The default `adjust` avoids it.
   - The network announcement (mDNS) is the same for everybody: printers a person may not use are still visible to them, and the job is refused. The printer list the gateway gives after the login hides them.
   - The hours are checked when the job is sent, not while it prints. There is one window (days + two times) per group or user.
-  - Scanning is not limited. The emergency administrator is exempt from the permissions (not from the quotas).
+  - Scanning is not limited. The emergency administrator is exempt from the permissions and from the quotas.
   - A permission asked for is granted for good or until a date, not for a number of prints or hours of use.
 
 ## 3. Clients
@@ -53,6 +53,8 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 - Print keys of Linux/CUPS clients end up saved on the client (revocable and useless elsewhere).
 - A single-use key is spent when its print is accepted: if CUPS or the printer then fail, the key is still spent and another one is made. After the print it still works for 2 minutes, only to ask for the status.
 - Announced printers appear on Linux desktops (Avahi) without a key; they do nothing until the queue is added with the key.
+- **GNOME** (Settings → Printers) can not add a queue whose address carries a user name and a key: use the `lpadmin` command from the "Create a key" page or `scripts/add-printer-linux.sh`.
+- The **scan window** is a last resort: it compares only the address of the TCP connection, so NAT, a reverse proxy, IPv4/IPv6 mixes or a changing address break it, and behind a shared address it also lets other devices scan while it is open ([scanning.md](scanning.md#limits-of-the-scan-window)).
 
 ## 4. Printers and scanners
 
@@ -75,7 +77,7 @@ What PrintMinder does **not** do (yet) or does with caveats. The short version i
 
 - Built-in backups: SQLite only; CUPS queues not included (they are in `scripts/backup.sh`); configuration files are restored by hand;
   no direct remote destinations; the passphrase can not be recovered. `scripts/backup.sh restore` is tested by hand only.
-- The login lock-out survives a restart: failed logins of the last 5 minutes are kept in `data/login-lockout.json` (user names and addresses with the times, no passwords). If the file can not be written the lock-out works in memory only and the log says so.
+- The login lock-out survives a restart: failed logins of the last 5 minutes are kept in `/data/login-lockout.json` (in the gateway volume; user names and addresses with the times, no passwords). If the file can not be written the lock-out works in memory only and the log says so.
 - The audit and the database are not encrypted, except the file names (see §1 and [data-protection.md](data-protection.md)).
 
 ## 6. Languages

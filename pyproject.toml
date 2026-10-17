@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cups-policy-gateway"
-version = "0.3.1b3"
+version = "0.3.2"
 description = "Auth, quota and audit gateway in front of CUPS (IPP)"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]

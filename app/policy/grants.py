@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
+from app.auth.users import is_emergency
 from app.i18n import _
 from app.audit.adminlog import record
 from app.config import settings
@@ -106,6 +107,8 @@ def create_quota_request(session: Session, user: User, metric: str, amount: int,
 
 
 def create_group_request(session: Session, user: User, target_group_id: int, reason: str, now: datetime) -> QuotaRequest:
+    if is_emergency(user):
+        raise RequestError(_("this account has no group"))
     group = session.get(Group, target_group_id)
     if group is None or not group.requestable:
         raise RequestError(_("that group can not be requested"))

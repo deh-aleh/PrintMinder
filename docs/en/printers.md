@@ -15,7 +15,7 @@ recorded. Everything is read live and best effort: a printer that does not offer
 - **Ink** left (levels and colours from CUPS).
 - **Printer counters** (lifetime): total pages, black and white, colour, single/double-sided sheets, jams, pick failures —
   read from HP's embedded web service (`/DevMgmt/ProductUsageDyn.xml`). Other brands show only IPP data.
-- Serial number, firmware, speed, paper ready, alerts (as the device reports them).
+- Serial number, firmware, speed, paper ready, alerts (as the device reports them). A paper jam, empty paper or ink/toner out or low also raise a notice in the bell ([admin-guide.md](admin-guide.md#7b-notices-the-bell)).
 - State and capabilities of the **scanner** (eSCL), with an *MFP* badge for multifunction devices.
 - Beside them, what the gateway recorded: jobs, pages, scans, last job.
 
@@ -108,14 +108,12 @@ that name apply to it again. The limit: a computer set up with a driver specific
 model is different. Computers that use the printer as driverless (IPP Everywhere) do not.
 
 CUPS does not say when a queue was created, so the gateway notes the **first time it sees** each queue (it looks every
-minute, so a printer that was connected and never opened in any page is still registered within a minute). Queues that
-existed when this feature was introduced were all "seen" at the same instant and stay alphabetical among themselves; a
+minute, so a printer that was connected and never opened in any page is still registered within a minute). A
 deleted queue loses its place (a new queue with the same name goes last). The mDNS announcement has no database and stays alphabetical.
 
 ## 4. Periodic maintenance print (physical printers only)
 
-A printer that sits idle for weeks dries its ink and glues its rollers. The gateway can print a small maintenance page at
-regular intervals. Button with a printer-and-timer icon at the top right of each card (absent for virtual printers; the
+The gateway can print a small maintenance page at regular intervals, so that an idle printer does not dry its ink. Button with a printer-and-timer icon at the top right of each card (absent for virtual printers; the
 server refuses the request anyway).
 
 - **One setting per printer, the same for every administrator.**

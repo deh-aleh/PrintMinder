@@ -279,6 +279,15 @@ def took_name(db, name: str) -> None:
         db.delete(row)
 
 
+def forget_former(db, name: str) -> bool:
+    """The administrator no longer wants this name offered in the rename dialog. True if it was there."""
+    row = db.get(PrinterFormer, ordering.key(name))
+    if row is None:
+        return False
+    db.delete(row)
+    return True
+
+
 def former_names(db, current: list[str]) -> list[PrinterFormer]:
     """The names of the past that no queue has now, most recent first (at most 20), for the rename dialog."""
     taken = {ordering.key(n) for n in current}

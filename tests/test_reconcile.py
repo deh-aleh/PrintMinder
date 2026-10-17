@@ -96,3 +96,21 @@ def test_orphaned_reservations_are_released_after_an_hour(sm):
     with sm() as s:
         got = {r.title: r.state for r in s.scalars(select(JobLog))}
     assert got == {"up": JobState.accepted, "dead": JobState.failed, "ok": JobState.accepted}
+
+
+def test_a_job_number_reused_by_a_newer_cups_job_is_not_taken_for_ours(sm):
+    """CUPS restarted its numbering (volume recreated): job 5 of today is not the job 5 we reserved last week."""
+    from datetime import timedelta
+    with sm() as s:
+        user = User(provider="local", username="reuse")
+        s.add(user)
+        s.flush()
+        old = JobLog(ts=NOW - timedelta(days=3), user_id=user.id, user_name="reuse", kind=JobKind.print, printer="p", cups_job_id=5, state=JobState.accepted)
+        mine = JobLog(ts=NOW - timedelta(minutes=2), user_id=user.id, user_name="reuse", kind=JobKind.print, printer="p", cups_job_id=6, state=JobState.accepted)
+        s.add_all([old, mine])
+        s.flush()
+        born = int((NOW - timedelta(minutes=2)).timestamp())
+        cups = {"p": {5: (9, 7, born), 6: (9, 2, born)}}   # job 5 in CUPS is a new one, made 2 minutes ago
+        apply_updates(s, [old, mine], cups, NOW)
+        assert old.pages is None and old.state == JobState.completed   # not given the 7 pages of someone else's job (gone for > 1 day)
+        assert mine.pages == 2

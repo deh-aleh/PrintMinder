@@ -107,7 +107,8 @@ docker compose run --rm -it --no-deps gateway cups-policy-admin backup-restore /
 docker compose up -d
 ```
 
-Il vecchio database resta accanto come `gateway.db.before-restore-…`; i file di configurazione finiscono in `/data/restored-config` (da
+Il ripristino legge e controlla prima tutto il file; un file danneggiato o troncato, una passphrase sbagliata, un backup senza database o fatto da una versione
+più nuova vengono rifiutati e il database attuale non viene toccato. Altrimenti il vecchio database resta accanto come `gateway.db.before-restore-…`; i file di configurazione finiscono in `/data/restored-config` (da
 copiare in `./config` su una macchina nuova). `backup-verify <file>` controlla un file senza ripristinarlo; `backup-run [--id N]` lancia
 i backup a mano. Il ripristino è la via di ritorno dopo un aggiornamento che vuoi annullare.
 

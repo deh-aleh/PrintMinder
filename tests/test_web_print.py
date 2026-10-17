@@ -182,7 +182,8 @@ async def test_the_key_page_gives_a_ready_command_per_printer_and_never_logs_the
     r = await web.post("/me/keys", data={"label": "pc", "csrf_token": web.token})
     key = re.search(r'class="secret">([^<]+)<', r.text).group(1)
     cmds = re.findall(r'class="secret" style="font-size:13px[^>]*>([^<]+)<', r.text)
-    urls, cmds = cmds[:2], cmds[2:]                                                  # GUI address first, terminal command after
+    cmds, urls = cmds[:2], cmds[2:]                                                  # terminal commands first (GNOME can not use the address), graphical addresses after
+    assert "GNOME" in r.text and "add-printer-linux.sh" in r.text
     assert all(u.startswith("ipps://ann:") for u in urls) and urls[0] == f"ipps://ann:{key}@gw.test/printers/HP7305"
     assert len(cmds) == 2 and all(c.startswith("lpadmin -p ") for c in cmds)
     assert f'ipps://ann:{key}@gw.test/printers/HP7305' in cmds[0] and "auth-info-required=none" in cmds[0]

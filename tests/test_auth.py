@@ -3,7 +3,7 @@ import pytest
 
 from app.auth.cache import CachedAuth
 from app.auth.radius import RadiusProvider
-from app.auth.throttle import Throttle
+from app.auth.throttle import FINGERPRINT_SEP, Throttle, register_failure
 from tests.conftest import requires_radius
 
 
@@ -85,12 +85,21 @@ async def test_radius_reject_reason_is_logged_without_the_password(caplog):
     assert "S3cretWrong" not in caplog.text
 
 
+def test_a_user_and_ip_lockout_made_by_failed_logins_survives_a_restart(tmp_path):
+    f = tmp_path / "lock.json"
+    t = Throttle(limit=2, window=100, path=f)
+    for pw in ("one", "two"):                     # the keys the portal and the IPP gateway really use: "u:name|ip" contains "|"
+        register_failure(t, "u:mario|10.0.0.5", "ip:10.0.0.5", pw)
+    assert t.blocked("u:mario|10.0.0.5")
+    assert Throttle(limit=2, window=100, path=f).blocked("u:mario|10.0.0.5")
+
+
 def test_a_lockout_survives_a_restart_but_not_its_window(tmp_path):
     f = tmp_path / "lock.json"
     t = Throttle(limit=3, window=100, path=f)
     for _ in range(3):
         t.fail("mario")
-    t.fail("x|fingerprint")                       # fingerprints of a wrong password are not written
+    t.fail("x" + FINGERPRINT_SEP + "fingerprint")  # fingerprints of a wrong password are not written
     assert t.blocked("mario") and f.is_file() and oct(f.stat().st_mode & 0o777) == "0o600"
     assert "fingerprint" not in f.read_text()
     again = Throttle(limit=3, window=100, path=f)  # the gateway restarts

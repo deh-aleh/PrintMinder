@@ -31,7 +31,7 @@ le copie e per l'intervallo di pagine scelto. Se `usate + pagine > limite` il jo
 Altrimenti le pagine sono registrate al momento, così i job simultanei le vedono. Dopo la stampa il riconciliatore sostituisce la stima
 con le **pagine reali** lette da CUPS. Un job con pagine non ancora note vale almeno 1 pagina.
 
-### Il limite morbido (importante)
+### Il limite morbido
 
 Il limite pagine è **rigido** solo per i documenti che il gateway sa contare. È **morbido** in questi casi:
 
@@ -107,7 +107,7 @@ pagina mostra, accanto a ogni campo, cosa dice il gruppo. Se cambi i permessi de
 a loro non arriva nessun avviso; se cambi i permessi propri di un utente, a lui arriva un avviso (vedi "Cosa vede l'utente"). Un
 amministratore è limitato come tutti gli altri. L'unica eccezione è l'**amministratore di emergenza** (`CUPSPL_BOOTSTRAP_ADMIN_USERNAME`,
 un account locale): ha tutti i permessi, nella sua pagina il blocco è spento ("tutti i permessi, non limitabile") e il server ignora
-quello che viene inviato per lui. Le quote valgono comunque anche per lui. **La scansione non è limitata** da niente di tutto questo:
+quello che viene inviato per lui. Non ha nemmeno gruppo né quote: non sta nel gruppo "administrator", non ha limiti di job o pagine e non può chiedere di cambiare gruppo. Quote, limiti e permessi del gruppo "administrator" valgono per tutti gli altri amministratori. **La scansione non è limitata** da niente di tutto questo:
 un utente può scansionare con una stampante su cui non può stampare.
 
 ### Stampanti
@@ -166,7 +166,7 @@ pagina del profilo, dove l'utente vede i suoi permessi e può chiedere quello ch
    o computer, e un lavoro mandato lì viene rifiutato. L'elenco delle stampanti che il gateway dà dopo l'accesso le lascia fuori.
 4. **Gli orari si controllano quando il lavoro viene inviato**, non mentre stampa.
 5. **La scansione non è limitata.**
-6. **L'amministratore di emergenza è esente** dai permessi (non dalle quote).
+6. **L'amministratore di emergenza è esente** dai permessi e dalle quote: non appartiene a nessun gruppo.
 
 ### Cosa vede l'utente
 
@@ -175,7 +175,7 @@ pagina del profilo, dove l'utente vede i suoi permessi e può chiedere quello ch
 - *Stampa*: solo le stampanti consentite; niente scelta del colore senza il permesso colore; una scelta fronte-retro (solo fronte / lato
   lungo / lato corto) sulle stampanti che hanno l'unità fronte-retro, solo per chi può stampare solo fronte; un avviso in cima con gli
   orari consentiti quando è fuori orario, e il lavoro viene rifiutato.
-- La campanella: gli avvisi "rifiutato" e "modificato" quando succede (quello "modificato" è *secondario*: si legge da solo dopo il tempo scelto dall'utente in `/me/settings`, 20 minuti di base), e uno quando un amministratore cambia i permessi propri della persona.
+- La campanella: gli avvisi "rifiutato", "quota raggiunta" e "modificato" quando succede (quello "modificato" è *secondario*: si legge da solo dopo il tempo scelto dall'utente in `/me/settings`, 20 minuti di base), e uno quando un amministratore cambia i permessi propri della persona.
 
 Il registro degli amministratori (*Azioni*) annota ogni modifica ai permessi di un gruppo o di un utente con i valori vecchi e nuovi.
 

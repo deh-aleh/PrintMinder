@@ -22,8 +22,6 @@ looking: an administrator who opens the audit sees it in their own language.
 installation: with RADIUS configured it says "Log in with your company (RADIUS) or local account."; without RADIUS only "Log in with your
 local account.". Both sentences are translated in every language; a new sentence on that page must be too.
 
-**Upgrading from an Italian-only version**: Italian stays for people whose browser is Italian; for the others the page becomes
-English. Set `CUPSPL_LANGUAGE=it` to keep Italian as the default.
 
 ## 2. What is *not* translated, on purpose
 

@@ -24,8 +24,8 @@ Problemi? Vedi [risoluzione-problemi.md](risoluzione-problemi.md).
 ## 2. Percorso rapido (Docker)
 
 ```sh
-# 0. scarica il pacchetto. Scrivi in VERSION l'ultima versione: la trovi in https://github.com/deh-aleh/PrintMinder/releases
-VERSION=1.0.0
+# 0. scarica il pacchetto; VERSION = l'ultima release (https://github.com/deh-aleh/PrintMinder/releases)
+VERSION=x.y.z
 curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/printminder-$VERSION.tar.gz
 curl -LO https://github.com/deh-aleh/PrintMinder/releases/download/v$VERSION/SHA256SUMS
 sha256sum -c --ignore-missing SHA256SUMS            # deve rispondere «OK»: il file è quello pubblicato
@@ -66,7 +66,7 @@ Rieseguirlo non sovrascrive mai file esistenti. Non condividere `config/` né `.
 
 ### 3.2 Le impostazioni del programma (parte B di `.env`)
 
-I valori predefiniti sono ragionevoli; le impostazioni che toccherai più spesso:
+Le impostazioni cambiate più spesso (tutte hanno un valore predefinito):
 
 | Impostazione | Quando |
 |---|---|
@@ -149,7 +149,7 @@ quando un computer o un telefono chiede le credenziali. Vedi [guida-utente.md](g
 | Dispositivo | Come |
 |---|---|
 | Qualunque telefono / computer | Portale → **Stampa** (`/me/print`): carica PDF, JPEG, PNG, GIF o testo. Nulla da installare. |
-| Linux | Dopo aver creato una chiave la pagina del profilo mostra un comando `lpadmin` già pronto; oppure `scripts/add-printer-linux.sh <server> <coda> <utente>`. |
+| Linux | La finestra grafica di GNOME non accetta nome utente e chiave: usa il comando `lpadmin` mostrato dopo «Crea una chiave», oppure `scripts/add-printer-linux.sh <server> <coda> <utente>`. |
 | Android | **Mopria Print Service** trova le stampanti e chiede nome e chiave. Il servizio di stampa di sistema di Android non sa autenticarsi. |
 | Windows, macOS, iPhone | Aggiungi una stampante di rete `ipps://<server>:8631/printers/<coda>`; quando richiesto inserisci nome utente e chiave. Windows 11 25H2 è provato ([windows.md](windows.md)); macOS e iPhone no. |
 
@@ -218,8 +218,7 @@ Ogni release ha anche un **pacchetto** (`printminder-<versione>.tar.gz` con il s
 | Pulsante *Aggiorna* nel portale | Facoltativo. Menu *Backup*, riquadro *Aggiornamento*. Richiede il contenitore `updater` (sotto) **e** un backup programmato attivo e riuscito nelle ultime 48 h: si fa un backup fresco, poi parte l'aggiornamento. Senza un backup programmato funzionante il pulsante resta spento e dice perché. Solo aggiornamenti dentro la stessa versione maggiore. Se la nuova versione non parte rimette quella vecchia, ma il ripristino del backup, se serve, lo fai tu dal menu *Backup* o con `scripts/backup.sh restore`. |
 | `git pull && docker compose up -d --build` | Solo in una cartella clonata con git (sviluppo) e per le immagini costruite da te (`PRINTGW_REGISTRY` vuoto in `.env`). `scripts/update.sh` in una cartella con `.git` si rifiuta di partire, per non litigare con git. |
 
-**Esempio.** Sei alla 1.0.0 e esce la 1.1.0 che cambia `docker-compose.yml` (un volume nuovo). Lanci `scripts/update.sh`: il compose nuovo arriva
-insieme alle immagini nuove, quindi non c'è il rischio di avere immagini 1.1.0 con un compose 1.0.0. Il tuo `.env` resta com'era.
+Il file compose e le immagini cambiano sempre insieme, quindi un'immagine nuova non gira mai con un compose vecchio. `.env` non viene toccato.
 
 **Avviso di nuova versione.** Una volta ogni 24 ore (la prima 2 minuti dopo l'avvio del gateway, quindi un riavvio lo rifà subito) il gateway chiede a GitHub qual è l'ultima release e mostra un avviso agli
 amministratori. Esce solo quella richiesta e non invia nulla del tuo server. Si spegne con `CUPSPL_UPDATE_CHECK=false`.
@@ -227,7 +226,7 @@ amministratori. Esce solo quella richiesta e non invia nulla del tuo server. Si 
 **Il contenitore facoltativo `updater`** applica gli aggiornamenti chiesti dal portale. È **spento di default** perché usa il socket
 di Docker (`/var/run/docker.sock`), e chi controlla quel socket controlla tutta la macchina (root): se qualcuno trovasse un difetto
 nel portale e riuscisse a usarlo, potrebbe comandare Docker e prendere il server. Legge solo un numero di versione `x.y.z` scritto dal gateway;
-le immagini arrivano sempre dal registry del tuo `.env`. Per accenderlo:
+le immagini arrivano sempre dal registry del tuo `.env`. Un aggiornamento avviato dal portale non sostituisce il container `updater` stesso (sta eseguendo l'aggiornamento): resta alla versione con cui è stato creato finché non esegui `docker compose up -d` da terminale. Per accenderlo:
 
 ```sh
 echo "COMPOSE_PROFILES=autoupdate" >> .env      # una riga in .env (oppure aggiungi --profile autoupdate ogni volta)

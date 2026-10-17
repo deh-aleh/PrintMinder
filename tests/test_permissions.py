@@ -763,7 +763,7 @@ async def test_renaming_moves_the_name_in_the_lists_and_remembers_the_old_one(ad
         assert s.scalars(select(AdminAudit).where(AdminAudit.action == "printer.rename")).one().detail_json["permission_lists"] == 1
     assert former(cl) == {"color": ("color", "renamed")}
     page = (await cl.get("/admin/printers")).text
-    assert 'data-name="color"' in page and "Names used before (1)" in page and "renamed on " in page
+    assert 'data-name="color"' in page and 'Names used before (<span class="former-count">1</span>)' in page and "renamed on " in page
     assert 'data-name="Colour2"' not in page                                              # a name in use is not offered
 
 
@@ -872,3 +872,25 @@ async def test_reaching_the_quota_tells_the_user_on_every_refused_print(gw):
     [n] = open_notices(gw, "quota_reached")                                             # one notice, counted
     assert n.count == 2 and n.key == "weekly:jobs"
     assert n.detail_json["used"] == 0 and n.detail_json["limit"] == 0 and n.detail_json["printer"] == "color"
+
+
+@pytest.mark.usefixtures("english")
+async def test_a_name_of_the_past_can_be_forgotten(adm):
+    cl = adm
+    await cl.post("/admin/printers/pdf/delete", data={"csrf_token": cl.token})
+    assert "pdf" in former(cl)
+    r = await cl.post("/admin/printers/former/forget", data={"csrf_token": cl.token, "name": "PDF"})
+    assert r.status_code == 303 and former(cl) == {}
+    assert 'data-name="pdf"' not in (await cl.get("/admin/printers")).text
+    with cl.sm() as s:
+        assert s.scalars(select(AdminAudit).where(AdminAudit.action == "printer.forget_name")).one()
+    r = await cl.post("/admin/printers/former/forget", data={"csrf_token": cl.token, "name": "pdf"})   # already gone: no error
+    assert r.status_code == 303
+
+
+@pytest.mark.usefixtures("english")
+async def test_forgetting_a_name_from_the_page_answers_json_without_a_message(adm):
+    cl = adm
+    await cl.post("/admin/printers/pdf/delete", data={"csrf_token": cl.token})
+    r = await cl.post("/admin/printers/former/forget", data={"csrf_token": cl.token, "name": "pdf"}, headers={"X-Fetch": "1"})
+    assert r.status_code == 200 and r.json() == {"ok": True, "found": True} and former(cl) == {}

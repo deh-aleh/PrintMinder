@@ -2,8 +2,7 @@
 
 [Documentation index](../README.md) · English · [Italiano](../it/architettura.md)
 
-This page explains what PrintMinder is made of, why it was built this way and how a request travels through it.
-For the role of each source file see [application-internals.md](application-internals.md).
+Components, trust boundaries and the path of a request. For the role of each source file see [application-internals.md](application-internals.md).
 
 ## 1. The idea
 
@@ -20,7 +19,7 @@ name CUPS sees never comes from the client: it is decided by the gateway after a
   (PC, Mac, …)  TLS +    │  • TLS + HTTP Basic (name + print key)   │ ──▶ RADIUS (optional)
   Basic auth             │  • identity imposed by the gateway       │
                          │  • quotas / grants + audit  ◀──▶  DB     │
-  browser  ───https────▶ │  • portal: /admin (admins), /me (users)  │
+  browser  ───https────▶ │  • portal: /login /admin /me /docs       │
                          └──────────────┬───────────────────────────┘
                                         │ unix socket (shared volume)
                          ┌──────────────▼───────────────┐
@@ -82,8 +81,9 @@ folder `data/backups` for backups, `config/` (read-only) for the TLS certificate
 ## 4. Path of an IPP request
 
 1. Only `application/ipp`, only HTTPS.
-2. **Capability queries** (`Get-Printer-Attributes`, small declared body, ≤ 64 KB) are answered without credentials:
-   clients need them to set a printer up. They create no users, no audit rows and forward no data.
+2. **Capability queries** (`Get-Printer-Attributes` and `Validate-Job`, declared body ≤ 64 KB, `CUPSPL_ANONYMOUS_DISCOVERY`) are answered
+   without credentials: clients ask them before they have a password. They create no users and no audit rows, and carry no document.
+   `Validate-Job` is not checked against the quota when anonymous.
 3. **Authentication**: HTTP Basic, user name + **print key**. The domain password is not accepted
    (`CUPSPL_IPP_AUTH=keys`); `keys+radius` re-admits it for RADIUS users during a transition, never for local accounts.
 4. **Operation filter**: users may print, cancel, list jobs and printers; CUPS administrative operations and
@@ -93,12 +93,14 @@ folder `data/backups` for backups, `config/` (read-only) for the TLS certificate
 6. **Consistency**: the `printer-uri` in the body must match the HTTP path.
 7. **Blocks and maintenance**: a blocked printer or the gateway maintenance mode refuses the job (see
    [printers.md](printers.md)).
-8. **Quota**: atomic reservation of the slot ([quotas.md](quotas.md)); if exceeded, an IPP error with the reason **and the
+8. **Permissions** (colour, one-sided, printer, hours): in `adjust` mode `print-color-mode` / `sides` are rewritten before CUPS, otherwise
+   the job is refused; printer lists are filtered ([quotas.md](quotas.md#5-advanced-permissions)). The emergency administrator is exempt.
+9. **Quota**: atomic reservation of the slot ([quotas.md](quotas.md)); if exceeded, an IPP error with the reason **and the
    portal address** to ask for an exception.
-9. **Forwarding** to CUPS in streaming (size cap `CUPSPL_MAX_REQUEST_MB`, default 200); internal URIs are rewritten,
+10. **Forwarding** to CUPS in streaming (size cap `CUPSPL_MAX_REQUEST_MB`, default 200); internal URIs are rewritten,
    `device-uri` hidden, CUPS HTML refusals turned into clean IPP errors.
-10. **Recording** of the outcome; if the upload is interrupted the row becomes `failed` and the slot is freed.
-11. Later, the **reconciler** replaces the page estimate with the real pages printed and frees quota for jobs that never printed.
+11. **Recording** of the outcome; if the upload is interrupted the row becomes `failed` and the slot is freed.
+12. Later, the **reconciler** replaces the page estimate with the real pages printed and frees quota for jobs that never printed. A CUPS job is matched to its audit row by job number *and* `time-at-creation` (CUPS restarts its numbering if its volume is recreated).
 
 Printing from the browser (`/me/print`) goes through the same checks (quota, audit, identity `gw:<user>`), only the
 authentication is the portal session.
@@ -117,6 +119,9 @@ All started by the gateway's lifespan ([`app/main.py`](../../app/main.py)):
 | mDNS announcer | `CUPSPL_MDNS_INTERVAL` (30 s) | Separate container: re-reads the queue list and tells the gateway which address it announces |
 | File names ([`app/titles.py`](../../app/titles.py)) | at start, then 1 day | Encrypts names written before the key existed; with retention on, erases names older than `CUPSPL_JOB_TITLE_RETENTION_DAYS` |
 | Certificate check ([`app/certwatch.py`](../../app/certwatch.py)) | 6 h | Reads the TLS certificate and `config/tls/sync-status.json`, and opens or closes the certificate notices |
+| Printer watch ([`app/printerwatch.py`](../../app/printerwatch.py)) | 1 min | Paper jam, paper out, ink out/low as notices (confirmed by two consecutive checks) |
+| Key housekeeping ([`app/keywatch.py`](../../app/keywatch.py)) | 1 h | Removes finished print keys, warns about keys about to expire and about temporary permissions that ended |
+| Update check ([`app/updates.py`](../../app/updates.py)) | 24 h (first 2 min after start) | Asks GitHub for the newest release (`CUPSPL_UPDATE_CHECK`) |
 
 ## 6. Data model
 
@@ -137,7 +142,9 @@ Tables (Alembic applies migrations at start; a test fails if a model changes wit
 | `printer_seen` | First time each queue was seen (default list order) |
 | `printer_order` | Where each administrator placed a printer in their own list (up/down arrows) |
 | `printer_offline` | Since when a USB queue does not answer (countdown to automatic removal) |
-| `gateway_setting` | Maintenance mode, instance id |
+| `printer_former` | Former queue names, offered in the rename dialog |
+| `notice` | The bell: notices for administrators and for single users |
+| `gateway_setting` | Maintenance mode, instance id, file-name saving switch, secret-key fingerprint |
 | `backup_target` | Backup destinations, one per administrator or the general one |
 
 ## 7. Design decisions worth knowing
